@@ -1,0 +1,74 @@
+// Example parameterized queries for Chronicle graph. Spec index 1.5.2 extended; Phase 14.3.
+// Use in Neo4j Browser or cypher-shell after rebuild. Set parameters first, then run one query at a time.
+// Support/challenge queries exclude retracted links (WHERE r.retracted_at IS NULL). See 04_retractions.cyp.
+//
+// Neo4j Browser: :param claim_uid => 'claim_01HZX3KQ8F2J7Y8M0A6T1R9Q2P';
+//                :param inv_uid => 'inv_01HZX3...';
+// cypher-shell:  -P "claim_uid=claim_01HZX3KQ8F2J7Y8M0A6T1R9Q2P"
+
+// =============================================================================
+// 1. TraceLineage(claim_uid, depth): support/challenge spans and decomposition
+//    Excludes retracted links. Params: $claim_uid (required)
+// =============================================================================
+MATCH (c:Claim {uid: $claim_uid})
+OPTIONAL MATCH (s:EvidenceSpan)-[r:SUPPORTS|CHALLENGES]->(c)
+WHERE (r IS NULL OR r.retracted_at IS NULL)
+OPTIONAL MATCH (c)-[:DECOMPOSES_TO*1..2]->(child:Claim)
+RETURN c, collect(DISTINCT s) AS spans, collect(DISTINCT child) AS child_claims;
+
+// =============================================================================
+// 2. TraceLineage with deeper decomposition (change 3 to your max depth)
+//    Cypher does not allow parameterized variable length; edit *1..3 as needed.
+//    Excludes retracted links. Params: $claim_uid
+// =============================================================================
+MATCH (c:Claim {uid: $claim_uid})
+OPTIONAL MATCH (s:EvidenceSpan)-[r:SUPPORTS|CHALLENGES]->(c)
+WHERE (r IS NULL OR r.retracted_at IS NULL)
+OPTIONAL MATCH (c)-[:DECOMPOSES_TO*1..3]->(child:Claim)
+RETURN c, collect(DISTINCT s) AS spans, collect(DISTINCT child) AS child_claims;
+
+// =============================================================================
+// 3. GetContradictionNetwork(claim_uid): claims in tension with this claim
+//    Params: $claim_uid
+// =============================================================================
+MATCH (c:Claim {uid: $claim_uid})
+MATCH (t:Tension)-[:BETWEEN]->(c)
+MATCH (t)-[:BETWEEN]->(other:Claim)
+WHERE other <> c
+RETURN DISTINCT other.uid AS claim_uid, other.claim_text AS claim_text,
+       t.uid AS tension_uid, t.status AS tension_status;
+
+// =============================================================================
+// 4. PropagateDowngrade (read-only): claim and all descendants
+//    Actual downgrade is via Chronicle commands/events, not the graph.
+//    Params: $claim_uid
+// =============================================================================
+MATCH (c:Claim {uid: $claim_uid})
+OPTIONAL MATCH (c)-[:DECOMPOSES_TO*]->(child:Claim)
+RETURN c, collect(DISTINCT child) AS descendants;
+
+// =============================================================================
+// 5. Claims by investigation
+//    Params: $inv_uid (investigation_uid)
+// =============================================================================
+MATCH (i:Investigation {uid: $inv_uid})-[:CONTAINS]->(c:Claim)
+RETURN c.uid AS claim_uid, c.claim_text, c.claim_type, c.current_status
+ORDER BY c.created_at;
+
+// =============================================================================
+// 6. Evidence supporting a claim (active links only; excludes retracted)
+//    Params: $claim_uid
+// =============================================================================
+MATCH (s:EvidenceSpan)-[r:SUPPORTS]->(c:Claim {uid: $claim_uid})
+WHERE r.retracted_at IS NULL
+MATCH (s)-[:IN]->(e:EvidenceItem)
+RETURN s.uid AS span_uid, e.uid AS evidence_uid, e.uri AS evidence_uri;
+
+// =============================================================================
+// 7. Evidence challenging a claim (active links only; excludes retracted)
+//    Params: $claim_uid
+// =============================================================================
+MATCH (s:EvidenceSpan)-[r:CHALLENGES]->(c:Claim {uid: $claim_uid})
+WHERE r.retracted_at IS NULL
+MATCH (s)-[:IN]->(e:EvidenceItem)
+RETURN s.uid AS span_uid, e.uid AS evidence_uid, e.uri AS evidence_uri;

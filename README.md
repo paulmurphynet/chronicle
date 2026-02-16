@@ -31,10 +31,16 @@ chronicle-verify path/to/file.chronicle
 | Doc | Purpose |
 |-----|---------|
 | [Eval contract](docs/eval_contract.md) | Input/output for the defensibility scorer; how to plug into eval harnesses. |
+| [Eval contract schema](docs/eval_contract_schema.json) | JSON Schema for contract input/output (machine-readable validation). |
 | [Defensibility metrics schema](docs/defensibility-metrics-schema.md) | Field semantics for the scorer output. |
 | [Eval and benchmarking](docs/eval-and-benchmarking.md) | How to run pipelines and report Chronicle defensibility. |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |
+| [Neo4j](docs/neo4j.md) | Optional graph projection for multi-run analysis and visualization. |
+| [Epistemology scope](docs/epistemology-scope.md) | What the project covers (and does not) regarding epistemology. |
+| [Migration from V1](docs/migration-from-v1.md) | What we brought from the old project, what we didn't, and why. |
+| [State and plan](docs/state-and-plan.md) | What we have so far and the plan going forward. |
+| [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
 
 ## License
 

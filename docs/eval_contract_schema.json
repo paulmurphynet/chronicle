@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/chronicle/Chronicle/docs/eval_contract_schema.json",
+  "title": "Chronicle defensibility eval contract",
+  "description": "Machine-readable schema for eval contract input and output. See eval_contract.md. Validate input against $defs/Input; validate output (success or error) against $defs/OutputSuccess or $defs/OutputError.",
+  "$defs": {
+    "Input": {
+      "type": "object",
+      "title": "Eval input",
+      "description": "Single defensibility eval run: query, answer, evidence.",
+      "required": ["query", "answer", "evidence"],
+      "properties": {
+        "query": { "type": "string", "description": "The user question or prompt." },
+        "answer": { "type": "string", "description": "The model's answer (recorded as the claim text)." },
+        "evidence": {
+          "type": "array",
+          "description": "Evidence the answer is based on (chunks or refs).",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "text": { "type": "string" },
+                  "path": { "type": "string" },
+                  "url": { "type": "string" }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "OutputSuccess": {
+      "type": "object",
+      "title": "Eval output (success)",
+      "description": "Defensibility metrics for the claim.",
+      "required": ["claim_uid", "provenance_quality", "corroboration", "contradiction_status"],
+      "properties": {
+        "claim_uid": { "type": "string" },
+        "provenance_quality": {
+          "type": "string",
+          "enum": ["strong", "medium", "weak", "challenged"]
+        },
+        "corroboration": {
+          "type": "object",
+          "required": ["support_count", "challenge_count", "independent_sources_count"],
+          "properties": {
+            "support_count": { "type": "integer" },
+            "challenge_count": { "type": "integer" },
+            "independent_sources_count": { "type": "integer" }
+          }
+        },
+        "contradiction_status": {
+          "type": "string",
+          "enum": ["none", "open", "acknowledged", "resolved"]
+        },
+        "knowability": {
+          "type": "object",
+          "properties": {
+            "known_as_of": { "type": ["string", "null"] },
+            "knowable_from": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "OutputError": {
+      "type": "object",
+      "title": "Eval output (error)",
+      "description": "Error response; harnesses should check for presence of 'error'.",
+      "required": ["error"],
+      "properties": {
+        "error": {
+          "type": "string",
+          "enum": [
+            "invalid_input",
+            "no_investigation",
+            "no_claim",
+            "no_defensibility_score"
+          ]
+        },
+        "claim_uid": { "type": ["string", "null"] },
+        "investigation_uid": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}
+
