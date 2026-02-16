@@ -1,0 +1,34 @@
+{
+  "scenario_id": "journalism_conflict",
+  "success": true,
+  "recorded_at": "2026-02-15T04:17:12.991358+00:00",
+  "steps": [
+    {
+      "learn_step": 1,
+      "action": "create_investigation"
+    },
+    {
+      "learn_step": 2,
+      "action": "ingest_evidence",
+      "count": 3
+    },
+    {
+      "learn_step": 3,
+      "action": "propose_claims",
+      "count": 2
+    },
+    {
+      "learn_step": 3,
+      "action": "link_support",
+      "count": 2
+    },
+    {
+      "learn_step": 5,
+      "action": "declare_tension"
+    },
+    {
+      "learn_step": 6,
+      "action": "export"
+    }
+  ]
+}

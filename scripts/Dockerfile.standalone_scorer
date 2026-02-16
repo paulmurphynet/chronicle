@@ -1,0 +1,19 @@
+# Standalone defensibility scorer (M2). Build and run:
+#   docker build -f scripts/Dockerfile.standalone_scorer -t chronicle-scorer .
+#   echo '{"query":"...","answer":"...","evidence":["..."]}' | docker run -i chronicle-scorer
+# Or with CLI flags:
+#   docker run --rm chronicle-scorer --query "Q?" --answer "A." --evidence '["chunk"]'
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Copy only what is needed to install and run the scorer (no frontend, tests, etc.)
+COPY pyproject.toml README.md ./
+COPY chronicle/ chronicle/
+COPY scripts/standalone_defensibility_scorer.py scripts/
+
+# Install the package without API/RAG extras to keep image small. The scorer uses only store + eval_metrics.
+RUN pip install --no-cache-dir -e .
+
+WORKDIR /app
+ENTRYPOINT ["python3", "scripts/standalone_defensibility_scorer.py"]

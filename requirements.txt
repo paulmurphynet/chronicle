@@ -1,0 +1,8 @@
+# Chronicle: install with venv activated first, e.g.:
+#   source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# Installs the package in editable mode with API and dev extras:
+# - api: FastAPI, uvicorn, httpx, python-multipart
+# - dev: pytest, pytest-cov, pytest-timeout, ruff, hypothesis, mypy, pip-audit, pre-commit
+-e ".[api,dev]"

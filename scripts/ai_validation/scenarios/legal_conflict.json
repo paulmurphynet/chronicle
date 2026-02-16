@@ -1,0 +1,25 @@
+{
+  "id": "legal_conflict",
+  "name": "Legal: conflicting contract terms (delivery date)",
+  "task": "Two contract excerpts specify different delivery dates. Ingest them as evidence, propose one claim per date, link evidence spans as support for each claim, and declare a tension between the conflicting delivery-date claims. Export the investigation as .chronicle.",
+  "documents": [
+    {
+      "content": "Contract A, Clause 3: The vendor shall deliver by March 1, 2024. Signed Party A.",
+      "title": "contract_a_clause3.txt"
+    },
+    {
+      "content": "Contract B, Amendment: Delivery date is April 15, 2024. Signed Party B.",
+      "title": "contract_b_amendment.txt"
+    },
+    {
+      "content": "Summary: conflicting delivery terms — March 1 vs April 15; resolve before production.",
+      "title": "summary.txt"
+    }
+  ],
+  "rubric": {
+    "min_investigations": 1,
+    "min_claims": 2,
+    "min_support_links": 1,
+    "require_tension": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "scenario_id": "journalism_conflict",
+  "chronicle_path": "/nonexistent.chronicle",
+  "error": "File not found: /nonexistent.chronicle",
+  "conformance_passed": false,
+  "conformance_checks": [],
+  "rubric_passed": false,
+  "rubric_checks": [],
+  "summary": "File not found: /nonexistent.chronicle",
+  "suggestion": "Scenario validation: journalism_conflict \u2014 File not found: /nonexistent.chronicle"
+}

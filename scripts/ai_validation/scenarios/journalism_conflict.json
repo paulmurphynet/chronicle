@@ -1,0 +1,25 @@
+{
+  "id": "journalism_conflict",
+  "name": "Journalism & OSINT: conflicting location (London vs Paris)",
+  "task": "Documents describe a location on 2024-01-15: one says London, one says Paris. Ingest them as evidence, propose one claim per document for the two location claims, link evidence spans as support for each claim, and declare a tension between the conflicting location claims. Export the investigation as .chronicle.",
+  "documents": [
+    {
+      "content": "Report dated 2024-01-15: the subject was seen in London at 14:00. Witness A confirmed the sighting.",
+      "title": "witness_report.txt"
+    },
+    {
+      "content": "Travel records show a booking to Paris on 2024-01-15. No corresponding London entry for that date.",
+      "title": "travel_records.txt"
+    },
+    {
+      "content": "Summary: conflicting accounts for 2024-01-15 location. London sighting vs Paris booking — resolve before publication.",
+      "title": "summary.txt"
+    }
+  ],
+  "rubric": {
+    "min_investigations": 1,
+    "min_claims": 2,
+    "min_support_links": 1,
+    "require_tension": true
+  }
+}

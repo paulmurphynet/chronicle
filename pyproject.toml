@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chronicle-standard"
+version = "0.1.0"
+description = "Defensibility scoring for RAG and evals. Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "AGPL-3.0" }
+authors = [{ name = "Chronicle" }]
+keywords = ["epistemic layer", "epistemology", "event-sourcing", "investigation", "evidence", "claims", "defensible knowledge", "RAG", "graph RAG"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+
+[project.scripts]
+chronicle = "chronicle.cli.main:main"
+chronicle-verify = "tools.verify_chronicle.verify_chronicle:main"
+
+# Optional deps (add when needed)
+[project.optional-dependencies]
+dev = ["pytest>=7,<9", "ruff>=0.1,<1", "mypy>=1.0,<2"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["chronicle*", "tools*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["chronicle", "tools"]
+
+[tool.ruff.lint]
+# E/F/I/N/W/UP = style; B = bugbear; C4 = comprehensions; SIM = simplify. See CONTRIBUTING, section 2, for docstrings (PEP 257); add "D" to select to enforce.
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]  # line length handled by formatter
+
+[tool.ruff.lint.per-file-ignores]
+"chronicle/store/read_model/__init__.py" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["tests/", "docs/"]
+
+# Phase 7: strict checking for our code; third-party without stubs can keep ignore_missing_imports
+[[tool.mypy.overrides]]
+module = "chronicle.*"
+ignore_missing_imports = false
+
+# Optional: so mypy at least parses test files when run (e.g. mypy chronicle tests)
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["chronicle"]
+branch = false
+# Core coverage only: exclude optional/plugin modules (Phase 4 quality-fix plan).
+omit = [
+    "chronicle/__init__.py",
+    "*/tests/*",
+    "chronicle/store/neo4j_sync.py",
+    "chronicle/store/neo4j_export.py",
+    "chronicle/core/encryption.py",
+    "chronicle/store/postgres_event_store.py",
+    "chronicle/tools/embeddings.py",
+    "chronicle/tools/embedding_config.py",
+    "chronicle/integrations/*",
+]
+
+[tool.coverage.report]
+fail_under = 75  # Optimal target: see docs/coverage-core.md
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", 'if __name__ == "__main__":']
