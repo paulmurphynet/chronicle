@@ -41,6 +41,7 @@ chronicle-verify path/to/file.chronicle
 | [Migration from V1](docs/migration-from-v1.md) | What we brought from the old project, what we didn't, and why. |
 | [State and plan](docs/state-and-plan.md) | What we have so far and the plan going forward. |
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
+| [Testing with Ollama](docs/testing-with-ollama.md) | Use local Ollama for real LLM-backed testing (decomposer, contradiction, type inference, etc.). |
 
 ## License
 

@@ -26,6 +26,7 @@
 - **Verification:** [Verifier](verifier.md).
 - **Context:** [Neo4j](neo4j.md), [Epistemology scope](epistemology-scope.md), [Migration from V1](migration-from-v1.md).
 - **Implementation:** [To-do](to_do.md) — single list for current implementation steps; clear when the batch is done and user docs are updated.
+- **Testing:** [Testing with Ollama](testing-with-ollama.md) — use local Ollama for real LLM-backed testing during development.
 
 Some in-repo links still point to docs that were not migrated (e.g. spec/, benchmark.md, verification-guarantees.md); those are noted in the migration doc and in the plan below.
 
@@ -50,6 +51,38 @@ Some in-repo links still point to docs that were not migrated (e.g. spec/, bench
 - Full Chronicle API server and frontend (remain in V1 or a separate repo).
 - Full spec doc tree (technical report + defensibility/eval docs are the source of truth).
 - Product/process docs (roadmaps, verticals, deployment) unless we add a minimal set for this product.
+
+---
+
+## Horizon: after the to-do list
+
+Once the current to-do (prune scripts, fix links, minimal tests, CI) is done and the list is cleared, these are the directions that can make Chronicle **the very best it can be** — in adoption, quality, and differentiation. None are mandatory; they’re a menu to pick from.
+
+**Adoption and visibility**
+
+- **Eval-harness integration** — Document or provide a thin adapter so Chronicle defensibility can be added as a metric in popular frameworks (e.g. RAGAS, Trulens, LangSmith evals, or custom harnesses). Goal: “add defensibility to your RAG eval in one step.”
+- **Citable benchmark** — A small, public benchmark (fixed queries + expected shape, or a generated set) that papers and blogs can cite. Reproducible with a single script; optional leaderboard or “baseline” numbers.
+- **Technical report as preprint** — Publish the technical report (e.g. arXiv) so researchers can cite the defensibility definition and schema. Strengthens “Chronicle” as a standard for evidence-based answer quality.
+
+**Quality and trust**
+
+- **Stable contract and CI** — Keep the eval contract stable; CI that runs scorer + verifier (and optional Ollama integration tests) on every change. Tagged releases so downstream users can pin a version.
+- **Small public dataset** — Optional: a few dozen (query, answer, evidence) examples with reference defensibility or at least schema-valid scorecards, for validation and demos.
+
+**Differentiation**
+
+- **One clear story** — “Chronicle: the defensibility score for RAG.” Docs and README lead with that; eval contract and technical report are the single source of truth. No competing narratives.
+- **Optional depth** — If we want to go further epistemically: optional “support rationale” or “warrant” field (why this evidence supports this claim), or a tighter link to NLI/entailment evals. Only if it clearly improves evals or adoption; [epistemology scope](epistemology-scope.md) already sets boundaries.
+
+**Ecosystem**
+
+- **Polish integrations** — LangChain, LlamaIndex, Haystack: ensure one “happy path” each is documented and tested; drop or archive the rest so the repo doesn’t carry dead code.
+- **.chronicle as interchange** — Position the .chronicle format as “show your work”: anyone can export (query, answer, evidence, defensibility) and others can verify. Encourages tooling and integrations that consume .chronicle.
+- **Optional minimal API** — If useful for demos or hosted evals: a tiny “run scorer as a service” (POST JSON, get defensibility) or a read-only API for .chronicle inspection. Can live in this repo or a separate one; not required for “best.”
+
+**Summary**
+
+Best = **adopted** (harnesses, papers, benchmark), **trusted** (stable contract, CI, tests), and **clearly differentiated** (defensibility for RAG, one story). The horizon above is a set of levers; we can choose a few and do them well rather than trying to do everything.
 
 ---
 
