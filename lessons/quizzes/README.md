@@ -16,9 +16,13 @@ Quizzes for the [Chronicle lessons](../README.md). Do the quiz for a lesson **af
 | [quiz-01-codebase-map.md](quiz-01-codebase-map.md) | 01 | Codebase map |
 | [quiz-02-the-scorer.md](quiz-02-the-scorer.md) | 02 | The standalone defensibility scorer |
 | [quiz-03-the-verifier.md](quiz-03-the-verifier.md) | 03 | The .chronicle verifier |
-| *…* | … | … |
-
-*(Add a row when you add a new quiz.)*
+| [quiz-04-events-and-core.md](quiz-04-events-and-core.md) | 04 | Events and core |
+| [quiz-05-store-and-session.md](quiz-05-store-and-session.md) | 05 | Store and session |
+| [quiz-06-defensibility-metrics.md](quiz-06-defensibility-metrics.md) | 06 | Defensibility metrics |
+| [quiz-07-integrations-and-scripts.md](quiz-07-integrations-and-scripts.md) | 07 | Integrations and scripts |
+| [quiz-08-cli.md](quiz-08-cli.md) | 08 | The Chronicle CLI |
+| [quiz-09-epistemic-tools.md](quiz-09-epistemic-tools.md) | 09 | Epistemic tools |
+| [quiz-10-export-import-neo4j.md](quiz-10-export-import-neo4j.md) | 10 | Export, import, Neo4j |
 
 ## For maintainers
 
