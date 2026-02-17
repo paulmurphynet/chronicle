@@ -2,6 +2,19 @@
 
 **Defensibility scoring for RAG and evals.** Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier. Show your work, verify it yourself.
 
+## New here?
+
+Chronicle answers: *How well is this answer supported by evidence?* It’s for RAG evaluation, audits, and anyone who needs a portable, verifiable record of claims and their evidence.
+
+**Prerequisites:** Python 3.11+; we recommend a virtual environment (e.g. `python3 -m venv .venv` then `source .venv/bin/activate` on Linux/macOS). Install the project with `pip install -e .` so the `chronicle` and `chronicle-verify` commands work.
+
+**Two paths:**
+
+- **I want to understand the project** — Read the [Guidebook](guidebook/README.md) (the story: problem, approach, limits), then the [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](critical_areas/README.md) (what defensibility and “verified” do *not* guarantee).
+- **I want to run the scorer or verifier** — Use the [Quick start](#quick-start) below. For common issues (e.g. `chronicle: command not found`), see [Troubleshooting](docs/troubleshooting.md).
+
+**Concepts:** [Glossary](docs/glossary.md) defines defensibility, claim, evidence, .chronicle, and related terms.
+
 ## Quick start
 
 **Score one (query, answer, evidence) run:**
@@ -39,6 +52,10 @@ chronicle-verify path/to/file.chronicle
 
 ## Docs
 
+**Essential:** [Eval contract](docs/eval_contract.md) (scorer I/O), [Verifier](docs/verifier.md) (.chronicle verification), [Technical report](docs/technical-report.md) (defensibility definition), [Guidebook](guidebook/README.md) (narrative), [Critical areas](critical_areas/README.md) (limits), [Troubleshooting](docs/troubleshooting.md) (common issues), [Glossary](docs/glossary.md) (terms).
+
+**By topic:**
+
 | Doc | Purpose |
 |-----|---------|
 | [Eval contract](docs/eval_contract.md) | Input/output for the defensibility scorer; how to plug into eval harnesses. |
@@ -58,7 +75,8 @@ chronicle-verify path/to/file.chronicle
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
 | [Testing with Ollama](docs/testing-with-ollama.md) | Use local Ollama for real LLM-backed testing (decomposer, contradiction, type inference, etc.). |
 | [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee. |
+| [Onboarding and open-source checklist](docs/ONBOARDING_AND_OPEN_SOURCE.md) | Plan for making the repo ready for colleagues and public release. |
 
 ## License
 
-AGPL-3.0. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

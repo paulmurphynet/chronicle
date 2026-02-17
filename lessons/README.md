@@ -17,13 +17,12 @@ Step-by-step annotated lessons that walk through **100% of the Chronicle codebas
 | [01](01-codebase-map.md) | Codebase map: what lives where | Repo layout |
 | [02](02-the-scorer.md) | The standalone defensibility scorer | `scripts/`, eval contract |
 | [03](03-the-verifier.md) | The .chronicle verifier | `tools/verify_chronicle/` |
-| [04](04-events-and-core.md) | Events and core types | `chronicle/core/` |
-| [05](05-store-and-session.md) | Store, read model, and session API | `chronicle/store/` |
-| [06](06-defensibility-metrics.md) | How defensibility is computed | `chronicle/eval_metrics.py`, store |
-| [07](07-integrations-and-scripts.md) | Integrations and scripts | `chronicle/integrations/`, `scripts/` |
-| … | *(more lessons as we cover remaining code)* | |
+| [04] *(planned)* | Events and core types | `chronicle/core/` |
+| [05] *(planned)* | Store, read model, and session API | `chronicle/store/` |
+| [06] *(planned)* | How defensibility is computed | `chronicle/eval_metrics.py`, store |
+| [07] *(planned)* | Integrations and scripts | `chronicle/integrations/`, `scripts/` |
 
-*Lessons beyond 07 will be added to cover the rest of the codebase (CLI, Neo4j, tools, etc.).*
+*Lessons 04–07 are planned; 00–03 are complete. After Lesson 03, explore `chronicle/core/`, `chronicle/store/`, and the [Technical report](../docs/technical-report.md) with the codebase map from Lesson 01.*
 
 ## Lesson format
 

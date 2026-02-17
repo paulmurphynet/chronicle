@@ -31,4 +31,4 @@ PYTHONPATH=. python3 scripts/ai_validation/run_all_verticals.py
 PYTHONPATH=. python3 scripts/generate_agent_tools.py
 ```
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for tests and checks; [docs/README.md](../docs/README.md) for the full doc index.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for dev setup and checks; the main [README](../README.md) and [docs](docs/) list the full doc index.

@@ -1,0 +1,17 @@
+# Glossary
+
+Short definitions of terms you’ll see in Chronicle docs, lessons, and code. For deeper treatment, see the [Technical report](technical-report.md) and [Epistemology scope](epistemology-scope.md).
+
+| Term | Definition |
+|------|------------|
+| **Claim** | A falsifiable statement (e.g. an answer from a model or a witness). Proposed, linked to evidence via support/challenge, and never stored as “true.” |
+| **Defensibility** | How well a claim holds up *given* the recorded evidence, links, tensions, and policy rules. A structural, policy-relative score—*not* a truth value. We compute it; we don’t certify that the claim is true. |
+| **Evidence** | Immutable content (e.g. a document, a retrieved chunk). Stored with a content hash. Support and challenge links point to **spans** within evidence, not whole items. |
+| **Evidence span** | A segment within an evidence item (e.g. character offsets). Links say “this span supports/challenges this claim” so the connection is explicit. |
+| **.chronicle** | The portable export format: a ZIP containing `manifest.json`, `chronicle.db` (SQLite), and an `evidence/` directory. Verifiable without running the full app. See [Chronicle file format](chronicle-file-format.md). |
+| **Eval contract** | Input (query, answer, evidence) and output (defensibility metrics) for the standalone scorer. Lets eval harnesses plug in without depending on implementation details. See [Eval contract](eval_contract.md). |
+| **Event-sourced** | All changes are stored as append-only events (e.g. EvidenceIngested, ClaimProposed, SupportLinked). State is derived by replaying events; history is never overwritten. |
+| **Investigation** | Top-level container for one line of inquiry: one set of claims, evidence, and tensions (e.g. one RAG run or one case). |
+| **Support / challenge** | Link types from an evidence span to a claim. *Support* = this evidence backs the claim; *challenge* = this evidence undermines it. Corroboration and defensibility use these counts. |
+| **Tension** | An explicit record that two claims conflict or weaken each other. Status can be open, acknowledged, or resolved. Tensions are first-class and affect defensibility. |
+| **Verifier** | Standalone tool (`chronicle-verify`) that checks a .chronicle file: manifest, DB schema, evidence hashes. Does *not* check truth, semantics, or source independence. See [Verifier](verifier.md) and [Verification guarantees](verification-guarantees.md). |
