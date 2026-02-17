@@ -2,7 +2,7 @@
 
 **Technical report (in-repo).** This document can be cited by researchers and formalized as a preprint when ready. It defines defensibility, the core schema (evidence, claim, support/challenge, tension), and how Chronicle is used for evaluation of RAG and reasoning systems.
 
-**Repository:** chronicle-standard (reference implementation). **Companion:** [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Spec index](spec/index.md).
+**Repository:** chronicle-standard (reference implementation). **Companion:** [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Verifier](verifier.md).
 
 ---
 
@@ -65,7 +65,7 @@ The read model maintains which spans support or challenge which claims. Corrobor
 - **Investigation** — Top-level container for one line of inquiry (story, case, or research question). Contains claims, evidence, and tensions. Identified by `investigation_uid`.
 - **Project** — Directory containing the event store, read model, and evidence files. One or more investigations live in a project. Export format: **.chronicle** (ZIP with manifest, SQLite DB, and evidence files), verifiable by a standalone verifier.
 
-Full event and read-model schemas are in the [Spec index](spec/index.md) and [schemas.md](spec/schemas.md); core entities are defined in [core-entities.md](spec/core-entities.md).
+The core entities (evidence, claim, support/challenge, tension, investigation) are defined in Section 3 above. Full event and read-model schemas are maintained in the codebase (`chronicle/core/events.py`, `chronicle/core/payloads.py`, `chronicle/store/schema.py`).
 
 ---
 
@@ -84,7 +84,7 @@ A **defensibility benchmark** is a dataset of investigations (or claim-centric s
 - **Defensibility scorecards** per claim (provenance_quality, corroboration, contradiction_status, weakest_link, knowability)
 - **Reasoning trail** (ordered events that built or modified each claim)
 
-The schema is **Chronicle-native**: any conformant `.chronicle` export (or event stream + read model) is a valid benchmark instance. No separate "benchmark format" is required. A **sample benchmark set** of 6 synthetic investigations (different defensibility profiles: open tension, strong, weak single source, challenged, resolved tension, strong three sources) is in [benchmark/sample_investigations/](benchmark/sample_investigations/README.md); regenerate with `scripts/benchmark_data/generate_benchmark_samples.py`. See [Benchmark](benchmark.md) for the full concept and [Defensibility metrics schema](defensibility-metrics-schema.md) for the stable metrics fields.
+The schema is **Chronicle-native**: any conformant `.chronicle` export (or event stream + read model) is a valid benchmark instance. No separate "benchmark format" is required. Synthetic investigations with different defensibility profiles can be generated with `scripts/synthetic_data/generate_realistic_synthetic.py`. See [Benchmark](benchmark.md) for the concept and script references, and [Defensibility metrics schema](defensibility-metrics-schema.md) for the stable metrics fields.
 
 ### 4.2 Evaluation targets
 
@@ -124,9 +124,7 @@ For the reference implementation and schemas: chronicle-standard (Chronicle refe
 | Document | Description |
 |----------|-------------|
 | [Defensibility metrics schema](defensibility-metrics-schema.md) | Stable metrics shape for eval harnesses; API and session usage. |
-| [Benchmark](benchmark.md) | Defensibility benchmark concept; dataset shape; fixed-query RAG run; **Export for training** (Section 2.3, script `export_for_ml.py`). |
+| [Benchmark](benchmark.md) | Defensibility benchmark concept; dataset shape; fixed-query run; export for training (script `export_for_ml.py`). |
 | [Using Chronicle in RAG evaluation](eval-and-benchmarking.md) | How to run pipeline + extract metrics; reporting defensibility in papers (Section 7). |
-| [Spec index](spec/index.md) | Event model, commands, queries, core entities, schemas. |
-| [Core entities](spec/core-entities.md) | Evidence, claim, tension, source, investigation. |
-| [Epistemic tools (spec)](spec/epistemic-tools.md) | Defensibility scorecard dimensions, weakest link, reasoning trail. |
-| [Verification guarantees](verification-guarantees.md) | What the verifier guarantees; invariants; checkpoint/snapshot roadmap. |
+| [Verification guarantees](verification-guarantees.md) | What the verifier guarantees and does not check. |
+| [Verifier](verifier.md) | How to run the standalone .chronicle verifier. |

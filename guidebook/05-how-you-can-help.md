@@ -1,0 +1,40 @@
+# How you can help
+
+Chronicle is better when more people contribute—code, feedback, docs, or simply by spreading the story. Here are concrete ways to help.
+
+---
+
+## If you write code
+
+- **Run the scorer and verifier** and report what works and what doesn’t. File issues or suggest improvements.
+- **Add defensibility to your evals.** Use the [eval contract](../docs/eval_contract.md) and the standalone scorer (or the session API) and share your experience—what was easy, what was missing.
+- **Contribute to the repo.** We have a [to-do list](../docs/to_do.md) (e.g. prune scripts, fix doc links, add tests). Pick an item, open a PR, or discuss in an issue.
+- **Use the lessons.** If you’re new to the codebase, go through the [lessons](../lessons/README.md); they’re there to bring junior engineers up to speed. If something is wrong or unclear, suggest a change.
+
+---
+
+## If you write or teach
+
+- **Reference the technical report and the contract.** If you teach or publish in the space of RAG, evals, or evidence-based systems, citing our [technical report](../docs/technical-report.md) and [eval contract](../docs/eval_contract.md) helps others find us and understand defensibility.
+- **Improve the guidebook or docs.** The [guidebook](README.md) is for everyone. If a sentence is confusing or a chapter is missing, suggest an edit or open a PR. Same for the main [docs](../docs/) (eval contract, verifier, etc.).
+
+---
+
+## If you evaluate or build RAG systems
+
+- **Try Chronicle in your pipeline.** Add the defensibility scorer as a metric and see how it behaves on your data. Your feedback—what’s useful, what’s noisy, what’s missing—shapes what we do next.
+- **Read the [critical areas](../critical_areas/README.md)** so you know what the score does and doesn’t guarantee (e.g. defensibility is not truth; source independence is not verified). That keeps evals and reports honest.
+- **Share benchmarks or case studies.** If you run defensibility at scale or in a particular domain, sharing (anonymized) lessons or numbers helps the community and us.
+
+---
+
+## If you just care about the problem
+
+- **Share the story.** Point people to this guidebook or the repo when the topic of “show your work,” evidence-based answers, or RAG evals comes up.
+- **Tell us what you need.** Open an issue or start a discussion: “We need X to adopt this” or “We tried Y and it didn’t work.” That feedback is how we prioritize.
+
+---
+
+We’re a small effort with a clear goal: make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. Every bit of help—code, docs, testing, or word of mouth—gets us closer.
+
+**Back to:** [Guidebook overview](README.md)

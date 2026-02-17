@@ -16,14 +16,14 @@ The **standalone verifier** validates a `.chronicle` export file (ZIP) so that r
    ```bash
    chronicle-verify path/to/file.chronicle
    ```
-   If you don't have Chronicle installed, from the chronicle-standard repo root you can run:
+   If you don't have Chronicle installed, from the repo root you can run:
    ```bash
-   python3 -m tools.verify_chronicle path/to/file.chronicle
+   PYTHONPATH=. python3 -m tools.verify_chronicle path/to/file.chronicle
    ```
    (Uses only Python's standard library; no install required.)
 2. **Web verifier:** If the sender gave you a link (e.g. a deployed verifier page), open it in your browser and drag-and-drop the file. No install; the file is read locally and never uploaded. When the Chronicle API is running locally, the verifier is at http://localhost:8000/verifier.
 
-**What "verified" means:** The verifier checks that the package is structurally valid (ZIP, manifest, database schema, evidence file hashes). It does *not* check that events are semantically consistent, that sources are independent, or that claims are true. For the full list of guarantees and limits, see [Verification guarantees and invariants](verification-guarantees.md). For a one-page note suitable for the court, see [Chronicle: judicial note (for the court)](legal-judicial-note.md).
+**What "verified" means:** The verifier checks that the package is structurally valid (ZIP, manifest, database schema, evidence file hashes). It does *not* check that events are semantically consistent, that sources are independent, or that claims are true. For the full list of guarantees and limits, see [Verification guarantees and invariants](verification-guarantees.md). For epistemological and practical limits, see [Critical areas](../critical_areas/README.md).
 
 **Where to get the CLI:** Install the package (`pip install chronicle-standard` when available on PyPI, or from the repo with `pip install -e .`) to get the `chronicle-verify` command. Or use the repo run above without installing.
 
@@ -31,7 +31,7 @@ The **standalone verifier** validates a `.chronicle` export file (ZIP) so that r
 
 A **submission package** is a ZIP that contains `investigation.chronicle`, a `reasoning_briefs/` folder (HTML per claim), `citations.bib`, `citations.json`, and optionally `chain-of-custody.html`. It is produced from the Publication page ("Export submission package") or via `GET /investigations/{id}/submission-package`.
 
-**What to do:** Extract the ZIP. Then (1) **verify** the file `investigation.chronicle` as above (CLI or web verifier). (2) **Read** the reasoning briefs by opening the HTML files in `reasoning_briefs/` in your browser. (3) Use `citations.bib` or `citations.json` in your editing or fact-check workflow. See [Journal submission package](journal-submission-package.md) Section 4 (What the recipient does) for the full recipient workflow.
+**What to do:** Extract the ZIP. Then (1) **verify** the file `investigation.chronicle` as above (CLI or web verifier). (2) **Read** the reasoning briefs by opening the HTML files in `reasoning_briefs/` in your browser. (3) Use `citations.bib` or `citations.json` in your editing or fact-check workflow as needed.
 
 ---
 
@@ -52,10 +52,9 @@ Use `python` instead of `python3` if that is the command on your system.
 ### Option 2: After installing chronicle-standard
 
 ```bash
-chronicle verify-chronicle path/to/file.chronicle
-# or the dedicated entry point:
 chronicle-verify path/to/file.chronicle
 ```
+Alternatively, use the `chronicle` CLI: `chronicle verify-chronicle path/to/file.chronicle`. Both require the package to be installed (`pip install -e .`).
 
 ### Option 3: Static web verifier (E4)
 
@@ -124,7 +123,7 @@ The **standalone verifier** (CLI and web) validates a **.chronicle file** (ZIP w
 - **CLI:** `chronicle export-minimal --investigation INVESTIGATION_UID --claim CLAIM_UID --output out.chronicle --path /project`
 - **API:** `POST /investigations/{investigation_uid}/claims/{claim_uid}/export-minimal` (returns the .chronicle file)
 
-The manifest of a minimal export includes `minimal_claim_uid` so recipients know it is a single-claim slice. Run the verifier on the file as usual: `chronicle verify-chronicle out.chronicle` or the web verifier.
+The manifest of a minimal export includes `minimal_claim_uid` so recipients know it is a single-claim slice. Run the verifier on the file as usual: `chronicle-verify out.chronicle` or the web verifier.
 
 **Summary:** Use the reasoning brief when you want to **hand over** "the proof" in one readable file. Use the .chronicle file (full or minimal) and verifier when you need **cryptographic and structural verification**. For a single claim, export a minimal .chronicle and verify it with the same verifier.
 

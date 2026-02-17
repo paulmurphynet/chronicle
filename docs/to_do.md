@@ -22,11 +22,11 @@ This keeps the repo from accumulating many one-off implementation-plan docs; one
 
 ### Fix broken doc links
 
-- [ ] **Verification guarantees** — Add `docs/verification-guarantees.md` (minimal: what the verifier checks and does not check) or fold that content into verifier.md; fix verifier.md links that point to verification-guarantees.md, legal-judicial-note.md, conformance.md (either add stubs or remove/rewrite links).
-- [ ] **Benchmark doc** — Add minimal `docs/benchmark.md` (benchmark concept, fixed-query run, export for training, script refs) so technical-report and eval-and-benchmarking links to Benchmark and benchmark/sample_investigations resolve; or rewrite those links to eval-and-benchmarking + scripts only.
-- [ ] **Integrating with Chronicle** — Add minimal `docs/integrating-with-chronicle.md` (minimum integration, investigation_key idempotency) or rewrite links in eval_contract.md, eval-and-benchmarking.md, defensibility-metrics-schema.md to existing docs (e.g. eval-and-benchmarking, scripts).
-- [ ] **Technical report references** — Fix technical-report.md links: spec/index, spec/schemas, spec/core-entities, spec/epistemic-tools (point to technical-report sections or add a short "Schema" section); benchmark.md, verification-guarantees.md, chronicle-as-training-data.md (resolve via new docs or rewrite).
-- [ ] **Chronicle as training data** — Add minimal `docs/chronicle-as-training-data.md` (export schema, export_for_ml) or remove/rewrite the technical-report and eval references to it.
+- [x] **Verification guarantees** — Added `docs/verification-guarantees.md`; fixed verifier.md links (verification-guarantees, conformance, critical_areas).
+- [x] **Benchmark doc** — Added minimal `docs/benchmark.md`; technical-report and eval-and-benchmarking now link to it and to scripts.
+- [x] **Integrating with Chronicle** — Added minimal `docs/integrating-with-chronicle.md`; eval and defensibility-metrics-schema links updated.
+- [x] **Technical report references** — Fixed technical-report.md: spec/ links replaced with in-report or codebase refs; benchmark, verification-guarantees, chronicle-as-training-data now resolve.
+- [x] **Chronicle as training data** — Added minimal `docs/chronicle-as-training-data.md`; added `docs/conformance.md` stub.
 
 ### Tests and CI
 

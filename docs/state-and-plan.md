@@ -28,7 +28,7 @@
 - **Implementation:** [To-do](to_do.md) — single list for current implementation steps; clear when the batch is done and user docs are updated.
 - **Testing:** [Testing with Ollama](testing-with-ollama.md) — use local Ollama for real LLM-backed testing during development.
 
-Some in-repo links still point to docs that were not migrated (e.g. spec/, benchmark.md, verification-guarantees.md); those are noted in the migration doc and in the plan below.
+Doc links have been updated: [Benchmark](benchmark.md), [Verification guarantees](verification-guarantees.md), [Integrating with Chronicle](integrating-with-chronicle.md), [Conformance](conformance.md), and [Chronicle as training data](chronicle-as-training-data.md) exist; technical-report and verifier no longer link to missing spec/ or stubs.
 
 ---
 
@@ -37,12 +37,12 @@ Some in-repo links still point to docs that were not migrated (e.g. spec/, bench
 ### Near term (stabilize and clarify)
 
 1. **Prune scripts** — Keep: scorer, verify_chronicle, run_defensibility_benchmark, eval_harness_adapter, export_for_ml, and RAG demo scripts. Drop or archive scripts that only served the old API/UI (e.g. start_chronicle.sh; ai_validation if it depends on API). Document in README or scripts/README which scripts are first-class.
-2. **Fix broken doc links** — Either add minimal in-repo versions of benchmark.md, verification-guarantees.md, integrating-with-chronicle.md (and any spec pointers) or update technical-report and other docs so they only link to existing files.
+2. **Fix broken doc links** — Done: benchmark.md, verification-guarantees.md, integrating-with-chronicle.md, conformance.md, chronicle-as-training-data.md added; technical-report and verifier updated to link only to existing docs.
 3. **Add minimal tests** — Focus on scorer and session (and optionally verifier) so we can refactor safely. No need to port the full V1 test suite.
 
 ### Medium term (as needed)
 
-4. **Benchmark and training data** — If we want a canonical benchmark: add a small benchmark/sample set or document "generate with script X." Fix or add benchmark.md so the technical report and eval-and-benchmarking links resolve.
+4. **Benchmark and training data** — benchmark.md added with concept and script refs. For a canonical sample set, document "generate with script X" (e.g. synthetic_data or benchmark_data scripts) as needed.
 5. **CI** — Minimal CI (e.g. lint, scorer smoke test) without the full V1 matrix.
 6. **Optional API/frontend** — If we ever want a reference API or UI, it can live in this repo or a separate one; for now we keep this repo as "library + CLI + scorer + verifier + docs."
 

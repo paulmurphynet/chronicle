@@ -8,11 +8,13 @@ Validates a `.chronicle` export file (ZIP) **without requiring chronicle-standar
 
 ## Usage
 
-From the repository root:
+From the repository root (with or without installing the package):
 
 ```bash
-python -m tools.verify_chronicle path/to/file.chronicle
+PYTHONPATH=. python3 -m tools.verify_chronicle path/to/file.chronicle
 ```
+
+Or after `pip install -e .`, use the entry point: `chronicle-verify path/to/file.chronicle`.
 
 Options:
 

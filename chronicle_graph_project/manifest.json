@@ -1,0 +1,14 @@
+{
+  "format_version": 1,
+  "investigation_uid": "inv_c60902b2b52a47418bef48c47b681f61",
+  "title": "OSINT sample",
+  "exported_at": "2026-02-17T00:03:40Z",
+  "built_under_policy_id": "policy_investigative_journalism",
+  "built_under_policy_version": "169770f7f8736ba2",
+  "policy_summary": "Profile: Investigative Journalism Standard.\nUnder this profile, we treat a claim as publication-ready when:\n  \u2022 For SEF: at least 2 distinct sources linked to support, min confidence 0.7; At least two independent sources required for established facts\n  \u2022 All claims have a type (SAC/SEF/INFERENCE/UNKNOWN)\n  \u2022 All tensions are addressed (no OPEN or DISPUTED blocking publication)\n  \u2022 Compound claims are at least partially_decomposed\n  \u2022 No tension is in a blocking status for Vault: OPEN, DISPUTED\n  \u2022 Tensions in INTRACTABLE, DEFERRED, ESCALATED have justification recorded",
+  "content_hash_manifest": {
+    "evidence_cc16939b58ad4b49bc538c09a9d3b4d7": "86289c49f4d79a629546635191a9b25b24d601d565e6f723b8022df9dce8e7d5",
+    "evidence_e4d98ddb20584dd5941d44d7e84f0762": "eb91e2f2cc1dc764cd5942f0839a9a2a1d25d83a544254d71a0c9d2a19fad843",
+    "evidence_dfc7e885e7c746d9a64f69b058b87ea5": "c5370ffae9c47afc7fc73110d2779ef86a00f9d9dbe2dc4f02b986ed90302ec0"
+  }
+}

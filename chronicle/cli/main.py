@@ -519,6 +519,19 @@ def cmd_similar_claims(path: Path, claim_uid: str, limit: int = 10) -> int:
 
 def main() -> int:
     """Parse CLI args and dispatch to command handlers."""
+    # Load .env so NEO4J_* etc. are set (optional: requires python-dotenv)
+    try:
+        import logging
+        from dotenv import load_dotenv
+        logging.getLogger("dotenv").setLevel(logging.ERROR)  # avoid parse warnings to stderr
+        load_dotenv()  # cwd first
+        # Also try project root (repo root when installed with pip install -e .)
+        _project_root = Path(__file__).resolve().parent.parent.parent  # cli -> chronicle -> repo
+        _env_file = _project_root / ".env"
+        if _env_file.is_file():
+            load_dotenv(_env_file)
+    except ImportError:
+        pass
     parser = argparse.ArgumentParser(
         prog="chronicle", description="Chronicle — epistemic ledger for investigations"
     )

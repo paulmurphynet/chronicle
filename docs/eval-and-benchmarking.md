@@ -23,14 +23,12 @@ Benefits:
 Attach a Chronicle **handler** or **writer** to your RAG pipeline so that retrieval and generation are recorded as evidence and claims.
 
 1. **Choose an integration** — Use the handler for your framework so that documents and the final answer are written to Chronicle:
-   - **LangChain:** `ChronicleCallbackHandler` (project path, investigation title, actor). See [LangChain integration](integrations/langchain.md) and example `scripts/langchain_rag_chronicle.py`.
-   - **LlamaIndex:** Chronicle component that writes evidence and claims. See [LlamaIndex integration](integrations/llamaindex.md).
-   - **Haystack:** Chronicle component. See [Haystack integration](integrations/haystack.md).
-   - **Custom:** Use the session API or HTTP API to create an investigation, ingest evidence, propose a claim, and link support/challenge. See [Integrating with Chronicle](integrating-with-chronicle.md) and `scripts/rag_path_demo.py`.
+   - **LangChain, LlamaIndex, Haystack:** Demo scripts (e.g. `scripts/langchain_rag_chronicle.py`, `scripts/cross_framework_rag_chronicle.py`) and integration docs when present in the repo.
+   - **Custom:** Use the session API or HTTP API to create an investigation, ingest evidence, propose a claim, and link support/challenge. See [Integrating with Chronicle](integrating-with-chronicle.md).
 
 2. **One investigation per eval run (or per query)** — By default, each run creates a new investigation. For evals you can:
    - **One investigation per run** — Keep default; each run has one investigation and one (or more) claims. Simple and isolated.
-   - **Stable key per scenario** — Use `investigation_key` (e.g. query id or scenario id) so that multiple runs with the same key reuse the same investigation. Useful if you want to compare "same question, different config" in one place. See [One investigation per key](integrating-with-chronicle.md#6-idempotency-for-agents-and-pipelines) and the cross-framework example `scripts/cross_framework_rag_chronicle.py`.
+   - **Stable key per scenario** — Use `investigation_key` (e.g. query id or scenario id) so that multiple runs with the same key reuse the same investigation. See [Integrating with Chronicle](integrating-with-chronicle.md#idempotency-for-agents-and-pipelines).
 
 3. **Run the pipeline** — Execute your RAG chain with the handler in the callbacks (or equivalent). After the run, the handler holds the session and investigation UID; you can list claims and read defensibility.
 

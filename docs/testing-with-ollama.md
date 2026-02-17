@@ -1,6 +1,6 @@
 # Testing with Ollama (local LLM)
 
-The project already supports **Ollama** as the default LLM backend. You can use it for real testing while developing, without an external API key.
+The project already supports **Ollama** as the default LLM backend. You can use it for real testing while developing, without an external API key. For a short runbook (env vars, tension suggestion script), see also [Using Ollama locally](using-ollama-locally.md).
 
 ## What uses the LLM
 
