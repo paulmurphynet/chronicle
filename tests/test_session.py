@@ -1,0 +1,69 @@
+"""Minimal tests for ChronicleSession: ingest evidence, propose claim, link support, get_defensibility_score."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from chronicle.store.project import create_project
+from chronicle.store.session import ChronicleSession
+
+
+def test_session_flow_ingest_propose_link_defensibility(tmp_path: Path) -> None:
+    """Create project, investigation, ingest evidence, propose claim, link support, get defensibility score."""
+    create_project(tmp_path)
+    text = b"The company reported revenue of $1.2M in Q1 2024."
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Test investigation",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            text,
+            "text/plain",
+            original_filename="doc.txt",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": len(text.decode("utf-8"))},
+            quote=text.decode("utf-8"),
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "Revenue was $1.2M.",
+            actor_id="test",
+            actor_type="tool",
+        )
+        session.link_support(
+            inv_uid,
+            span_uid,
+            claim_uid,
+            actor_id="test",
+            actor_type="tool",
+        )
+        scorecard = session.get_defensibility_score(claim_uid)
+    assert scorecard is not None
+    assert scorecard.provenance_quality in ("strong", "medium", "weak", "challenged")
+    assert scorecard.corroboration.get("support_count", 0) >= 1
+    assert scorecard.contradiction_status in ("none", "open", "acknowledged", "resolved")
+
+
+def test_session_requires_existing_project(tmp_path: Path) -> None:
+    """ChronicleSession raises if project dir has no chronicle.db."""
+    # tmp_path exists but we never call create_project; no chronicle.db
+    with pytest.raises(FileNotFoundError, match="Not a Chronicle project"):
+        ChronicleSession(tmp_path)

@@ -12,7 +12,7 @@ This doc describes the **minimum integration** for RAG pipelines (or other syste
 4. **Link support** — For each evidence span that supports the answer, call `session.link_support(inv_uid, span_uid, claim_uid)`.
 5. **Read defensibility** — `session.get_defensibility_score(claim_uid)` or the equivalent API returns the scorecard (provenance_quality, corroboration, contradiction_status, etc.). See [Defensibility metrics schema](defensibility-metrics-schema.md).
 
-No RAG framework is required: the [standalone defensibility scorer](eval_contract.md#3-current-implementations) (`scripts/standalone_defensibility_scorer.py`) does exactly this in-process for a single (query, answer, evidence) input and outputs the metrics JSON.
+No RAG framework is required: the [standalone defensibility scorer](eval_contract.md#3-current-implementations) (`scripts/standalone_defensibility_scorer.py`) does exactly this in-process for a single (query, answer, evidence) input and outputs the metrics JSON. **Your RAG harness → our scorer** is the standard path: see [RAG evals: defensibility metric](rag-evals-defensibility-metric.md) for the contract, schema, and a Python example; an optional copy-paste adapter template is in [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py).
 
 ---
 

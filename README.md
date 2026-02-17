@@ -62,11 +62,18 @@ chronicle-verify path/to/file.chronicle
 | [Eval contract schema](docs/eval_contract_schema.json) | JSON Schema for contract input/output (machine-readable validation). |
 | [Defensibility metrics schema](docs/defensibility-metrics-schema.md) | Field semantics for the scorer output. |
 | [Eval and benchmarking](docs/eval-and-benchmarking.md) | How to run pipelines and report Chronicle defensibility. |
+| [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness (standard metric). |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |
 | [Neo4j](docs/neo4j.md) | Optional graph projection for multi-run analysis and visualization. |
+| [Neo4j schema](docs/neo4j-schema.md) | Node labels, relationship types, and example Cypher for the sync output. |
 | [Aura graph pipeline](docs/aura-graph-pipeline.md) | Run an ever-growing Chronicle graph on Neo4j Aura (verify → import → sync). |
 | [Chronicle file format](docs/chronicle-file-format.md) | What's inside a .chronicle (ZIP): manifest, DB, evidence; where claims and tensions live. |
+| [Consuming .chronicle](docs/consuming-chronicle.md) | How to read a .chronicle without the Chronicle package (ZIP + SQLite + evidence). |
+| [Generic export](docs/GENERIC_EXPORT.md) | Export investigation as JSON or CSV ZIP for BI, dashboards, fact-checking pipelines. |
+| [Claim–evidence–metrics export](docs/claim-evidence-metrics-export.md) | Stable JSON shape for one claim + evidence refs + defensibility (fact-checking UIs, dashboards). |
+| [External IDs](docs/external-ids.md) | How to store fact-check IDs, C2PA claim IDs, etc. in evidence metadata (and claim notes/tags when exposed). |
+| [Provenance recording](docs/provenance-recording.md) | Store source and evidence–source links; feed C2PA/CR assertions (we record, we don’t verify). |
 | [Epistemology scope](docs/epistemology-scope.md) | What the project covers (and does not) regarding epistemology. |
 | [AI to populate epistemology](docs/ai-to-populate-epistemology.md) | How much AI is needed to fully populate claims, support/challenge, tensions. |
 | [Using Ollama locally](docs/using-ollama-locally.md) | Use local Ollama (no API key) for tension suggestion, decomposition, type inference. |

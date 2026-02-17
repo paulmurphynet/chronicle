@@ -15,3 +15,20 @@ Short definitions of terms you’ll see in Chronicle docs, lessons, and code. Fo
 | **Support / challenge** | Link types from an evidence span to a claim. *Support* = this evidence backs the claim; *challenge* = this evidence undermines it. Corroboration and defensibility use these counts. |
 | **Tension** | An explicit record that two claims conflict or weaken each other. Status can be open, acknowledged, or resolved. Tensions are first-class and affect defensibility. |
 | **Verifier** | Standalone tool (`chronicle-verify`) that checks a .chronicle file: manifest, DB schema, evidence hashes. Does *not* check truth, semantics, or source independence. See [Verifier](verifier.md) and [Verification guarantees](verification-guarantees.md). |
+
+## Terminology for interop
+
+When integrating with fact-checking tools, argumentation frameworks, or provenance systems, these mappings can help align vocabulary:
+
+| Chronicle term | Common equivalent(s) |
+|----------------|----------------------|
+| **Claim** | Statement, assertion, verdict (when from a fact-checker). |
+| **Support** | Evidence for, supports, backs. |
+| **Challenge** | Evidence against, contradicts, undermines. |
+| **Tension** | Contradiction, conflict (between two claims). |
+| **Evidence (item)** | Source, document, chunk. |
+| **Span** | Quote or segment within a source. |
+| **Defensibility** | Structural score given evidence and policy; not “truth” or “verdict.” |
+| **Investigation** | Case, run, thread (one line of inquiry). |
+
+Consumers can treat Chronicle’s **claim** as “the statement we’re assessing,” **support**/ **challenge** as “evidence for” / “evidence against,” and **tension** as “recorded contradiction between two claims.” Export formats (e.g. [generic export](GENERIC_EXPORT.md), [consuming .chronicle](consuming-chronicle.md)) use these names; adapters can map to local schemas using the table above.

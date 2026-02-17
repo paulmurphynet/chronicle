@@ -2,7 +2,8 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/chronicle/Chronicle/docs/eval_contract_schema.json",
   "title": "Chronicle defensibility eval contract",
-  "description": "Machine-readable schema for eval contract input and output. See eval_contract.md. Validate input against $defs/Input; validate output (success or error) against $defs/OutputSuccess or $defs/OutputError.",
+  "description": "Machine-readable schema for eval contract input and output. Contract version 1.0; breaking changes will be rare and announced. See eval_contract.md. Validate input against $defs/Input; validate output (success or error) against $defs/OutputSuccess or $defs/OutputError.",
+  "contract_version": "1.0",
   "$defs": {
     "Input": {
       "type": "object",

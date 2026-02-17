@@ -36,8 +36,9 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 
 ## Tests
 
-- Tests live under `tests/` (when present). Run with `pytest` from the repo root.
-- The standalone scorer and verifier can be used as integration smoke tests (see Development setup above).
+- Tests live under `tests/` (when present). Run with `pytest` from the repo root (e.g. `pytest tests/ -v`). Requires dev deps: `pip install -e ".[dev]"`.
+- Coverage: scorer (valid/invalid input), session (ingest → claim → link → defensibility), verifier (on a .chronicle export). The standalone scorer and verifier can also be used as integration smoke tests (see Development setup above).
+- **CI:** GitHub Actions runs ruff (chronicle, tools) and pytest on push/PR. See [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 ## Documentation
 

@@ -48,3 +48,5 @@ Neo4j is **optional**. The scorer and verifier do not use it. Use it when you wa
 ## Summary
 
 Neo4j is a **projection** of the same read model. It does not replace the scorer or the verifier. Use it for multi-run analysis, lineage traversal, and visualization when your workflow benefits from a graph.
+
+**Schema reference:** For node labels, relationship types, and example Cypher queries, see [Neo4j schema](neo4j-schema.md).

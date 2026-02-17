@@ -78,3 +78,5 @@ Other tables (source, actor, etc.) may exist depending on the schema version. Th
 - **Integrity**: verifier hashes each file and compares to `content_hash` in the DB (or manifest).
 
 So: the .chronicle format is **ZIP + manifest + SQLite + evidence blobs**. The “contains” / support / tension relationships are in the **database**, not in the evidence file names or contents. If you want to inspect or query structure, open **chronicle.db** (e.g. with sqlite3 or a DB browser) and look at the **claim**, **evidence_link**, and **tension** tables.
+
+**Consuming without the Chronicle package:** To read a .chronicle from another language or tool (e.g. fact-checking UI, dashboard), see [Consuming .chronicle](consuming-chronicle.md) for step-by-step instructions (open ZIP, read manifest, query SQLite, resolve evidence files).

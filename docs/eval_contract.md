@@ -4,6 +4,8 @@
 
 **Companion:** [Defensibility metrics schema](defensibility-metrics-schema.md) (output field semantics), [Using Chronicle in RAG evaluation](eval-and-benchmarking.md) (how to run pipelines and read metrics), [Integrating with Chronicle](integrating-with-chronicle.md) (minimum integration). **Machine-readable:** [eval_contract_schema.json](eval_contract_schema.json) — JSON Schema for input (`$defs/Input`) and output success/error (`$defs/OutputSuccess`, `$defs/OutputError`) for validation in harnesses.
 
+**Contract version:** 1.0. Breaking changes to the input/output shape will be rare and announced. If you only do one thing: pipe one JSON object (query, answer, evidence) to the scorer stdin and read one JSON object from stdout. See [Current implementations](#3-current-implementations).
+
 ---
 
 ## 1. Input
