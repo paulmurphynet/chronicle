@@ -12,12 +12,16 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from chronicle.core.identity import (
+    CHRONICLE_IDENTITY_PROVIDER_ENV,
+    CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH_ENV,
+    VERIFICATION_ACCOUNT,
     VERIFICATION_CLAIMED,
     VERIFICATION_NONE,
     get_effective_actor_from_request,
     get_identity_provider,
     NoneIdP,
     PrincipalInfo,
+    TraditionalIdP,
 )
 
 
@@ -105,17 +109,99 @@ def test_get_effective_actor_from_request_with_headers() -> None:
 
 def test_get_identity_provider_returns_none_idp_by_default() -> None:
     """get_identity_provider returns NoneIdP when env is unset or 'none'."""
-    prev = os.environ.get("CHRONICLE_IDENTITY_PROVIDER")
+    prev = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)
     try:
         for val in (None, "none", "NONE"):
-            if val is None and "CHRONICLE_IDENTITY_PROVIDER" in os.environ:
-                del os.environ["CHRONICLE_IDENTITY_PROVIDER"]
+            if val is None and CHRONICLE_IDENTITY_PROVIDER_ENV in os.environ:
+                del os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV]
             elif val is not None:
-                os.environ["CHRONICLE_IDENTITY_PROVIDER"] = val
+                os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = val
             idp = get_identity_provider()
             assert isinstance(idp, NoneIdP)
     finally:
         if prev is not None:
-            os.environ["CHRONICLE_IDENTITY_PROVIDER"] = prev
-        elif "CHRONICLE_IDENTITY_PROVIDER" in os.environ:
-            del os.environ["CHRONICLE_IDENTITY_PROVIDER"]
+            os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = prev
+        elif CHRONICLE_IDENTITY_PROVIDER_ENV in os.environ:
+            del os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV]
+
+
+def test_get_identity_provider_returns_traditional_idp() -> None:
+    """get_identity_provider returns TraditionalIdP when env is 'traditional'."""
+    prev = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)
+    try:
+        os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = "traditional"
+        idp = get_identity_provider()
+        assert isinstance(idp, TraditionalIdP)
+    finally:
+        if prev is not None:
+            os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = prev
+        elif CHRONICLE_IDENTITY_PROVIDER_ENV in os.environ:
+            del os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV]
+
+
+def test_get_identity_provider_stub_for_gov_id_did_zk() -> None:
+    """get_identity_provider returns NoneIdP stub for gov_id, did, zk (not implemented)."""
+    prev = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)
+    try:
+        for name in ("gov_id", "did", "zk"):
+            os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = name
+            idp = get_identity_provider()
+            assert isinstance(idp, NoneIdP)
+    finally:
+        if prev is not None:
+            os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = prev
+        elif CHRONICLE_IDENTITY_PROVIDER_ENV in os.environ:
+            del os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV]
+
+
+def test_traditional_idp_with_state_override() -> None:
+    """TraditionalIdP with override and request.state.actor_id returns VERIFICATION_ACCOUNT."""
+    req = _make_request({"X-Actor-Id": "header_actor"}, state=None)
+    # Add state with actor_id (TraditionalIdP reads getattr(state, "actor_id", None))
+    class State:
+        actor_id = "auth_principal"
+        actor_type = "human"
+    req.state = State()
+    prev_override = os.environ.get(CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH_ENV)
+    prev_idp = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)
+    try:
+        os.environ[CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH_ENV] = "true"
+        os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = "traditional"
+        info = TraditionalIdP().resolve(req)
+        assert info.principal_id == "auth_principal"
+        assert info.verification_level == VERIFICATION_ACCOUNT
+    finally:
+        if prev_override is not None:
+            os.environ[CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH_ENV] = prev_override
+        elif CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH_ENV in os.environ:
+            del os.environ[CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH_ENV]
+        if prev_idp is not None:
+            os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = prev_idp
+        elif CHRONICLE_IDENTITY_PROVIDER_ENV in os.environ:
+            del os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV]
+
+
+def test_traditional_idp_fallback_to_headers_when_no_state() -> None:
+    """TraditionalIdP with no state uses X-Actor-Id header and returns VERIFICATION_ACCOUNT when present."""
+    req = _make_request({"X-Actor-Id": "header_actor", "X-Actor-Type": "tool"})
+    req.state = None
+    prev = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)
+    try:
+        os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = "traditional"
+        info = TraditionalIdP().resolve(req)
+        assert info.principal_id == "header_actor"
+        assert info.actor_type == "tool"
+        assert info.verification_level == VERIFICATION_ACCOUNT
+    finally:
+        if prev is not None:
+            os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = prev
+        elif CHRONICLE_IDENTITY_PROVIDER_ENV in os.environ:
+            del os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV]
+
+
+def test_none_idp_actor_type_system() -> None:
+    """NoneIdP accepts x-actor-type: system."""
+    req = _make_request({"x-actor-id": "sys1", "x-actor-type": "system"})
+    info = NoneIdP().resolve(req)
+    assert info.principal_id == "sys1"
+    assert info.actor_type == "system"
