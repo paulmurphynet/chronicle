@@ -24,6 +24,28 @@
 
 ---
 
+## Epistemology-optimal configuration (from thought experiment 01)
+
+Agreed list of changes from the [epistemologists’ conference review](../../thought_experiments/01-epistemologists-conference-review.md) to bring Chronicle to the target epistemology configuration. See story [06 — Epistemology: what we implement and what we don’t](../../story/06-epistemology-scope-tables.md) for the full tables.
+
+7. **Scorer / eval caveat (docs)** — In [eval contract](eval_contract.md), [benchmark](benchmark.md), and [RAG evals defensibility metric](rag-evals-defensibility-metric.md): add a prominent note that the default scorer links every evidence chunk as support for the single claim and does not validate that evidence actually supports the claim; for higher assurance, validate or curate links (e.g. human or NLI) then record.
+
+8. **Surface independence_notes (data + docs)** — Include `independence_notes` (or a summary) in defensibility scorecard explanations and in claim–evidence–metrics export when a source has them, so “N independent sources” can be read with the user’s qualification (e.g. “not independently verified”) where present.
+
+9. **Optional warrant / link rationale (schema + API)** — Make optional warrant (or rationale) on support/challenge links a stable, documented field in schema, API, and exports. “Why does this evidence support/challenge this claim?”—as asserted, not verified.
+
+10. **Optional defeater type (schema + API)** — Add optional `defeater_kind` (or equivalent) on challenge links and on tensions: e.g. `rebutting` vs `undercutting`. Purely additive; defensibility logic can ignore it initially or use it later for explanations.
+
+11. **Optional source reliability / authority metadata (schema + API)** — Allow optional user-supplied reliability or authority metadata on sources (e.g. label or short rationale). Record only; no verification. Document in critical areas and epistemology-scope that we do not verify reliability.
+
+12. **Optional policy rationale (schema + config)** — Allow optional rationale or citation for policy/threshold choices (e.g. “strong = 2+ sources, per [benchmark X]”). Enables evaluators to assess whether the bar is appropriate for the context.
+
+13. **Optional epistemic stance on claims (schema + API)** — Allow optional epistemic stance on claims (e.g. “working hypothesis” vs “asserted as established”). Structural only; no commitment to a theory of knowledge.
+
+14. **Epistemology-scope and critical areas (docs)** — Update [epistemology-scope](epistemology-scope.md) and relevant [critical areas](../../critical_areas/README.md) to describe the new optional fields (warrant, defeater type, source reliability metadata, policy rationale, epistemic stance) and to reiterate that none of them are verified—only recorded.
+
+---
+
 ## Is 75% coverage advisable?
 
 **Yes.** The project already targets 75% for **core** code (see [coverage-core](coverage-core.md)). Coverage is measured only on included paths; API, Neo4j, integrations, and some optional tools are omitted so the bar applies to the defensibility path (event store, read model, session, scorer, verifier). Reaching 75% again is advisable because:

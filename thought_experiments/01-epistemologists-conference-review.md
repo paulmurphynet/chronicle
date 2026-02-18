@@ -88,4 +88,90 @@ The panel’s view was that Chronicle is **correctly implemented** for its state
 
 ---
 
+## Follow-up: conversation and agreed change list
+
+The organisers ask the four to talk amongst themselves and agree on a **concrete list of changes** that would bring Chronicle to the exact most optimal epistemology configuration for its stated purposes (RAG evals, show-your-work, policy-driven scoring, portable verification)—without turning it into a full epistemological framework.
+
+**Reed:** I’m happy to prioritise two things: (1) surface **independence_notes** in the defensibility scorecard or export so that when someone sees “2 independent sources” they can also see “not independently verified” if that’s what’s recorded; (2) add **optional source metadata** for reliability or authority—user-supplied, we record only—so the model can distinguish “two weak independent sources” from “two strong ones” without us claiming to verify strength. Both stay within “as modeled by the user.”
+
+**Vega:** I’ll support that. For my part, I’d add **optional defeater type** on challenge links and tensions: rebutting vs undercutting. We don’t need to change the defensibility *logic* initially—just record it. That gives formal epistemology and downstream tools the right vocabulary. I’m fine *not* adding priority orderings over evidence or full AGM belief revision; that’s out of scope and would complicate the model a lot for limited gain for your use case.
+
+**Kim:** I agree on defeater types. I’d also add an **optional warrant (or link rationale) field** that’s first-class in the schema and in exports—you already have rationale in some code paths; making it a stable, documented option everywhere would support justification-sensitive workflows. And **optional epistemic stance** on claims—e.g. “accepted as working hypothesis” vs “asserted as established”—so domains that care about “we believe but don’t claim to know” can record it without us committing to a theory of knowledge. Still structural and policy-relative.
+
+**O’Brien:** I want **optional policy rationale**—a place to record *why* a threshold was chosen (e.g. “2+ sources for strong, per benchmark X”) so evaluators can judge whether the bar is appropriate. And I insist on **documentation**: a prominent caveat in the eval contract and benchmark docs that the default scorer links all evidence as support and does not validate entailment; for higher assurance, links should be curated or validated (human or NLI) and then recorded. No schema change for that—just clarity where people design evals.
+
+**Reed:** So we’re agreed: schema and data-model additions are all optional; docs and surfacing of existing data (independence_notes) are mandatory where we already have the data. No new *guarantees*—still “we record, we don’t verify.”
+
+**Vega:** Right. Optimal for your purposes means: maximal expressiveness for epistemic structure that fits RAG/evals and show-your-work, without implementing justification theory, full belief revision, or truth.
+
+**Kim:** And the critical areas and epistemology-scope doc should be updated to mention the new optional fields and to state that we still don’t verify warrant, defeater correctness, source reliability, or policy validity.
+
+**O’Brien:** Agreed. Here’s the list we hand to the maintainers.
+
+---
+
+### Agreed concrete list of changes (for optimal epistemology configuration)
+
+| # | Change | Type | Rationale |
+|---|--------|------|-----------|
+| 1 | **Scorer / eval caveat** | Docs | In eval contract, benchmark doc, and RAG-evals doc: add a prominent note that the default scorer links every evidence chunk as support for the single claim and does not validate that evidence actually supports the claim; for higher assurance, validate or curate links (e.g. human or NLI) then record. |
+| 2 | **Surface independence_notes** | Data + docs | Include `independence_notes` (or a summary) in defensibility scorecard explanations and in claim–evidence–metrics export when a source has them, so “N independent sources” can be read with the user’s qualification (e.g. “not independently verified”) where present. |
+| 3 | **Optional warrant / link rationale** | Schema + API | Make optional warrant (or rationale) on support/challenge links a stable, documented field in schema, API, and exports. “Why does this evidence support/challenge this claim?”—as asserted, not verified. |
+| 4 | **Optional defeater type** | Schema + API | Add optional `defeater_kind` (or equivalent) on challenge links and on tensions: e.g. `rebutting` vs `undercutting`. Purely additive; defensibility logic can ignore it initially or use it later for explanations. |
+| 5 | **Optional source reliability / authority metadata** | Schema + API | Allow optional user-supplied reliability or authority metadata on sources (e.g. label or short rationale). Record only; no verification. Document in critical areas and epistemology-scope that we do not verify reliability. |
+| 6 | **Optional policy rationale** | Schema + config | Allow optional rationale or citation for policy/threshold choices (e.g. “strong = 2+ sources, per [benchmark X]”). Enables evaluators to assess whether the bar is appropriate for the context. |
+| 7 | **Optional epistemic stance on claims** | Schema + API | Allow optional epistemic stance on claims (e.g. “working hypothesis” vs “asserted as established”). Structural only; no commitment to a theory of knowledge. |
+| 8 | **Epistemology-scope and critical areas** | Docs | Update epistemology-scope and relevant critical areas to describe the new optional fields (warrant, defeater type, source reliability metadata, policy rationale, epistemic stance) and to reiterate that none of them are verified—only recorded. |
+
+The panel explicitly **does not** recommend: implementing full Toulmin argument schemas, AGM-style belief revision, priority orderings over evidence, or the verifier checking semantics/entailment/truth. Those remain out of scope for Chronicle’s purposes.
+
+---
+
+## Appendix A: What Chronicle implements (and why)
+
+Table of the epistemic options and features Chronicle implements, and the reason each is in scope for RAG evals, show-your-work, and policy-driven scoring.
+
+| Feature / option | What we implement | Why (for our purposes) |
+|------------------|-------------------|-------------------------|
+| **Evidence** | First-class immutable evidence items and spans; content-hashed; links reference spans. | Enables “this sentence supports this claim”; integrity via hash; verifiable in .chronicle. |
+| **Claims** | Falsifiable statements; proposed, linked, asserted or withdrawn; never stored as “true.” | Keeps defensibility structural; avoids truth claims; fits evals and audits. |
+| **Support and challenge** | First-class link types span→claim; optional strength; retractions as events. | Core of defensibility: what supports or challenges a claim is explicit and auditable. |
+| **Corroboration** | support_count, challenge_count, independent_sources_count from links and sources. | Policy can require min sources; matches testimonial intuition (multiple independent backings). |
+| **Sources** | Register source; link evidence to source; independence_notes (user-supplied). | Models real-world origins for corroboration; independence “as modeled,” documented. |
+| **Tensions** | First-class tensions between claims (conflict/weakening); status open/acknowledged/resolved; optional resolution rationale. | Contradictions explicit; defensibility reflects open vs resolved; defeasibility without full belief revision. |
+| **Defensibility** | Structural, policy-relative scorecard (provenance_quality, corroboration, contradiction_status, weakest_link, etc.). | Single summary for “how well does this claim hold up?” for evals and dashboards; not truth. |
+| **Temporal** | known_as_of; as-of defensibility queries; full event history. | Reproducibility; “defensibility at T”; audit trail. |
+| **Attribution and trail** | Who asserted; optional confidence; reasoning trail (events that built/modified the claim). | Accountability; agent-centred interpretation; audit. |
+| **Link rationale / warrant** | Optional rationale (or warrant) on support/challenge links (as agreed: first-class and stable). | “Why this evidence supports this claim” for justification-sensitive workflows; as asserted, not verified. |
+| **Defeater type** | Optional rebutting vs undercutting on challenges/tensions (as agreed). | Richer explanation of why defensibility changed; aligns with formal epistemology; optional. |
+| **Source reliability metadata** | Optional user-supplied reliability/authority on sources (as agreed). | Distinguish strong vs weak sources in structure; we record, we don’t verify. |
+| **Policy rationale** | Optional rationale/citation for threshold choices (as agreed). | Evaluators can assess whether the bar is appropriate; applied epistemology. |
+| **Epistemic stance** | Optional stance on claims, e.g. working hypothesis vs asserted (as agreed). | Domains that need “we believe but don’t claim to know” without a full theory of knowledge. |
+| **Verifier and .chronicle** | Standalone verifier (structure, schema, evidence hashes); portable format. | “Show your work” is checkable by anyone; no overclaim (verified = well-formed, not true). |
+| **Explicit limits** | Critical areas; epistemology-scope; verification-guarantees. | Prevents over-trust; defensibility ≠ truth; independence/support “as modeled,” not verified. |
+
+---
+
+## Appendix B: Parts of epistemology we do not implement (and why not)
+
+Table of epistemic concepts or theories that exist in the literature or in practice but that Chronicle does not attempt to implement, and the reason they are out of scope for our purposes.
+
+| Area of epistemology | What we do not implement | Why not (for our purposes) |
+|----------------------|---------------------------|----------------------------|
+| **Truth and factuality** | We do not assert that any claim is true or false. | Our job is structural defensibility and verifiable “show your work,” not access to the world or fact-checking. Truth is a different question; asserting it would require semantics and verification we don’t have and don’t promise. |
+| **Full Toulmin / argument schemas** | We do not model full argument structure (claim, data, warrant, backing, qualifier) or argument schemas. | We support optional warrant/rationale on links; full Toulmin would complicate the schema and the UI for limited gain in RAG evals and portable verification. Operational defensibility doesn’t require it. |
+| **Formal belief revision (e.g. AGM)** | We do not implement AGM-style revision or priority orderings over evidence/sources. | Retractions and tensions give a practical form of revision; full AGM would require a commitment to a specific revision policy and ordering. Out of scope for a portable, policy-agnostic eval and verification tool. |
+| **Fine-grained knowledge vs belief** | We do not model “known” vs “believed” vs “accepted” in a fine-grained epistemic sense. | We allow optional epistemic stance (e.g. working hypothesis vs asserted); we do not commit to a theory of knowledge or justification. That keeps the system usable across domains without philosophical baggage. |
+| **Justification theory** | We do not commit to foundationalism, coherentism, or reliabilism. | Defensibility is structural and policy-driven (counts, thresholds, tensions). Picking a justification theory would constrain use cases and would not add value for RAG evals and show-your-work. |
+| **Defeater semantics** | We do not *compute* or validate defeater correctness (rebutting vs undercutting). We may *record* defeater type optionally. | We record structure; we don’t verify that a link is correctly classified as rebutting or undercutting. Implementing semantics would require a formal model of content we don’t have. |
+| **Source independence (verified)** | We do not verify that two sources are actually independent in the real world. | We record independence as modeled by the user; verification would require external knowledge and would break our “record, don’t verify” boundary. |
+| **Source reliability (computed)** | We do not compute or verify a general “reliability” or “authority” score. | We may record user-supplied reliability metadata; we do not validate it. Computing reliability would require a theory of evidence and authority we don’t adopt. |
+| **Entailment / NLI** | We do not run natural-language inference or entailment checks to validate that evidence supports or challenges a claim. | We record links; validating entailment would be a separate service and would blur the line between “structure” and “content correctness.” Critical area 04 states this clearly. |
+| **Verifier: semantics or truth** | The verifier does not check event semantics, referential consistency, truth of claims, or independence. | Verification is structural and integrity-only (ZIP, manifest, schema, hashes). Semantic or factual verification would be a different product and would require definitions we don’t impose. |
+| **Actor identity (verified)** | We do not verify that actor_id or verification_level correspond to real identities or credentials. | We record who the writer says acted; identity binding is a deployment concern. Documented in critical area 06. |
+| **Policy validity** | We do not validate that thresholds or policy rules are empirically or scientifically grounded for a domain. | Policy is configurable; we allow optional rationale so evaluators can assess it. We don’t certify that a policy is “correct” for a given domain. |
+| **Documented epistemology (literature)** | The technical report and docs define defensibility operationally; we do not frame the design in philosophical epistemology terms or cite epistemic literature. | The project is operationally epistemic—focused on RAG evals, show-your-work, and verification—not a contribution to philosophical epistemology. The thought experiment and these appendices are the exception for reflection. |
+
+---
+
 **← [Thought experiments index](README.md)** | **Next →:** *(none yet)*

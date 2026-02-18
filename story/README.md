@@ -41,8 +41,8 @@ By the end you’ll understand:
 
 ## How to read the story
 
-1. **Read in order.** [01](01-the-problem.md) → [02](02-why-this-problem-exists.md) → [03](03-how-we-are-solving-it.md) → [04](04-where-challenges-remain.md) → [05](05-how-you-can-help.md). The chapters build on each other.
-2. **On GitHub:** Each chapter has **← Previous | Index | Next →** at the bottom (chapter 05 has **End of story** instead of Next) so you can move without returning here.
+1. **Read in order.** [01](01-the-problem.md) → [02](02-why-this-problem-exists.md) → [03](03-how-we-are-solving-it.md) → [04](04-where-challenges-remain.md) → [05](05-how-you-can-help.md) → [06](06-epistemology-scope-tables.md). The chapters build on each other.
+2. **On GitHub:** Each chapter has **← Previous | Index | Next →** at the bottom (chapter 06 has **End of story** instead of Next) so you can move without returning here.
 3. **Before you rely on scores or verification,** read the [critical areas](../critical_areas/README.md). They spell out what defensibility and “verified” do *not* guarantee, so the system isn’t over-trusted.
 4. **For technical depth,** use the [docs](../docs/README.md) and [lessons](../lessons/README.md). The story stays high-level; contracts, schemas, and code live there.
 
@@ -57,6 +57,7 @@ By the end you’ll understand:
 | [03](03-how-we-are-solving-it.md) | How we’re solving it | Evidence, claims, defensibility score, .chronicle format, verifier, and fitting into your ecosystem. |
 | [04](04-where-challenges-remain.md) | Where challenges remain | Adoption, what’s done and what’s left, scope and limits, and growing the ecosystem. |
 | [05](05-how-you-can-help.md) | How you can help | Ways to contribute: code, docs, testing, feedback, sharing the story. |
+| [06](06-epistemology-scope-tables.md) | Epistemology: what we implement and what we don’t | Canonical tables: what Chronicle implements (and why) and what we do not implement (and why not). |
 
 ---
 
