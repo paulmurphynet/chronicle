@@ -87,5 +87,5 @@ omit = [
 ]
 
 [tool.coverage.report]
-fail_under = 33  # Raise toward 75% as tests grow; see docs/coverage-core.md
+fail_under = 33  # Raise as tests grow (target 75%); see docs/coverage-core.md. CI uses same value.
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", 'if __name__ == "__main__":']

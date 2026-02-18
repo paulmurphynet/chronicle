@@ -33,5 +33,4 @@ jobs:
         run: ruff format --check chronicle tools
 
       - name: Pytest with coverage (core)
-        run: pytest tests/ -v --cov=chronicle --cov=tools --cov-report=term-missing
-        # Optional: add --cov-fail-under=75 when coverage target is met (see pyproject.toml [tool.coverage])
+        run: pytest tests/ -v --cov=chronicle --cov=tools --cov-report=term-missing --cov-fail-under=33
