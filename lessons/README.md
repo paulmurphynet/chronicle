@@ -26,7 +26,7 @@ Step-by-step annotated lessons that walk through **100% of the Chronicle codebas
 | [10](10-export-import-neo4j.md) | Export, import, and Neo4j | `chronicle/store/export_import.py`, `neo4j_sync.py` |
 | [11](11-interoperability-api-and-tests.md) | Interoperability, API, and tests | Terminology, external IDs, provenance, HTTP API, tests, CI |
 
-The full path from 00 to 11 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag), epistemic tools, export/import/Neo4j, and interop/API/tests.
+The full path from 00 to 11 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, and interop/API/tests (including request identity, attestation, and the minimal curation UI).
 
 ## Lesson format
 
@@ -50,6 +50,7 @@ Terms you’ll see across lessons (and in the code):
 - **Eval contract** — Input (query, answer, evidence) and output (defensibility metrics) for the scorer; see [docs/eval_contract.md](../docs/eval_contract.md).
 - **Event-sourced** — All changes are stored as events; we don’t overwrite history.
 - **quickstart-rag** — CLI command `chronicle quickstart-rag`: one-command RAG flow; see [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md).
+- **Actor / attestation** — Every event records who did it (actor_id, actor_type); optional verification level can be stored. See [docs/human-in-the-loop-and-attestation.md](../docs/human-in-the-loop-and-attestation.md).
 
 For more, see [Epistemology scope](../docs/epistemology-scope.md), the [Technical report](../docs/technical-report.md), and [Verification guarantees](../docs/verification-guarantees.md).
 

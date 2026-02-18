@@ -22,6 +22,10 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 7. What does **CI** run on push/PR? (Linter and test runner.)
 
+8. How does the **API** record who made a write request (e.g. who created an investigation)? What headers can a client send?
+
+9. Where is the **minimal curation UI** served when the API is running? What does it let you do?
+
 ---
 
 ## Answer key
@@ -36,6 +40,10 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 5. **Install:** `pip install -e ".[api]"`. **Env:** Set **CHRONICLE_PROJECT_PATH** to the project directory. **Command:** `uvicorn chronicle.api.app:app` (optionally `--reload`). See docs/api.md.
 
-6. (a) **tests/test_standalone_scorer.py** — (b) **tests/test_session.py** — (c) **tests/test_verifier.py**.
+6. (a) **tests/test_standalone_scorer.py** — (b) **tests/test_session.py** — (c) **tests/test_verifier.py**. Also **test_attestation.py** (payload helper), **test_identity.py** (identity module), **test_cli_actor.py** (CLI actor identity).
 
 7. **Ruff** (check + format) on chronicle and tools, and **pytest tests/** on Python 3.11 and 3.12. See .github/workflows/ci.yml.
+
+8. The API resolves the actor from an **Identity Provider (IdP)** when configured, or from request **headers**: **X-Actor-Id** and **X-Actor-Type**. Clients can send those headers so the ledger records them as the actor. Default is `actor_id=default`, `actor_type=human`. See docs/api.md and chronicle/core/identity.py.
+
+9. **/static/curation.html** (e.g. http://127.0.0.1:8000/static/curation.html). It lets you set your Actor ID, create investigations, ingest evidence (paste text), propose claims, and link support—all writes are attributed to you via X-Actor-Id. See docs/human-in-the-loop-and-attestation.md.

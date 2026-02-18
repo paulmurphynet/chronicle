@@ -44,9 +44,9 @@ This is the core. High-level structure:
 
 | Path | Role |
 |------|------|
-| **`chronicle/core/`** | Event model, payloads, UIDs, validation, policy. The “language” of what we record. |
+| **`chronicle/core/`** | Event model, payloads, UIDs, validation, policy, **identity** (actor binding, verification level). The “language” of what we record. |
 | **`chronicle/store/`** | Event store, read model (projection, models, sqlite_read_model), session API, commands (claims, evidence, defensibility, etc.). |
-| **`chronicle/store/commands/`** | Command handlers: investigation, evidence, claims, tensions, defensibility, export, and more. |
+| **`chronicle/store/commands/`** | Command handlers: investigation, evidence, claims, tensions, defensibility, export, **attestation** (payload helpers), and more. |
 | **`chronicle/eval_metrics.py`** | Builds the **defensibility metrics** structure (the shape the scorer returns). |
 | **`chronicle/integrations/`** | LangChain, LlamaIndex, Haystack hooks so RAG pipelines can use Chronicle. |
 | **`chronicle/api/`** | Optional HTTP API (FastAPI): investigations, evidence, claims, links, defensibility, export/import. Install `.[api]`. |
@@ -78,6 +78,7 @@ When you run the **standalone scorer**, it uses: `create_project`, session, inge
 - **`docs/consuming-chronicle.md`** — How to read a .chronicle from another language or tool (ZIP, manifest, SQLite).  
 - **`docs/external-ids.md`** — Storing fact-check IDs, C2PA claim IDs, etc. in evidence metadata.  
 - **`docs/rag-evals-defensibility-metric.md`** — RAG evals: contract, schema, how to run the scorer in your harness.  
+- **`docs/human-in-the-loop-and-attestation.md`** — Human curation, actor identity (CLI env, API headers), verification level, minimal curation UI.  
 - **`docs/neo4j-schema.md`** — Node labels and relationship types for the Neo4j sync (graph RAG / queries).
 
 ## Try it

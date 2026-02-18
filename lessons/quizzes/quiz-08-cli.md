@@ -20,6 +20,8 @@ Answer these after reading the lesson and the CLI main. Try not to peek at the a
 
 6. How do you get the **defensibility scorecard** for a specific claim from the CLI? (Subcommand and required args.)
 
+7. How do you **attribute** a CLI write (e.g. create-investigation) to yourself so the ledger records you as the actor?
+
 ---
 
 ## Answer key
@@ -34,4 +36,6 @@ Answer these after reading the lesson and the CLI main. Try not to peek at the a
 
 5. In **pyproject.toml**: **chronicle = chronicle.cli.main:main** (the **main** function in **chronicle/cli/main.py**).
 
-6. **chronicle defensibility &lt;claim_uid&gt; --path /path/to/project** (claim_uid is a positional argument). Returns the defensibility scorecard for that claim.
+6. **chronicle get-defensibility &lt;claim_uid&gt; --path /path/to/project** (claim_uid is a positional argument). Returns the defensibility scorecard for that claim.
+
+7. Set **CHRONICLE_ACTOR_ID** (and optionally **CHRONICLE_ACTOR_TYPE**) in the environment, or pass **--actor-id** and **--actor-type** on the command (e.g. `chronicle --actor-id jane_doe create-investigation "My run" --path /path/to/project`). See docs/human-in-the-loop-and-attestation.md.

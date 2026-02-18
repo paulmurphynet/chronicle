@@ -32,11 +32,11 @@ Open **chronicle/cli/main.py** and scan the **subparsers** (e.g. around lines 54
 | **quickstart-rag** | One-command RAG demo: create temp project, investigation, ingest sample text, propose claim, link support, print defensibility. Use `--path` to keep the project; `--text` for your own file. See [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md). |
 | **init** | Initialize a Chronicle project directory (creates chronicle.db, schema). |
 | **create-investigation** | Create an investigation (title, etc.) in the project. |
-| **ingest** | Ingest a file as evidence into an investigation. |
+| **ingest-evidence** | Ingest a file as evidence into an investigation. |
 | **export** | Export an investigation to a .chronicle file (ZIP). |
 | **export-minimal** | Export a minimal .chronicle containing only one claim and its evidence/links/tensions. |
 | **import** | Import a .chronicle file into the project. |
-| **defensibility** | Get the defensibility scorecard for a claim (by claim_uid). |
+| **get-defensibility** | Get the defensibility scorecard for a claim (by claim_uid). |
 | **reasoning-trail** | Get the reasoning trail (events that built or modified the claim). |
 | **reasoning-brief** | Generate the reasoning brief (human-readable summary) for a claim. |
 | **verify** | Run the **project** invariant suite (different from verify-chronicle: checks project state). |
@@ -46,6 +46,15 @@ Open **chronicle/cli/main.py** and scan the **subparsers** (e.g. around lines 54
 | **policy** | List, export, or import policy profiles. |
 
 So the CLI is a **wrapper** around the same session and commands used by the scorer and scripts: init creates the project, then other commands use ChronicleSession (or the verifier, or Neo4j sync) under the hood.
+
+## Attribution (actor identity)
+
+Write commands (create-investigation, ingest-evidence, set-tier, quickstart-rag) record **who** did the action. You can set your identity so the ledger attributes writes to you:
+
+- **Environment:** Set **CHRONICLE_ACTOR_ID** and optionally **CHRONICLE_ACTOR_TYPE** (e.g. `human`, `tool`). Any write command in that shell will use them.
+- **Flags:** Pass **--actor-id** and **--actor-type** on the same run (e.g. `chronicle --actor-id jane_doe create-investigation "My run" --path /path/to/project`). Flags override env.
+
+Scripts that use the session (e.g. **scripts/ingest_transcript_csv.py**) also respect **CHRONICLE_ACTOR_ID** for the curator. See [docs/human-in-the-loop-and-attestation.md](../docs/human-in-the-loop-and-attestation.md).
 
 ## verify vs verify-chronicle
 
@@ -62,7 +71,8 @@ So the CLI is a **wrapper** around the same session and commands used by the sco
 ## Summary
 
 - The **chronicle** CLI is implemented in **chronicle/cli/main.py**; entry point in pyproject.toml.
-- **quickstart-rag** gives a one-command RAG flow (project, investigation, evidence, claim, defensibility); **init**, **create-investigation**, **ingest**, **export**, **import**, **defensibility**, **reasoning-trail**, **reasoning-brief**, **verify**, **verify-chronicle**, **neo4j-sync**, **policy** are the other main subcommands.
+- **quickstart-rag** gives a one-command RAG flow (project, investigation, evidence, claim, defensibility); **init**, **create-investigation**, **ingest-evidence**, **export**, **import**, **get-defensibility**, **reasoning-trail**, **reasoning-brief**, **verify**, **verify-chronicle**, **neo4j-sync**, **policy** are the other main subcommands.
+- Set **CHRONICLE_ACTOR_ID** (or **--actor-id**) so write commands are attributed to you; see human-in-the-loop doc.
 - **verify** = project invariants; **verify-chronicle** = .chronicle file verifier (same as chronicle-verify).
 
 **Quiz:** [quizzes/quiz-08-cli.md](quizzes/quiz-08-cli.md)

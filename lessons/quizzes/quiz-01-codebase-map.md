@@ -22,6 +22,8 @@ Answer these after reading the lesson and looking at the repo layout. Try not to
 
 7. Where is the **optional HTTP API** implemented, and how do you install it?
 
+8. Where does **actor identity** and **verification level** (for human-in-the-loop and attestation) live in the codebase? Which doc describes the full workflow?
+
 ---
 
 ## Answer key
@@ -39,3 +41,5 @@ Answer these after reading the lesson and looking at the repo layout. Try not to
 6. **`tests/`** — e.g. test_standalone_scorer.py, test_session.py, test_verifier.py. **CI** (`.github/workflows/ci.yml`) runs **ruff** (check + format) on chronicle and tools, and **pytest tests/** on Python 3.11 and 3.12.
 
 7. **`chronicle/api/app.py`** (FastAPI app). Install with **`pip install -e ".[api]"`**; then set `CHRONICLE_PROJECT_PATH` and run `uvicorn chronicle.api.app:app`. See docs/api.md.
+
+8. **`chronicle/core/identity.py`** — IdP abstraction, get_effective_actor_from_request; **`chronicle/store/commands/attestation.py`** — payload helpers for _verification_level / _attestation_ref. The full workflow (CLI env, API headers, curation UI) is in **docs/human-in-the-loop-and-attestation.md**.

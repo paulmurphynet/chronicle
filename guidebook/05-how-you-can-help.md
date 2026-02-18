@@ -19,7 +19,7 @@ The first three chapters described the problem, why it exists, and how we’re s
 ## If you write or teach
 
 - **Reference the technical report and the contract.** If you teach or publish in the space of RAG, evals, or evidence-based systems, citing our [technical report](../docs/technical-report.md) and [eval contract](../docs/eval_contract.md) helps others find us and understand defensibility.
-- **Improve the guidebook or docs.** The [guidebook](README.md) is for everyone. If a sentence is confusing or a chapter is missing, suggest an edit or open a PR. Same for the main [docs](../docs/) (eval contract, verifier, verification guarantees, implementer checklist, RAG in 5 minutes, API, consuming .chronicle, external IDs, provenance, RAG evals, etc.).
+- **Improve the guidebook or docs.** The [guidebook](README.md) is for everyone. If a sentence is confusing or a chapter is missing, suggest an edit or open a PR. Same for the main [docs](../docs/) (eval contract, verifier, verification guarantees, implementer checklist, RAG in 5 minutes, API, human-in-the-loop and attestation, consuming .chronicle, external IDs, provenance, RAG evals, etc.).
 
 ---
 
