@@ -878,7 +878,7 @@ class SqliteReadModel:
     def get_evidence_link(self, link_uid: str) -> EvidenceLink | None:
         """Return evidence link by uid or None (includes retracted links). Phase 3: used when retracting."""
         row = self._conn.execute(
-            """SELECT link_uid, claim_uid, span_uid, link_type, strength, notes, created_at, created_by_actor_id, source_event_id
+            """SELECT link_uid, claim_uid, span_uid, link_type, strength, notes, rationale, created_at, created_by_actor_id, source_event_id
                FROM evidence_link WHERE link_uid = ?""",
             (link_uid,),
         ).fetchone()
@@ -891,15 +891,16 @@ class SqliteReadModel:
             link_type=row[3],
             strength=row[4],
             notes=row[5],
-            created_at=row[6],
-            created_by_actor_id=row[7],
-            source_event_id=row[8],
+            rationale=row[6],
+            created_at=row[7],
+            created_by_actor_id=row[8],
+            source_event_id=row[9],
         )
 
     def _get_links_for_claim(self, claim_uid: str, link_type: str) -> list[EvidenceLink]:
         """Return active (non-retracted) support or challenge links for claim. Phase 3: excludes evidence_link_retraction."""
         cur = self._conn.execute(
-            """SELECT el.link_uid, el.claim_uid, el.span_uid, el.link_type, el.strength, el.notes, el.created_at, el.created_by_actor_id, el.source_event_id
+            """SELECT el.link_uid, el.claim_uid, el.span_uid, el.link_type, el.strength, el.notes, el.rationale, el.created_at, el.created_by_actor_id, el.source_event_id
                FROM evidence_link el
                LEFT JOIN evidence_link_retraction r ON el.link_uid = r.link_uid
                WHERE el.claim_uid = ? AND el.link_type = ? AND r.link_uid IS NULL
@@ -914,9 +915,10 @@ class SqliteReadModel:
                 link_type=r[3],
                 strength=r[4],
                 notes=r[5],
-                created_at=r[6],
-                created_by_actor_id=r[7],
-                source_event_id=r[8],
+                rationale=r[6],
+                created_at=r[7],
+                created_by_actor_id=r[8],
+                source_event_id=r[9],
             )
             for r in cur.fetchall()
         ]

@@ -14,4 +14,3 @@
 
 3. **Tagged release** — When cutting a release: update CHANGELOG, tag (e.g. v0.1.0), and optionally publish to PyPI. Process is in [CONTRIBUTING](../CONTRIBUTING.md).
 
-4. **Optional depth (warrant / rationale)** — If it clearly improves evals or adoption: optional “support rationale” or “warrant” field (why this evidence supports this claim), or tighter link to NLI/entailment evals. [Epistemology scope](epistemology-scope.md) sets boundaries.

@@ -287,13 +287,14 @@ def _handle_evidence_link(conn: sqlite3.Connection, event: Event, link_type: str
     span_uid = payload["span_uid"]
     strength = payload.get("strength")
     notes = payload.get("notes")
+    rationale = payload.get("rationale")
     created_at = event.recorded_at
     created_by_actor_id = event.actor_id
     source_event_id = event.event_id
     conn.execute(
         """
-        INSERT INTO evidence_link (link_uid, claim_uid, span_uid, link_type, strength, notes, created_at, created_by_actor_id, source_event_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO evidence_link (link_uid, claim_uid, span_uid, link_type, strength, notes, rationale, created_at, created_by_actor_id, source_event_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             link_uid,
@@ -302,6 +303,7 @@ def _handle_evidence_link(conn: sqlite3.Connection, event: Event, link_type: str
             link_type,
             strength,
             notes,
+            rationale,
             created_at,
             created_by_actor_id,
             source_event_id,

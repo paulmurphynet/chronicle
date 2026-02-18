@@ -52,8 +52,8 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 | POST | `/investigations` | Create investigation. Body: `{ "title", "description?", "investigation_key?" }`. Returns `event_id`, `investigation_uid`. |
 | POST | `/investigations/{id}/evidence` | Ingest evidence. JSON body: `{ "content"? \| "content_base64"?`, `media_type?`, `original_filename?` } **or** multipart form with field `file`. Returns `event_id`, `evidence_uid`, `span_uid`. |
 | POST | `/investigations/{id}/claims` | Propose claim. Body: `{ "text", "initial_type?" }`. Returns `event_id`, `claim_uid`. |
-| POST | `/investigations/{id}/links/support` | Link span as support. Body: `{ "span_uid", "claim_uid" }`. Returns `event_id`, `link_uid`. |
-| POST | `/investigations/{id}/links/challenge` | Link span as challenge. Body: `{ "span_uid", "claim_uid" }`. |
+| POST | `/investigations/{id}/links/support` | Link span as support. Body: `{ "span_uid", "claim_uid", "rationale"? }`. Returns `event_id`, `link_uid`. |
+| POST | `/investigations/{id}/links/challenge` | Link span as challenge. Body: `{ "span_uid", "claim_uid", "rationale"? }`. Optional **rationale**: why this evidence supports/challenges this claim (warrant). |
 | POST | `/investigations/{id}/tensions` | Declare tension. Body: `{ "claim_a_uid", "claim_b_uid", "tension_kind?" }`. Returns `event_id`, `tension_uid`. |
 
 ### Read

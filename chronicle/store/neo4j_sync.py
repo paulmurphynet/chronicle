@@ -247,7 +247,7 @@ def _sync_relationships(conn: sqlite3.Connection, driver: Any) -> None:
         # SUPPORTS
         rows = _fetch_rows(
             conn,
-            "SELECT span_uid, claim_uid, link_uid, source_event_id FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid",
+            "SELECT span_uid, claim_uid, link_uid, source_event_id, rationale FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid",
         )
         for batch in _batched(rows, BATCH_SIZE):
             session.run(
@@ -256,7 +256,7 @@ def _sync_relationships(conn: sqlite3.Connection, driver: Any) -> None:
                 MATCH (s:EvidenceSpan {uid: row.span_uid})
                 MATCH (c:Claim {uid: row.claim_uid})
                 MERGE (s)-[r:SUPPORTS]->(c)
-                ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid
+                ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
                 """,
                 rows=batch,
             )
@@ -264,7 +264,7 @@ def _sync_relationships(conn: sqlite3.Connection, driver: Any) -> None:
         # CHALLENGES
         rows = _fetch_rows(
             conn,
-            "SELECT span_uid, claim_uid, link_uid, source_event_id FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid",
+            "SELECT span_uid, claim_uid, link_uid, source_event_id, rationale FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid",
         )
         for batch in _batched(rows, BATCH_SIZE):
             session.run(
@@ -273,7 +273,7 @@ def _sync_relationships(conn: sqlite3.Connection, driver: Any) -> None:
                 MATCH (s:EvidenceSpan {uid: row.span_uid})
                 MATCH (c:Claim {uid: row.claim_uid})
                 MERGE (s)-[r:CHALLENGES]->(c)
-                ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid
+                ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
                 """,
                 rows=batch,
             )

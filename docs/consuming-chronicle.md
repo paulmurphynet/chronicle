@@ -58,7 +58,7 @@ Table and column names follow the Chronicle read model. Key tables:
 - **claim** — `claim_uid` (PK), `investigation_uid`, `claim_text`, `current_status`, `claim_type`, `decomposition_status`, `temporal_json`, etc.
 - **evidence_item** — `evidence_uid` (PK), `investigation_uid`, `uri`, `content_hash`, `media_type`, etc.
 - **evidence_span** — `span_uid` (PK), `evidence_uid`, `anchor_type`, `anchor_start`, `anchor_end`, `quote`, etc.
-- **evidence_link** — `link_uid` (PK), `span_uid`, `claim_uid`, `link_type` (SUPPORT | CHALLENGE), optional `strength`. Check for **evidence_link_retraction** table: if a link_uid appears there, treat as retracted.
+- **evidence_link** — `link_uid` (PK), `span_uid`, `claim_uid`, `link_type` (SUPPORT | CHALLENGE), optional `strength`, optional `rationale` (warrant: why this evidence supports/challenges this claim). Check for **evidence_link_retraction** table: if a link_uid appears there, treat as retracted.
 - **tension** — `tension_uid` (PK), `claim_a_uid`, `claim_b_uid`, `status` (OPEN, ACK, RESOLVED), `tension_kind`, `notes`.
 
 For full schema (column list and types), inspect the DB with `sqlite3 chronicle.db ".schema"` after extracting, or see the Chronicle source: `chronicle/store/schema.py` (read model section).

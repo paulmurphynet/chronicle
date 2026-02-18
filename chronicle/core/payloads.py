@@ -479,6 +479,7 @@ class EvidenceLinkPayload:
     span_uid: str
     strength: float | None = None  # 0..1
     notes: str | None = None
+    rationale: str | None = None  # Optional warrant: why this evidence supports/challenges this claim (evals, NLI)
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -490,6 +491,8 @@ class EvidenceLinkPayload:
             d["strength"] = self.strength
         if self.notes is not None:
             d["notes"] = self.notes
+        if self.rationale is not None:
+            d["rationale"] = self.rationale
         return d
 
 

@@ -70,6 +70,7 @@ class ProposeClaimBody(BaseModel):
 class LinkBody(BaseModel):
     span_uid: str
     claim_uid: str
+    rationale: str | None = None  # Optional: why this evidence supports/challenges this claim (warrant)
 
 
 class DeclareTensionBody(BaseModel):
@@ -266,6 +267,7 @@ def link_support(request: Request, investigation_uid: str, body: LinkBody) -> di
             investigation_uid,
             body.span_uid,
             body.claim_uid,
+            rationale=body.rationale,
             actor_id=actor_id,
             actor_type=actor_type,
             verification_level=verification_level,
@@ -285,6 +287,7 @@ def link_challenge(request: Request, investigation_uid: str, body: LinkBody) -> 
             investigation_uid,
             body.span_uid,
             body.claim_uid,
+            rationale=body.rationale,
             actor_id=actor_id,
             actor_type=actor_type,
             verification_level=verification_level,

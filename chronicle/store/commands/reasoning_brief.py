@@ -66,6 +66,7 @@ def assemble_reasoning_brief(
                 "uri": ev_item.uri if ev_item else None,
                 "inherited": inherited,
                 "strength": getattr(link, "strength", None),
+                "rationale": getattr(link, "rationale", None),
                 "integrity_status": getattr(ev_item, "integrity_status", "UNVERIFIED")
                 if ev_item
                 else None,
@@ -87,6 +88,7 @@ def assemble_reasoning_brief(
                 "uri": ev_item.uri if ev_item else None,
                 "inherited": inherited,
                 "strength": getattr(link, "strength", None),
+                "rationale": getattr(link, "rationale", None),
                 "integrity_status": getattr(ev_item, "integrity_status", "UNVERIFIED")
                 if ev_item
                 else None,

@@ -27,7 +27,7 @@ So we cover: **evidence–claim linkage**, **support/challenge/corroboration**, 
 
 | Area | Gap or limit |
 |------|--------------|
-| **Justification / warrant** | We record *that* a span supports a claim (and optional strength). We do not model *why* it supports (e.g. inference rule, Toulmin-style warrant/backing, or argument schema). |
+| **Justification / warrant** | We record *that* a span supports a claim (and optional strength). We support an optional **rationale** (warrant) on each support/challenge link: short text for *why* this evidence supports or challenges this claim (e.g. for NLI/entailment evals). We do not model full Toulmin backing or argument schemas. |
 | **Belief revision** | Retractions and tensions give a form of revision. We do not implement formal belief-revision semantics (e.g. AGM) or priority orderings over evidence. |
 | **Knowledge vs belief** | Claim types (e.g. SEF, SAC, inference) and status (asserted/withdrawn) give a rough distinction. We do not model "known" vs "believed" vs "accepted" in a fine-grained epistemic sense. |
 | **Defeater types** | Challenges and tensions make claims defeasible in practice. We do not distinguish rebutting vs undercutting defeaters in the schema or scorecard. |
@@ -39,6 +39,6 @@ So we cover: **evidence–claim linkage**, **support/challenge/corroboration**, 
 
 ## Summary
 
-We cover **evidence, claims, support/challenge, sources (with independence notes), tensions, and a structural defensibility score** with clear boundaries: defensibility is not truth; source independence is as modeled, not verified. We do **not** cover warrants, formal belief revision, fine-grained knowledge/belief, defeater taxonomy, or justification theory. The project is **operationally epistemic** (good for RAG evals, show-your-work, and policy-driven scoring) rather than a full epistemological framework.
+We cover **evidence, claims, support/challenge (with optional link rationale), sources (with independence notes), tensions, and a structural defensibility score** with clear boundaries: defensibility is not truth; source independence is as modeled, not verified. We do **not** cover full Toulmin warrants/argument schemas, formal belief revision, fine-grained knowledge/belief, defeater taxonomy, or justification theory. The project is **operationally epistemic** (good for RAG evals, show-your-work, and policy-driven scoring) rather than a full epistemological framework.
 
 For the precise defensibility definition and schema, see [Technical report](technical-report.md) and [Defensibility metrics schema](defensibility-metrics-schema.md).

@@ -106,6 +106,7 @@ class EvidenceLink:
     link_type: str  # SUPPORTS|CHALLENGES
     strength: float | None
     notes: str | None
+    rationale: str | None  # Optional warrant: why this evidence supports/challenges this claim
     created_at: str
     created_by_actor_id: str
     source_event_id: str

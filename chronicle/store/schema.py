@@ -176,6 +176,7 @@ CREATE TABLE IF NOT EXISTS evidence_link (
   link_type            TEXT NOT NULL,
   strength             REAL NULL,
   notes                TEXT NULL,
+  rationale            TEXT NULL,
   created_at           TEXT NOT NULL,
   created_by_actor_id  TEXT NOT NULL,
   source_event_id      TEXT NOT NULL
@@ -515,6 +516,15 @@ def ensure_checkpoint_certification_columns(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def ensure_evidence_link_rationale_column(conn: sqlite3.Connection) -> None:
+    """Optional warrant/rationale on evidence links (why this evidence supports/challenges this claim)."""
+    cur = conn.execute("PRAGMA table_info(evidence_link)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "rationale" not in columns:
+        conn.execute("ALTER TABLE evidence_link ADD COLUMN rationale TEXT NULL")
+    conn.commit()
+
+
 def run_read_model_ddl_only(conn: sqlite3.Connection) -> None:
     """Create read model tables if not exist. Does not write schema_version. For standalone use or before rebuild."""
     conn.executescript(READ_MODEL_DDL)
@@ -528,6 +538,7 @@ def run_read_model_ddl_only(conn: sqlite3.Connection) -> None:
         )
     conn.executescript(EVIDENCE_SPAN_DDL)
     conn.executescript(EVIDENCE_LINK_DDL)
+    ensure_evidence_link_rationale_column(conn)
     conn.executescript(EVIDENCE_LINK_RETRACTION_DDL)
     ensure_evidence_redaction_columns(conn)
     ensure_evidence_reviewed_columns(conn)

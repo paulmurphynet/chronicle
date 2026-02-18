@@ -92,12 +92,10 @@ def test_evidence_objects_with_text_accepted():
 
 def test_evidence_objects_with_url_accepted(monkeypatch):
     """Evidence as list of objects with 'url' is accepted when fetch succeeds (mocked)."""
-    from scripts.standalone_defensibility_scorer import _fetch_url
-
     def mock_fetch(url: str):
         return "Fetched content from URL." if url == "https://example.com/doc.txt" else None
 
-    monkeypatch.setattr("scripts.standalone_defensibility_scorer._fetch_url", mock_fetch)
+    monkeypatch.setattr("chronicle.scorer_contract._fetch_url", mock_fetch)
     out = _run({
         "query": "What happened?",
         "answer": "It happened.",
