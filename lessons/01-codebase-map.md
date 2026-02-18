@@ -55,6 +55,8 @@ This is the core. High-level structure:
 | **`chronicle/verify.py`** | Project invariant suite (run via `chronicle verify`). |
 | **`tools/verify_chronicle/`** | Standalone .chronicle file verifier (run via `chronicle-verify` or `chronicle verify-chronicle`). |
 
+**Note:** `chronicle/verify.py` checks a **project DB** (append-only ledger, referential integrity, etc.); `tools/verify_chronicle/` checks a **.chronicle file** (ZIP, manifest, schema, evidence hashes). Don’t conflate them.
+
 When you run the **standalone scorer**, it uses: `create_project`, session, ingest evidence, propose claim, link support, then **get defensibility** and serialize it to the eval contract shape. All of that lives under `chronicle/`.
 
 ## Scripts you’ll see in lessons
@@ -97,5 +99,7 @@ When you run the **standalone scorer**, it uses: `create_project`, session, inge
 - **Scorer:** `scripts/standalone_defensibility_scorer.py`; **verifier:** `tools/verify_chronicle/` (and `chronicle-verify` CLI).  
 - **Engine:** `chronicle/` — core (events), store (session, commands), eval_metrics, integrations, tools, CLI.  
 - **Contracts and semantics:** `docs/eval_contract.md`, defensibility-metrics-schema, technical-report, verifier.
+
+**Next:** [Lesson 02: The standalone defensibility scorer](02-the-scorer.md)
 
 **Quiz:** [quizzes/quiz-01-codebase-map.md](quizzes/quiz-01-codebase-map.md)

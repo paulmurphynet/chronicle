@@ -53,4 +53,6 @@ You don’t need to read every handler; the point is: **one event type → one (
 - **ChronicleSession** is the main API: create_investigation, ingest_evidence, anchor_span, propose_claim, link_support, get_defensibility_score, and more.
 - The scorer is a thin script over the session; all real work is in the store and commands.
 
+**Next:** [Lesson 06: Defensibility metrics](06-defensibility-metrics.md)
+
 **Quiz:** [quizzes/quiz-05-store-and-session.md](quizzes/quiz-05-store-and-session.md)

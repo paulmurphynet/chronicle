@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Replay from event or time** — `replay_read_model(store, up_to_event_id=...)` / `up_to_time=...` and CLI `chronicle replay --up-to-event` / `--up-to-time` for point-in-time read model.
 - **Read model snapshot create/restore** — `chronicle.store.read_model_snapshot`: `create_read_model_snapshot`, `restore_from_snapshot`; CLI `chronicle snapshot create` / `chronicle snapshot restore`.
 - **Claim–evidence–metrics export** — `build_claim_evidence_metrics_export()` in `chronicle.store.commands.generic_export` for fact-checking UIs and dashboards; see [claim-evidence-metrics-export](docs/claim-evidence-metrics-export.md).
-- **Technical report citation** — [CITATION.cff](CITATION.cff) and citation section in [technical report §5](docs/technical-report.md#5-citation); README links to citation.
+- **Technical report citation** — [CITATION.cff](CITATION.cff) and citation section in [technical report Section 5](docs/technical-report.md#5-citation); README links to citation.
 
 ### Changed
 

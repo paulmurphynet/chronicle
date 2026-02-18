@@ -75,4 +75,6 @@ Scripts that use the session (e.g. **scripts/ingest_transcript_csv.py**) also re
 - Set **CHRONICLE_ACTOR_ID** (or **--actor-id**) so write commands are attributed to you; see human-in-the-loop doc.
 - **verify** = project invariants; **verify-chronicle** = .chronicle file verifier (same as chronicle-verify).
 
+**Next:** [Lesson 09: Epistemic tools](09-epistemic-tools.md)
+
 **Quiz:** [quizzes/quiz-08-cli.md](quizzes/quiz-08-cli.md)

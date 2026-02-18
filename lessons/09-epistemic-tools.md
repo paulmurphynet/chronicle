@@ -61,4 +61,6 @@ Open **chronicle/tools/llm_client.py**.
 - **Type/scope inference** — Optional LLM suggestions for claim type and scope.
 - **LlmClient** — Ollama (default) or OpenAI-compatible; config via env; no API key for Ollama.
 
+**Next:** [Lesson 10: Export, import, and Neo4j](10-export-import-neo4j.md)
+
 **Quiz:** [quizzes/quiz-09-epistemic-tools.md](quizzes/quiz-09-epistemic-tools.md)

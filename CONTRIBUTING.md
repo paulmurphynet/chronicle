@@ -2,6 +2,11 @@
 
 Thanks for your interest in contributing. This file explains how to set up a dev environment, run checks, and where to get help.
 
+## Project notes (style and CI)
+
+1. **CI is disabled** until the maintainer turns it on. The workflow in [.github/workflows/ci.yml](.github/workflows/ci.yml) does not run on push or pull_request; it can be run manually via "Run workflow" if needed. Do not re-enable push/PR triggers until the maintainer requests it.
+2. **Do not use section symbols** (e.g. §) in this project. Use section numbers instead (e.g. "Section 5", "Section 3.2").
+
 ## Development setup
 
 1. **Clone the repo** and enter the directory.
@@ -61,7 +66,7 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 
 - Tests live under `tests/` (when present). Run with `pytest` from the repo root (e.g. `pytest tests/ -v`). Requires dev deps: `pip install -e ".[dev]"`.
 - Coverage: scorer (valid/invalid input), session (ingest → claim → link → defensibility), verifier (on a .chronicle export). The standalone scorer and verifier can also be used as integration smoke tests (see Development setup above).
-- **CI:** GitHub Actions runs ruff (chronicle, tools) and pytest on push/PR. See [.github/workflows/ci.yml](.github/workflows/ci.yml).
+- **CI:** Currently disabled (workflow runs only on manual trigger). See [.github/workflows/ci.yml](.github/workflows/ci.yml) and "Project notes" above.
 
 ## Documentation
 

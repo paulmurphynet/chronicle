@@ -8,9 +8,9 @@
 
 ## Current steps
 
-1. **Test coverage — phase 1 (verify, snapshot, event store)** — Raise coverage for core I/O and verification: add tests for `chronicle/verify.py` (verifier checks on in-memory or fixture .chronicle), `chronicle/store/read_model_snapshot.py` (create + restore from temp project), and `chronicle/store/sqlite_event_store.py` (append, read_by_subject, read_by_investigation, migrations). Target: get these modules to ≥70% so overall moves toward 75%. See [coverage-core](coverage-core.md).
+1. ~~**Test coverage — phase 1 (verify, snapshot, event store)**~~ — **Done.** Tests added for `chronicle/verify.py`, `chronicle/store/read_model_snapshot.py`, and `chronicle/store/sqlite_event_store.py` (see `tests/test_verify.py`, `tests/test_read_model_snapshot.py`, `tests/test_sqlite_event_store.py`). Coverage for these modules is now ~80–98%.
 
-2. **Test coverage — phase 2 (projection, read model, commands)** — Add tests for projection handlers (e.g. SupportLinked, ClaimProposed, evidence_link with rationale), `sqlite_read_model` methods that are still uncovered (list_claims_by_type, list_*, get_defensibility_score path), and store commands used by session flow (evidence ingest/link, claims propose, defensibility). Target: projection and sqlite_read_model toward 60–70%; key commands (evidence, claims) toward 50%+.
+2. ~~**Test coverage — phase 2 (projection, read model, commands)**~~ — **Done.** Tests added in `tests/test_projection_read_model_commands.py`: support/challenge link with rationale, list_claims_by_type (filter, include_withdrawn, created_since), get_defensibility_score (strength weighting, withdrawn returns None), type_claim and withdraw_claim projection, list_evidence_by_investigation.
 
 3. **Test coverage — phase 3 (session, scorer, identity; raise fail_under)** — Cover session methods not yet hit (export/import, replay, snapshot, get_reasoning_brief), finish `scorer_contract` (URL fetch path with mock), and `chronicle/core/identity.py` branches. Then raise `fail_under` in pyproject.toml (e.g. 50% → 60% → 75%) so CI enforces the target. See [code-quality-review](code-quality-review.md).
 

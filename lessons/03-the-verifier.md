@@ -50,4 +50,6 @@ If you don’t have one, generate it first (see [docs/verifier.md](../docs/verif
 - **Verifier** = stdlib-only checks: manifest, DB schema, evidence hashes.  
 - **Code:** `tools/verify_chronicle/verify_chronicle.py`; **CLI:** `chronicle-verify`. For the full list of guarantees and what the verifier does *not* check (e.g. event semantics, truth of claims), see [docs/verification-guarantees.md](../docs/verification-guarantees.md).
 
+**Next:** [Lesson 04: Events and core](04-events-and-core.md)
+
 **Quiz:** [quizzes/quiz-03-the-verifier.md](quizzes/quiz-03-the-verifier.md)

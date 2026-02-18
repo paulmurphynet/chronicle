@@ -22,7 +22,7 @@ So “verified” means: **integrity and schema and hashes**. It does **not** me
 ## Technical
 
 - **Implementation:** `tools/verify_chronicle/verify_chronicle.py`. Functions include `verify_manifest()` (required keys, format_version), `verify_db_schema()` (schema_version, required tables such as events, investigation, claim, evidence_item), and evidence-hash checks. No code path validates claim truth, source independence, or link semantics.
-- **User-facing doc:** `docs/verifier.md` states that the verifier checks “structurally valid (ZIP, manifest, database schema, evidence file hashes)” and does *not* check “event semantics, independence of sources, truth of claims,” and points to verification guarantees (when that doc exists).
+- **User-facing doc:** `docs/verifier.md` states that the verifier checks “structurally valid (ZIP, manifest, database schema, evidence file hashes)” and does *not* check “event semantics, independence of sources, truth of claims,” and points to [verification guarantees](../docs/verification-guarantees.md).
 
 ---
 
