@@ -76,10 +76,18 @@ Neither the verifier nor the Chronicle runtime guarantees:
 
 **Audit today:**
 
-- **Project database:** Run `chronicle verify --path /project` to execute the full invariant suite (append-only ledger, referential integrity, status consistency, projection completeness, checkpoint consistency, evidence integrity on disk). The project is audited as a whole. Event history is available via the CLI for inspection. Replay-from-N or time-range replay is in [To-do](to_do.md) if added.
+- **Project database:** Run `chronicle verify --path /project` to execute the full invariant suite (append-only ledger, referential integrity, status consistency, projection completeness, checkpoint consistency, evidence integrity on disk). The project is audited as a whole. Event history is available via the CLI for inspection.
 - **.chronicle file:** Run the standalone verifier (CLI or web) as in Section 1. The verifier checks the exported snapshot (structure, hashes, optional append-only); it does not run the full invariant suite.
 
-For very large projects, checkpointing or snapshots may be added later; see [To-do](to_do.md). Today there is no snapshot path, only full replay.
+**Replay-from-N and time-range replay:** You can rebuild the read model from the event log up to a given event or time. Use this for recovery (e.g. read model corrupted after event N) or to inspect state at a point in time. Run:
+
+- **Full rebuild:** `chronicle replay --path /project` — truncates the read model and reapplies all events (same as an internal version upgrade).
+- **Up to an event:** `chronicle replay --path /project --up-to-event EVENT_ID` — replays events from the start up to and including the event with that `event_id`; the read model then reflects state at that event.
+- **Up to a time:** `chronicle replay --path /project --up-to-time 2024-06-15T12:00:00Z` — replays all events with `recorded_at` ≤ that time (ISO-8601); the read model then reflects state at that time.
+
+After a partial replay (with `--up-to-event` or `--up-to-time`), the read model is intentionally partial; run `chronicle replay --path /project` with no bounds to rebuild to the latest. The underlying API is `replay_read_model(conn, up_to_event_id=..., up_to_recorded_at=...)` in `chronicle.store.sqlite_event_store`.
+
+For very large projects, checkpointing or snapshots may be added later; see [To-do](to_do.md). Today there is no snapshot path, only full or bounded replay.
 
 ---
 

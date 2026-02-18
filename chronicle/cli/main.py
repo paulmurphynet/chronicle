@@ -256,6 +256,41 @@ def cmd_verify_chronicle(chronicle_file: Path, no_invariants: bool) -> int:
     return 1
 
 
+def cmd_replay(
+    path: Path,
+    up_to_event: str | None,
+    up_to_time: str | None,
+) -> int:
+    """Rebuild read model from event log (optionally up to an event or time). Use for recovery or state-at-point verification."""
+    if not project_exists(path):
+        print(f"Not a Chronicle project: {path}", file=sys.stderr)
+        return 1
+    if up_to_event is not None and up_to_time is not None:
+        print("Use only one of --up-to-event or --up-to-time.", file=sys.stderr)
+        return 1
+    from chronicle.store.schema import init_event_store_schema
+    from chronicle.store.sqlite_event_store import replay_read_model
+
+    db_path = path / CHRONICLE_DB
+    conn = sqlite3.connect(str(db_path))
+    try:
+        init_event_store_schema(conn)
+        applied = replay_read_model(
+            conn,
+            up_to_event_id=up_to_event,
+            up_to_recorded_at=up_to_time,
+        )
+    finally:
+        conn.close()
+    if up_to_event:
+        print(f"Replayed {applied} events (up to and including event_id={up_to_event!r}).")
+    elif up_to_time:
+        print(f"Replayed {applied} events (up to recorded_at<={up_to_time!r}).")
+    else:
+        print(f"Replayed {applied} events (full rebuild).")
+    return 0
+
+
 def cmd_verify(path: Path, skip_evidence: bool) -> int:
     """Run invariant suite (Spec 12.7.5) and print pass/fail report."""
     from chronicle.verify import verify_project
@@ -903,6 +938,28 @@ def main() -> int:
         help="B.2: Defensibility snapshot as of this event ID",
     )
 
+    replay_p = subparsers.add_parser(
+        "replay",
+        help="Rebuild read model from event log (optionally up to an event or time); for recovery or state-at-point",
+    )
+    replay_p.add_argument(
+        "--path",
+        "-p",
+        default=".",
+        type=_path_arg,
+        help="Project path (default: current directory)",
+    )
+    replay_p.add_argument(
+        "--up-to-event",
+        metavar="EVENT_ID",
+        help="Replay events from the start up to and including this event_id",
+    )
+    replay_p.add_argument(
+        "--up-to-time",
+        metavar="ISO8601",
+        help="Replay events with recorded_at <= this time (ISO-8601)",
+    )
+
     verify_p = subparsers.add_parser("verify", help="Run invariant suite on project (Spec 12.7.5)")
     verify_p.add_argument(
         "--path",
@@ -1055,6 +1112,12 @@ def main() -> int:
                 limit_claims=getattr(args, "limit_claims", 500),
                 as_of_date=getattr(args, "as_of", None),
                 as_of_event_id=getattr(args, "as_of_event", None),
+            )
+        if args.command == "replay":
+            return cmd_replay(
+                args.path,
+                getattr(args, "up_to_event", None),
+                getattr(args, "up_to_time", None),
             )
         if args.command == "verify":
             return cmd_verify(args.path, args.skip_evidence)

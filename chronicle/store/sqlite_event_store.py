@@ -99,6 +99,43 @@ def _ensure_read_model_ready(conn: sqlite3.Connection) -> None:
         conn.commit()
 
 
+def replay_read_model(
+    conn: sqlite3.Connection,
+    *,
+    up_to_event_id: str | None = None,
+    up_to_recorded_at: str | None = None,
+) -> int:
+    """Truncate read model tables and replay events from the event log (optionally up to a bound).
+
+    Use for recovery or to get read-model state at a point in time. Full replay if neither
+    bound is set; otherwise replays events from the start up to and including the given
+    event_id or the last event with recorded_at <= up_to_recorded_at (ISO-8601).
+
+    Returns the number of events applied. Does not update schema_version (caller may do so).
+    """
+    run_read_model_ddl_only(conn)
+    truncate_read_model_tables(conn)
+    columns = (
+        "event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+        "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
+        "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash"
+    )
+    query = f"SELECT rowid, {columns} FROM events ORDER BY rowid ASC"
+    cur = conn.execute(query)
+    applied = 0
+    for row in cur.fetchall():
+        _, *event_row = row
+        event = _row_to_event(tuple(event_row))
+        if up_to_recorded_at is not None and event.recorded_at > up_to_recorded_at:
+            break
+        apply_event(conn, event)
+        applied += 1
+        if up_to_event_id is not None and event.event_id == up_to_event_id:
+            break
+    conn.commit()
+    return applied
+
+
 class SqliteEventStore:
     """EventStore backed by SQLite. When run_projection is True, append runs projection in same transaction."""
 
