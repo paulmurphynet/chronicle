@@ -15,7 +15,7 @@ That’s the problem we’re solving. We call it **defensibility**.
 - **Evals focus on other things.** Many evaluation frameworks measure relevance, fluency, or factuality, but not “how well is this answer supported by this evidence?” So systems get tuned to look good on those metrics, not on defensibility.
 - **“Show your work” is a slogan, not a standard.** There’s no common format or verifier that lets anyone—auditors, users, partners—independently check that the work was actually shown and that the story hangs together.
 
-The result: we get more and more answers, and less and less ability to see how they hold up.
+The result: more and more answers, less and less ability to see how they hold up.
 
 ---
 
@@ -29,7 +29,7 @@ So defensibility is:
 - **Relative to policy** — What does your domain or organization require (e.g. minimum sources, handling of tensions)?
 - **Structural and auditable** — Counts, statuses, and a trail you can inspect or verify.
 
-That’s the problem in a nutshell: the world needs a way to **score and verify** how defensible answers are, and to do it in a way that’s portable, checkable, and usable in evaluation pipelines. Chronicle is our attempt to provide that.
+That’s the problem in a nutshell: we need a way to **score and verify** how defensible answers are—portable, checkable, and usable in evaluation pipelines. Chronicle is our attempt to provide that.
 
 ---
 

@@ -1,6 +1,6 @@
 # How you can help
 
-Chronicle is better when more people contribute—code, feedback, docs, or simply by spreading the story. Here are concrete ways to help.
+The first three chapters described the problem, why it exists, and how we’re solving it. The fourth spelled out where challenges remain and what we don’t promise. This one is about **you**: how you can make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. Chronicle is better when more people contribute—code, feedback, docs, or simply by spreading the story. Here are concrete ways to help.
 
 ---
 
@@ -37,6 +37,6 @@ Chronicle is better when more people contribute—code, feedback, docs, or simpl
 
 ---
 
-We’re a small effort with a clear goal: make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. Every bit of help—code, docs, testing, or word of mouth—gets us closer.
+We’re a small effort with a clear goal: make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. Every bit of help—code, docs, testing, or word of mouth—gets us closer. Thank you for reading, and for caring about “show your work.”
 
 **Back to:** [Guidebook overview](README.md)

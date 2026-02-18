@@ -1,6 +1,6 @@
 # How we’re solving it
 
-We’re not trying to decide what’s true. We’re trying to make **how well a claim is supported** visible, scoreable, and verifiable.
+We’re not trying to decide what’s true. We’re trying to make **how well a claim is supported** visible, scoreable, and verifiable—so you can judge and improve it.
 
 ---
 
@@ -12,7 +12,7 @@ We treat **evidence** as first-class: immutable items (e.g. retrieved chunks or 
 
 ## Defensibility score
 
-We compute a **defensibility** result: things like strength of provenance, how many sources support the claim, whether there are open contradictions, and (optionally) temporal or knowability information. That result is a **scorecard**—a stable shape that eval harnesses and tools can consume. So “how defensible is this answer?” becomes a number and a structure, not a vague feeling.
+We compute a **defensibility** result: strength of provenance, how many sources support the claim, whether there are open contradictions, and (optionally) temporal or knowability. That result is a **scorecard**—a stable shape that eval harnesses and tools can consume. “How defensible is this answer?” becomes a number and a structure, not a vague feeling.
 
 ---
 

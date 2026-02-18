@@ -1,24 +1,52 @@
 # Chronicle guidebook
 
-The **narrative** of Chronicle: the problem we’re trying to address, why it exists, how we’re tackling it, where the challenges are, and how you can help. This guidebook is for **everyone**—contributors, partners, researchers, and anyone curious—not only software engineers.
+This guidebook is the **narrative** of Chronicle: the problem we’re addressing, why it exists, how we’re tackling it, where the challenges are, and how you can help. It’s written for **everyone**—contributors, partners, researchers, and anyone curious about how we evaluate and trust answers—not only software engineers.
+
+---
+
+## Who this is for
+
+- **You care about trust and evidence.** You want answers that show their work, and you want a way to check that the work was actually done.
+- **You build or evaluate RAG, search, or AI systems.** You’re looking for a defensibility metric and a portable format that fits into pipelines and evals.
+- **You work in fact-checking, provenance, or compliance.** You need to link claims to evidence and to external systems without locking into a single vendor.
+- **You’re new to Chronicle.** You want the big picture before diving into the [technical report](../docs/technical-report.md) or the [developer lessons](../lessons/README.md).
+
+If that sounds like you, start with [Chapter 01: The problem we’re solving](01-the-problem.md) and read in order.
+
+---
+
+## What you’ll get from reading it
+
+By the end you’ll understand:
+
+- **Why defensibility matters** — What goes wrong when answers aren’t backed by visible evidence, and what we mean (and don’t mean) by “defensibility.”
+- **Why the problem is here to stay** — The forces (scale, AI/RAG, trust, evals) that made “show your work” both essential and under-served.
+- **How Chronicle addresses it** — Evidence and claims, a defensibility score, a portable .chronicle format, a verifier, and how we fit into your ecosystem (APIs, adapters, provenance).
+- **What’s hard and what we don’t do** — Honest limits so you don’t over-trust the score or the verifier.
+- **How you can help** — Concrete ways to contribute code, docs, feedback, or simply spread the story.
+
+---
 
 ## How to read the guidebook
 
-- **Start with [The problem we’re solving](01-the-problem.md).** It sets the scene: why “defensibility” and “show your work” matter.
-- Then read in order: **Why this problem exists**, **How we’re solving it**, **Where the challenges are**, and **How you can help**.
-- If you want to go deeper on the technical side, the repo has a [Technical report](../docs/technical-report.md) and [lessons](../lessons/README.md) for developers.
-- **Before relying on scores or verification,** read the [critical areas](../critical_areas/README.md): they explain what defensibility and “verified” do *not* guarantee, so the system isn’t over-trusted.
+1. **Read in order.** [01](01-the-problem.md) → [02](02-why-this-problem-exists.md) → [03](03-how-we-are-solving-it.md) → [04](04-where-challenges-remain.md) → [05](05-how-you-can-help.md). The chapters build on each other.
+2. **Before you rely on scores or verification,** read the [critical areas](../critical_areas/README.md). They spell out what defensibility and “verified” do *not* guarantee, so the system isn’t over-trusted.
+3. **For technical depth,** use the [docs](../docs/) and [lessons](../lessons/README.md). The guidebook stays high-level; contracts, schemas, and code live there.
 
-## Contents (narrative arc)
+---
+
+## Contents
 
 | Chapter | Title | What it covers |
-|---------|--------|----------------|
-| [01](01-the-problem.md) | The problem we’re solving | Why answers need to be defensible; what goes wrong when they aren’t. |
-| [02](02-why-this-problem-exists.md) | Why this problem exists | Forces that created the problem: scale of content, AI, trust, and evals. |
-| [03](03-how-we-are-solving-it.md) | How we’re solving it | Our approach: evidence, claims, defensibility score, .chronicle format, verifier. |
-| [04](04-where-challenges-remain.md) | Where challenges remain | What’s hard, what’s incomplete, and what we’re still figuring out. |
+|--------|--------|----------------|
+| [01](01-the-problem.md) | The problem we’re solving | Why answers need to be defensible; what goes wrong when they aren’t; what we mean by “defensibility.” |
+| [02](02-why-this-problem-exists.md) | Why this problem exists | The forces that created the problem: scale of content, AI and RAG, trust and verification, and evals. |
+| [03](03-how-we-are-solving-it.md) | How we’re solving it | Evidence, claims, defensibility score, .chronicle format, verifier, and fitting into your ecosystem. |
+| [04](04-where-challenges-remain.md) | Where challenges remain | Adoption, what’s done and what’s left, scope and limits, and growing the ecosystem. |
 | [05](05-how-you-can-help.md) | How you can help | Ways to contribute: code, docs, testing, feedback, sharing the story. |
 
-## One-paragraph summary
+---
+
+## One paragraph
 
 We live in a world where **content is abundant and trust is scarce**. AI and RAG systems give answers, but it’s hard to know how well those answers are supported by evidence. **Chronicle** is our response: we don’t try to say what’s “true”—we help people see **how defensible** a claim is given the evidence and the rules they care about. We do that with a **defensibility score**, a portable **.chronicle** format, and a **verifier** so anyone can check “show your work” without running our full stack. This guidebook tells that story and invites you to be part of it.

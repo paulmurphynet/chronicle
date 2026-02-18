@@ -1,6 +1,6 @@
 # Why this problem exists
 
-The need for defensibility isn’t accidental. Several forces pushed it to the front.
+The need for defensibility didn’t come out of nowhere. Several forces pushed it to the front.
 
 ---
 
@@ -24,7 +24,7 @@ In many domains—journalism, legal, compliance, research—trust is earned by s
 
 ## Evals that don’t reward defensibility
 
-Evaluation drives behavior. If evals only measure accuracy, speed, or relevance, systems will optimize for those. If we want systems to **improve** at being defensible, we need evals that **include** defensibility. Today, that’s missing in most pipelines. So the problem persists partly because the feedback loop—eval → improve → eval—doesn’t yet include defensibility as a first-class signal.
+Evaluation drives behavior. If evals only measure accuracy, speed, or relevance, systems optimize for those. If we want systems to **improve** at being defensible, we need evals that **include** defensibility. Today that’s missing in most pipelines—so the problem persists partly because the feedback loop (eval → improve → eval) doesn’t yet treat defensibility as a first-class signal.
 
 ---
 
