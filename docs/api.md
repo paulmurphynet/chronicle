@@ -33,11 +33,17 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 
 | Env | Description |
 |-----|-------------|
-| `CHRONICLE_PROJECT_PATH` | **Required.** Path to the Chronicle project directory. If the directory does not exist it is created; if it exists but has no `chronicle.db`, the project is initialized. |
+| `CHRONICLE_PROJECT_PATH` | **Required for project-based endpoints.** Path to the Chronicle project directory. If the directory does not exist it is created; if it exists but has no `chronicle.db`, the project is initialized. **Not required** for `POST /score`. |
 
 ---
 
 ## Endpoints
+
+### Standalone score (no project path)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/score` | Run defensibility scorer on `{ "query", "answer", "evidence" }`. **Does not require** `CHRONICLE_PROJECT_PATH`; uses a temporary project. Evidence: array of strings or objects with `"text"` or `"url"` (path-based evidence not accepted). Returns same shape as [eval contract](eval_contract.md) (metrics or error). |
 
 ### Write
 
@@ -70,7 +76,7 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/health` | 200 if `CHRONICLE_PROJECT_PATH` is set and project is usable; 503 otherwise. |
+| GET | `/health` | 200 if `CHRONICLE_PROJECT_PATH` is set and project is usable; 503 otherwise. When using only `POST /score`, you can leave the env unset; `/score` still works while `/health` returns 503. |
 
 ---
 

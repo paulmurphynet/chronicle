@@ -23,6 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from chronicle.core.identity import get_effective_actor_from_request
+from chronicle.scorer_contract import run_scorer_contract
 from chronicle.store.project import create_project, project_exists
 from chronicle.store.session import ChronicleSession
 
@@ -77,6 +78,14 @@ class DeclareTensionBody(BaseModel):
     tension_kind: str = "contradiction"
 
 
+class ScoreBody(BaseModel):
+    """Eval contract: query, answer, evidence. Same shape as docs/eval_contract.md."""
+
+    query: str
+    answer: str
+    evidence: list[dict[str, Any] | str]
+
+
 app = FastAPI(
     title="Chronicle API",
     description="Minimal HTTP API for evidence, claims, defensibility, and export/import. Same shapes as eval contract and defensibility schema.",
@@ -96,6 +105,22 @@ def verifier_page() -> FileResponse:
     if not path.is_file():
         raise HTTPException(status_code=404, detail="Verifier page not found")
     return FileResponse(path, media_type="text/html")
+
+
+# ----- Standalone score (no project path required) -----
+
+
+@app.post("/score")
+def score_defensibility(body: ScoreBody) -> dict[str, Any]:
+    """Run defensibility scorer on (query, answer, evidence). No CHRONICLE_PROJECT_PATH required.
+
+    Body: { "query", "answer", "evidence" } (evidence: array of strings or objects with
+    "text" or "url"). Path-based evidence is not accepted. Returns same shape as eval contract.
+    """
+    result = run_scorer_contract(body.model_dump(), allow_path=False)
+    if result.get("error") == "invalid_input":
+        raise HTTPException(status_code=400, detail=result)
+    return result
 
 
 # ----- Investigations -----
