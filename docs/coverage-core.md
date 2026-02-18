@@ -2,7 +2,7 @@
 
 Coverage is measured over the **chronicle** package with certain paths omitted (API, Neo4j, integrations, optional tools). See `pyproject.toml` → `[tool.coverage.run]` for `omit`.
 
-**Target:** 75% statement coverage for the included (core) code. We raise `fail_under` as coverage improves so CI keeps the bar meaningful.
+**Target:** 75% statement coverage for the included (core) code. We raise `fail_under` as coverage improves so CI keeps the bar meaningful. Getting back to 75% is advisable; phased action items are in [to_do](to_do.md#current-steps).
 
 **Current:** `fail_under` is set to 33%. CI runs `pytest tests/ ... --cov-fail-under=33` so the build fails if coverage drops below that. We raise the value as the test suite grows (target 75%). The suite focuses on session flow (including multi-evidence and eval-contract metrics), standalone scorer, verifier, attestation, identity, and CLI actor.
 

@@ -67,7 +67,12 @@ def _normalize_evidence(evidence: list, *, allow_path: bool = True) -> list[str]
             if isinstance(text, str) and text.strip():
                 chunks.append(text)
             elif allow_path and "path" in item:
-                path = Path(item["path"])
+                try:
+                    base = Path.cwd().resolve()
+                    path = Path(item["path"]).resolve()
+                    path.relative_to(base)  # path must be under cwd (path traversal mitigation)
+                except (ValueError, TypeError):
+                    continue
                 if path.is_file():
                     chunks.append(path.read_text(encoding="utf-8", errors="replace").strip())
             elif "url" in item and isinstance(item["url"], str) and item["url"].strip():
