@@ -1,10 +1,10 @@
 # Chronicle
 
-**Defensibility scoring for RAG and evals.** Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier. Show your work, verify it yourself.
+When a system—or a person—gives you an answer, you're often left to trust it. Is it actually backed by evidence? Can you see which sources support or challenge it? When claims conflict or evidence is thin, is that out in the open? Today, "show your work" is a slogan, not a standard: there's no common way to **score** how defensible an answer is or to **verify** that the work was actually shown. Chronicle changes that. We don't decide what's true—we make **how well a claim is supported** visible, scoreable, and verifiable. You get a defensibility scorecard (provenance strength, corroboration, contradictions), a portable **.chronicle** package you can hand to anyone, and a verifier so "show your work" becomes something you can check, not just promise.
 
 ## New here?
 
-Chronicle answers: *How well is this answer supported by evidence?* It’s for RAG evaluation, audits, and anyone who needs a portable, verifiable record of claims and their evidence.
+Chronicle answers: *How well is this answer supported by evidence?* It’s for RAG evaluation, audits, fact-checking, and anyone who needs a portable, verifiable record of claims and their evidence.
 
 **Prerequisites:** Python 3.11+; we recommend a virtual environment (e.g. `python3 -m venv .venv` then `source .venv/bin/activate` on Linux/macOS). Install the project with `pip install -e .` so the `chronicle` and `chronicle-verify` commands work.
 
@@ -19,25 +19,65 @@ Chronicle answers: *How well is this answer supported by evidence?* It’s for R
 
 ## Quick start
 
-**Score one (query, answer, evidence) run:**
+**1. Install and run the defensibility scorer**
+
+The scorer takes one (query, answer, evidence) run and returns a defensibility scorecard. No API or database required—ideal for pipelines and eval harnesses.
 
 ```bash
 pip install -e .
-echo '{"query": "What was revenue?", "answer": "Revenue was $1.2M.", "evidence": ["The company reported revenue of $1.2M in Q1 2024."]}' \
-  | PYTHONPATH=. python3 scripts/standalone_defensibility_scorer.py
 ```
 
-Output: one JSON object with defensibility metrics (or error). See [Eval contract](docs/eval_contract.md).
+Save a run as JSON (e.g. `run.json`). Example: a RAG answer about a company's emissions, with multiple retrieved chunks as evidence:
 
-**Verify a .chronicle file:**
+```json
+{
+  "query": "What were Acme Corp's reported Scope 1 emissions for FY2024?",
+  "answer": "Acme Corp reported Scope 1 emissions of 12,400 tCO2e for FY2024.",
+  "evidence": [
+    "Acme Corp Sustainability Report FY2024, p.8: 'Scope 1 (direct) emissions for the reporting period were 12,400 tCO2e, unchanged from the prior year.'",
+    "Acme Corp Annual Report 2024, Environmental section: 'Our direct operational footprint (Scope 1) totaled 12,400 tonnes CO2 equivalent.'",
+    "CDP submission summary (Acme Corp, 2024): 'Scope 1: 12.4 kt CO2e.'"
+  ]
+}
+```
+
+Pipe it into the scorer:
+
+```bash
+PYTHONPATH=. python3 scripts/standalone_defensibility_scorer.py < run.json
+```
+
+You get one JSON object back: defensibility metrics for that claim. Example shape:
+
+```json
+{
+  "contract_version": "1.0",
+  "claim_uid": "claim_...",
+  "provenance_quality": "strong",
+  "corroboration": {
+    "support_count": 3,
+    "challenge_count": 0,
+    "independent_sources_count": 1
+  },
+  "contradiction_status": "none"
+}
+```
+
+Here, three evidence chunks support the same claim, so provenance is **strong**. In the default scorer path, evidence is not linked to separate sources, so `independent_sources_count` is derived from the single run; for multi-source corroboration, use the session or API to register sources and link evidence. See [Eval contract](docs/eval_contract.md) and [Defensibility metrics schema](docs/defensibility-metrics-schema.md).
+
+**2. Verify a .chronicle file**
+
+Export an investigation to a .chronicle package (ZIP); anyone can verify it without running your stack:
 
 ```bash
 chronicle-verify path/to/file.chronicle
 ```
 
-(Activate the project venv first: `source .venv/bin/activate`, or run with `./.venv/bin/chronicle-verify` from the repo root.)
+Use a venv (`source .venv/bin/activate`) or run `./.venv/bin/chronicle-verify` from the repo root. See [Verifier](docs/verifier.md) and [Verification guarantees](docs/verification-guarantees.md).
 
-**Run the defensibility benchmark** (fixed queries, RAG run, record scores): `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py`. See [Benchmark](docs/benchmark.md).
+**3. Run the defensibility benchmark**
+
+Fixed queries, RAG run, recorded scores: `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py`. See [Benchmark](docs/benchmark.md).
 
 ## What's in this repo
 
