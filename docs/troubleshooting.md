@@ -82,6 +82,16 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ---
 
+## CLI shows "Error: ..." and exits with code 1
+
+**Cause:** The command hit a user-fixable condition (e.g. not a Chronicle project, investigation not found, validation failure). The CLI prints the message and exits 1 without a traceback.
+
+**Fix:**
+
+- Read the message (e.g. "Not a Chronicle project (no chronicle.db): ..." → run from a project dir or run `chronicle init` first). For the full list of error types and how they are used, see [Errors](errors.md).
+
+---
+
 ## Python version errors
 
 **Cause:** Chronicle requires Python 3.11+.

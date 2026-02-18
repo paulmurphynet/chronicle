@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from chronicle.core.errors import ChronicleProjectNotFoundError, ChronicleUserError
 from chronicle.core.policy import POLICY_FILENAME, load_policy_profile
 from chronicle.core.validation import MAX_LIST_LIMIT
 from chronicle.store.claim_embedding_store import ClaimEmbeddingStore
@@ -88,7 +89,7 @@ class ChronicleSession:
     def __init__(self, project_dir: Path | str) -> None:
         self._path = Path(project_dir)
         if not project_exists(self._path):
-            raise FileNotFoundError(f"Not a Chronicle project (no {CHRONICLE_DB}): {self._path}")
+            raise ChronicleProjectNotFoundError(f"Not a Chronicle project (no {CHRONICLE_DB}): {self._path}")
         self._store = SqliteEventStore(self._path / CHRONICLE_DB, run_projection=True)
         self._evidence = FileSystemEvidenceStore(self._path)
 
@@ -579,9 +580,9 @@ class ChronicleSession:
     ) -> dict[str, Any]:
         """Build audit pack for an investigation. B.1. When as_of_date or as_of_event_id is set, defensibility_snapshot is at that point in time (B.2)."""
         if self.read_model.get_investigation(investigation_uid) is None:
-            raise ValueError("Investigation not found")
+            raise ChronicleUserError("Investigation not found")
         if as_of_date is not None and as_of_event_id is not None:
-            raise ValueError("At most one of as_of_date or as_of_event_id may be set")
+            raise ChronicleUserError("At most one of as_of_date or as_of_event_id may be set")
         rm = self.read_model
         human_decisions = self.get_human_decisions_audit_trail(investigation_uid, limit=500)
         claims = rm.list_claims_by_type(
@@ -1087,7 +1088,7 @@ class ChronicleSession:
 
         claim = self.read_model.get_claim(claim_uid)
         if claim is None:
-            raise ValueError(f"claim_uid must reference an existing claim: {claim_uid}")
+            raise ChronicleUserError(f"claim_uid must reference an existing claim: {claim_uid}")
 
         result = None
         tool_module_id = "chronicle.tools.decomposer.heuristic"

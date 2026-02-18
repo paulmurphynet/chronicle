@@ -65,6 +65,7 @@ chronicle-verify path/to/file.chronicle
 | [HTTP API](docs/api.md) | Optional minimal API: `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run uvicorn. Write/read/export/import. |
 | [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness (standard metric). |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
+| [Errors](docs/errors.md) | Error types (ChronicleUserError, etc.); when to use which; how CLI/API map to exit codes and HTTP status. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |
 | [Neo4j](docs/neo4j.md) | Optional graph projection for multi-run analysis and visualization. |
 | [Neo4j schema](docs/neo4j-schema.md) | Node labels, relationship types, and example Cypher for the sync output. |

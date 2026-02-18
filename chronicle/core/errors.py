@@ -6,7 +6,11 @@ class ChronicleError(Exception):
 
 
 class ChronicleUserError(ChronicleError):
-    """Error that should be shown to the user as a message; not a bug. E.g. validation, missing project."""
+    """Error that should be shown to the user as a message; not a bug. E.g. validation, missing entity, policy rules."""
+
+
+class ChronicleProjectNotFoundError(ChronicleUserError):
+    """Raised when the project path does not contain a Chronicle project (e.g. no chronicle.db). CLI → exit 1; API → 404."""
 
 
 class ChronicleIdempotencyCapacityError(ChronicleUserError):

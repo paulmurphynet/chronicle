@@ -438,7 +438,7 @@ def promote_to_sef(
             ev = read_model.get_evidence_item(ev_uid)
             provenance_types.append(getattr(ev, "provenance_type", None) if ev else None)
         if all(p == "ai_generated" for p in provenance_types):
-            raise ValueError(
+            raise ChronicleUserError(
                 "PromoteToSEF: policy disallows SEF when all supporting evidence is AI-generated "
                 f"(no_sef_from_ai_only); add at least one human-created or unknown-provenance evidence "
                 f"(policy: {profile.profile_id})"
@@ -455,7 +455,7 @@ def promote_to_sef(
             if s.get("independence_notes") and str(s.get("independence_notes", "")).strip()
         )
         if with_rationale < mes.min_sources_with_independence_notes:
-            raise ValueError(
+            raise ChronicleUserError(
                 f"Policy requires at least {mes.min_sources_with_independence_notes} source(s) "
                 "with independence rationale recorded; add rationale on the Sources page. "
                 f"(policy: {profile.profile_id}); {with_rationale} of {len(sources_backing)} source(s) have rationale."

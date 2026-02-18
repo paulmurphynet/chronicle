@@ -40,11 +40,9 @@ This doc is a checklist and plan for making Chronicle easy for newcomers (collea
 
 ## Medium impact (before or soon after open source)
 
-### 6. **Lessons 04–07**
+### 6. **Lessons 04–11** ✓
 
-- lessons/README lists 04 (events/core), 05 (store/session), 06 (defensibility), 07 (integrations/scripts) but only 00–03 exist. Either:
-  - Add 04–07 so the "learning path" is complete, or
-  - Update lessons/README to say "Lessons 04–07 coming soon; after 03, explore `chronicle/core/`, `chronicle/store/`, and `scripts/` with the technical report and codebase map." So nobody expects files that don’t exist.
+- The full learning path is in place: lessons 00–11 (and matching quizzes) exist under `lessons/`. 04 = events/core, 05 = store/session, 06 = defensibility, 07 = integrations/scripts; 08 = CLI, 09 = epistemic tools, 10 = export/import/Neo4j, 11 = interop/API/tests. No “coming soon” placeholder; readers can work through the full sequence.
 
 ### 7. **Doc grouping for newcomers**
 
@@ -80,7 +78,7 @@ This doc is a checklist and plan for making Chronicle easy for newcomers (collea
 | High | Add CONTRIBUTING.md (setup, tests, style, where to ask). |
 | High | Add troubleshooting (command not found, NEO4J_URI, scorer input). |
 | High | Fix scripts/README links; add glossary (docs/glossary.md or README). |
-| Medium | Complete or clearly scope lessons 04–07; group README docs (essential vs more). |
+| Medium | Done: lessons 04–11 exist; learning path complete. Group README docs (essential vs more). |
 | Medium | Add getting-started.md; surface critical areas in README/getting-started. |
 | Medium | Changelog/version note for open source. |
 

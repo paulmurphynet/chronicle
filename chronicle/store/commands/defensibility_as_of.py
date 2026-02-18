@@ -3,6 +3,7 @@
 import sqlite3
 from typing import Any
 
+from chronicle.core.errors import ChronicleUserError
 from chronicle.store.commands.claims import get_defensibility_score
 from chronicle.store.protocols import EventStore, ReadModel
 from chronicle.store.read_model import SqliteReadModel, apply_event
@@ -25,7 +26,7 @@ def get_defensibility_as_of(
     if read_model.get_investigation(investigation_uid) is None:
         return None
     if (as_of_date is None) == (as_of_event_id is None):
-        raise ValueError("Exactly one of as_of_date or as_of_event_id must be set")
+        raise ChronicleUserError("Exactly one of as_of_date or as_of_event_id must be set")
 
     events = store.read_by_investigation(investigation_uid, limit=_AS_OF_EVENT_LIMIT)
     # Replay in recorded_at order to match main read model (not occurred_at).
@@ -44,7 +45,7 @@ def get_defensibility_as_of(
                 found = True
                 break
         if not found:
-            raise ValueError(f"as_of_event_id {as_of_event_id!r} not found in investigation stream")
+            raise ChronicleUserError(f"as_of_event_id {as_of_event_id!r} not found in investigation stream")
         filtered = seen
         as_of_label = as_of_event_id
 

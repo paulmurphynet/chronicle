@@ -64,8 +64,10 @@ def test_session_flow_ingest_propose_link_defensibility(tmp_path: Path) -> None:
 
 def test_session_requires_existing_project(tmp_path: Path) -> None:
     """ChronicleSession raises if project dir has no chronicle.db."""
+    from chronicle.core.errors import ChronicleProjectNotFoundError
+
     # tmp_path exists but we never call create_project; no chronicle.db
-    with pytest.raises(FileNotFoundError, match="Not a Chronicle project"):
+    with pytest.raises(ChronicleProjectNotFoundError, match="Not a Chronicle project"):
         ChronicleSession(tmp_path)
 
 

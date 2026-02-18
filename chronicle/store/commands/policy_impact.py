@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 
+from chronicle.core.errors import ChronicleUserError
 from chronicle.core.policy import (
     PolicyProfile,
     load_policy_profile_by_id,
@@ -44,7 +45,7 @@ def get_policy_impact(
         }
 
     if read_model.get_investigation(investigation_uid) is None:
-        raise ValueError("Investigation not found")
+        raise ChronicleUserError("Investigation not found")
 
     claims = read_model.list_claims_by_type(
         investigation_uid=investigation_uid,

@@ -35,6 +35,10 @@ Thanks for your interest in contributing. This file explains how to set up a dev
    chronicle-verify path/to/any.chronicle   # or generate one with scripts/generate_sample_chronicle.py
    ```
 
+## Errors (user-facing)
+
+- User-fixable failures (validation, missing project, missing entity, policy rules) should raise **ChronicleUserError** or **ChronicleProjectNotFoundError** from `chronicle.core.errors`. The CLI catches these and exits 1 with a clean message; the API can map them to 400/404/429. See [docs/errors.md](docs/errors.md) for the full hierarchy, when to use which type, and how CLI/API map them.
+
 ## Code style and linting
 
 - The project uses **ruff** for linting. Run `ruff check .` and `ruff format .` from the repo root (see `pyproject.toml` for config).
