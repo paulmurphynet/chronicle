@@ -1,4 +1,13 @@
-"""ChronicleSession: one project path, holds EventStore + ReadModel + EvidenceStore."""
+"""ChronicleSession: one project path, holds EventStore + ReadModel + EvidenceStore.
+
+This module is an intentional facade: ChronicleSession exposes a single entry point
+for all write/read operations, and each method is a thin wrapper that delegates
+to the command layer (chronicle.store.commands). The file is deliberately large
+(~1.5k lines) so that callers have one place to look and one object to hold.
+Splitting by domain (e.g. session_investigation, session_claims, session_evidence)
+and composing them in ChronicleSession is optional; the current design is stable
+and refactors are not required for correctness or maintainability.
+"""
 
 from datetime import UTC, datetime
 from pathlib import Path
