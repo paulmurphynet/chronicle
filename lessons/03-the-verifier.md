@@ -12,7 +12,7 @@
 
 ## What the verifier does
 
-A **.chronicle** file is a portable package (ZIP) of an investigation: manifest, schema, SQLite DB (events/read model), and evidence. The **verifier** checks that the package is well-formed and consistent—e.g. manifest has required keys, DB has the right tables, evidence hashes match. It uses **only the Python stdlib** (zipfile, json, sqlite3, hashlib) so anyone can verify without installing the Chronicle package. “Verify it yourself” is a design goal.
+A **.chronicle** file is a portable package (ZIP) of an investigation: manifest, schema, SQLite DB (events/read model), and evidence. The **verifier** checks that the package is well-formed and consistent—e.g. manifest has required keys, DB has the right tables, evidence hashes match. For a **complete** description of the file format and data schema (manifest keys, DB tables, evidence layout), see [Lesson 12: The .chronicle file format and data schema](12-chronicle-file-format-and-schema.md). It uses **only the Python stdlib** (zipfile, json, sqlite3, hashlib) so anyone can verify without installing the Chronicle package. “Verify it yourself” is a design goal.
 
 ## What gets checked
 

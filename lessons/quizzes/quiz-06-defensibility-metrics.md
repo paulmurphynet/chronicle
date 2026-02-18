@@ -31,3 +31,7 @@ Answer these after reading the lesson and the claims/eval_metrics code. Try not 
 4. **scorecard_to_metrics_dict(claim_uid, scorecard)** in **`chronicle/eval_metrics.py`**.
 
 5. **No.** Defensibility is computed entirely from the **read model** (support/challenge counts, sources, tensions, claim status). No external API or LLM is called in get_defensibility_score.
+
+---
+
+**← Previous:** [quiz-05-store-and-session](quiz-05-store-and-session.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-07-integrations-and-scripts](quiz-07-integrations-and-scripts.md)

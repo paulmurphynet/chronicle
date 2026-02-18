@@ -24,6 +24,7 @@ Quizzes for the [Chronicle lessons](../README.md). Do the quiz for a lesson **af
 | [quiz-09-epistemic-tools.md](quiz-09-epistemic-tools.md) | 09 | Epistemic tools |
 | [quiz-10-export-import-neo4j.md](quiz-10-export-import-neo4j.md) | 10 | Export, import, Neo4j |
 | [quiz-11-interoperability-api-and-tests.md](quiz-11-interoperability-api-and-tests.md) | 11 | Interoperability, API, and tests |
+| [quiz-12-chronicle-file-format-and-schema.md](quiz-12-chronicle-file-format-and-schema.md) | 12 | The .chronicle file format and data schema |
 
 ## For maintainers
 

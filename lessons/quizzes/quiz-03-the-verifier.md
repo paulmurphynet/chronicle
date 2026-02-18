@@ -29,3 +29,7 @@
 4. **`chronicle-verify path/to/file.chronicle`** (after `pip install -e .`).
 
 5. **`tools/verify_chronicle/verify_chronicle.py`** (and the package entry point that calls it).
+
+---
+
+**← Previous:** [quiz-02-the-scorer](quiz-02-the-scorer.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-04-events-and-core](quiz-04-events-and-core.md)

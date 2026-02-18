@@ -39,3 +39,7 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 6. **scripts/adapters/** — example_rag_to_scorer.py (RAG harness output → scorer), fact_checker_to_chronicle.py (fact-checker output → evidence + claim + support/challenge), provenance_to_chronicle.py (provenance assertions → sources + evidence–source links). They are **copy-paste templates** for interop with external systems.
 
 7. **Install:** `pip install -e ".[api]"`. **Env:** Set **CHRONICLE_PROJECT_PATH** to the project directory. **Command:** `uvicorn chronicle.api.app:app` (optionally `--reload`). See docs/api.md.
+
+---
+
+**← Previous:** [quiz-06-defensibility-metrics](quiz-06-defensibility-metrics.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-08-cli](quiz-08-cli.md)

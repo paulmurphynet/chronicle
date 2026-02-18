@@ -27,8 +27,9 @@ Step-by-step annotated lessons that walk through **100% of the Chronicle codebas
 | [09](09-epistemic-tools.md) | Epistemic tools (decomposer, contradiction, type inference) | `chronicle/tools/` |
 | [10](10-export-import-neo4j.md) | Export, import, and Neo4j | `chronicle/store/export_import.py`, `neo4j_sync.py` |
 | [11](11-interoperability-api-and-tests.md) | Interoperability, API, and tests | Terminology, external IDs, provenance, HTTP API, tests, CI |
+| [12](12-chronicle-file-format-and-schema.md) | The .chronicle file format and data schema | ZIP layout, manifest, chronicle.db (events + read model), evidence/; full schema reference |
 
-The full path from 00 to 11 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, and interop/API/tests (including request identity, attestation, and the minimal curation UI).
+The full path from 00 to 12 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, interop/API/tests, and the **complete .chronicle file format and data schema** (manifest, DB tables, evidence layout).
 
 ## Lesson format
 
@@ -48,7 +49,7 @@ Terms you’ll see across lessons (and in the code):
 - **Defensibility** — How well a claim is supported by evidence and policy; we score it, we don’t assert “truth.”
 - **Claim** — A falsifiable statement (e.g. the model’s answer); linked to evidence via support/challenge.
 - **Evidence** — Immutable items (e.g. retrieved chunks); content-hashed; can have spans.
-- **.chronicle** — Our portable format (ZIP) for an investigation: manifest, schema, evidence, claims.
+- **.chronicle** — Our portable format (ZIP) for an investigation: manifest, chronicle.db (events + read model), evidence files. Full layout and data schema: [Lesson 12](12-chronicle-file-format-and-schema.md).
 - **Eval contract** — Input (query, answer, evidence) and output (defensibility metrics) for the scorer; see [docs/eval_contract.md](../docs/eval_contract.md).
 - **Event-sourced** — All changes are stored as events; we don’t overwrite history.
 - **quickstart-rag** — CLI command `chronicle quickstart-rag`: one-command RAG flow; see [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md).

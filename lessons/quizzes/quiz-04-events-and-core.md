@@ -31,3 +31,7 @@ Answer these after reading the lesson and the core module. Try not to peek at th
 4. Yes. When an event is appended, a **projection handler** runs (in `chronicle/store/read_model/projection.py`) that updates the read model tables (e.g. handle_claim_proposed updates the claim table; handle_support_linked inserts into evidence_link).
 
 5. **Event-sourced** means all changes are stored as append-only events; state (the read model) is derived by replaying or projecting from those events, not by overwriting.
+
+---
+
+**← Previous:** [quiz-03-the-verifier](quiz-03-the-verifier.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-05-store-and-session](quiz-05-store-and-session.md)

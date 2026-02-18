@@ -39,3 +39,7 @@ Answer these after reading the lesson and the CLI main. Try not to peek at the a
 6. **chronicle get-defensibility &lt;claim_uid&gt; --path /path/to/project** (claim_uid is a positional argument). Returns the defensibility scorecard for that claim.
 
 7. Set **CHRONICLE_ACTOR_ID** (and optionally **CHRONICLE_ACTOR_TYPE**) in the environment, or pass **--actor-id** and **--actor-type** on the command (e.g. `chronicle --actor-id jane_doe create-investigation "My run" --path /path/to/project`). See docs/human-in-the-loop-and-attestation.md.
+
+---
+
+**← Previous:** [quiz-07-integrations-and-scripts](quiz-07-integrations-and-scripts.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-09-epistemic-tools](quiz-09-epistemic-tools.md)

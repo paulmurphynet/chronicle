@@ -31,3 +31,7 @@ Answer after reading the lesson and running the scorer at least once.
 4. The temp project gives the scorer an **isolated environment** for one run: ingest evidence, propose the claim, link support, compute defensibility, then discard. No need for a real project path or cleanup; one run = one temp dir.
 
 5. **Success:** a single JSON object with `contract_version: "1.0"` and defensibility metrics (e.g. `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, …). **Failure:** a single JSON object with `contract_version`, at least `error` (e.g. `invalid_input`), and usually `message`.
+
+---
+
+**← Previous:** [quiz-01-codebase-map](quiz-01-codebase-map.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-03-the-verifier](quiz-03-the-verifier.md)

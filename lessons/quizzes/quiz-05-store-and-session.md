@@ -31,3 +31,7 @@ Answer these after reading the lesson and the store/session code. Try not to pee
 4. **handle_support_linked** inserts a row into the **evidence_link** table (span_uid, claim_uid, link_type=SUPPORT, etc.).
 
 5. **get_defensibility_score** returns a **DefensibilityScorecard** (or None if claim not found or withdrawn)—a dataclass with provenance_quality, corroboration, contradiction_status, weakest_link, knowability, etc.
+
+---
+
+**← Previous:** [quiz-04-events-and-core](quiz-04-events-and-core.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-06-defensibility-metrics](quiz-06-defensibility-metrics.md)

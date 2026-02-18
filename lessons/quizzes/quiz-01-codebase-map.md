@@ -43,3 +43,7 @@ Answer these after reading the lesson and looking at the repo layout. Try not to
 7. **`chronicle/api/app.py`** (FastAPI app). Install with **`pip install -e ".[api]"`**; then set `CHRONICLE_PROJECT_PATH` and run `uvicorn chronicle.api.app:app`. See docs/api.md.
 
 8. **`chronicle/core/identity.py`** — IdP abstraction, get_effective_actor_from_request; **`chronicle/store/commands/attestation.py`** — payload helpers for _verification_level / _attestation_ref. The full workflow (CLI env, API headers, curation UI) is in **docs/human-in-the-loop-and-attestation.md**.
+
+---
+
+**Index:** [Quizzes](README.md) | **Next →:** [quiz-02-the-scorer](quiz-02-the-scorer.md)

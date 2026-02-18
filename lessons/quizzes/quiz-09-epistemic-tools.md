@@ -31,3 +31,7 @@ Answer these after reading the lesson and the tools. Try not to peek at the answ
 4. **Provider**: **ollama**. **Model**: **qwen2.5:7b** (default in llm_config). Base URL default is http://127.0.0.1:11434. So local Ollama with no API key.
 
 5. **scripts/suggest_tensions_with_llm.py**. Flag **--apply** declares each suggested tension in the project (session.declare_tension).
+
+---
+
+**← Previous:** [quiz-08-cli](quiz-08-cli.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-10-export-import-neo4j](quiz-10-export-import-neo4j.md)

@@ -9,7 +9,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | Resource | Purpose |
 |----------|---------|
 | [**Story**](../story/README.md) | The Chronicle story: mission, vision, the problem, why it exists, how we're solving it, challenges, how you can help. Read in order (01 → 05). |
-| [**Lessons**](../lessons/README.md) | Step-by-step codebase walkthrough for developers. Numbered 00–11; each lesson has **← Previous \| Index \| Next →** at the bottom. |
+| [**Lessons**](../lessons/README.md) | Step-by-step codebase walkthrough for developers. Numbered 00–12; each lesson has **← Previous \| Index \| Next →** (or End of lessons) at the bottom. Lesson 12 fully covers the .chronicle file format and data schema. |
 | [**Critical areas**](../critical_areas/README.md) | What defensibility and verification do *not* guarantee. Read before relying on scores or "verified." Each doc links back to the index and to the next. |
 | [**Getting started**](getting-started.md) | One page: install, scorer + verifier quick start, next steps. |
 
@@ -41,5 +41,6 @@ For the full list of docs by topic (API, Neo4j, file format, RAG evals, provenan
 
 - **Story:** Start at [story/README.md](../story/README.md); use the chapter table. Each chapter has **← Previous \| Index \| Next →** at the bottom.
 - **Lessons:** Start at [lessons/README.md](../lessons/README.md); use the learning path table. Each lesson has **← Previous \| Index \| Next →** and a **Quiz** link.
+- **Lessons / quizzes:** Each quiz has **← Previous \| Index \| Next →** at the bottom (or End of quizzes for quiz-12).
 - **Critical areas:** Start at [critical_areas/README.md](../critical_areas/README.md); use the document table. Each document has **← Index** and **Next →** at the bottom.
 - **Deep links:** You can link to any doc, e.g. `docs/verifier.md`, `story/03-how-we-are-solving-it.md`, or `lessons/02-the-scorer.md`. Use anchor links for sections, e.g. `eval_contract.md#2-output`.

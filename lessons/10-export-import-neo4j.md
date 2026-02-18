@@ -54,7 +54,7 @@ So the **same** data you have in SQLite (read model) is mirrored in Neo4j for gr
 
 ## .chronicle file format (recap)
 
-From **docs/chronicle-file-format.md**:
+For **full** coverage of the .chronicle format and data schema (manifest, all DB tables, evidence integrity), see [Lesson 12: The .chronicle file format and data schema](12-chronicle-file-format-and-schema.md). From **docs/chronicle-file-format.md**:
 
 - **manifest.json** — format_version, investigation_uid, title, exported_at, optional content_hash_manifest.
 - **chronicle.db** — SQLite with events table and read model tables (investigation, claim, evidence_item, evidence_span, evidence_link, tension, …).
