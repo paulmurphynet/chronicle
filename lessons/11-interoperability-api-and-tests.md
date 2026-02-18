@@ -49,7 +49,7 @@ Export formats and adapters use Chronicle’s names; your adapter can map to loc
 
 ## Claim–evidence–metrics and RAG evals
 
-**Claim–evidence–metrics export (docs/claim-evidence-metrics-export.md):** Defines a stable JSON shape for “one claim + evidence refs + support/challenge counts + defensibility” so fact-checking UIs or dashboards can ingest it. You can build this from the generic export plus evidence_link and get_defensibility_score; the doc describes the schema and wrapper format.
+**Claim–evidence–metrics export (docs/claim-evidence-metrics-export.md):** Defines a stable JSON shape for “one claim + evidence refs + support/challenge counts + defensibility” so fact-checking UIs or dashboards can ingest it. Use **build_claim_evidence_metrics_export** (chronicle.store.commands.generic_export) with the read model and a defensibility getter (e.g. session.get_defensibility_score) to get the full wrapper; the doc describes the schema.
 
 **RAG evals (docs/rag-evals-defensibility-metric.md):** One page that ties everything together for RAG pipelines: the **contract** (input/output), the **schema**, and **how to run the scorer** in your harness (stdin, CLI flags, or in-process Python). Use it as the entry point for “Chronicle defensibility as a standard metric” in RAG evals.
 

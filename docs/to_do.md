@@ -47,6 +47,6 @@
 
 ### Doc updates (after features)
 
-- [ ] **Update guidebook, lessons, quizzes, critical areas** — After implementing the new features above, update the guidebook, lessons (and quizzes), and critical areas so they reflect current behavior and narrative. No separate “plan” docs; keep to_do as the single list.
+- [x] **Update guidebook, lessons, quizzes, critical areas** — After implementing the new features above, update the guidebook, lessons (and quizzes), and critical areas so they reflect current behavior and narrative. No separate “plan” docs; keep to_do as the single list.
 
-- [ ] **Update ONBOARDING checklist** — In [ONBOARDING_AND_OPEN_SOURCE](ONBOARDING_AND_OPEN_SOURCE.md), mark completed items (e.g. README “New here?”, CONTRIBUTING, troubleshooting, glossary, getting-started, changelog, personas, example .chronicle) so the checklist matches reality, or retire the doc and keep only to_do.
+- [x] **Update ONBOARDING checklist** — In [ONBOARDING_AND_OPEN_SOURCE](ONBOARDING_AND_OPEN_SOURCE.md), mark completed items (e.g. README “New here?”, CONTRIBUTING, troubleshooting, glossary, getting-started, changelog, personas, example .chronicle) so the checklist matches reality, or retire the doc and keep only to_do.

@@ -62,7 +62,7 @@ From **docs/chronicle-file-format.md**:
 
 **Consuming without the Chronicle package:** If you need to read a .chronicle from another language or tool (e.g. fact-checking UI, dashboard), see **docs/consuming-chronicle.md**: open the ZIP, read manifest and chronicle.db, resolve evidence by URI. The verifier (`chronicle-verify`) can still validate the file.
 
-**Generic export:** For BI or dashboards you may not need the full .chronicle. **docs/GENERIC_EXPORT.md** describes exporting an investigation as **JSON** or **CSV ZIP** (claims, evidence metadata, tensions; no evidence blobs). Use the session and **build_generic_export_json** or **build_generic_export_csv_zip** from the store commands.
+**Generic export:** For BI or dashboards you may not need the full .chronicle. **docs/GENERIC_EXPORT.md** describes exporting an investigation as **JSON** or **CSV ZIP** (claims, evidence metadata, tensions; no evidence blobs). Use the session and **build_generic_export_json** or **build_generic_export_csv_zip** from the store commands. For fact-checking UIs and dashboards, **build_claim_evidence_metrics_export** returns the stable claim+evidence refs+defensibility shape; see [claim-evidence-metrics-export](../docs/claim-evidence-metrics-export.md).
 
 ## Try it
 
