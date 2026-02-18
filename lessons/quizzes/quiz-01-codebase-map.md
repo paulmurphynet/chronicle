@@ -24,6 +24,8 @@ Answer these after reading the lesson and looking at the repo layout. Try not to
 
 8. Where does **actor identity** and **verification level** (for human-in-the-loop and attestation) live in the codebase? Which doc describes the full workflow?
 
+9. Where does the **Reference UI** (human-in-the-loop frontend) live in the repo?
+
 ---
 
 ## Answer key
@@ -43,6 +45,8 @@ Answer these after reading the lesson and looking at the repo layout. Try not to
 7. **`chronicle/api/app.py`** (FastAPI app). Install with **`pip install -e ".[api]"`**; then set `CHRONICLE_PROJECT_PATH` and run `uvicorn chronicle.api.app:app`. See docs/api.md.
 
 8. **`chronicle/core/identity.py`** — IdP abstraction, get_effective_actor_from_request; **`chronicle/store/commands/attestation.py`** — payload helpers for _verification_level / _attestation_ref. The full workflow (CLI env, API headers, curation UI) is in **docs/human-in-the-loop-and-attestation.md**.
+
+9. **`frontend/`** — React + Vite + TypeScript app; API-only client for Try sample, investigations, evidence/claims/links, defensibility, export, Learn guides. See frontend/README.md.
 
 ---
 

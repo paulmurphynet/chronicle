@@ -20,13 +20,15 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 6. Which **tests** cover (a) the standalone scorer, (b) the session flow (ingest → claim → link → defensibility), (c) the verifier on a .chronicle file?
 
-7. What does **CI** run on push/PR? (Linter and test runner.)
+7. What does **CI** run when it runs, and how is it currently triggered? (Linter and test runner.)
 
 8. How does the **API** record who made a write request (e.g. who created an investigation)? What headers can a client send?
 
 9. Where is the **minimal curation UI** served when the API is running? What does it let you do?
 
 10. What is the **Reference UI** and where does it live? What does **Try sample** do?
+
+11. How do you **confirm** a tension suggestion in the API (turn it into a real tension)? Is there a separate “confirm” endpoint?
 
 ---
 
@@ -44,13 +46,15 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 6. (a) **tests/test_standalone_scorer.py** — (b) **tests/test_session.py** — (c) **tests/test_verifier.py**. Also **test_attestation.py** (payload helper), **test_identity.py** (identity module), **test_cli_actor.py** (CLI actor identity).
 
-7. **Ruff** (check + format) on chronicle and tools, and **pytest tests/** on Python 3.11 and 3.12. See .github/workflows/ci.yml.
+7. **Ruff** (check + format) on chronicle and tools, and **pytest tests/** on Python 3.11 and 3.12. CI is currently triggered via **workflow_dispatch** (manual “Run workflow”); push/PR triggers can be re-enabled. See .github/workflows/ci.yml.
 
 8. The API resolves the actor from an **Identity Provider (IdP)** when configured, or from request **headers**: **X-Actor-Id** and **X-Actor-Type**. Clients can send those headers so the ledger records them as the actor. Default is `actor_id=default`, `actor_type=human`. See docs/api.md and chronicle/core/identity.py.
 
 9. **/static/curation.html** (e.g. http://127.0.0.1:8000/static/curation.html). It lets you set your Actor ID, create investigations, ingest evidence (paste text), propose claims, and link support—all writes are attributed to you via X-Actor-Id. See docs/human-in-the-loop-and-attestation.md.
 
 10. The **Reference UI** is the official human-in-the-loop frontend that talks only to the Chronicle HTTP API; it lives in **frontend/** in this repo (React + Vite + TypeScript). **Try sample** creates a minimal investigation (one evidence, one claim, one support link) via the API and opens it so you can see defensibility and export. See frontend/README.md and docs/reference-ui-plan.md.
+
+11. You **confirm** by **declaring the tension**: POST declare_tension with the same claim_a_uid and claim_b_uid. The backend then marks the matching suggestion as confirmed. There is **no** separate “confirm” endpoint; **dismiss** is the only dedicated tension-suggestion endpoint (POST …/tension-suggestions/{id}/dismiss).
 
 ---
 

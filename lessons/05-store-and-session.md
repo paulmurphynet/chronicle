@@ -30,6 +30,8 @@ Open **`chronicle/store/session.py`**.
 - **link_support(inv_uid, span_uid, claim_uid, rationale=..., strength=...)** — Appends `SupportLinked`. Optional **rationale** (warrant: why this evidence supports this claim). Same pattern for **link_challenge** (optional rationale, **defeater_kind** e.g. rebutting/undercutting) and **declare_tension** (optional **defeater_kind**). **register_source** accepts optional **reliability_notes** (user-supplied; we record, we don't verify).
 - **get_defensibility_score(claim_uid)** — Reads from the read model (via the claims command) and returns a **DefensibilityScorecard**. We’ll see how that’s computed in Lesson 06.
 
+The session also supports **tension suggestions** (emit_tension_suggestions, dismiss_tension_suggestion) and **tier** (set_tier, tier history) for the Reference UI and workspace gating; see Lesson 11 and [docs/api.md](../docs/api.md).
+
 The **scorer** (Lesson 02) does exactly this: create project → open session → create investigation → for each evidence chunk: ingest_evidence, anchor_span → propose_claim (answer) → link_support for each span → get_defensibility_score → serialize to JSON.
 
 ## Projection in one example
@@ -44,13 +46,13 @@ You don’t need to read every handler; the point is: **one event type → one (
 
 ## Try it
 
-1. Read **session.py** around **ingest_evidence** and **propose_claim** (e.g. lines 200–280). See how they call the command and return the UIDs.
+1. Read **session.py** in the **ingest_evidence** and **propose_claim** methods (around lines 190–250). See how they call the command and return the UIDs.
 2. In **projection.py**, find **handle_evidence_ingested** and **handle_support_linked**. See what tables they write to.
 
 ## Summary
 
 - **Event store** appends events; **projection** updates the read model (investigation, claim, evidence_item, evidence_span, evidence_link, tension).
-- **ChronicleSession** is the main API: create_investigation, ingest_evidence, anchor_span, propose_claim, link_support, get_defensibility_score, and more.
+- **ChronicleSession** is the main API: create_investigation, ingest_evidence, anchor_span, propose_claim, link_support, get_defensibility_score, plus tension suggestions, tier, and more.
 - The scorer is a thin script over the session; all real work is in the store and commands.
 
 **← Previous:** [Lesson 04: Events and core](04-events-and-core.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 06: Defensibility metrics](06-defensibility-metrics.md)

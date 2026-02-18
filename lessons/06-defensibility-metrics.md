@@ -18,7 +18,7 @@ Defensibility is **not** a truth value. It’s a **structural and policy-relativ
 
 Open **`chronicle/store/commands/claims.py`**.
 
-- **get_defensibility_score(read_model, claim_uid, use_strength_weighting=False, policy_profile=None)** (around line 755) is the main function. It:
+- **get_defensibility_score(read_model, claim_uid, use_strength_weighting=False, policy_profile=None)** (around line 769) is the main function. It:
   1. Loads the claim; returns None if not found or status is WITHDRAWN.
   2. Gets all **support** and **challenge** links for the claim (including inherited from parent if it’s a compound claim). Counts them and, optionally, sums their **strength** (0..1).
   3. Counts **independent_sources_count**: distinct sources (from evidence_source_link) that back the claim via supporting evidence.
@@ -40,7 +40,7 @@ The **defensibility-metrics-schema** doc defines each field so that harnesses an
 
 ## Try it
 
-1. In **claims.py**, read the block that sets `provenance_quality` (around lines 805–812). Note the exact conditions for strong, medium, weak, challenged.
+1. In **claims.py**, read the block that sets `provenance_quality` (around lines 812–828). Note the exact conditions for strong, medium, weak, challenged.
 2. In **eval_metrics.py**, confirm that **scorecard_to_metrics_dict** only includes the keys listed in the defensibility-metrics-schema (no extra internal fields).
 
 ## Summary
