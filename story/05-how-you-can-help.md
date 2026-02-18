@@ -20,7 +20,7 @@ The first three chapters described the problem, why it exists, and how we’re s
 ## If you write or teach
 
 - **Reference the technical report and the contract.** If you teach or publish in the space of RAG, evals, or evidence-based systems, citing our [technical report](../docs/technical-report.md) and [eval contract](../docs/eval_contract.md) helps others find us and understand defensibility.
-- **Improve the guidebook or docs.** The [guidebook](README.md) is for everyone. If a sentence is confusing or a chapter is missing, suggest an edit or open a PR. Same for the main [docs](../docs/) (eval contract, verifier, verification guarantees, implementer checklist, RAG in 5 minutes, API, human-in-the-loop and attestation, consuming .chronicle, external IDs, provenance, RAG evals, etc.).
+- **Improve the story or docs.** The [story](README.md) is for everyone. If a sentence is confusing or a chapter is missing, suggest an edit or open a PR. Same for the main [docs](../docs/) (eval contract, verifier, verification guarantees, implementer checklist, RAG in 5 minutes, API, human-in-the-loop and attestation, consuming .chronicle, external IDs, provenance, RAG evals, etc.).
 
 ---
 
@@ -34,11 +34,11 @@ The first three chapters described the problem, why it exists, and how we’re s
 
 ## If you just care about the problem
 
-- **Share the story.** Point people to this guidebook or the repo when the topic of “show your work,” evidence-based answers, or RAG evals comes up.
+- **Share the story.** Point people to the [story](README.md) or the repo when the topic of “show your work,” evidence-based answers, or RAG evals comes up.
 - **Tell us what you need.** Open an issue or start a discussion: “We need X to adopt this” or “We tried Y and it didn’t work.” That feedback is how we prioritize.
 
 ---
 
 We’re a small effort with a clear goal: make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. Every bit of help—code, docs, testing, or word of mouth—gets us closer. Thank you for reading, and for caring about “show your work.”
 
-**Back to:** [Guidebook overview](README.md)
+**← Previous:** [04 — Where challenges remain](04-where-challenges-remain.md) | **Index:** [Story](README.md)

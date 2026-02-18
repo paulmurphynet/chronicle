@@ -1,6 +1,18 @@
-# Chronicle guidebook
+# The Chronicle story
 
-This guidebook is the **narrative** of Chronicle: the problem we’re addressing, why it exists, how we’re tackling it, where the challenges are, and how you can help. It’s written for **everyone**—contributors, partners, researchers, and anyone curious about how we evaluate and trust answers—not only software engineers.
+This is the **narrative** of Chronicle: the problem we’re addressing, why it exists, how we’re tackling it, where the challenges are, and how you can help. It’s written for **everyone**—contributors, partners, researchers, and anyone curious about how we evaluate and trust answers—not only software engineers.
+
+---
+
+## Mission
+
+Our **mission** is to make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. We don't try to say what's "true"—we help people see **how defensible** a claim is given the evidence and the rules they care about, and we give them a way to **verify** that the work was actually shown.
+
+---
+
+## Vision
+
+Our **vision** is a world where every answer can show its work and anyone can check it. Defensibility becomes a standard metric in RAG and evals; the .chronicle format and verifier make "show your work" something you can prove, not just promise. Adoption means eval frameworks, labs, and tooling use defensibility and the portable format—so the feedback loop (eval → improve → eval) treats evidence-backed answers as a first-class signal.
 
 ---
 
@@ -27,11 +39,12 @@ By the end you’ll understand:
 
 ---
 
-## How to read the guidebook
+## How to read the story
 
 1. **Read in order.** [01](01-the-problem.md) → [02](02-why-this-problem-exists.md) → [03](03-how-we-are-solving-it.md) → [04](04-where-challenges-remain.md) → [05](05-how-you-can-help.md). The chapters build on each other.
-2. **Before you rely on scores or verification,** read the [critical areas](../critical_areas/README.md). They spell out what defensibility and “verified” do *not* guarantee, so the system isn’t over-trusted.
-3. **For technical depth,** use the [docs](../docs/) and [lessons](../lessons/README.md). The guidebook stays high-level; contracts, schemas, and code live there.
+2. **On GitHub:** Each chapter has **← Previous | Index | Next →** at the bottom so you can move without returning here.
+3. **Before you rely on scores or verification,** read the [critical areas](../critical_areas/README.md). They spell out what defensibility and “verified” do *not* guarantee, so the system isn’t over-trusted.
+4. **For technical depth,** use the [docs](../docs/README.md) and [lessons](../lessons/README.md). The story stays high-level; contracts, schemas, and code live there.
 
 ---
 
@@ -49,4 +62,4 @@ By the end you’ll understand:
 
 ## One paragraph
 
-We live in a world where **content is abundant and trust is scarce**. AI and RAG systems give answers, but it’s hard to know how well those answers are supported by evidence. **Chronicle** is our response: we don’t try to say what’s “true”—we help people see **how defensible** a claim is given the evidence and the rules they care about. We do that with a **defensibility score**, a portable **.chronicle** format, and a **verifier** so anyone can check “show your work” without running our full stack. This guidebook tells that story and invites you to be part of it.
+We live in a world where **content is abundant and trust is scarce**. AI and RAG systems give answers, but it’s hard to know how well those answers are supported by evidence. **Chronicle** is our response: we don’t try to say what’s “true”—we help people see **how defensible** a claim is given the evidence and the rules they care about. We do that with a **defensibility score**, a portable **.chronicle** format, and a **verifier** so anyone can check “show your work” without running our full stack. This document tells that story and invites you to be part of it.

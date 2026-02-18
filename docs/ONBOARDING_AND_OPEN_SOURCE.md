@@ -10,7 +10,7 @@ These items are in place so the repo is usable for contributors and evaluators:
 
 | Item | Status |
 |------|--------|
-| **README "New here?"** | Done — personas, two paths (understand vs run), guidebook, lessons, getting-started, glossary. |
+| **README "New here?"** | Done — personas, two paths (understand vs run), story, lessons, getting-started, glossary. |
 | **CONTRIBUTING** | Done — dev setup, style (ruff, mypy), errors, changelog, coverage. |
 | **Troubleshooting** | Done — [docs/troubleshooting.md](troubleshooting.md); common issues and fixes. |
 | **Glossary** | Done — [docs/glossary.md](glossary.md); defensibility, claim, evidence, .chronicle, etc. |
@@ -24,4 +24,4 @@ These items are in place so the repo is usable for contributors and evaluators:
 | **Errors** | Done — [docs/errors.md](errors.md); ChronicleUserError, when to use which, CLI/API mapping. |
 | **Example .chronicle** | Done — Try sample from `generate_sample_chronicle.py`; verifier doc has "Get a sample .chronicle." |
 
-Guidebook, lessons, quizzes, and critical areas are updated **after** implementing new features so they stay in sync with the product.
+Story, lessons, quizzes, and critical areas are updated **after** implementing new features so they stay in sync with the product.

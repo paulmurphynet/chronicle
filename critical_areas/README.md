@@ -4,6 +4,8 @@ This folder documents the **areas of Chronicle that most affect epistemological 
 
 Chronicle is built to help people see how well a claim is supported by evidence—not to certify truth, verify real-world facts, or guarantee that “support” means logical entailment. These documents explain **what the system does and does not do** in the places where misunderstanding would be most dangerous. Each document combines **narrative** (why this matters, what the risk is) with **technical** pointers (where in the code this shows up) so that both decision-makers and engineers can align on the boundaries.
 
+**On GitHub:** Use the table below. Each document has **← Critical areas index** and **Next →** at the bottom so you can read in order or jump back to this index.
+
 ---
 
 ## Who this is for
@@ -38,4 +40,4 @@ Chronicle is built to help people see how well a claim is supported by evidence�
 
 - **[Epistemology scope](../docs/epistemology-scope.md)** — Full list of what we cover and what we don’t; critical_areas zooms in on the **highest-risk** boundaries and ties them to code.
 - **[Technical report](../docs/technical-report.md)** — Defensibility definition and schema; critical_areas explains **limits** of that definition.
-- **[Guidebook](../guidebook/README.md)** — The narrative story; critical_areas is the “handle with care” layer that keeps that story honest.
+- **[Story](../story/README.md)** — The Chronicle story (mission, vision, narrative); critical_areas is the “handle with care” layer that keeps that story honest.

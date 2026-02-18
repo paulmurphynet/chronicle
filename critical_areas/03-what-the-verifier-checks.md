@@ -30,3 +30,5 @@ So “verified” means: **integrity and schema and hashes**. It does **not** me
 
 - **Verified = structural integrity and evidence hashes, not content correctness.** Use verification to trust that the package is well-formed and unaltered; do not use it to infer that claims are true or that evidence actually supports them.
 - When sharing or receiving a .chronicle, communicate clearly: “Verified means the package structure and hashes check out; it does not mean we’ve validated the truth or the support relationships of the claims inside.”
+---
+**← [Critical areas index](README.md)** | **Next →:** [04 — Evidence–claim linking](04-evidence-claim-linking.md)

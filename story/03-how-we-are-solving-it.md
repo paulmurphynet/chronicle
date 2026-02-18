@@ -60,4 +60,4 @@ If you’re building a fact-checking UI, a provenance pipeline, or a RAG eval ha
 
 ---
 
-**Next:** [04 — Where challenges remain](04-where-challenges-remain.md)
+**← Previous:** [02 — Why this problem exists](02-why-this-problem-exists.md) | **Index:** [Story](README.md) | **Next →:** [04 — Where challenges remain](04-where-challenges-remain.md)

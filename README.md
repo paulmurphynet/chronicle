@@ -10,7 +10,7 @@ Chronicle answers: *How well is this answer supported by evidence?* It’s for R
 
 **Two paths:**
 
-- **I want to understand the project** — Read the [Guidebook](guidebook/README.md) (the story: problem, approach, limits), then the [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](critical_areas/README.md) (what defensibility and “verified” do *not* guarantee).
+- **I want to understand the project** — Read the [Story](story/README.md) (mission, vision, problem, approach, limits), then the [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](critical_areas/README.md) (what defensibility and “verified” do *not* guarantee).
 - **I want to run the scorer or verifier** — Use the [Quick start](#quick-start) below, or the full [Getting started](docs/getting-started.md) page. For common issues (e.g. `chronicle: command not found`), see [Troubleshooting](docs/troubleshooting.md).
 
 **Concepts:** [Glossary](docs/glossary.md) defines defensibility, claim, evidence, .chronicle, and related terms.
@@ -51,12 +51,12 @@ The **.chronicle** format is “show your work”: export your investigation and
 |----------|---------|
 | [Lessons](lessons/README.md) | Step-by-step annotated lessons that walk through the codebase (for developers). |
 | [Lessons → Quizzes](lessons/quizzes/README.md) | Quizzes after each lesson to check understanding. |
-| [Guidebook](guidebook/README.md) | The story of Chronicle: the problem, why it exists, how we're solving it, challenges, how you can help (for everyone). |
+| [Story](story/README.md) | The Chronicle story: mission, vision, the problem, why it exists, how we're solving it, challenges, how you can help (for everyone). |
 | [Critical areas](critical_areas/README.md) | Epistemological and practical limits: what defensibility and verification do *not* guarantee, so scores are not over-trusted (narrative + technical). |
 
 ## Docs
 
-**Essential:** [Eval contract](docs/eval_contract.md) (scorer I/O), [Verifier](docs/verifier.md) (.chronicle verification), [Technical report](docs/technical-report.md) (defensibility definition), [Guidebook](guidebook/README.md) (narrative), [Critical areas](critical_areas/README.md) (limits), [Troubleshooting](docs/troubleshooting.md) (common issues), [Glossary](docs/glossary.md) (terms). **Releases:** [CHANGELOG](CHANGELOG.md) and tagged versions for pinning. **Citation:** [Technical report Section 5 (Citation)](docs/technical-report.md#5-citation) and [CITATION.cff](CITATION.cff).
+**Essential:** [Eval contract](docs/eval_contract.md) (scorer I/O), [Verifier](docs/verifier.md) (.chronicle verification), [Technical report](docs/technical-report.md) (defensibility definition), [Story](story/README.md) (narrative), [Critical areas](critical_areas/README.md) (limits), [Troubleshooting](docs/troubleshooting.md) (common issues), [Glossary](docs/glossary.md) (terms). **Releases:** [CHANGELOG](CHANGELOG.md) and tagged versions for pinning. **Citation:** [Technical report Section 5 (Citation)](docs/technical-report.md#5-citation) and [CITATION.cff](CITATION.cff).
 
 **By topic:**
 

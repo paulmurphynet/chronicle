@@ -9,6 +9,8 @@ Step-by-step annotated lessons that walk through **100% of the Chronicle codebas
 3. **Run the code when possible.** Many lessons suggest commands to run (e.g. the scorer, the verifier). Run them so the behavior is concrete.
 4. **Take the quiz.** After each lesson, do the matching quiz in [quizzes/](quizzes/). Quizzes check understanding and point you back to the code if something was missed.
 
+**On GitHub:** Use the learning path table above. At the bottom of each lesson you'll see **← Previous | Index | Next →** so you can move without returning to this README.
+
 ## Learning path (lesson order)
 
 | Lesson | Topic | Key area |
@@ -56,6 +58,8 @@ For more, see [Epistemology scope](../docs/epistemology-scope.md), the [Technica
 
 ## For maintainers
 
+- **Lessons must be kept up to date with all functionality of the app.** When you add or change features, update the relevant lesson(s) and this README. Include "Update lessons for X" in [To-do](../docs/to_do.md) when a change affects the walkthrough.
 - Add new lessons in number order; update this README and the learning path table.
 - Keep **Key files** and code references accurate when refactoring.
 - Each lesson should have a corresponding quiz in `lessons/quizzes/` (e.g. `quiz-01-codebase-map.md`).
+- Keep the **← Previous | Index | Next →** navigation at the bottom of each lesson correct when reordering or adding lessons.

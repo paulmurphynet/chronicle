@@ -28,4 +28,4 @@ Evaluation drives behavior. If evals only measure accuracy, speed, or relevance,
 
 ---
 
-**Next:** [03 — How we’re solving it](03-how-we-are-solving-it.md)
+**← Previous:** [01 — The problem](01-the-problem.md) | **Index:** [Story](README.md) | **Next →:** [03 — How we're solving it](03-how-we-are-solving-it.md)

@@ -33,4 +33,4 @@ That’s the problem in a nutshell: we need a way to **score and verify** how de
 
 ---
 
-**Next:** [02 — Why this problem exists](02-why-this-problem-exists.md)
+**← Previous:** — (start) | **Index:** [Story](README.md) | **Next →:** [02 — Why this problem exists](02-why-this-problem-exists.md)

@@ -28,3 +28,5 @@ Defensibility is **structural and policy-relative**. Truth is a different questi
 
 - **Defensibility = structure + policy, not truth.** Use the score to see how well the *recorded* evidence and *recorded* links support the claim—not to decide whether the claim is correct in the world.
 - **Document this** when you present scores (e.g. in dashboards or reports): e.g. “Defensibility reflects support structure and policy; it does not certify factual correctness.”
+---
+**← [Critical areas index](README.md)** | **Next →:** [02 — Source independence is not verified](02-source-independence-is-not-verified.md)

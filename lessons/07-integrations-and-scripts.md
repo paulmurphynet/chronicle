@@ -98,6 +98,6 @@ So scripts are **thin orchestration**; the engine is the store and commands.
 - **Integrations** (chronicle/integrations/) wire RAG frameworks to ChronicleSession so that runs record evidence and claims.
 - All rely on the same session API and event store; they differ only in input source and output (JSON, .chronicle, Neo4j).
 
-**Next:** [Lesson 08: The Chronicle CLI](08-cli.md)
+**← Previous:** [Lesson 06: Defensibility metrics](06-defensibility-metrics.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 08: The CLI](08-cli.md)
 
 **Quiz:** [quizzes/quiz-07-integrations-and-scripts.md](quizzes/quiz-07-integrations-and-scripts.md)

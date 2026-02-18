@@ -49,6 +49,6 @@ The **defensibility-metrics-schema** doc defines each field so that harnesses an
 - **provenance_quality** is derived from counts and thresholds; **contradiction_status** from tension statuses.
 - **eval_metrics.py** turns the scorecard into the **stable metrics dict** for the eval contract and scorer output.
 
-**Next:** [Lesson 07: Integrations and scripts](07-integrations-and-scripts.md)
+**← Previous:** [Lesson 05: Store and session](05-store-and-session.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 07: Integrations and scripts](07-integrations-and-scripts.md)
 
 **Quiz:** [quizzes/quiz-06-defensibility-metrics.md](quizzes/quiz-06-defensibility-metrics.md)

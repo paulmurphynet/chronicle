@@ -60,6 +60,6 @@ You don’t need to memorize every payload; the point is: **the core package def
 - **Event types** live in `chronicle/core/events.py`; **payloads** live in `chronicle/core/payloads.py`.
 - The **read model** (tables like claim, evidence_item, evidence_link) is built by **projecting** these events—we’ll see that in Lesson 05.
 
-**Next:** [Lesson 05: Store and session](05-store-and-session.md)
+**← Previous:** [Lesson 03: The verifier](03-the-verifier.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 05: Store and session](05-store-and-session.md)
 
 **Quiz:** [quizzes/quiz-04-events-and-core.md](quizzes/quiz-04-events-and-core.md)

@@ -25,7 +25,7 @@
 - **Eval and defensibility:** [Eval contract](eval_contract.md), [eval contract schema](eval_contract_schema.json), [Defensibility metrics schema](defensibility-metrics-schema.md), [Eval and benchmarking](eval-and-benchmarking.md), [Technical report](technical-report.md).
 - **Verification:** [Verifier](verifier.md).
 - **Context:** [Neo4j](neo4j.md), [Epistemology scope](epistemology-scope.md), [Migration from V1](migration-from-v1.md).
-- **Implementation:** [To-do](to_do.md) — single list for all pending work; guidebook, lessons, quizzes, and other doc updates are done after implementing features.
+- **Implementation:** [To-do](to_do.md) — single list for all pending work; story, lessons, quizzes, and other doc updates are done after implementing features.
 - **Testing:** [Testing with Ollama](testing-with-ollama.md) — use local Ollama for real LLM-backed testing during development.
 
 Doc links have been updated: [Benchmark](benchmark.md), [Verification guarantees](verification-guarantees.md), [Integrating with Chronicle](integrating-with-chronicle.md), [Conformance](conformance.md), and [Chronicle as training data](chronicle-as-training-data.md) exist; technical-report and verifier no longer link to missing spec/ or stubs.

@@ -29,3 +29,5 @@ Over-relying on this number as a guarantee of real-world independence is a serio
 - **Independent_sources_count = distinct source UIDs in the model, not “verified independent in reality.”** Use it as a structural indicator; do not treat it as a guarantee of real-world independence.
 - **Independence_notes** are user-supplied. They improve transparency but are not validated by us.
 - When presenting the metric, clarify: “Independent sources count reflects the number of distinct sources in the model; independence in the real world is not verified by Chronicle.”
+---
+**← [Critical areas index](README.md)** | **Next →:** [03 — What the verifier checks](03-what-the-verifier-checks.md)

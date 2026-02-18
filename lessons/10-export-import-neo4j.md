@@ -76,6 +76,6 @@ From **docs/chronicle-file-format.md**:
 - **Neo4j sync** pushes the project’s read model to Neo4j so you can query or visualize the graph (claims, evidence, support, tensions).
 - The **verifier** checks .chronicle files; the **Aura pipeline** (verify → import → sync) is the full runbook for getting Chronicle data into a shared graph.
 
-**Next:** [Lesson 11: Interoperability, API, and tests](11-interoperability-api-and-tests.md)
+**← Previous:** [Lesson 09: Epistemic tools](09-epistemic-tools.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 11: Interoperability, API, and tests](11-interoperability-api-and-tests.md)
 
 **Quiz:** [quizzes/quiz-10-export-import-neo4j.md](quizzes/quiz-10-export-import-neo4j.md)

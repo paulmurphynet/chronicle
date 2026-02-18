@@ -36,4 +36,4 @@ Longer term, the ecosystem could grow: hosted scorer APIs, UIs that consume .chr
 
 ---
 
-**Next:** [05 — How you can help](05-how-you-can-help.md)
+**← Previous:** [03 — How we're solving it](03-how-we-are-solving-it.md) | **Index:** [Story](README.md) | **Next →:** [05 — How you can help](05-how-you-can-help.md)

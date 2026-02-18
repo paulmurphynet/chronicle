@@ -70,7 +70,7 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 
 ## Documentation
 
-- User-facing docs are in `docs/`, the [Guidebook](guidebook/README.md), and [Critical areas](critical_areas/README.md). Keep them accurate when you change behavior.
+- User-facing docs are in `docs/`, the [Story](story/README.md), and [Critical areas](critical_areas/README.md). Keep them accurate when you change behavior.
 - Lessons in `lessons/` walk through the codebase; update "Key files" and code references when you refactor.
 
 ## Where to ask

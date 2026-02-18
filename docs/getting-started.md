@@ -1,6 +1,6 @@
 # Getting started with Chronicle
 
-One page: what Chronicle is, how to install it, and how to run the scorer and verifier. After this, go to the [Guidebook](guidebook/README.md) for the story or [Lessons](lessons/README.md) for the codebase walkthrough.
+One page: what Chronicle is, how to install it, and how to run the scorer and verifier. After this, go to the [Story](story/README.md) for the story or [Lessons](lessons/README.md) for the codebase walkthrough.
 
 ---
 
@@ -52,6 +52,6 @@ To get a sample .chronicle to verify: `PYTHONPATH=. python3 scripts/generate_sam
 
 ## Next steps
 
-- **Understand the project** — Read the [Guidebook](guidebook/README.md) (problem, approach, limits), then [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](../critical_areas/README.md).
+- **Understand the project** — Read the [Story](story/README.md) (mission, vision, problem, approach, limits), then [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](../critical_areas/README.md).
 - **Run the scorer in your pipeline** — [Eval contract](eval_contract.md), [RAG evals: defensibility metric](rag-evals-defensibility-metric.md), [Integrating with Chronicle](integrating-with-chronicle.md).
 - **Contribute** — [CONTRIBUTING](../CONTRIBUTING.md), [Lessons](lessons/README.md).

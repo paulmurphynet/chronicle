@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- **Guidebook** — Expanded with interoperability at a glance (POST /score, .chronicle interchange, optional rationale, Neo4j deduplication), limits (rationale vs full warrants, optional graph deduplication), and how-to-help (POST /score, Neo4j dedupe).
+- **Story** — Expanded with interoperability at a glance (POST /score, .chronicle interchange, optional rationale, Neo4j deduplication), limits (rationale vs full warrants, optional graph deduplication), and how-to-help (POST /score, Neo4j dedupe).
 - **Standalone scorer** — Refactored to use `chronicle.scorer_contract.run_scorer_contract()`; URL fetch and evidence normalization live in the package.
 
 ### Fixed
@@ -36,7 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **chronicle-verify** — CLI to verify a .chronicle (ZIP) manifest, schema, and evidence hashes. Stdlib only.
 - **Chronicle package** — Event store, read model, defensibility computation, session API. Optional HTTP API (`.[api]`), Neo4j sync (`.[neo4j]`).
 - **Integrations** — LangChain, LlamaIndex, Haystack (optional callbacks/components).
-- **Docs** — Eval contract, verifier, technical report, guidebook, critical areas, lessons 00–11, troubleshooting, errors.
+- **Docs** — Eval contract, verifier, technical report, story, critical areas, lessons 00–11, troubleshooting, errors.
 
 [0.2.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.2.0
 [0.1.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.1.0

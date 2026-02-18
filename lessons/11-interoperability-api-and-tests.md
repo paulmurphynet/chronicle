@@ -110,6 +110,6 @@ Run tests: **`pytest tests/ -v`** (requires **`pip install -e ".[dev]"`**).
 - **Optional HTTP API** (chronicle/api/, install `.[api]`) exposes write/read/export over HTTP with the same shapes as the eval contract. **Request identity** is set via **X-Actor-Id** / **X-Actor-Type** (or IdP); **verification_level** can be stored in event payloads. **Minimal curation UI** at **/static/curation.html** lets you create investigations and add evidence with your identity.
 - **Tests** (scorer, session, verifier, attestation, identity, CLI actor) and **CI** (ruff + pytest) keep the core behavior and style stable.
 
-**Back to:** [Lessons overview](README.md)
+**← Previous:** [Lesson 10: Export, import, and Neo4j](10-export-import-neo4j.md) | **Index:** [Lessons](README.md)
 
 **Quiz:** [quizzes/quiz-11-interoperability-api-and-tests.md](quizzes/quiz-11-interoperability-api-and-tests.md)

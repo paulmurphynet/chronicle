@@ -31,7 +31,7 @@ Open the repo root and look at the main folders:
 | **`docs/`** | Eval contract, technical report, verifier, API, consuming .chronicle, external IDs, provenance, Neo4j schema, RAG evals, to-do. |
 | **`neo4j/`** | Optional: Cypher scripts to rebuild a graph from Chronicle data (for analysis/visualization). |
 | **`lessons/`** | These lessons. **`lessons/quizzes/`** holds the quizzes. |
-| **`guidebook/`** | The narrative guide (problem, solution, how to help)—for everyone, not only engineers. |
+| **`story/`** | The Chronicle story (mission, vision, problem, solution, how to help)—for everyone, not only engineers. |
 
 The **entry points** you’ll use most are:
 
@@ -100,6 +100,6 @@ When you run the **standalone scorer**, it uses: `create_project`, session, inge
 - **Engine:** `chronicle/` — core (events), store (session, commands), eval_metrics, integrations, tools, CLI.  
 - **Contracts and semantics:** `docs/eval_contract.md`, defensibility-metrics-schema, technical-report, verifier.
 
-**Next:** [Lesson 02: The standalone defensibility scorer](02-the-scorer.md)
+**← Previous:** [Lesson 00: How to use these lessons](00-how-to-use-these-lessons.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 02: The scorer](02-the-scorer.md)
 
 **Quiz:** [quizzes/quiz-01-codebase-map.md](quizzes/quiz-01-codebase-map.md)

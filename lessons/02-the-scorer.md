@@ -59,6 +59,6 @@ You should see one JSON object with `claim_uid`, `provenance_quality`, `corrobor
 - Output is **one JSON object** per run: either the defensibility metrics (contract success) or an error object.  
 - The implementation is in `scripts/standalone_defensibility_scorer.py`; the contract is in `docs/eval_contract.md`.
 
-**Next:** [Lesson 03: The .chronicle verifier](03-the-verifier.md)
+**← Previous:** [Lesson 01: Codebase map](01-codebase-map.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 03: The verifier](03-the-verifier.md)
 
 **Quiz:** [quizzes/quiz-02-the-scorer.md](quizzes/quiz-02-the-scorer.md)
