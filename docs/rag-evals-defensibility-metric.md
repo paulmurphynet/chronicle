@@ -2,6 +2,8 @@
 
 Use **Chronicle defensibility** in your RAG eval harness as a standard metric: one (query, answer, evidence) in → one defensibility score out. No API server required; pipe JSON to the scorer and read JSON back.
 
+**Important:** The default scorer links every evidence chunk as support for the single claim and does **not** validate that evidence actually supports the answer. For higher assurance, validate or curate evidence–claim links (e.g. human or NLI) then record; see [Eval contract](eval_contract.md#important-what-the-default-scorer-does-and-does-not-do).
+
 ---
 
 ## 1. Contract and schema

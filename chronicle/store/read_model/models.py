@@ -81,6 +81,7 @@ class Claim:
     parent_claim_uid: str | None
     decomposition_status: str
     updated_at: str
+    epistemic_stance: str | None = None  # e.g. working_hypothesis | asserted_established
 
 
 @dataclass
@@ -107,6 +108,7 @@ class EvidenceLink:
     strength: float | None
     notes: str | None
     rationale: str | None  # Optional warrant: why this evidence supports/challenges this claim
+    defeater_kind: str | None  # Optional: rebutting | undercutting (for challenge links)
     created_at: str
     created_by_actor_id: str
     source_event_id: str
@@ -145,6 +147,7 @@ class Tension:
     assigned_to: str | None = None
     due_date: str | None = None
     remediation_type: str | None = None
+    defeater_kind: str | None = None  # Optional: rebutting | undercutting
 
 
 @dataclass
@@ -201,6 +204,7 @@ class EvidenceSupersession:
 class Source:
     """One row from the source read model. Spec Section 14.4.11.
     Phase 2 (Epistemology): independence_notes — optional rationale for treating this source as independent (e.g. different institution, different methods).
+    reliability_notes: optional user-supplied reliability/authority metadata (we record, we don't verify).
     """
 
     source_uid: str
@@ -214,6 +218,7 @@ class Source:
     created_at: str
     created_by_actor_id: str
     updated_at: str
+    reliability_notes: str | None = None
 
 
 @dataclass

@@ -65,18 +65,21 @@ class CreateInvestigationBody(BaseModel):
 class ProposeClaimBody(BaseModel):
     text: str
     initial_type: str | None = None
+    epistemic_stance: str | None = None  # e.g. working_hypothesis | asserted_established
 
 
 class LinkBody(BaseModel):
     span_uid: str
     claim_uid: str
     rationale: str | None = None  # Optional: why this evidence supports/challenges this claim (warrant)
+    defeater_kind: str | None = None  # Optional: rebutting | undercutting (for challenge links)
 
 
 class DeclareTensionBody(BaseModel):
     claim_a_uid: str
     claim_b_uid: str
     tension_kind: str = "contradiction"
+    defeater_kind: str | None = None  # Optional: rebutting | undercutting
 
 
 class ScoreBody(BaseModel):
@@ -245,6 +248,7 @@ def propose_claim(
             investigation_uid,
             body.text,
             initial_type=body.initial_type,
+            epistemic_stance=body.epistemic_stance,
             actor_id=actor_id,
             actor_type=actor_type,
             verification_level=verification_level,
@@ -268,6 +272,7 @@ def link_support(request: Request, investigation_uid: str, body: LinkBody) -> di
             body.span_uid,
             body.claim_uid,
             rationale=body.rationale,
+            defeater_kind=body.defeater_kind,
             actor_id=actor_id,
             actor_type=actor_type,
             verification_level=verification_level,
@@ -288,6 +293,7 @@ def link_challenge(request: Request, investigation_uid: str, body: LinkBody) -> 
             body.span_uid,
             body.claim_uid,
             rationale=body.rationale,
+            defeater_kind=body.defeater_kind,
             actor_id=actor_id,
             actor_type=actor_type,
             verification_level=verification_level,
@@ -313,6 +319,7 @@ def declare_tension(
             body.claim_a_uid,
             body.claim_b_uid,
             tension_kind=body.tension_kind,
+            defeater_kind=body.defeater_kind,
             actor_id=actor_id,
             actor_type=actor_type,
             verification_level=verification_level,
@@ -331,7 +338,7 @@ def get_claim(claim_uid: str) -> dict[str, Any]:
         claim = session.read_model.get_claim(claim_uid)
         if claim is None:
             raise HTTPException(status_code=404, detail="Claim not found")
-        return {
+        out: dict[str, Any] = {
             "claim_uid": claim.claim_uid,
             "investigation_uid": claim.investigation_uid,
             "claim_text": claim.claim_text,
@@ -340,6 +347,9 @@ def get_claim(claim_uid: str) -> dict[str, Any]:
             "created_at": claim.created_at,
             "updated_at": claim.updated_at,
         }
+        if getattr(claim, "epistemic_stance", None) is not None:
+            out["epistemic_stance"] = claim.epistemic_stance
+        return out
 
 
 @app.get("/claims/{claim_uid}/defensibility")
@@ -347,7 +357,8 @@ def get_defensibility(
     claim_uid: str,
     use_strength_weighting: bool = False,
 ) -> dict[str, Any]:
-    """Get defensibility scorecard for a claim. Same shape as eval contract / defensibility schema. 404 if claim not found."""
+    """Get defensibility scorecard for a claim. Same shape as eval contract / defensibility schema.
+    Includes sources_backing_claim (with independence_notes when present) so evaluators can interpret N independent sources. 404 if claim not found."""
     path = _get_project_path()
     with ChronicleSession(path) as session:
         claim = session.read_model.get_claim(claim_uid)
@@ -358,7 +369,11 @@ def get_defensibility(
         )
         if scorecard is None:
             raise HTTPException(status_code=404, detail="Defensibility not available")
-        return asdict(scorecard)
+        out = asdict(scorecard)
+        sources_backing = session.get_sources_backing_claim(claim_uid)
+        if sources_backing:
+            out["sources_backing_claim"] = sources_backing
+        return out
 
 
 @app.get("/claims/{claim_uid}/reasoning-brief")

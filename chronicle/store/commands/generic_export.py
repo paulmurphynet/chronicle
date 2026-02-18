@@ -33,6 +33,15 @@ class ReadModelLike(Protocol):
     def get_evidence_item(self, evidence_uid: str) -> Any: ...
 
 
+def _get_sources_backing_claim_safe(read_model: ReadModelLike, claim_uid: str) -> list[dict[str, Any]]:
+    """Return sources_backing_claim when read_model supports it (includes independence_notes)."""
+    if hasattr(read_model, "get_sources_backing_claim") and callable(
+        getattr(read_model, "get_sources_backing_claim")
+    ):
+        return getattr(read_model, "get_sources_backing_claim")(claim_uid)
+    return []
+
+
 def _row_to_dict(obj: Any) -> dict[str, Any]:
     """Convert dataclass to dict for JSON (no recursion for nested objects)."""
     if obj is None:
@@ -115,7 +124,7 @@ def build_claim_evidence_metrics_export(
         defensibility: dict[str, Any] = (
             scorecard_to_metrics_dict(claim_uid, scorecard) if scorecard else {}
         )
-        out_claims.append({
+        claim_entry: dict[str, Any] = {
             "claim_uid": claim_uid,
             "claim_text": claim_text,
             "investigation_uid": inv_uid,
@@ -123,7 +132,11 @@ def build_claim_evidence_metrics_export(
             "support_count": len(support_links),
             "challenge_count": len(challenge_links),
             "defensibility": defensibility,
-        })
+        }
+        sources_backing = _get_sources_backing_claim_safe(read_model, claim_uid)
+        if sources_backing:
+            claim_entry["sources_backing_claim"] = sources_backing
+        out_claims.append(claim_entry)
     return {
         "schema_version": CLAIM_EVIDENCE_METRICS_SCHEMA_VERSION,
         "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/claim-evidence-metrics-export.md",

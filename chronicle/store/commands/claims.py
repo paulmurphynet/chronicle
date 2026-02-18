@@ -61,6 +61,7 @@ def propose_claim(
     parent_claim_uid: str | None = None,
     notes: str | None = None,
     tags: list[str] | None = None,
+    epistemic_stance: str | None = None,
     actor_id: str = "default",
     actor_type: str = "human",
     workspace: str = "spark",
@@ -91,6 +92,7 @@ def propose_claim(
         parent_claim_uid=parent_claim_uid,
         notes=notes,
         tags=tags,
+        epistemic_stance=epistemic_stance,
         created_by=ActorRef(actor_type=actor_type, actor_id=actor_id),
     ).to_dict()
     apply_attestation_to_payload(

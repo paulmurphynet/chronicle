@@ -268,7 +268,7 @@ class SqliteReadModel:
         effective_limit = min(limit, MAX_LIST_LIMIT) if limit is not None else None
         sql = """SELECT claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text,
                claim_type, scope_json, temporal_json, current_status, language, tags_json, notes,
-               parent_claim_uid, decomposition_status, updated_at FROM claim WHERE 1=1"""
+               parent_claim_uid, decomposition_status, epistemic_stance, updated_at FROM claim WHERE 1=1"""
         params: list = []
         if claim_type is not None:
             sql += " AND claim_type = ?"
@@ -308,7 +308,8 @@ class SqliteReadModel:
                 notes=r[11],
                 parent_claim_uid=r[12],
                 decomposition_status=r[13],
-                updated_at=r[14],
+                epistemic_stance=r[14] if len(r) > 14 else None,
+                updated_at=r[15] if len(r) > 15 else r[14],
             )
             for r in cur.fetchall()
         ]
@@ -330,7 +331,7 @@ class SqliteReadModel:
                 """
                 SELECT c.claim_uid, c.investigation_uid, c.created_at, c.created_by_actor_id, c.claim_text,
                        c.claim_type, c.scope_json, c.temporal_json, c.current_status, c.language, c.tags_json,
-                       c.notes, c.parent_claim_uid, c.decomposition_status, c.updated_at
+                       c.notes, c.parent_claim_uid, c.decomposition_status, c.epistemic_stance, c.updated_at
                 FROM claim c
                 INNER JOIN (
                     SELECT DISTINCT claim_uid FROM claim_fts WHERE claim_fts MATCH ? LIMIT ?
@@ -360,7 +361,8 @@ class SqliteReadModel:
                 notes=r[11],
                 parent_claim_uid=r[12],
                 decomposition_status=r[13],
-                updated_at=r[14],
+                epistemic_stance=r[14] if len(r) > 14 else None,
+                updated_at=r[15] if len(r) > 15 else r[14],
             )
             for r in cur.fetchall()
         ]
@@ -369,7 +371,7 @@ class SqliteReadModel:
         row = self._conn.execute(
             """SELECT claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text,
                claim_type, scope_json, temporal_json, current_status, language, tags_json, notes,
-               parent_claim_uid, decomposition_status, updated_at FROM claim WHERE claim_uid = ?""",
+               parent_claim_uid, decomposition_status, epistemic_stance, updated_at FROM claim WHERE claim_uid = ?""",
             (uid,),
         ).fetchone()
         if not row:
@@ -389,7 +391,8 @@ class SqliteReadModel:
             notes=row[11],
             parent_claim_uid=row[12],
             decomposition_status=row[13],
-            updated_at=row[14],
+            epistemic_stance=row[14] if len(row) > 14 else None,
+            updated_at=row[15] if len(row) > 15 else row[14],
         )
 
     def get_evidence_span(self, uid: str) -> EvidenceSpan | None:
@@ -420,7 +423,7 @@ class SqliteReadModel:
         cur = self._conn.execute(
             """SELECT claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text,
                claim_type, scope_json, temporal_json, current_status, language, tags_json, notes,
-               parent_claim_uid, decomposition_status, updated_at FROM claim WHERE parent_claim_uid = ? ORDER BY created_at ASC""",
+               parent_claim_uid, decomposition_status, epistemic_stance, updated_at FROM claim WHERE parent_claim_uid = ? ORDER BY created_at ASC""",
             (claim_uid,),
         )
         return [
@@ -439,7 +442,8 @@ class SqliteReadModel:
                 notes=r[11],
                 parent_claim_uid=r[12],
                 decomposition_status=r[13],
-                updated_at=r[14],
+                epistemic_stance=r[14] if len(r) > 14 else None,
+                updated_at=r[15] if len(r) > 15 else r[14],
             )
             for r in cur.fetchall()
         ]
@@ -574,7 +578,7 @@ class SqliteReadModel:
     def get_source(self, uid: str) -> Source | None:
         """Return source by uid or None. Spec 1.5.2."""
         row = self._conn.execute(
-            """SELECT source_uid, investigation_uid, display_name, source_type, alias, encrypted_identity, notes, independence_notes, created_at, created_by_actor_id, updated_at
+            """SELECT source_uid, investigation_uid, display_name, source_type, alias, encrypted_identity, notes, independence_notes, reliability_notes, created_at, created_by_actor_id, updated_at
                FROM source WHERE source_uid = ?""",
             (uid,),
         ).fetchone()
@@ -589,15 +593,16 @@ class SqliteReadModel:
             encrypted_identity=row[5],
             notes=row[6],
             independence_notes=row[7] if len(row) > 7 else None,
-            created_at=row[8] if len(row) > 8 else row[7],
-            created_by_actor_id=row[9] if len(row) > 9 else row[8],
-            updated_at=row[10] if len(row) > 10 else row[9],
+            created_at=row[9] if len(row) > 9 else row[8],
+            created_by_actor_id=row[10] if len(row) > 10 else row[9],
+            updated_at=row[11] if len(row) > 11 else row[10],
+            reliability_notes=row[8] if len(row) > 8 else None,
         )
 
     def list_sources_by_investigation(self, investigation_uid: str) -> list[Source]:
         """Return sources for an investigation in created_at order. Spec 1.5.2."""
         cur = self._conn.execute(
-            """SELECT source_uid, investigation_uid, display_name, source_type, alias, encrypted_identity, notes, independence_notes, created_at, created_by_actor_id, updated_at
+            """SELECT source_uid, investigation_uid, display_name, source_type, alias, encrypted_identity, notes, independence_notes, reliability_notes, created_at, created_by_actor_id, updated_at
                FROM source WHERE investigation_uid = ? ORDER BY created_at ASC""",
             (investigation_uid,),
         )
@@ -611,9 +616,10 @@ class SqliteReadModel:
                 encrypted_identity=r[5],
                 notes=r[6],
                 independence_notes=r[7] if len(r) > 7 else None,
-                created_at=r[8] if len(r) > 8 else r[7],
-                created_by_actor_id=r[9] if len(r) > 9 else r[8],
-                updated_at=r[10] if len(r) > 10 else r[9],
+                created_at=r[9] if len(r) > 9 else r[8],
+                created_by_actor_id=r[10] if len(r) > 10 else r[9],
+                updated_at=r[11] if len(r) > 11 else r[10],
+                reliability_notes=r[8] if len(r) > 8 else None,
             )
             for r in cur.fetchall()
         ]
@@ -878,7 +884,7 @@ class SqliteReadModel:
     def get_evidence_link(self, link_uid: str) -> EvidenceLink | None:
         """Return evidence link by uid or None (includes retracted links). Phase 3: used when retracting."""
         row = self._conn.execute(
-            """SELECT link_uid, claim_uid, span_uid, link_type, strength, notes, rationale, created_at, created_by_actor_id, source_event_id
+            """SELECT link_uid, claim_uid, span_uid, link_type, strength, notes, rationale, defeater_kind, created_at, created_by_actor_id, source_event_id
                FROM evidence_link WHERE link_uid = ?""",
             (link_uid,),
         ).fetchone()
@@ -892,15 +898,16 @@ class SqliteReadModel:
             strength=row[4],
             notes=row[5],
             rationale=row[6],
-            created_at=row[7],
-            created_by_actor_id=row[8],
-            source_event_id=row[9],
+            defeater_kind=row[7] if len(row) > 7 else None,
+            created_at=row[8] if len(row) > 8 else row[7],
+            created_by_actor_id=row[9] if len(row) > 9 else row[8],
+            source_event_id=row[10] if len(row) > 10 else row[9],
         )
 
     def _get_links_for_claim(self, claim_uid: str, link_type: str) -> list[EvidenceLink]:
         """Return active (non-retracted) support or challenge links for claim. Phase 3: excludes evidence_link_retraction."""
         cur = self._conn.execute(
-            """SELECT el.link_uid, el.claim_uid, el.span_uid, el.link_type, el.strength, el.notes, el.rationale, el.created_at, el.created_by_actor_id, el.source_event_id
+            """SELECT el.link_uid, el.claim_uid, el.span_uid, el.link_type, el.strength, el.notes, el.rationale, el.defeater_kind, el.created_at, el.created_by_actor_id, el.source_event_id
                FROM evidence_link el
                LEFT JOIN evidence_link_retraction r ON el.link_uid = r.link_uid
                WHERE el.claim_uid = ? AND el.link_type = ? AND r.link_uid IS NULL
@@ -916,9 +923,10 @@ class SqliteReadModel:
                 strength=r[4],
                 notes=r[5],
                 rationale=r[6],
-                created_at=r[7],
-                created_by_actor_id=r[8],
-                source_event_id=r[9],
+                defeater_kind=r[7] if len(r) > 7 else None,
+                created_at=r[8] if len(r) > 8 else r[7],
+                created_by_actor_id=r[9] if len(r) > 9 else r[8],
+                source_event_id=r[10] if len(r) > 10 else r[9],
             )
             for r in cur.fetchall()
         ]
@@ -926,7 +934,7 @@ class SqliteReadModel:
     def get_tension(self, tension_uid: str) -> Tension | None:
         """Return tension by uid or None. Phase 11: includes exception_workflow fields when present."""
         row = self._conn.execute(
-            """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
+            """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, defeater_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
                       assigned_to, due_date, remediation_type
                FROM tension WHERE tension_uid = ?""",
             (tension_uid,),
@@ -939,21 +947,22 @@ class SqliteReadModel:
             claim_a_uid=row[2],
             claim_b_uid=row[3],
             tension_kind=row[4],
-            status=row[5],
-            notes=row[6],
-            created_at=row[7],
-            created_by_actor_id=row[8],
-            source_event_id=row[9],
-            updated_at=row[10],
-            assigned_to=row[11],
-            due_date=row[12],
-            remediation_type=row[13],
+            status=row[6],
+            notes=row[7],
+            created_at=row[8],
+            created_by_actor_id=row[9],
+            source_event_id=row[10],
+            updated_at=row[11],
+            assigned_to=row[12],
+            due_date=row[13],
+            remediation_type=row[14],
+            defeater_kind=row[5] if len(row) > 5 else None,
         )
 
     def get_tensions_for_claim(self, claim_uid: str) -> list[Tension]:
         """Return tensions where claim_uid is claim_a or claim_b. Spec 1.5.2. Phase 11: includes exception_workflow fields."""
         cur = self._conn.execute(
-            """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
+            """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, defeater_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
                       assigned_to, due_date, remediation_type
                FROM tension WHERE claim_a_uid = ? OR claim_b_uid = ? ORDER BY created_at ASC""",
             (claim_uid, claim_uid),
@@ -965,15 +974,16 @@ class SqliteReadModel:
                 claim_a_uid=r[2],
                 claim_b_uid=r[3],
                 tension_kind=r[4],
-                status=r[5],
-                notes=r[6],
-                created_at=r[7],
-                created_by_actor_id=r[8],
-                source_event_id=r[9],
-                updated_at=r[10],
-                assigned_to=r[11],
-                due_date=r[12],
-                remediation_type=r[13],
+                status=r[6],
+                notes=r[7],
+                created_at=r[8],
+                created_by_actor_id=r[9],
+                source_event_id=r[10],
+                updated_at=r[11],
+                assigned_to=r[12],
+                due_date=r[13],
+                remediation_type=r[14],
+                defeater_kind=r[5] if len(r) > 5 else None,
             )
             for r in cur.fetchall()
         ]
@@ -1030,7 +1040,7 @@ class SqliteReadModel:
         limit: int = 500,
     ) -> list[Tension]:
         """Return tensions for an investigation; optional status filter. Phase 5. Phase 11: includes exception_workflow fields."""
-        sel = """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
+        sel = """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, defeater_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
                          assigned_to, due_date, remediation_type
                    FROM tension"""
         if status is not None:
@@ -1051,22 +1061,23 @@ class SqliteReadModel:
                 claim_a_uid=r[2],
                 claim_b_uid=r[3],
                 tension_kind=r[4],
-                status=r[5],
-                notes=r[6],
-                created_at=r[7],
-                created_by_actor_id=r[8],
-                source_event_id=r[9],
-                updated_at=r[10],
-                assigned_to=r[11],
-                due_date=r[12],
-                remediation_type=r[13],
+                status=r[6],
+                notes=r[7],
+                created_at=r[8],
+                created_by_actor_id=r[9],
+                source_event_id=r[10],
+                updated_at=r[11],
+                assigned_to=r[12],
+                due_date=r[13],
+                remediation_type=r[14],
+                defeater_kind=r[5] if len(r) > 5 else None,
             )
             for r in cur.fetchall()
         ]
 
     def list_tensions_overdue(self, investigation_uid: str, limit: int = 500) -> list[Tension]:
         """Return tensions with due_date in the past and status not RESOLVED. Phase D.1 (exception workflow)."""
-        sel = """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
+        sel = """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, defeater_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
                          assigned_to, due_date, remediation_type
                    FROM tension
                    WHERE investigation_uid = ? AND due_date IS NOT NULL AND due_date < date('now') AND status != 'RESOLVED'
@@ -1080,15 +1091,16 @@ class SqliteReadModel:
                 claim_a_uid=r[2],
                 claim_b_uid=r[3],
                 tension_kind=r[4],
-                status=r[5],
-                notes=r[6],
-                created_at=r[7],
-                created_by_actor_id=r[8],
-                source_event_id=r[9],
-                updated_at=r[10],
-                assigned_to=r[11],
-                due_date=r[12],
-                remediation_type=r[13],
+                status=r[6],
+                notes=r[7],
+                created_at=r[8],
+                created_by_actor_id=r[9],
+                source_event_id=r[10],
+                updated_at=r[11],
+                assigned_to=r[12],
+                due_date=r[13],
+                remediation_type=r[14],
+                defeater_kind=r[5] if len(r) > 5 else None,
             )
             for r in cur.fetchall()
         ]

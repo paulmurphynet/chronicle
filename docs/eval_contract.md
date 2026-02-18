@@ -8,6 +8,12 @@
 
 ---
 
+## Important: what the default scorer does and does not do
+
+**The standalone scorer**, by default, links **every** evidence chunk as **support** for the single claim (the answer). It does **not** validate that each chunk actually supports or entails the answer. So defensibility metrics (e.g. support_count, provenance_quality) reflect this structural convention—not a check that evidence semantically supports the claim. **For higher assurance**, validate or curate evidence–claim links (e.g. by human review or by an NLI/entailment step) and then record them in a full Chronicle session; the default scorer path does not perform that validation.
+
+---
+
 ## 1. Input
 
 A single defensibility eval run is defined by:

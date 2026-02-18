@@ -4,6 +4,8 @@ A **defensibility benchmark** uses Chronicle-formatted investigations and defens
 
 **Citable benchmark:** The canonical run is **`scripts/benchmark_data/run_defensibility_benchmark.py`**: fixed queries, Chronicle-backed RAG path, defensibility recorded per answer. Reproducible with one command from the repo root; output shape is documented in [Eval and benchmarking](eval-and-benchmarking.md). Papers and blogs can cite "Chronicle defensibility benchmark (run_defensibility_benchmark.py)" and the [eval contract](eval_contract.md) for the metric definition.
 
+**Scorer default:** The default scorer links every evidence chunk as support for the single claim and does not validate that evidence actually supports the answer. For higher assurance, validate or curate evidence–claim links (e.g. human or NLI) then record; see [Eval contract](eval_contract.md#important-what-the-default-scorer-does-and-does-not-do).
+
 **Sample / public dataset:** For validation and demos, you can generate a small set of (query, answer, evidence) investigations with schema-valid defensibility scorecards. Use `scripts/synthetic_data/generate_realistic_synthetic.py` for synthetic investigations with varied defensibility profiles, or `scripts/benchmark_data/generate_benchmark_samples.py` for fixed-query benchmark samples. A minimal Try sample is produced by `scripts/generate_sample_chronicle.py`. See [Eval contract](eval_contract.md) for the scorer input/output shape.
 
 ---

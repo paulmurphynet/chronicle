@@ -40,6 +40,7 @@ def register_source(
     encrypted_identity: str | None = None,
     notes: str | None = None,
     independence_notes: str | None = None,
+    reliability_notes: str | None = None,
     actor_id: str = "default",
     actor_type: str = "human",
     workspace: str = "spark",
@@ -66,6 +67,7 @@ def register_source(
         encrypted_identity=encrypted_identity,
         notes=notes,
         independence_notes=independence_notes,
+        reliability_notes=reliability_notes,
     )
     event = Event(
         event_id=event_id,
@@ -190,7 +192,8 @@ def get_sources_backing_claim(
                 seen[esl.source_uid] = {
                     "source_uid": source.source_uid,
                     "display_name": source.display_name,
-                    "independence_notes": source.independence_notes,
+                    "independence_notes": getattr(source, "independence_notes", None),
+                    "reliability_notes": getattr(source, "reliability_notes", None),
                 }
     return sorted(seen.values(), key=lambda x: x["source_uid"])
 

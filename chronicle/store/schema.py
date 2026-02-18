@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS claim (
   notes                TEXT NULL,
   parent_claim_uid     TEXT NULL,
   decomposition_status TEXT NOT NULL DEFAULT 'unanalyzed',
+  epistemic_stance     TEXT NULL,
   updated_at           TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_claim_investigation ON claim (investigation_uid);
@@ -177,6 +178,7 @@ CREATE TABLE IF NOT EXISTS evidence_link (
   strength             REAL NULL,
   notes                TEXT NULL,
   rationale            TEXT NULL,
+  defeater_kind        TEXT NULL,
   created_at           TEXT NOT NULL,
   created_by_actor_id  TEXT NOT NULL,
   source_event_id      TEXT NOT NULL
@@ -217,6 +219,7 @@ CREATE TABLE IF NOT EXISTS tension (
   claim_a_uid          TEXT NOT NULL REFERENCES claim (claim_uid),
   claim_b_uid          TEXT NOT NULL REFERENCES claim (claim_uid),
   tension_kind         TEXT NULL,
+  defeater_kind        TEXT NULL,
   status               TEXT NOT NULL DEFAULT 'OPEN',
   notes                TEXT NULL,
   created_at           TEXT NOT NULL,
@@ -298,6 +301,7 @@ CREATE TABLE IF NOT EXISTS source (
   encrypted_identity  TEXT NULL,
   notes               TEXT NULL,
   independence_notes   TEXT NULL,
+  reliability_notes    TEXT NULL,
   created_at          TEXT NOT NULL,
   created_by_actor_id TEXT NOT NULL,
   updated_at           TEXT NOT NULL
@@ -525,11 +529,48 @@ def ensure_evidence_link_rationale_column(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+def ensure_evidence_link_defeater_kind_column(conn: sqlite3.Connection) -> None:
+    """Optional defeater_kind on evidence_link (rebutting vs undercutting for challenge links)."""
+    cur = conn.execute("PRAGMA table_info(evidence_link)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "defeater_kind" not in columns:
+        conn.execute("ALTER TABLE evidence_link ADD COLUMN defeater_kind TEXT NULL")
+    conn.commit()
+
+
+def ensure_tension_defeater_kind_column(conn: sqlite3.Connection) -> None:
+    """Optional defeater_kind on tension (rebutting vs undercutting)."""
+    cur = conn.execute("PRAGMA table_info(tension)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "defeater_kind" not in columns:
+        conn.execute("ALTER TABLE tension ADD COLUMN defeater_kind TEXT NULL")
+    conn.commit()
+
+
+def ensure_source_reliability_notes_column(conn: sqlite3.Connection) -> None:
+    """Optional reliability_notes on source (user-supplied; we record, we don't verify)."""
+    cur = conn.execute("PRAGMA table_info(source)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "reliability_notes" not in columns:
+        conn.execute("ALTER TABLE source ADD COLUMN reliability_notes TEXT NULL")
+    conn.commit()
+
+
+def ensure_claim_epistemic_stance_column(conn: sqlite3.Connection) -> None:
+    """Optional epistemic_stance on claim (e.g. working_hypothesis vs asserted_established)."""
+    cur = conn.execute("PRAGMA table_info(claim)")
+    columns = [row[1] for row in cur.fetchall()]
+    if "epistemic_stance" not in columns:
+        conn.execute("ALTER TABLE claim ADD COLUMN epistemic_stance TEXT NULL")
+    conn.commit()
+
+
 def run_read_model_ddl_only(conn: sqlite3.Connection) -> None:
     """Create read model tables if not exist. Does not write schema_version. For standalone use or before rebuild."""
     conn.executescript(READ_MODEL_DDL)
     ensure_investigation_tier_columns(conn)
     conn.executescript(CLAIM_DDL)
+    ensure_claim_epistemic_stance_column(conn)
     conn.executescript(CLAIM_FTS_DDL)
     # Backfill FTS only when empty (e.g. existing DB upgraded to add FTS); triggers handle new claims
     if conn.execute("SELECT COUNT(*) FROM claim_fts").fetchone()[0] == 0:
@@ -539,6 +580,7 @@ def run_read_model_ddl_only(conn: sqlite3.Connection) -> None:
     conn.executescript(EVIDENCE_SPAN_DDL)
     conn.executescript(EVIDENCE_LINK_DDL)
     ensure_evidence_link_rationale_column(conn)
+    ensure_evidence_link_defeater_kind_column(conn)
     conn.executescript(EVIDENCE_LINK_RETRACTION_DDL)
     ensure_evidence_redaction_columns(conn)
     ensure_evidence_reviewed_columns(conn)
@@ -546,11 +588,13 @@ def run_read_model_ddl_only(conn: sqlite3.Connection) -> None:
     conn.executescript(CLAIM_ASSERTION_DDL)
     conn.executescript(TENSION_DDL)
     ensure_tension_exception_columns(conn)
+    ensure_tension_defeater_kind_column(conn)
     conn.executescript(TENSION_SUGGESTION_DDL)
     conn.executescript(CLAIM_DECOMPOSITION_DDL)
     conn.executescript(EVIDENCE_SUPERSESSION_DDL)
     conn.executescript(SOURCE_DDL)
     ensure_source_independence_notes_column(conn)
+    ensure_source_reliability_notes_column(conn)
     conn.executescript(EVIDENCE_SOURCE_LINK_DDL)
     conn.executescript(EVIDENCE_TRUST_ASSESSMENT_DDL)
     conn.executescript(ARTIFACT_DDL)

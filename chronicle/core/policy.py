@@ -19,6 +19,7 @@ _POLICY_KNOWN_TOP_LEVEL_KEYS = frozenset(
         "profile_id",
         "display_name",
         "description",
+        "policy_rationale",
         "mes_rules",
         "evidence_admissibility",
         "tension_rules",
@@ -169,6 +170,7 @@ class PolicyProfile:
     profile_id: str
     display_name: str = ""
     description: str = ""
+    policy_rationale: str | None = None  # Optional: why thresholds were chosen (e.g. "per benchmark X")
     mes_rules: list[MESRule] = field(default_factory=list)
     evidence_admissibility: EvidenceAdmissibility | None = None
     tension_rules: TensionRules | None = None
@@ -311,6 +313,7 @@ class PolicyProfile:
             profile_id=d.get("profile_id", "default"),
             display_name=d.get("display_name", ""),
             description=d.get("description", ""),
+            policy_rationale=d.get("policy_rationale") or None,
             mes_rules=mes_rules,
             evidence_admissibility=evidence_admissibility,
             tension_rules=tension_rules,
@@ -386,6 +389,8 @@ class PolicyProfile:
                 }
                 for tier, to in self.tier_overrides.items()
             }
+        if self.policy_rationale is not None:
+            d["policy_rationale"] = self.policy_rationale
         if include_format_version:
             d["format_version"] = POLICY_FORMAT_VERSION
         if self.exception_workflow:

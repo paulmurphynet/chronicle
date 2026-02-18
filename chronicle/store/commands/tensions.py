@@ -58,6 +58,7 @@ def declare_tension(
     claim_b_uid: str,
     *,
     tension_kind: str | None = None,
+    defeater_kind: str | None = None,
     notes: str | None = None,
     actor_id: str = "default",
     actor_type: str = "human",
@@ -93,6 +94,7 @@ def declare_tension(
         claim_a_uid=claim_a_uid,
         claim_b_uid=claim_b_uid,
         tension_kind=tension_kind,
+        defeater_kind=defeater_kind,
         notes=notes,
     ).to_dict()
     apply_attestation_to_payload(

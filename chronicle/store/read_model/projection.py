@@ -205,18 +205,20 @@ def handle_claim_proposed(conn: sqlite3.Connection, event: Event) -> None:
     notes = payload.get("notes")
     parent_claim_uid = payload.get("parent_claim_uid")
     decomposition_status = "unanalyzed"
+    epistemic_stance = payload.get("epistemic_stance")
     conn.execute(
         """
         INSERT INTO claim (
             claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text,
             claim_type, scope_json, temporal_json, current_status, language, tags_json, notes,
-            parent_claim_uid, decomposition_status, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            parent_claim_uid, decomposition_status, epistemic_stance, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(claim_uid) DO UPDATE SET
             claim_text = excluded.claim_text,
             claim_type = excluded.claim_type,
             notes = excluded.notes,
             tags_json = excluded.tags_json,
+            epistemic_stance = excluded.epistemic_stance,
             updated_at = excluded.updated_at
         """,
         (
@@ -234,6 +236,7 @@ def handle_claim_proposed(conn: sqlite3.Connection, event: Event) -> None:
             notes,
             parent_claim_uid,
             decomposition_status,
+            epistemic_stance,
             created_at,
         ),
     )
@@ -288,13 +291,14 @@ def _handle_evidence_link(conn: sqlite3.Connection, event: Event, link_type: str
     strength = payload.get("strength")
     notes = payload.get("notes")
     rationale = payload.get("rationale")
+    defeater_kind = payload.get("defeater_kind")
     created_at = event.recorded_at
     created_by_actor_id = event.actor_id
     source_event_id = event.event_id
     conn.execute(
         """
-        INSERT INTO evidence_link (link_uid, claim_uid, span_uid, link_type, strength, notes, rationale, created_at, created_by_actor_id, source_event_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO evidence_link (link_uid, claim_uid, span_uid, link_type, strength, notes, rationale, defeater_kind, created_at, created_by_actor_id, source_event_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             link_uid,
@@ -304,6 +308,7 @@ def _handle_evidence_link(conn: sqlite3.Connection, event: Event, link_type: str
             strength,
             notes,
             rationale,
+            defeater_kind,
             created_at,
             created_by_actor_id,
             source_event_id,
@@ -438,6 +443,7 @@ def handle_tension_declared(conn: sqlite3.Connection, event: Event) -> None:
     claim_a_uid = payload["claim_a_uid"]
     claim_b_uid = payload["claim_b_uid"]
     tension_kind = payload.get("tension_kind")
+    defeater_kind = payload.get("defeater_kind")
     status = "OPEN"
     notes = payload.get("notes")
     created_at = event.recorded_at
@@ -445,8 +451,8 @@ def handle_tension_declared(conn: sqlite3.Connection, event: Event) -> None:
     source_event_id = event.event_id
     conn.execute(
         """
-        INSERT INTO tension (tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at, assigned_to, due_date, remediation_type)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL)
+        INSERT INTO tension (tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, defeater_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at, assigned_to, due_date, remediation_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL)
         """,
         (
             tension_uid,
@@ -454,6 +460,7 @@ def handle_tension_declared(conn: sqlite3.Connection, event: Event) -> None:
             claim_a_uid,
             claim_b_uid,
             tension_kind,
+            defeater_kind,
             status,
             notes,
             created_at,
@@ -765,14 +772,15 @@ def handle_source_registered(conn: sqlite3.Connection, event: Event) -> None:
     encrypted_identity = payload.get("encrypted_identity")
     notes = payload.get("notes")
     independence_notes = payload.get("independence_notes")
+    reliability_notes = payload.get("reliability_notes")
     created_at = event.recorded_at
     created_by_actor_id = event.actor_id
     conn.execute(
         """
         INSERT INTO source (
             source_uid, investigation_uid, display_name, source_type, alias,
-            encrypted_identity, notes, independence_notes, created_at, created_by_actor_id, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            encrypted_identity, notes, independence_notes, reliability_notes, created_at, created_by_actor_id, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(source_uid) DO UPDATE SET
             display_name = excluded.display_name,
             source_type = excluded.source_type,
@@ -780,6 +788,7 @@ def handle_source_registered(conn: sqlite3.Connection, event: Event) -> None:
             encrypted_identity = excluded.encrypted_identity,
             notes = excluded.notes,
             independence_notes = excluded.independence_notes,
+            reliability_notes = excluded.reliability_notes,
             updated_at = excluded.updated_at
         """,
         (
@@ -791,6 +800,7 @@ def handle_source_registered(conn: sqlite3.Connection, event: Event) -> None:
             encrypted_identity,
             notes,
             independence_notes,
+            reliability_notes,
             created_at,
             created_by_actor_id,
             created_at,

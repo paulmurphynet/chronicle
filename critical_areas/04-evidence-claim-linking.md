@@ -18,6 +18,7 @@ In the **standalone scorer**, we automatically link each evidence chunk as **sup
 
 - **Support** in Chronicle = “a link of type support was recorded.” It does **not** mean “we have verified that this evidence supports this claim.”
 - **Challenge** = “a link of type challenge was recorded.” Same caveat.
+- We support an optional **rationale** (warrant) and optional **defeater_kind** (rebutting | undercutting) on links. Both are **recorded as asserted**; we do not verify that the rationale is correct or that the defeater kind is accurate.
 
 Over-relying on link counts as if they reflected validated support/entailment is an epistemic risk. The score can look “strong” (e.g. two supports, two sources) even when the evidence doesn’t actually support the claim, if no one has added challenge links or checked the relationship.
 

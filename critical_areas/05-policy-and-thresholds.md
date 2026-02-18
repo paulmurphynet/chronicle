@@ -29,6 +29,7 @@ Over-relying on the score as if it were backed by domain-validated or scientific
 
 - **Policy and thresholds are configurable and structural—not empirically or domain-validated by us.** Use them to enforce consistency and to reflect organizational choices; do not present them as if they were validated for a given domain (e.g. “journalism standard”) unless you have done that validation yourself.
 - When documenting or deploying a policy, state clearly that it reflects your (or your org’s) choices and that Chronicle does not certify that it meets any external standard.
+- Policy profiles may include optional **policy_rationale** (why thresholds were chosen, e.g. "per benchmark X"). We **record** it; we do **not** validate that the rationale is correct or that the policy is appropriate for a domain.
 - For domain-specific assurance, policy would need to be validated against domain requirements outside Chronicle; Chronicle only applies whatever policy is configured.
 
 ---

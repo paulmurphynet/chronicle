@@ -192,6 +192,7 @@ class ClaimProposedPayload:
     created_by: ActorRef | None = None
     notes: str | None = None
     tags: list[str] | None = None
+    epistemic_stance: str | None = None  # e.g. working_hypothesis | asserted_established
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {"claim_uid": self.claim_uid, "claim_text": self.claim_text}
@@ -210,6 +211,8 @@ class ClaimProposedPayload:
             d["notes"] = self.notes
         if self.tags is not None:
             d["tags"] = self.tags
+        if self.epistemic_stance is not None:
+            d["epistemic_stance"] = self.epistemic_stance
         return d
 
 
@@ -281,6 +284,7 @@ class TensionDeclaredPayload:
     claim_a_uid: str
     claim_b_uid: str
     tension_kind: str | None = None
+    defeater_kind: str | None = None  # Optional: rebutting | undercutting
     notes: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -291,6 +295,8 @@ class TensionDeclaredPayload:
         }
         if self.tension_kind is not None:
             d["tension_kind"] = self.tension_kind
+        if self.defeater_kind is not None:
+            d["defeater_kind"] = self.defeater_kind
         if self.notes is not None:
             d["notes"] = self.notes
         return d
@@ -480,6 +486,7 @@ class EvidenceLinkPayload:
     strength: float | None = None  # 0..1
     notes: str | None = None
     rationale: str | None = None  # Optional warrant: why this evidence supports/challenges this claim (evals, NLI)
+    defeater_kind: str | None = None  # Optional: rebutting | undercutting (for challenge links)
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -493,6 +500,8 @@ class EvidenceLinkPayload:
             d["notes"] = self.notes
         if self.rationale is not None:
             d["rationale"] = self.rationale
+        if self.defeater_kind is not None:
+            d["defeater_kind"] = self.defeater_kind
         return d
 
 
@@ -669,6 +678,7 @@ class ClaimDecompositionAnalyzedPayload:
 class SourceRegisteredPayload:
     """Payload for SourceRegistered. Spec Section 15.1.23.
     Phase 2 (Epistemology): independence_notes — optional rationale for treating this source as independent (e.g. different institution, different methods).
+    reliability_notes: optional user-supplied reliability/authority metadata (we record, we don't verify).
     """
 
     source_uid: str
@@ -679,6 +689,7 @@ class SourceRegisteredPayload:
     encrypted_identity: str | None = None
     notes: str | None = None
     independence_notes: str | None = None
+    reliability_notes: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -695,6 +706,8 @@ class SourceRegisteredPayload:
             d["notes"] = self.notes
         if self.independence_notes is not None:
             d["independence_notes"] = self.independence_notes
+        if self.reliability_notes is not None:
+            d["reliability_notes"] = self.reliability_notes
         return d
 
 
