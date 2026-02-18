@@ -19,7 +19,7 @@
 
 - [x] **Claim–evidence–metrics export helper** — Add a single API/helper (e.g. `build_claim_evidence_metrics_export`) that returns the stable JSON shape for one claim + evidence refs + defensibility, so callers don’t assemble from `build_generic_export_json` + read model + scorecards by hand. See [claim-evidence-metrics-export](claim-evidence-metrics-export.md) for the shape.
 
-- [ ] **Multi-key claim metadata** — If needed: add `metadata_json` (or equivalent) to claims so multiple external keys per claim are supported; document in [external-ids](external-ids.md). Until then, a single note or tag is enough for one external ID.
+- [x] **Multi-key claim metadata** — If needed: add `metadata_json` (or equivalent) to claims so multiple external keys per claim are supported; document in [external-ids](external-ids.md). Until then, a single note or tag is enough for one external ID.
 
 - [ ] **Verification: replay-from-N or time-range replay** — Optional extension for project verification: formal replay from event N or time-range replay. Document in [verification-guarantees](verification-guarantees.md) if added.
 
@@ -29,7 +29,7 @@
 
 - [x] **Ollama tests: pytest marker** — Add a marker (e.g. `@pytest.mark.ollama`) for tests that require Ollama; skip when env is unset or Ollama unreachable so CI stays fast and local runs can exercise the full stack. See [testing-with-ollama](testing-with-ollama.md).
 
-- [ ] **Prune scripts (ai_validation, verticals)** — If ai_validation or verticals assume the old API or full UI and have no remaining dependents, archive or remove them and document in [scripts/README](../scripts/README.md). Otherwise leave as optional/advanced.
+- [x] **Prune scripts (ai_validation, verticals)** — If ai_validation or verticals assume the old API or full UI and have no remaining dependents, archive or remove them and document in [scripts/README](../scripts/README.md). Otherwise leave as optional/advanced.
 
 - [ ] **Guidebook enhancement** — Expand the guidebook (narrative, problem, approach, limits) after more features (e.g. interoperability) are in place to avoid repeated rewrites.
 
@@ -41,7 +41,7 @@
 
 - [ ] **Optional depth (warrant / rationale)** — If it clearly improves evals or adoption: optional “support rationale” or “warrant” field (why this evidence supports this claim), or tighter link to NLI/entailment evals. [Epistemology scope](epistemology-scope.md) sets boundaries.
 
-- [ ] **Eval-harness integration (RAGAS, Trulens, LangSmith)** — Document or provide a thin adapter so Chronicle defensibility can be added as a metric in popular frameworks. Goal: “add defensibility to your RAG eval in one step.” (Doc and adapter template already in [integrating-with-chronicle](integrating-with-chronicle.md); further framework-specific adapters as needed.)
+- [x] **Eval-harness integration (RAGAS, Trulens, LangSmith)** — Document or provide a thin adapter so Chronicle defensibility can be added as a metric in popular frameworks. Goal: “add defensibility to your RAG eval in one step.” (Doc and adapter template already in [integrating-with-chronicle](integrating-with-chronicle.md); further framework-specific adapters as needed.)
 
 - [x] **.chronicle as interchange positioning** — Clarify in docs/README that the .chronicle format is “show your work”: anyone can export and others can verify; encourage tooling that consumes .chronicle.
 

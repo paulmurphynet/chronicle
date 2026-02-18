@@ -43,6 +43,18 @@ To add Chronicle defensibility as a **metric** in a RAG eval framework (e.g. RAG
 
 No Chronicle-specific server is required; the scorer runs in-process. For benchmarks and reporting, see [Eval and benchmarking](eval-and-benchmarking.md) and [Defensibility benchmark](benchmark.md).
 
+**Framework-specific (RAGAS, Trulens, LangSmith):** These frameworks let you add custom metrics. Add a metric that, per run, takes (query, answer, contexts), invokes the Chronicle scorer (stdin → `standalone_defensibility_scorer.py` or in-process `defensibility_metrics_for_claim`), and records the result (e.g. `provenance_quality`, `corroboration.support_count`). Example pattern:
+
+```python
+# Pseudocode: one run → one defensibility metric
+def defensibility_metric(run: Run) -> float | dict:
+    payload = {"query": run.query, "answer": run.answer, "evidence": run.contexts}
+    result = run_scorer(payload)  # standalone_defensibility_scorer or session path
+    return result.get("provenance_quality") or result  # or map to your framework's score
+```
+
+Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py) as the scorer bridge; your framework then calls it per run and aggregates.
+
 ---
 
 ## Idempotency for agents and pipelines

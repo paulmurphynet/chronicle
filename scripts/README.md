@@ -29,8 +29,8 @@ Scripts and directories for scenario validation, per-vertical samples, benchmark
 
 | Path | Purpose |
 |------|---------|
-| **ai_validation/** | Scenario validation (rule-based driver). Scenarios per vertical, scorer, run_all_verticals, trace/proposal for Learn. See [ai_validation/README.md](ai_validation/README.md). |
-| **verticals/** | Per-vertical sample generators (e.g. Journalism `generate_sample.py`). See [verticals/README.md](verticals/README.md). |
+| **ai_validation/** | Scenario validation (rule-based driver). Uses current Chronicle API (ChronicleSession, create_project, propose_claim, etc.). Scenarios per vertical, scorer, run_all_verticals. See [ai_validation/README.md](ai_validation/README.md). |
+| **verticals/** | Per-vertical sample generators (e.g. Journalism `generate_sample.py`). Used by `generate_sample_chronicle.py` for the Try sample. See [verticals/README.md](verticals/README.md). |
 | **benchmark_data/** | Benchmark sample generation: `generate_benchmark_samples.py`, `generate_vertical_corpora.py`, `synthetic_training_pipeline.py`, `evals_to_preference_pair.py`. First-class entry point: `run_defensibility_benchmark.py` (listed above). |
 | **adapters/** | Map external formats to Chronicle: [example_rag_to_scorer](adapters/example_rag_to_scorer.py), [fact_checker_to_chronicle](adapters/fact_checker_to_chronicle.py), [provenance_to_chronicle](adapters/provenance_to_chronicle.py). See [adapters/README.md](adapters/README.md). |
 | **synthetic_data/** | Generate realistic synthetic data: `generate_realistic_synthetic.py`. |
@@ -73,7 +73,7 @@ PYTHONPATH=. python3 scripts/generate_agent_tools.py
 
 ## Archived scripts
 
-No scripts have been archived in this repo. Scripts that only served an old API/UI (e.g. `start_chronicle.sh`) were not added here or have been removed elsewhere. If we archive scripts in the future, we will list them in this section and note where they were moved (e.g. an `archived/` directory or a tag).
+**Assessment (to-do “Prune scripts”):** `ai_validation` and `verticals` use the current Chronicle API (session, read model, export). They are kept as optional/advanced; no scripts were archived. If a script is ever retired (e.g. superseded by another tool), it will be listed here and moved to an `archived/` directory or tagged.
 
 ---
 

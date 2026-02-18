@@ -59,6 +59,8 @@ def propose_claim(
     *,
     initial_type: str | None = None,
     parent_claim_uid: str | None = None,
+    notes: str | None = None,
+    tags: list[str] | None = None,
     actor_id: str = "default",
     actor_type: str = "human",
     workspace: str = "spark",
@@ -87,6 +89,8 @@ def propose_claim(
         claim_text=text,
         initial_type=initial_type,
         parent_claim_uid=parent_claim_uid,
+        notes=notes,
+        tags=tags,
         created_by=ActorRef(actor_type=actor_type, actor_id=actor_id),
     ).to_dict()
     apply_attestation_to_payload(
