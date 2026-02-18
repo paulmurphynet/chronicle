@@ -5,9 +5,13 @@
 **Key files:**
 
 - [chronicle/integrations/](../chronicle/integrations/) — LangChain, LlamaIndex, Haystack (when present)
-- [scripts/README.md](../scripts/README.md) — script layout and quick runs
+- [scripts/README.md](../scripts/README.md) — script layout, **first-class scripts** table, and quick runs
+- [scripts/adapters/](../scripts/adapters/) — RAG→scorer example, fact-checker→Chronicle, provenance→Chronicle
+- [chronicle/api/app.py](../chronicle/api/app.py) — optional HTTP API (install `.[api]`)
 - [scripts/standalone_defensibility_scorer.py](../scripts/standalone_defensibility_scorer.py) — already covered in Lesson 02
 - [docs/eval-and-benchmarking.md](../docs/eval-and-benchmarking.md) — how to run pipelines and report defensibility
+- [docs/api.md](../docs/api.md) — HTTP API config and endpoints
+- [docs/rag-evals-defensibility-metric.md](../docs/rag-evals-defensibility-metric.md) — RAG evals: contract and scorer in your harness
 
 ---
 
@@ -20,19 +24,51 @@ The **chronicle/integrations/** directory (or package) is intended to hold **han
 
 If the repo has `chronicle/integrations/langchain.py` or similar, open it and see how it uses **create_investigation**, **ingest_evidence**, **propose_claim**, **link_support**. If the directory is empty or minimal, the pattern is still: **framework event → session method**. Demos may live in **scripts/** (e.g. `langchain_rag_chronicle.py`, `cross_framework_rag_chronicle.py`).
 
-## Scripts layout
+## First-class scripts
 
-Open **scripts/README.md**.
+Open **scripts/README.md** and find the **“First-class scripts”** table. These are the main entry points for pipelines and interop:
 
-- **standalone_defensibility_scorer.py** — One (query, answer, evidence) in → defensibility JSON out. No framework required (Lesson 02).
-- **benchmark_data/run_defensibility_benchmark.py** — Runs a fixed set of queries through a Chronicle-backed path and outputs defensibility per answer (for benchmarking).
-- **eval_harness_adapter.py** — Adapts a single RAG run (e.g. LangChain) to the eval contract: run the pipeline, get the claim_uid for the answer, call **defensibility_metrics_for_claim(session, claim_uid)**, record the result.
-- **generate_sample_chronicle.py** — Produces a sample .chronicle (e.g. for the verifier or frontend). Delegates to verticals (e.g. journalism).
-- **ingest_transcript_csv.py** — CSV → one evidence item + one span + one claim per row; exports .chronicle. Used for transcripts (e.g. Lizzie Borden inquest).
-- **suggest_tensions_with_llm.py** — Suggests tensions (heuristic or Ollama LLM) and optionally applies them to the project.
+- **chronicle-verify** — Verify a .chronicle file (manifest, schema, evidence hashes). Stdlib only.
+- **standalone_defensibility_scorer.py** — One (query, answer, evidence) in → defensibility JSON out (Lesson 02).
+- **benchmark_data/run_defensibility_benchmark.py** — Fixed queries, RAG path, defensibility per answer.
+- **eval_harness_adapter.py** — Adapt a RAG run to the eval contract and record defensibility.
+- **export_for_ml.py** — Export investigation data for ML/training.
+- **rag_path_demo.py** — Minimal RAG path (session: ingest, claim, link).
+- **\*_rag_chronicle.py** — LangChain, LlamaIndex, Haystack, cross-framework demos.
+
+Use this table when you need to plug Chronicle into an eval harness, benchmark, or export pipeline.
+
+## Adapters (scripts/adapters/)
+
+Open **scripts/adapters/README.md**. Adapters map **external formats** into Chronicle (or into the scorer):
+
+- **example_rag_to_scorer.py** — Copy-paste template: read JSON (query, answer, evidence) from stdin or file, call the scorer, print metrics. Use when your RAG harness outputs the eval contract shape.
+- **fact_checker_to_chronicle.py** — Fact-checker output (claim + verdict + sources) → evidence items, propose_claim, support/challenge links. Expected JSON: `claim`, `verdict`, `sources` (with snippet, stance).
+- **provenance_to_chronicle.py** — Provenance assertions (“this evidence from this source”) → register_source, ingest_evidence, link_evidence_to_source. We record; we don’t verify. Requires `--path` to a project.
+
+These are **templates**: you can copy and adjust for your fact-checking or provenance pipeline. See [docs/provenance-recording.md](../docs/provenance-recording.md) and [docs/external-ids.md](../docs/external-ids.md).
+
+## Optional HTTP API
+
+If you install the **`[api]`** extra (`pip install -e ".[api]"`), you get a minimal HTTP API in **chronicle/api/app.py**. Run it with:
+
+```bash
+export CHRONICLE_PROJECT_PATH=/path/to/project
+uvicorn chronicle.api.app:app --reload
+```
+
+It exposes **write** (investigations, evidence, claims, links, tensions), **read** (claim, defensibility, reasoning brief), and **export/import** (.chronicle). Response shapes match the eval contract and defensibility schema. No auth in this minimal version; see [docs/api.md](../docs/api.md). Useful for fact-checking or provenance UIs that call Chronicle over HTTP.
+
+## Other scripts (layout)
+
+Beyond the first-class list, **scripts/README.md** also describes:
+
+- **generate_sample_chronicle.py** — Produces a sample .chronicle (verticals, e.g. journalism).
+- **ingest_transcript_csv.py** — CSV → one evidence item + one span + one claim per row; exports .chronicle.
+- **suggest_tensions_with_llm.py** — Suggests tensions (heuristic or Ollama LLM), optionally applies them.
 - **ingest_chronicle_to_aura.py** — Verify → import .chronicle into a graph project → sync to Neo4j (Aura pipeline).
 
-All of these use the **session** (or the verifier, or the Neo4j sync) under the hood. They are entry points for different workflows: eval, benchmarking, sample data, transcript ingestion, tension suggestion, graph sync.
+All of these use the **session** (or the verifier, or the Neo4j sync) under the hood.
 
 ## How scripts use the session
 
@@ -47,13 +83,17 @@ So scripts are **thin orchestration**; the engine is the store and commands.
 
 ## Try it
 
-1. List the contents of **scripts/** and **chronicle/integrations/** (if present). Match a few script names to the descriptions in **scripts/README.md**.
-2. Open **scripts/ingest_transcript_csv.py** and find where it calls **session.ingest_evidence**, **session.propose_claim**, and **session.link_support**. Confirm it follows the same pattern as the scorer (without the temp project).
+1. List the contents of **scripts/** and **scripts/adapters/**. Match the first-class scripts in **scripts/README.md** to their paths.
+2. Open **scripts/adapters/example_rag_to_scorer.py** and see how it reads JSON and calls **_run_scorer**. Run it with a one-line JSON input (query, answer, evidence) from stdin.
+3. (Optional) Install **`.[api]`**, set **CHRONICLE_PROJECT_PATH**, run **uvicorn chronicle.api.app:app**, and open **http://127.0.0.1:8000/docs** to try the API.
+4. Open **scripts/ingest_transcript_csv.py** and find where it calls **session.ingest_evidence**, **session.propose_claim**, and **session.link_support**. Confirm it follows the same pattern as the scorer (without the temp project).
 
 ## Summary
 
+- **First-class scripts** (scripts/README.md): scorer, verifier, benchmark, eval harness adapter, export_for_ml, RAG demos. Use them to plug Chronicle into pipelines.
+- **Adapters** (scripts/adapters/): RAG→scorer example, fact-checker→Chronicle, provenance→Chronicle. Copy-paste templates for interop.
+- **Optional HTTP API** (chronicle/api/, install `.[api]`): write/read/export over HTTP; same shapes as eval contract and defensibility schema.
 - **Integrations** (chronicle/integrations/) wire RAG frameworks to ChronicleSession so that runs record evidence and claims.
-- **Scripts** provide entry points: scorer, benchmark runner, eval harness adapter, sample generator, transcript ingest, tension suggestion, Aura ingest/sync.
 - All rely on the same session API and event store; they differ only in input source and output (JSON, .chronicle, Neo4j).
 
 **Quiz:** [quizzes/quiz-07-integrations-and-scripts.md](quizzes/quiz-07-integrations-and-scripts.md)

@@ -23,9 +23,12 @@ Open the repo root and look at the main folders:
 | Path | What it is |
 |------|------------|
 | **`chronicle/`** | The main Python package: events, store, session, defensibility, integrations. This is the “engine.” |
-| **`scripts/`** | Runnable scripts: the **standalone defensibility scorer**, benchmark runner, RAG demos, utilities. |
+| **`chronicle/api/`** | Optional HTTP API (install with `.[api]`): FastAPI app for write/read/export over HTTP. See [docs/api.md](../docs/api.md). |
+| **`scripts/`** | Runnable scripts: scorer, verifier (CLI), benchmark, eval harness adapter, RAG demos, adapters. See **scripts/README.md** for the **first-class** list. |
+| **`scripts/adapters/`** | Example adapters: RAG→scorer, fact-checker→Chronicle, provenance→Chronicle. Copy-paste templates for interop. |
 | **`tools/`** | Standalone tooling. The important one is **`verify_chronicle/`** — the .chronicle verifier (stdlib only). |
-| **`docs/`** | Eval contract, technical report, verifier doc, Neo4j, migration, plan, to-do. |
+| **`tests/`** | Pytest tests: scorer, session flow, verifier. CI runs ruff + pytest (see [.github/workflows/ci.yml](../.github/workflows/ci.yml)). |
+| **`docs/`** | Eval contract, technical report, verifier, API, consuming .chronicle, external IDs, provenance, Neo4j schema, RAG evals, to-do. |
 | **`neo4j/`** | Optional: Cypher scripts to rebuild a graph from Chronicle data (for analysis/visualization). |
 | **`lessons/`** | These lessons. **`lessons/quizzes/`** holds the quizzes. |
 | **`guidebook/`** | The narrative guide (problem, solution, how to help)—for everyone, not only engineers. |
@@ -46,6 +49,7 @@ This is the core. High-level structure:
 | **`chronicle/store/commands/`** | Command handlers: investigation, evidence, claims, tensions, defensibility, export, and more. |
 | **`chronicle/eval_metrics.py`** | Builds the **defensibility metrics** structure (the shape the scorer returns). |
 | **`chronicle/integrations/`** | LangChain, LlamaIndex, Haystack hooks so RAG pipelines can use Chronicle. |
+| **`chronicle/api/`** | Optional HTTP API (FastAPI): investigations, evidence, claims, links, defensibility, export/import. Install `.[api]`. |
 | **`chronicle/tools/`** | Epistemic tools: decomposer, contradiction detection, type/scope inference, embeddings (optional LLM). |
 | **`chronicle/cli/`** | CLI: project init, neo4j-export, neo4j-sync, and other project/claim/evidence commands. |
 | **`chronicle/verify.py`** | Project invariant suite (run via `chronicle verify`). |
@@ -66,7 +70,12 @@ When you run the **standalone scorer**, it uses: `create_project`, session, inge
 - **`docs/eval_contract_schema.json`** — JSON Schema for that contract.  
 - **`docs/defensibility-metrics-schema.md`** — Meaning of each field in the scorer output.  
 - **`docs/verifier.md`** — What the verifier checks and how to use it.  
-- **`docs/technical-report.md`** — Defensibility definition and schema (citable).
+- **`docs/technical-report.md`** — Defensibility definition and schema (citable).  
+- **`docs/api.md`** — Optional HTTP API: install `.[api]`, set `CHRONICLE_PROJECT_PATH`, run uvicorn.  
+- **`docs/consuming-chronicle.md`** — How to read a .chronicle from another language or tool (ZIP, manifest, SQLite).  
+- **`docs/external-ids.md`** — Storing fact-check IDs, C2PA claim IDs, etc. in evidence metadata.  
+- **`docs/rag-evals-defensibility-metric.md`** — RAG evals: contract, schema, how to run the scorer in your harness.  
+- **`docs/neo4j-schema.md`** — Node labels and relationship types for the Neo4j sync (graph RAG / queries).
 
 ## Try it
 

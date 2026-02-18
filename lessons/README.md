@@ -24,8 +24,9 @@ Step-by-step annotated lessons that walk through **100% of the Chronicle codebas
 | [08](08-cli.md) | The Chronicle CLI | `chronicle/cli/` |
 | [09](09-epistemic-tools.md) | Epistemic tools (decomposer, contradiction, type inference) | `chronicle/tools/` |
 | [10](10-export-import-neo4j.md) | Export, import, and Neo4j | `chronicle/store/export_import.py`, `neo4j_sync.py` |
+| [11](11-interoperability-api-and-tests.md) | Interoperability, API, and tests | Terminology, external IDs, provenance, HTTP API, tests, CI |
 
-The full path from 00 to 10 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI, epistemic tools, and export/import/Neo4j.
+The full path from 00 to 11 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI, epistemic tools, export/import/Neo4j, and interop/API/tests.
 
 ## Lesson format
 

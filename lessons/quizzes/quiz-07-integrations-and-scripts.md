@@ -18,6 +18,10 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 
 5. What is the **ingest_chronicle_to_aura** script’s three-step pipeline? (In order.)
 
+6. Where do the **adapters** (RAG→scorer, fact-checker→Chronicle, provenance→Chronicle) live, and what are they for?
+
+7. How do you run the **optional HTTP API**? (Install extra, env var, command.)
+
 ---
 
 ## Answer key
@@ -31,3 +35,7 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 4. **scripts/suggest_tensions_with_llm.py** — uses heuristic or LLM to suggest tensions; with **--apply** it declares them in the project via session.declare_tension.
 
 5. **Verify** the .chronicle file → **Import** it into the graph project (merge events + evidence) → **Sync** the project to Neo4j (Aura). So: verify → import → sync.
+
+6. **scripts/adapters/** — example_rag_to_scorer.py (RAG harness output → scorer), fact_checker_to_chronicle.py (fact-checker output → evidence + claim + support/challenge), provenance_to_chronicle.py (provenance assertions → sources + evidence–source links). They are **copy-paste templates** for interop with external systems.
+
+7. **Install:** `pip install -e ".[api]"`. **Env:** Set **CHRONICLE_PROJECT_PATH** to the project directory. **Command:** `uvicorn chronicle.api.app:app` (optionally `--reload`). See docs/api.md.

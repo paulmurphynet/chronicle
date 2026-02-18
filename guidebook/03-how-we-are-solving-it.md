@@ -18,19 +18,31 @@ We compute a **defensibility** result: things like strength of provenance, how m
 
 ## One run in, one score out
 
-For RAG and evals, we keep the contract simple: **one (query, answer, evidence) in → one defensibility metrics object out.** No API server required. You can run our standalone scorer in a pipeline, or call the same logic from your own code. That makes it easy to add “Chronicle defensibility” as a metric alongside whatever else you already measure.
+For RAG and evals, we keep the contract simple: **one (query, answer, evidence) in → one defensibility metrics object out.** No API server required. You can run our standalone scorer in a pipeline, or call the same logic from your own code. That makes it easy to add “Chronicle defensibility” as a metric alongside whatever else you already measure. We document this path in a single place—[RAG evals: defensibility as a standard metric](../docs/rag-evals-defensibility-metric.md)—so your harness can plug in with the same contract and schema.
 
 ---
 
 ## .chronicle and “verify it yourself”
 
-We also define a portable format: **.chronicle**. It’s a package (e.g. a ZIP) that contains the investigation’s manifest, schema, evidence, and claims. Anyone can **verify** it with our verifier—no need to run our full stack or trust us. So “show your work” becomes a **verifiable artifact**, not a promise. That’s how we try to close the loop: you produce a defensible record; others can check it.
+We also define a portable format: **.chronicle**. It’s a package (e.g. a ZIP) that contains the investigation’s manifest, schema, evidence, and claims. Anyone can **verify** it with our verifier—no need to run our full stack or trust us. So “show your work” becomes a **verifiable artifact**, not a promise. That’s how we try to close the loop: you produce a defensible record; others can check it. We also document [how to consume a .chronicle](../docs/consuming-chronicle.md) from another language or tool (open the ZIP, read the DB, resolve evidence), so fact-checking UIs or dashboards can use the format without running our stack.
 
 ---
 
 ## Event-sourced and auditable
 
 Under the hood, we record **events**—every ingest, every claim, every link—and never erase them. So the story of how an answer was built is preserved. That supports auditing, debugging, and future extensions (e.g. “how defensible was this claim as of last Tuesday?”).
+
+---
+
+## Fitting into your ecosystem
+
+We want Chronicle to work alongside fact-checking tools, provenance systems, and RAG pipelines:
+
+- **Same shapes everywhere.** The defensibility scorecard and eval contract are stable and documented. Whether you use the standalone scorer, the session API, or the optional **HTTP API** ([docs/api.md](../docs/api.md)—install with `.[api]`, set a project path, run uvicorn), you get the same response shapes. That makes it easier for UIs and harnesses to swap one for another.
+- **Adapters and terminology.** We provide example **adapters** (RAG→scorer, fact-checker output→Chronicle, provenance assertions→Chronicle) and a **terminology** table ([glossary](../docs/glossary.md#terminology-for-interop)) so you can map our terms (claim, support, challenge, tension) to yours (statement, evidence for/against, contradiction).
+- **External IDs and provenance.** You can store **external IDs** (e.g. fact-check ID, C2PA claim ID) in evidence metadata so “this Chronicle claim” lines up with “that external record.” We can **record** source and evidence–source links from provenance assertions (e.g. C2PA/CR); we don’t *verify* those assertions—we persist them so defensibility and reasoning trails can reference your provenance model. See [external IDs](../docs/external-ids.md) and [provenance recording](../docs/provenance-recording.md).
+
+If you’re building a fact-checking UI, a provenance pipeline, or a RAG eval harness, the [docs](../docs/) and [lessons](../lessons/README.md) walk through the contracts, schemas, and code paths so you can integrate without guessing.
 
 ---
 

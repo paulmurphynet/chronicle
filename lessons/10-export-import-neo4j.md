@@ -7,6 +7,9 @@
 - [chronicle/store/export_import.py](../chronicle/store/export_import.py) — export_investigation, import_investigation
 - [chronicle/store/neo4j_sync.py](../chronicle/store/neo4j_sync.py) — sync_project_to_neo4j
 - [docs/chronicle-file-format.md](../docs/chronicle-file-format.md) — what’s inside a .chronicle
+- [docs/consuming-chronicle.md](../docs/consuming-chronicle.md) — how to read a .chronicle from another language or tool (ZIP, manifest, SQLite, evidence)
+- [docs/GENERIC_EXPORT.md](../docs/GENERIC_EXPORT.md) — export investigation as JSON or CSV ZIP (no evidence blobs) for BI/dashboards
+- [docs/neo4j-schema.md](../docs/neo4j-schema.md) — node labels, relationship types, and example Cypher for the sync output
 - [docs/aura-graph-pipeline.md](../docs/aura-graph-pipeline.md) — verify → import → sync runbook
 
 ---
@@ -47,6 +50,8 @@ Open **chronicle/store/neo4j_sync.py**.
 
 So the **same** data you have in SQLite (read model) is mirrored in Neo4j for graph queries, visualization (e.g. Aura Browser), or graph RAG. Sync is **idempotent**: re-syncing the same project updates the graph to match the project.
 
+**Graph schema reference:** **docs/neo4j-schema.md** documents node labels (Investigation, Claim, EvidenceItem, EvidenceSpan, Tension, etc.), relationship types (CONTAINS, SUPPORTS, CHALLENGES, BETWEEN, …), and example Cypher queries (e.g. claims in tension, evidence supporting a claim). Use it when building graph RAG or custom queries without reverse-engineering the sync output.
+
 ## .chronicle file format (recap)
 
 From **docs/chronicle-file-format.md**:
@@ -54,6 +59,10 @@ From **docs/chronicle-file-format.md**:
 - **manifest.json** — format_version, investigation_uid, title, exported_at, optional content_hash_manifest.
 - **chronicle.db** — SQLite with events table and read model tables (investigation, claim, evidence_item, evidence_span, evidence_link, tension, …).
 - **evidence/** — One file per evidence item; path in evidence_item.uri. Content is the raw blob (e.g. text). The **structure** (who said what, support, tensions) is in the DB, not in the filenames.
+
+**Consuming without the Chronicle package:** If you need to read a .chronicle from another language or tool (e.g. fact-checking UI, dashboard), see **docs/consuming-chronicle.md**: open the ZIP, read manifest and chronicle.db, resolve evidence by URI. The verifier (`chronicle-verify`) can still validate the file.
+
+**Generic export:** For BI or dashboards you may not need the full .chronicle. **docs/GENERIC_EXPORT.md** describes exporting an investigation as **JSON** or **CSV ZIP** (claims, evidence metadata, tensions; no evidence blobs). Use the session and **build_generic_export_json** or **build_generic_export_csv_zip** from the store commands.
 
 ## Try it
 

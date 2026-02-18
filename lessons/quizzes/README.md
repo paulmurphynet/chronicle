@@ -23,6 +23,7 @@ Quizzes for the [Chronicle lessons](../README.md). Do the quiz for a lesson **af
 | [quiz-08-cli.md](quiz-08-cli.md) | 08 | The Chronicle CLI |
 | [quiz-09-epistemic-tools.md](quiz-09-epistemic-tools.md) | 09 | Epistemic tools |
 | [quiz-10-export-import-neo4j.md](quiz-10-export-import-neo4j.md) | 10 | Export, import, Neo4j |
+| [quiz-11-interoperability-api-and-tests.md](quiz-11-interoperability-api-and-tests.md) | 11 | Interoperability, API, and tests |
 
 ## For maintainers
 
