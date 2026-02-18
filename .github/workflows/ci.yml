@@ -32,5 +32,6 @@ jobs:
       - name: Ruff format check (core)
         run: ruff format --check chronicle tools
 
-      - name: Pytest (scorer, session, verifier)
-        run: pytest tests/ -v
+      - name: Pytest with coverage (core)
+        run: pytest tests/ -v --cov=chronicle --cov=tools --cov-report=term-missing
+        # Optional: add --cov-fail-under=75 when coverage target is met (see pyproject.toml [tool.coverage])

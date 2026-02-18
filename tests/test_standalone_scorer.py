@@ -27,6 +27,7 @@ def test_valid_input_returns_metrics():
         "evidence": ["The company reported revenue of $1.2M in Q1 2024."],
     })
     assert "error" not in out
+    assert out.get("contract_version") == "1.0"
     assert "claim_uid" in out
     assert out.get("provenance_quality") in ("strong", "medium", "weak", "challenged")
     assert "corroboration" in out
@@ -40,6 +41,7 @@ def test_invalid_json_returns_error():
     """Invalid JSON on stdin yields invalid_input error."""
     out = _run_scorer("not json at all")
     assert out.get("error") == "invalid_input"
+    assert out.get("contract_version") == "1.0"
     assert "message" in out
 
 
@@ -86,6 +88,24 @@ def test_evidence_objects_with_text_accepted():
     })
     assert "error" not in out
     assert "claim_uid" in out
+
+
+def test_evidence_objects_with_url_accepted(monkeypatch):
+    """Evidence as list of objects with 'url' is accepted when fetch succeeds (mocked)."""
+    from scripts.standalone_defensibility_scorer import _fetch_url
+
+    def mock_fetch(url: str):
+        return "Fetched content from URL." if url == "https://example.com/doc.txt" else None
+
+    monkeypatch.setattr("scripts.standalone_defensibility_scorer._fetch_url", mock_fetch)
+    out = _run({
+        "query": "What happened?",
+        "answer": "It happened.",
+        "evidence": [{"url": "https://example.com/doc.txt"}],
+    })
+    assert "error" not in out
+    assert "claim_uid" in out
+    assert out["corroboration"]["support_count"] >= 1
 
 
 def test_main_returns_zero_on_success(monkeypatch):

@@ -39,6 +39,7 @@
       "description": "Defensibility metrics for the claim.",
       "required": ["claim_uid", "provenance_quality", "corroboration", "contradiction_status"],
       "properties": {
+        "contract_version": { "type": "string", "const": "1.0" },
         "claim_uid": { "type": "string" },
         "provenance_quality": {
           "type": "string",
@@ -72,6 +73,7 @@
       "description": "Error response; harnesses should check for presence of 'error'.",
       "required": ["error"],
       "properties": {
+        "contract_version": { "type": "string", "const": "1.0" },
         "error": {
           "type": "string",
           "enum": [

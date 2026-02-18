@@ -14,6 +14,8 @@ This doc describes the **minimum integration** for RAG pipelines (or other syste
 
 No RAG framework is required: the [standalone defensibility scorer](eval_contract.md#3-current-implementations) (`scripts/standalone_defensibility_scorer.py`) does exactly this in-process for a single (query, answer, evidence) input and outputs the metrics JSON. **Your RAG harness → our scorer** is the standard path: see [RAG evals: defensibility metric](rag-evals-defensibility-metric.md) for the contract, schema, and a Python example; an optional copy-paste adapter template is in [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py).
 
+**Limits of the standalone scorer:** In that path, every evidence chunk is linked as support (no entailment check); evidence is not linked to sources, so `independent_sources_count` is typically 0; and evidence can be strings or objects with `text`, `path`, or `url` (URLs fetched with SSRF safeguards). See [RAG evals §5](rag-evals-defensibility-metric.md#5-limits-of-the-standalone-scorer) and [Critical areas](../critical_areas/README.md).
+
 ---
 
 ## Idempotency for agents and pipelines

@@ -2,7 +2,7 @@
 
 ## What we have so far
 
-**Product focus:** Defensibility scoring for RAG and evals. Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier. No API or frontend in this repo — "library + CLI + scorer + verifier + docs."
+**Product focus:** Defensibility scoring for RAG and evals. Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier. An optional minimal HTTP API lives in-repo (see [api.md](api.md); install with `.[api]`); otherwise "library + CLI + scorer + verifier + docs."
 
 ### Core deliverables
 
@@ -10,7 +10,7 @@
 |-------|----------------|
 | **Standalone defensibility scorer** | `scripts/standalone_defensibility_scorer.py`: JSON in (query, answer, evidence), defensibility metrics out. Implements the [eval contract](eval_contract.md). No RAG stack required. |
 | **chronicle-verify** | CLI (`chronicle-verify`) to verify a .chronicle (ZIP) — manifest, schema, evidence hashes. Stdlib only; can verify without the Chronicle package. |
-| **Chronicle package** | Event store, read model, defensibility computation, session API. Used by the scorer and by LangChain/LlamaIndex/Haystack integrations. Full command layer (claims, evidence, sources, tensions, reasoning brief, etc.); no HTTP API in this repo. |
+| **Chronicle package** | Event store, read model, defensibility computation, session API. Used by the scorer and by LangChain/LlamaIndex/Haystack integrations. Full command layer (claims, evidence, sources, tensions, reasoning brief, etc.). Optional minimal HTTP API in-repo: [api.md](api.md). |
 | **Eval contract** | Stable input/output for the scorer; [eval_contract.md](eval_contract.md) and [eval_contract_schema.json](eval_contract_schema.json) for harnesses. |
 
 ### Supporting pieces

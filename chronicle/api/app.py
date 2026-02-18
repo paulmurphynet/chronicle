@@ -18,7 +18,8 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from chronicle.store.project import create_project, project_exists
@@ -70,6 +71,20 @@ app = FastAPI(
     description="Minimal HTTP API for evidence, claims, defensibility, and export/import. Same shapes as eval contract and defensibility schema.",
     version="0.1.0",
 )
+
+# Static files (e.g. web verifier)
+_STATIC_DIR = Path(__file__).resolve().parent / "static"
+if _STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+
+
+@app.get("/verifier")
+def verifier_page() -> FileResponse:
+    """Serve the drag-and-drop .chronicle verifier page. No data is uploaded; verification runs in the browser."""
+    path = _STATIC_DIR / "verifier.html"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Verifier page not found")
+    return FileResponse(path, media_type="text/html")
 
 
 # ----- Investigations -----

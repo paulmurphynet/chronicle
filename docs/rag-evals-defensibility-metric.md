@@ -6,8 +6,8 @@ Use **Chronicle defensibility** in your RAG eval harness as a standard metric: o
 
 ## 1. Contract and schema
 
-- **Input:** One JSON object: `query` (string), `answer` (string), `evidence` (array of strings or objects with `text`/`path`). See [Eval contract](eval_contract.md).
-- **Output:** One JSON object: defensibility metrics (`claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, optional `knowability`) or an error object with `error` and `message`.
+- **Input:** One JSON object: `query` (string), `answer` (string), `evidence` (array of strings or objects with `text`/`path`/`url`). See [Eval contract](eval_contract.md).
+- **Output:** One JSON object: defensibility metrics (`contract_version`, `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, optional `knowability`) or an error object with `error` and `message`.
 - **Machine-readable:** [eval_contract_schema.json](eval_contract_schema.json) — validate input with `$defs/Input`, output with `$defs/OutputSuccess` or `$defs/OutputError`.
 - **Field semantics:** [Defensibility metrics schema](defensibility-metrics-schema.md).
 
@@ -77,3 +77,13 @@ python3 scripts/standalone_defensibility_scorer.py \
 - **Eval-native** — Designed for “one run in, one metrics out” so harnesses can add defensibility alongside accuracy, latency, etc.
 
 Use this page as the entry point for “Chronicle defensibility as the standard metric” in RAG evals.
+
+---
+
+## 5. Limits of the standalone scorer
+
+When using the standalone scorer only (no session/API):
+
+- **All evidence is linked as support** — Every evidence chunk is recorded as supporting the single claim (the answer). This is a structural convention for evals, not a check that each chunk actually supports the answer. See [Evidence–claim linking](../critical_areas/04-evidence-claim-linking.md).
+- **No source registration** — Evidence is not linked to distinct sources, so `independent_sources_count` is typically **0** in the output. See [Defensibility metrics schema](defensibility-metrics-schema.md).
+- **URL evidence** — The scorer fetches `url` evidence with SSRF safeguards; failed or skipped URLs do not add a chunk (you still need at least one successful chunk).

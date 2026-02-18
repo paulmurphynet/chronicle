@@ -10,6 +10,22 @@ A **defensibility benchmark** uses Chronicle-formatted investigations and defens
 - **Fixed-query run:** Run a fixed set of queries through a Chronicle-backed RAG pipeline and record defensibility per answer. Script: `scripts/benchmark_data/run_defensibility_benchmark.py`. From repo root: `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py` (optional `--output results.json` or `--stdout`). See [Eval and benchmarking](eval-and-benchmarking.md) for the output shape and how to reproduce.
 - **Sample investigations:** Synthetic investigations with different defensibility profiles (e.g. open tension, strong, weak single source) can be generated with scripts in `scripts/synthetic_data/` or `scripts/benchmark_data/` (if present). The technical report references a sample set of 6 investigations; regenerate with the script referenced in the repo (e.g. `scripts/benchmark_data/generate_benchmark_samples.py` if it exists, or use `scripts/synthetic_data/generate_realistic_synthetic.py` for synthetic data).
 
+### Generating the canonical sample set
+
+From the repo root, run:
+
+```bash
+PYTHONPATH=. python3 scripts/synthetic_data/generate_realistic_synthetic.py
+```
+
+This generates synthetic investigations with varied defensibility profiles. For benchmark samples keyed to fixed queries and docs, use:
+
+```bash
+PYTHONPATH=. python3 scripts/benchmark_data/generate_benchmark_samples.py
+```
+
+(if that script exists in your checkout). Output locations and options: see each script's `--help`.
+
 ---
 
 ## 2. Export for training

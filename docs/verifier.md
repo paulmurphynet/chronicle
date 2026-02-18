@@ -37,7 +37,7 @@ A **submission package** is a ZIP that contains `investigation.chronicle`, a `re
 
 ## No chronicle-standard required
 
-The verifier uses only the Python standard library (`zipfile`, `json`, `sqlite3`, `hashlib`, `tempfile`). You do **not** need to install the chronicle-standard package or have a project directory.
+The verifier uses only the Python standard library (`zipfile`, `json`, `sqlite3`, `hashlib`, `tempfile`). You do **not** need to install the chronicle-standard package, run the Chronicle API, or have a project directory—Python and (optionally) the `chronicle-verify` entry point after install are enough.
 
 ## How to run
 

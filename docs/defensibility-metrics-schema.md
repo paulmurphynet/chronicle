@@ -25,7 +25,7 @@ Eval harnesses can rely on the following fields. All are present in the API resp
 | `corroboration` | object | At least: `support_count` (int), `challenge_count` (int), `independent_sources_count` (int). Optional when strength weighting used: `support_weighted_sum`, `challenge_weighted_sum` (float). |
 | `corroboration.support_count` | int | Number of support links. |
 | `corroboration.challenge_count` | int | Number of challenge links. |
-| `corroboration.independent_sources_count` | int | Count of distinct sources (as linked by the user) backing support; not independently verified. |
+| `corroboration.independent_sources_count` | int | Count of distinct sources (as linked by the user) backing support; not independently verified. In the **standalone scorer** path, evidence is not linked to sources, so this is typically 0. |
 | `contradiction_status` | string | `none` \| `open` \| `acknowledged` \| `resolved`. |
 | `knowability` | object (optional) | When set: `known_as_of` (ISO8601 or null), `knowable_from` (string or null). "When could we first defend this claim?" |
 

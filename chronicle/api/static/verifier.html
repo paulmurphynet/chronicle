@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Chronicle .chronicle verifier</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    .drop-zone { border: 2px dashed #ccc; border-radius: 8px; padding: 2rem; text-align: center; margin: 1rem 0; cursor: pointer; }
+    .drop-zone.dragover { border-color: #06c; background: #f0f7ff; }
+    .drop-zone input { display: none; }
+    .result { margin-top: 1.5rem; }
+    .result.verified { color: #0a0; }
+    .result.not-verified { color: #c00; }
+    .checks { list-style: none; padding: 0; }
+    .checks li { padding: 0.25rem 0; }
+    .checks .pass { color: #0a0; }
+    .checks .fail { color: #c00; }
+    .summary { margin-top: 1rem; padding: 0.75rem; background: #f5f5f5; border-radius: 4px; font-size: 0.9rem; }
+    .summary dt { font-weight: 600; margin-top: 0.5rem; }
+    .summary dd { margin-left: 0; }
+    footer { margin-top: 2rem; font-size: 0.85rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Chronicle .chronicle verifier</h1>
+  <p>Drop a <code>.chronicle</code> file below (or click to choose). Verification runs in your browser; the file is never uploaded.</p>
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".chronicle">
+    <span id="dropLabel">Drop file here or click to browse</span>
+  </div>
+  <div class="result" id="result" hidden></div>
+  <footer>Uses the same checks as the CLI verifier: ZIP structure, manifest, schema, evidence hashes, append-only ledger. See <a href="https://github.com/chronicle/Chronicle/blob/main/docs/verification-guarantees.md">verification guarantees</a>.</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://sql.js.org/dist/sql-wasm.js"></script>
+  <script>
+    const REQUIRED_MANIFEST_KEYS = ['format_version', 'investigation_uid'];
+    const MIN_FORMAT_VERSION = 1;
+    const REQUIRED_TABLES = ['events', 'schema_version', 'investigation', 'claim', 'evidence_item'];
+
+    function report(name, passed, detail) { return { name, passed, detail }; }
+
+    async function sha256Hex(buffer) {
+      const hash = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function verifyChronicle(zip) {
+      const results = [];
+
+      // File / ZIP
+      const names = Object.keys(zip.files).filter(n => !n.endsWith('/'));
+      if (!names.includes('manifest.json')) {
+        results.push(report('zip', false, 'missing manifest.json'));
+        return results;
+      }
+      if (!names.includes('chronicle.db')) {
+        results.push(report('zip', false, 'missing chronicle.db'));
+        return results;
+      }
+      results.push(report('zip', true, 'valid ZIP with manifest and DB'));
+
+      // Manifest
+      const manifestJson = await zip.files['manifest.json'].async('string');
+      let manifest;
+      try {
+        manifest = JSON.parse(manifestJson);
+      } catch (e) {
+        results.push(report('manifest', false, String(e)));
+        return results;
+      }
+      for (const key of REQUIRED_MANIFEST_KEYS) {
+        if (!(key in manifest)) {
+          results.push(report('manifest', false, 'missing key: ' + key));
+          return results;
+        }
+      }
+      const fv = parseInt(manifest.format_version, 10);
+      if (isNaN(fv) || fv < MIN_FORMAT_VERSION) {
+        results.push(report('manifest', false, 'format_version must be integer >= ' + MIN_FORMAT_VERSION));
+        return results;
+      }
+      results.push(report('manifest', true, 'format_version=' + fv + ', investigation_uid present'));
+
+      // DB: load with sql.js
+      const dbBytes = await zip.files['chronicle.db'].async('arraybuffer');
+      const SQL = await initSqlJs({ locateFile: () => 'https://sql.js.org/dist/sql-wasm.wasm' });
+      const db = new SQL.Database(new Uint8Array(dbBytes));
+
+      try {
+        // Schema version
+        try {
+          const schemaRows = db.exec("SELECT component, version FROM schema_version WHERE component IN ('event_store', 'read_model')");
+          if (!schemaRows.length || !schemaRows[0].values.length) {
+            results.push(report('schema_version', false, 'no event_store or read_model version row'));
+          } else {
+            const versions = Object.fromEntries(schemaRows[0].values.map(([c, v]) => [c, v]));
+            results.push(report('schema_version', true, 'versions: ' + JSON.stringify(versions)));
+          }
+        } catch (e) {
+          results.push(report('schema_version', false, String(e)));
+        }
+
+        // Required tables
+        const missing = [];
+        for (const table of REQUIRED_TABLES) {
+          const r = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='" + table.replace(/'/g, "''") + "'");
+          if (!r.length || !r[0].values.length) missing.push(table);
+        }
+        if (missing.length) {
+          results.push(report('schema_tables', false, 'missing tables: ' + missing.join(', ')));
+        } else {
+          results.push(report('schema_tables', true, 'all required tables present'));
+        }
+
+        // Evidence hashes
+        try {
+          const evRows = db.exec('SELECT evidence_uid, uri, content_hash FROM evidence_item');
+          if (!evRows.length || !evRows[0].values.length) {
+            results.push(report('evidence_hashes', true, 'no evidence items'));
+          } else {
+            const cols = evRows[0].columns;
+            const uidIdx = cols.indexOf('evidence_uid');
+            const uriIdx = cols.indexOf('uri');
+            const hashIdx = cols.indexOf('content_hash');
+            const failed = [];
+            for (const row of evRows[0].values) {
+              const uri = row[uriIdx];
+              const contentHash = row[hashIdx];
+              if (!uri || uri.includes('..') || uri.startsWith('/')) {
+                failed.push(row[uidIdx] + ': invalid uri');
+                continue;
+              }
+              if (!zip.files[uri]) {
+                failed.push(row[uidIdx] + ': file missing in ZIP (' + uri + ')');
+                continue;
+              }
+              const data = await zip.files[uri].async('arraybuffer');
+              const digest = await sha256Hex(data);
+              if (digest !== contentHash) failed.push(row[uidIdx] + ': hash mismatch');
+            }
+            if (failed.length) {
+              results.push(report('evidence_hashes', false, failed.slice(0, 5).join('; ') + (failed.length > 5 ? ' ...' : '')));
+            } else {
+              results.push(report('evidence_hashes', true, 'all ' + evRows[0].values.length + ' evidence file(s) match hash'));
+            }
+          }
+        } catch (e) {
+          results.push(report('evidence_hashes', false, String(e)));
+        }
+
+        // Append-only ledger
+        try {
+          const eventRows = db.exec('SELECT event_id, recorded_at FROM events ORDER BY rowid ASC');
+          if (!eventRows.length || !eventRows[0].values.length) {
+            results.push(report('append_only_ledger', true, 'no events'));
+          } else {
+            let prev = '';
+            for (const row of eventRows[0].values) {
+              const rec = row[1];
+              if (rec < prev) {
+                results.push(report('append_only_ledger', false, 'recorded_at reversal at event_id=' + row[0]));
+                break;
+              }
+              prev = rec;
+            }
+            if (results[results.length - 1].name !== 'append_only_ledger') {
+              results.push(report('append_only_ledger', true, eventRows[0].values.length + ' events in order'));
+            }
+          }
+        } catch (e) {
+          results.push(report('append_only_ledger', false, String(e)));
+        }
+      } finally {
+        db.close();
+      }
+
+      return results;
+    }
+
+    function render(results, manifest) {
+      const allPassed = results.every(r => r.passed);
+      const resultEl = document.getElementById('result');
+      resultEl.hidden = false;
+      resultEl.className = 'result ' + (allPassed ? 'verified' : 'not-verified');
+      resultEl.innerHTML = '<h2>' + (allPassed ? 'Verified' : 'Not verified') + '</h2>' +
+        '<ul class="checks">' + results.map(r =>
+          '<li class="' + (r.passed ? 'pass' : 'fail') + '">[' + (r.passed ? 'PASS' : 'FAIL') + '] ' + r.name + ': ' + r.detail + '</li>'
+        ).join('') + '</ul>';
+      if (allPassed && manifest) {
+        resultEl.innerHTML += '<dl class="summary"><dt>What\'s inside</dt>' +
+          '<dd>Investigation: ' + (manifest.investigation_uid || '') + '</dd>' +
+          '<dd>Title: ' + (manifest.title || '(no title)') + '</dd></dl>';
+      }
+    }
+
+    async function handleFile(file) {
+      if (!file || !file.name.toLowerCase().endsWith('.chronicle')) {
+        alert('Please choose a .chronicle file.');
+        return;
+      }
+      document.getElementById('dropLabel').textContent = 'Verifying…';
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const zip = await JSZip.loadAsync(arrayBuffer);
+        const results = await verifyChronicle(zip);
+        let manifest = null;
+        if (results.some(r => r.name === 'manifest' && r.passed)) {
+          try {
+            const manifestJson = await zip.files['manifest.json'].async('string');
+            manifest = JSON.parse(manifestJson);
+          } catch (_) {}
+        }
+        render(results, manifest);
+      } catch (e) {
+        document.getElementById('result').hidden = false;
+        document.getElementById('result').className = 'result not-verified';
+        document.getElementById('result').innerHTML = '<h2>Error</h2><p>' + String(e) + '</p>';
+      }
+      document.getElementById('dropLabel').textContent = 'Drop file here or click to browse';
+    }
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => { const f = fileInput.files[0]; if (f) handleFile(f); });
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+  </script>
+</body>
+</html>

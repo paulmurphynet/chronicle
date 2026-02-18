@@ -29,13 +29,53 @@ import argparse
 import json
 import sys
 import tempfile
+import urllib.request
 from pathlib import Path
+from urllib.parse import urlparse
+
+# Max bytes to fetch per URL (avoid memory exhaustion)
+_URL_FETCH_MAX_BYTES = 5 * 1024 * 1024
+
+
+def _fetch_url(url: str) -> str | None:
+    """Fetch URL and return decoded text, or None if unsafe/failed. Uses SSRF safeguards."""
+    parsed = urlparse(url)
+    if not parsed.scheme or not parsed.netloc:
+        return None
+    if parsed.scheme not in ("http", "https"):
+        return None
+    host = parsed.hostname or parsed.netloc.split(":")[0]
+    from chronicle.core.ssrf import is_ssrf_unsafe_host
+
+    if is_ssrf_unsafe_host(host):
+        return None
+
+    class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            p = urlparse(newurl)
+            h = p.hostname or (p.netloc.split(":")[0] if p.netloc else "")
+            if h and is_ssrf_unsafe_host(h):
+                raise ValueError("Redirect to disallowed host")
+            return urllib.request.HTTPRedirectHandler.redirect_request(
+                self, req, fp, code, msg, headers, newurl
+            )
+
+    opener = urllib.request.build_opener(_SafeRedirectHandler)
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Chronicle-Scorer/1.0"})
+        with opener.open(req, timeout=30) as resp:
+            raw = resp.read(_URL_FETCH_MAX_BYTES + 1)
+            if len(raw) > _URL_FETCH_MAX_BYTES:
+                return None
+            return raw.decode("utf-8", errors="replace").strip()
+    except Exception:
+        return None
 
 
 def _normalize_evidence(evidence: list) -> list[str]:
-    """Extract text chunks from evidence list (strings or objects with text/path)."""
+    """Extract text chunks from evidence list (strings or objects with text/path/url)."""
     chunks: list[str] = []
-    for i, item in enumerate(evidence):
+    for item in evidence:
         if isinstance(item, str):
             if item.strip():
                 chunks.append(item)
@@ -47,7 +87,10 @@ def _normalize_evidence(evidence: list) -> list[str]:
                 path = Path(item["path"])
                 if path.is_file():
                     chunks.append(path.read_text(encoding="utf-8", errors="replace").strip())
-                # else skip missing file
+            elif "url" in item and isinstance(item["url"], str) and item["url"].strip():
+                fetched = _fetch_url(item["url"].strip())
+                if fetched:
+                    chunks.append(fetched)
         # else skip non-string, non-dict
     return chunks
 
@@ -57,29 +100,30 @@ def _run_scorer(stdin_input: str) -> dict:
     try:
         data = json.loads(stdin_input)
     except json.JSONDecodeError as e:
-        return {"error": "invalid_input", "message": str(e)}
+        return {"contract_version": "1.0", "error": "invalid_input", "message": str(e)}
 
     query = data.get("query")
     answer = data.get("answer")
     evidence = data.get("evidence")
 
     if not isinstance(query, str):
-        return {"error": "invalid_input", "message": "query must be a string"}
+        return {"contract_version": "1.0", "error": "invalid_input", "message": "query must be a string"}
     if not isinstance(answer, str):
-        return {"error": "invalid_input", "message": "answer must be a string"}
+        return {"contract_version": "1.0", "error": "invalid_input", "message": "answer must be a string"}
     if not isinstance(evidence, list):
-        return {"error": "invalid_input", "message": "evidence must be an array"}
+        return {"contract_version": "1.0", "error": "invalid_input", "message": "evidence must be an array"}
 
     chunks = _normalize_evidence(evidence)
     if not chunks:
         return {
+            "contract_version": "1.0",
             "error": "invalid_input",
-            "message": "evidence must contain at least one non-empty text chunk (string or object with \"text\")",
+            "message": "evidence must contain at least one non-empty text chunk (string or object with \"text\", \"path\", or \"url\")",
         }
 
+    from chronicle.eval_metrics import defensibility_metrics_for_claim
     from chronicle.store.project import create_project
     from chronicle.store.session import ChronicleSession
-    from chronicle.eval_metrics import defensibility_metrics_for_claim
 
     with tempfile.TemporaryDirectory(prefix="chronicle_scorer_") as tmp:
         path = Path(tmp)
@@ -133,11 +177,12 @@ def _run_scorer(stdin_input: str) -> dict:
             metrics = defensibility_metrics_for_claim(session, claim_uid)
             if metrics is None:
                 return {
+                    "contract_version": "1.0",
                     "claim_uid": claim_uid,
                     "error": "no_defensibility_score",
                     "investigation_uid": inv_uid,
                 }
-            return metrics
+            return {"contract_version": "1.0", **metrics}
 
 
 def _build_input_from_args(args: argparse.Namespace) -> tuple[bool, str | dict]:
@@ -181,6 +226,7 @@ def main() -> int:
         stdin_input = sys.stdin.read()
         if not stdin_input.strip():
             out = {
+                "contract_version": "1.0",
                 "error": "invalid_input",
                 "message": "empty stdin; send one JSON object with query, answer, evidence or use --query, --answer, --evidence",
             }
