@@ -291,6 +291,38 @@ def cmd_replay(
     return 0
 
 
+def cmd_snapshot_create(path: Path, at_event: str, output: Path) -> int:
+    """Create read-model snapshot at event N (for scale: restore + tail replay later)."""
+    if not project_exists(path):
+        print(f"Not a Chronicle project: {path}", file=sys.stderr)
+        return 1
+    try:
+        from chronicle.store.read_model_snapshot import create_read_model_snapshot
+
+        applied = create_read_model_snapshot(path, at_event, output)
+        print(f"Created snapshot at {output} (replayed {applied} events up to {at_event!r}).")
+        return 0
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
+def cmd_snapshot_restore(path: Path, snapshot: Path) -> int:
+    """Restore read model from snapshot file, then replay tail events."""
+    if not project_exists(path):
+        print(f"Not a Chronicle project: {path}", file=sys.stderr)
+        return 1
+    try:
+        from chronicle.store.read_model_snapshot import restore_from_snapshot
+
+        tail_count = restore_from_snapshot(path, snapshot)
+        print(f"Restored from {snapshot} and replayed {tail_count} tail events.")
+        return 0
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
 def cmd_verify(path: Path, skip_evidence: bool) -> int:
     """Run invariant suite (Spec 12.7.5) and print pass/fail report."""
     from chronicle.verify import verify_project
@@ -960,6 +992,23 @@ def main() -> int:
         help="Replay events with recorded_at <= this time (ISO-8601)",
     )
 
+    snapshot_p = subparsers.add_parser(
+        "snapshot",
+        help="Read-model snapshot at event N for scale: create or restore from snapshot + tail replay",
+    )
+    snapshot_sub = snapshot_p.add_subparsers(dest="snapshot_command", required=True)
+    snapshot_create_p = snapshot_sub.add_parser("create", help="Create snapshot of read model at event N")
+    snapshot_create_p.add_argument("--path", "-p", default=".", type=_path_arg, help="Project path")
+    snapshot_create_p.add_argument("--at-event", required=True, metavar="EVENT_ID", help="Snapshot as of this event_id (inclusive)")
+    snapshot_create_p.add_argument(
+        "--output", "-o", required=True, type=_path_arg, help="Output path for snapshot SQLite file"
+    )
+    snapshot_restore_p = snapshot_sub.add_parser("restore", help="Restore read model from snapshot, then replay tail events")
+    snapshot_restore_p.add_argument("--path", "-p", default=".", type=_path_arg, help="Project path")
+    snapshot_restore_p.add_argument(
+        "--snapshot", "-s", required=True, type=_path_arg, help="Path to snapshot SQLite file"
+    )
+
     verify_p = subparsers.add_parser("verify", help="Run invariant suite on project (Spec 12.7.5)")
     verify_p.add_argument(
         "--path",
@@ -1119,6 +1168,11 @@ def main() -> int:
                 getattr(args, "up_to_event", None),
                 getattr(args, "up_to_time", None),
             )
+        if args.command == "snapshot":
+            if args.snapshot_command == "create":
+                return cmd_snapshot_create(args.path, args.at_event, args.output)
+            if args.snapshot_command == "restore":
+                return cmd_snapshot_restore(args.path, args.snapshot)
         if args.command == "verify":
             return cmd_verify(args.path, args.skip_evidence)
         if args.command == "verify-chronicle":

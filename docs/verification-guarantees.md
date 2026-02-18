@@ -87,7 +87,12 @@ Neither the verifier nor the Chronicle runtime guarantees:
 
 After a partial replay (with `--up-to-event` or `--up-to-time`), the read model is intentionally partial; run `chronicle replay --path /project` with no bounds to rebuild to the latest. The underlying API is `replay_read_model(conn, up_to_event_id=..., up_to_recorded_at=...)` in `chronicle.store.sqlite_event_store`.
 
-For very large projects, checkpointing or snapshots may be added later; see [To-do](to_do.md). Today there is no snapshot path, only full or bounded replay.
+**Checkpointing / snapshots (scale):** For very large projects you can create a **read-model snapshot** at event N and later restore from it and replay only **tail events** (events after N), instead of full replay from zero. This speeds up recovery and catch-up.
+
+- **Create snapshot:** `chronicle snapshot create --path /project --at-event EVENT_ID --output /path/to/snap.db` — Writes a SQLite file containing the read model as of that event (and metadata: event_id, rowid, recorded_at). The project DB is only read; it is not modified.
+- **Restore from snapshot:** `chronicle snapshot restore --path /project --snapshot /path/to/snap.db` — Truncates the project read model, copies the snapshot’s read model into the project DB, then replays all events after the snapshot’s event (tail). The project read model is then current.
+
+Verification story: you can **verify snapshot integrity and tail events** (e.g. create snapshot, add events, restore from snapshot and run `chronicle verify`), or **full replay** (`chronicle replay --path /project`). The underlying API is `create_read_model_snapshot` and `restore_from_snapshot` in `chronicle.store.read_model_snapshot`.
 
 ---
 
