@@ -2,17 +2,24 @@
 
 Spec: schemas.md 14.5, neo4j-pipeline.md 16. Order: schema, nodes, relationships, retractions.
 Idempotent (MERGE). Full rebuild from read model; retractions applied per Phase 2.
-Optional: dedupe evidence by content_hash (one EvidenceItem node per content; lineage via CONTAINS_EVIDENCE).
+Optional: dedupe by content — evidence by content_hash, claims by hash(claim_text); lineage via CONTAINS_EVIDENCE / CONTAINS_CLAIM.
 """
 
 from __future__ import annotations
 
+import hashlib
 import os
 import sqlite3
 from pathlib import Path
 from typing import Any
 
 from chronicle.store.project import CHRONICLE_DB
+
+
+def _claim_content_hash(claim_text: str | None) -> str:
+    """Deterministic hash of claim text for deduplication."""
+    text = (claim_text or "").strip()
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 BATCH_SIZE = 500
 
@@ -107,38 +114,84 @@ def _sync_nodes(
                 rows=batch,
             )
 
-        # Claims
-        rows = _fetch_rows(
-            conn,
-            """SELECT claim_uid, investigation_uid, claim_text, claim_type, current_status,
-                      decomposition_status, coalesce(parent_claim_uid,'') AS parent_claim_uid,
-                      created_at, updated_at FROM claim ORDER BY claim_uid""",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MERGE (c:Claim {uid: row.claim_uid})
-                ON CREATE SET
-                  c.display_name = coalesce(CASE WHEN row.claim_text IS NOT NULL AND row.claim_text <> '' THEN row.claim_text END, row.claim_uid),
-                  c.claim_text = row.claim_text,
-                  c.claim_type = CASE WHEN row.claim_type <> '' THEN row.claim_type END,
-                  c.current_status = coalesce(CASE WHEN row.current_status <> '' THEN row.current_status END, 'ACTIVE'),
-                  c.decomposition_status = coalesce(CASE WHEN row.decomposition_status <> '' THEN row.decomposition_status END, 'unanalyzed'),
-                  c.parent_claim_uid = CASE WHEN row.parent_claim_uid <> '' THEN row.parent_claim_uid END,
-                  c.investigation_uid = row.investigation_uid,
-                  c.created_at = datetime(row.created_at),
-                  c.updated_at = datetime(row.updated_at)
-                ON MATCH SET
-                  c.claim_text = coalesce(CASE WHEN row.claim_text IS NOT NULL AND row.claim_text <> '' THEN row.claim_text END, c.claim_text),
-                  c.claim_type = coalesce(CASE WHEN row.claim_type <> '' THEN row.claim_type END, c.claim_type),
-                  c.current_status = coalesce(CASE WHEN row.current_status <> '' THEN row.current_status END, c.current_status),
-                  c.decomposition_status = coalesce(CASE WHEN row.decomposition_status <> '' THEN row.decomposition_status END, c.decomposition_status),
-                  c.parent_claim_uid = coalesce(CASE WHEN row.parent_claim_uid <> '' THEN row.parent_claim_uid END, c.parent_claim_uid),
-                  c.updated_at = coalesce(datetime(row.updated_at), c.updated_at)
-                """,
-                rows=batch,
+        # Claims (when dedupe: one node per claim_content_hash; else one per claim_uid)
+        if dedupe_evidence_by_content_hash:
+            rows = _fetch_rows(
+                conn,
+                """SELECT claim_uid, investigation_uid, claim_text, claim_type, current_status,
+                          decomposition_status, coalesce(parent_claim_uid,'') AS parent_claim_uid,
+                          created_at, updated_at FROM claim ORDER BY claim_uid""",
             )
+            for r in rows:
+                r["claim_content_hash"] = _claim_content_hash(r.get("claim_text"))
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MERGE (c:Claim {uid: row.claim_content_hash})
+                    ON CREATE SET
+                      c.display_name = coalesce(CASE WHEN row.claim_text IS NOT NULL AND row.claim_text <> '' THEN row.claim_text END, row.claim_content_hash),
+                      c.claim_text = row.claim_text,
+                      c.claim_type = CASE WHEN row.claim_type <> '' THEN row.claim_type END,
+                      c.current_status = coalesce(CASE WHEN row.current_status <> '' THEN row.current_status END, 'ACTIVE'),
+                      c.decomposition_status = coalesce(CASE WHEN row.decomposition_status <> '' THEN row.decomposition_status END, 'unanalyzed'),
+                      c.parent_claim_uid = CASE WHEN row.parent_claim_uid <> '' THEN row.parent_claim_uid END,
+                      c.created_at = datetime(row.created_at),
+                      c.updated_at = datetime(row.updated_at)
+                    ON MATCH SET
+                      c.claim_text = coalesce(CASE WHEN row.claim_text IS NOT NULL AND row.claim_text <> '' THEN row.claim_text END, c.claim_text),
+                      c.claim_type = coalesce(CASE WHEN row.claim_type <> '' THEN row.claim_type END, c.claim_type),
+                      c.current_status = coalesce(CASE WHEN row.current_status <> '' THEN row.current_status END, c.current_status),
+                      c.decomposition_status = coalesce(CASE WHEN row.decomposition_status <> '' THEN row.decomposition_status END, c.decomposition_status),
+                      c.parent_claim_uid = coalesce(CASE WHEN row.parent_claim_uid <> '' THEN row.parent_claim_uid END, c.parent_claim_uid),
+                      c.updated_at = coalesce(datetime(row.updated_at), c.updated_at)
+                    """,
+                    rows=batch,
+                )
+            # Lineage: (Investigation)-[:CONTAINS_CLAIM {claim_uid}]->(Claim)
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (i:Investigation {uid: row.investigation_uid})
+                    MATCH (c:Claim {uid: row.claim_content_hash})
+                    MERGE (i)-[r:CONTAINS_CLAIM]->(c)
+                    ON CREATE SET r.claim_uid = row.claim_uid
+                    """,
+                    rows=batch,
+                )
+        else:
+            rows = _fetch_rows(
+                conn,
+                """SELECT claim_uid, investigation_uid, claim_text, claim_type, current_status,
+                          decomposition_status, coalesce(parent_claim_uid,'') AS parent_claim_uid,
+                          created_at, updated_at FROM claim ORDER BY claim_uid""",
+            )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MERGE (c:Claim {uid: row.claim_uid})
+                    ON CREATE SET
+                      c.display_name = coalesce(CASE WHEN row.claim_text IS NOT NULL AND row.claim_text <> '' THEN row.claim_text END, row.claim_uid),
+                      c.claim_text = row.claim_text,
+                      c.claim_type = CASE WHEN row.claim_type <> '' THEN row.claim_type END,
+                      c.current_status = coalesce(CASE WHEN row.current_status <> '' THEN row.current_status END, 'ACTIVE'),
+                      c.decomposition_status = coalesce(CASE WHEN row.decomposition_status <> '' THEN row.decomposition_status END, 'unanalyzed'),
+                      c.parent_claim_uid = CASE WHEN row.parent_claim_uid <> '' THEN row.parent_claim_uid END,
+                      c.investigation_uid = row.investigation_uid,
+                      c.created_at = datetime(row.created_at),
+                      c.updated_at = datetime(row.updated_at)
+                    ON MATCH SET
+                      c.claim_text = coalesce(CASE WHEN row.claim_text IS NOT NULL AND row.claim_text <> '' THEN row.claim_text END, c.claim_text),
+                      c.claim_type = coalesce(CASE WHEN row.claim_type <> '' THEN row.claim_type END, c.claim_type),
+                      c.current_status = coalesce(CASE WHEN row.current_status <> '' THEN row.current_status END, c.current_status),
+                      c.decomposition_status = coalesce(CASE WHEN row.decomposition_status <> '' THEN row.decomposition_status END, c.decomposition_status),
+                      c.parent_claim_uid = coalesce(CASE WHEN row.parent_claim_uid <> '' THEN row.parent_claim_uid END, c.parent_claim_uid),
+                      c.updated_at = coalesce(datetime(row.updated_at), c.updated_at)
+                    """,
+                    rows=batch,
+                )
 
         # EvidenceItem (E2.3: provenance_type; optional dedupe by content_hash)
         if dedupe_evidence_by_content_hash:
@@ -282,6 +335,12 @@ def _sync_relationships(
     *,
     dedupe_evidence_by_content_hash: bool = False,
 ) -> None:
+    # When dedupe: resolve claim_uid -> claim_content_hash for relationship MATCHes
+    claim_uid_to_content_hash: dict[str, str] = {}
+    if dedupe_evidence_by_content_hash:
+        for r in _fetch_rows(conn, "SELECT claim_uid, claim_text FROM claim"):
+            claim_uid_to_content_hash[r["claim_uid"]] = _claim_content_hash(r.get("claim_text"))
+
     with driver.session() as session:
         # Span IN EvidenceItem (when dedupe: match EvidenceItem by content_hash)
         if dedupe_evidence_by_content_hash:
@@ -325,34 +384,64 @@ def _sync_relationships(
             conn,
             "SELECT span_uid, claim_uid, link_uid, source_event_id, rationale FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid",
         )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (s:EvidenceSpan {uid: row.span_uid})
-                MATCH (c:Claim {uid: row.claim_uid})
-                MERGE (s)-[r:SUPPORTS]->(c)
-                ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
-                """,
-                rows=batch,
-            )
+        if dedupe_evidence_by_content_hash:
+            for r in rows:
+                r["claim_content_hash"] = claim_uid_to_content_hash.get(r["claim_uid"], r["claim_uid"])
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (s:EvidenceSpan {uid: row.span_uid})
+                    MATCH (c:Claim {uid: row.claim_content_hash})
+                    MERGE (s)-[r:SUPPORTS]->(c)
+                    ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
+                    """,
+                    rows=batch,
+                )
+        else:
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (s:EvidenceSpan {uid: row.span_uid})
+                    MATCH (c:Claim {uid: row.claim_uid})
+                    MERGE (s)-[r:SUPPORTS]->(c)
+                    ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
+                    """,
+                    rows=batch,
+                )
 
         # CHALLENGES
         rows = _fetch_rows(
             conn,
             "SELECT span_uid, claim_uid, link_uid, source_event_id, rationale FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid",
         )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (s:EvidenceSpan {uid: row.span_uid})
-                MATCH (c:Claim {uid: row.claim_uid})
-                MERGE (s)-[r:CHALLENGES]->(c)
-                ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
-                """,
-                rows=batch,
-            )
+        if dedupe_evidence_by_content_hash:
+            for r in rows:
+                r["claim_content_hash"] = claim_uid_to_content_hash.get(r["claim_uid"], r["claim_uid"])
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (s:EvidenceSpan {uid: row.span_uid})
+                    MATCH (c:Claim {uid: row.claim_content_hash})
+                    MERGE (s)-[r:CHALLENGES]->(c)
+                    ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
+                    """,
+                    rows=batch,
+                )
+        else:
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (s:EvidenceSpan {uid: row.span_uid})
+                    MATCH (c:Claim {uid: row.claim_uid})
+                    MERGE (s)-[r:CHALLENGES]->(c)
+                    ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
+                    """,
+                    rows=batch,
+                )
 
         # ASSERTS
         rows = _fetch_rows(
@@ -361,12 +450,16 @@ def _sync_relationships(
                       assertion_mode AS mode, confidence, source_event_id
                FROM claim_assertion ORDER BY assertion_uid""",
         )
+        if dedupe_evidence_by_content_hash:
+            for r in rows:
+                r["claim_content_hash"] = claim_uid_to_content_hash.get(r["claim_uid"], r["claim_uid"])
         for batch in _batched(rows, BATCH_SIZE):
+            claim_key = "claim_content_hash" if dedupe_evidence_by_content_hash else "claim_uid"
             session.run(
-                """
+                f"""
                 UNWIND $rows AS row
-                MATCH (a:Actor {uid: row.actor_uid})
-                MATCH (c:Claim {uid: row.claim_uid})
+                MATCH (a:Actor {{uid: row.actor_uid}})
+                MATCH (c:Claim {{uid: row.{claim_key}}})
                 MERGE (a)-[r:ASSERTS]->(c)
                 ON CREATE SET
                   r.source_event_id = row.source_event_id,
@@ -382,43 +475,88 @@ def _sync_relationships(
             conn,
             "SELECT tension_uid, claim_a_uid, claim_b_uid, source_event_id FROM tension ORDER BY tension_uid",
         )
+        if dedupe_evidence_by_content_hash:
+            for r in rows:
+                r["claim_a_content_hash"] = claim_uid_to_content_hash.get(r["claim_a_uid"], r["claim_a_uid"])
+                r["claim_b_content_hash"] = claim_uid_to_content_hash.get(r["claim_b_uid"], r["claim_b_uid"])
         for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (t:Tension {uid: row.tension_uid})
-                MATCH (c1:Claim {uid: row.claim_a_uid})
-                MATCH (c2:Claim {uid: row.claim_b_uid})
-                MERGE (t)-[r1:BETWEEN]->(c1)
-                ON CREATE SET r1.source_event_id = row.source_event_id
-                MERGE (t)-[r2:BETWEEN]->(c2)
-                ON CREATE SET r2.source_event_id = row.source_event_id
-                """,
-                rows=batch,
-            )
+            if dedupe_evidence_by_content_hash:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (t:Tension {uid: row.tension_uid})
+                    MATCH (c1:Claim {uid: row.claim_a_content_hash})
+                    MATCH (c2:Claim {uid: row.claim_b_content_hash})
+                    MERGE (t)-[r1:BETWEEN]->(c1)
+                    ON CREATE SET r1.source_event_id = row.source_event_id
+                    MERGE (t)-[r2:BETWEEN]->(c2)
+                    ON CREATE SET r2.source_event_id = row.source_event_id
+                    """,
+                    rows=batch,
+                )
+            else:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (t:Tension {uid: row.tension_uid})
+                    MATCH (c1:Claim {uid: row.claim_a_uid})
+                    MATCH (c2:Claim {uid: row.claim_b_uid})
+                    MERGE (t)-[r1:BETWEEN]->(c1)
+                    ON CREATE SET r1.source_event_id = row.source_event_id
+                    MERGE (t)-[r2:BETWEEN]->(c2)
+                    ON CREATE SET r2.source_event_id = row.source_event_id
+                    """,
+                    rows=batch,
+                )
 
-        # SUPERSEDES
-        rows = _fetch_rows(
-            conn,
-            """SELECT new_evidence_uid, prior_evidence_uid, supersession_type, coalesce(reason,'') AS reason, source_event_id
-               FROM evidence_supersession ORDER BY supersession_uid""",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (eNew:EvidenceItem {uid: row.new_evidence_uid})
-                MATCH (ePrior:EvidenceItem {uid: row.prior_evidence_uid})
-                MERGE (eNew)-[r:SUPERSEDES]->(ePrior)
-                ON CREATE SET
-                  r.source_event_id = row.source_event_id,
-                  r.type = row.supersession_type,
-                  r.reason = CASE WHEN row.reason <> '' THEN row.reason END
-                """,
-                rows=batch,
+        # SUPERSEDES (when dedupe: match EvidenceItem by content_hash)
+        if dedupe_evidence_by_content_hash:
+            rows = _fetch_rows(
+                conn,
+                """SELECT es.new_evidence_uid, es.prior_evidence_uid, es.supersession_type,
+                          coalesce(es.reason,'') AS reason, es.source_event_id,
+                          en.content_hash AS new_content_hash, ep.content_hash AS prior_content_hash
+                   FROM evidence_supersession es
+                   JOIN evidence_item en ON es.new_evidence_uid = en.evidence_uid
+                   JOIN evidence_item ep ON es.prior_evidence_uid = ep.evidence_uid
+                   ORDER BY es.supersession_uid""",
             )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (eNew:EvidenceItem {uid: row.new_content_hash})
+                    MATCH (ePrior:EvidenceItem {uid: row.prior_content_hash})
+                    MERGE (eNew)-[r:SUPERSEDES]->(ePrior)
+                    ON CREATE SET
+                      r.source_event_id = row.source_event_id,
+                      r.type = row.supersession_type,
+                      r.reason = CASE WHEN row.reason <> '' THEN row.reason END
+                    """,
+                    rows=batch,
+                )
+        else:
+            rows = _fetch_rows(
+                conn,
+                """SELECT new_evidence_uid, prior_evidence_uid, supersession_type, coalesce(reason,'') AS reason, source_event_id
+                   FROM evidence_supersession ORDER BY supersession_uid""",
+            )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (eNew:EvidenceItem {uid: row.new_evidence_uid})
+                    MATCH (ePrior:EvidenceItem {uid: row.prior_evidence_uid})
+                    MERGE (eNew)-[r:SUPERSEDES]->(ePrior)
+                    ON CREATE SET
+                      r.source_event_id = row.source_event_id,
+                      r.type = row.supersession_type,
+                      r.reason = CASE WHEN row.reason <> '' THEN row.reason END
+                    """,
+                    rows=batch,
+                )
 
-        # DECOMPOSES_TO
+        # DECOMPOSES_TO (when dedupe: match Claim by content_hash)
         rows = _fetch_rows(
             conn,
             """SELECT c.claim_uid AS child_uid, c.parent_claim_uid AS parent_uid, e.event_id AS source_event_id
@@ -426,53 +564,111 @@ def _sync_relationships(
                JOIN events e ON e.subject_uid = c.claim_uid AND e.event_type = 'ClaimProposed'
                WHERE c.parent_claim_uid IS NOT NULL ORDER BY c.claim_uid""",
         )
+        if dedupe_evidence_by_content_hash:
+            for r in rows:
+                r["parent_content_hash"] = claim_uid_to_content_hash.get(r["parent_uid"], r["parent_uid"])
+                r["child_content_hash"] = claim_uid_to_content_hash.get(r["child_uid"], r["child_uid"])
         for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (parent:Claim {uid: row.parent_uid})
-                MATCH (child:Claim {uid: row.child_uid})
-                MERGE (parent)-[r:DECOMPOSES_TO]->(child)
-                ON CREATE SET r.source_event_id = row.source_event_id
-                """,
-                rows=batch,
-            )
+            if dedupe_evidence_by_content_hash:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (parent:Claim {uid: row.parent_content_hash})
+                    MATCH (child:Claim {uid: row.child_content_hash})
+                    MERGE (parent)-[r:DECOMPOSES_TO]->(child)
+                    ON CREATE SET r.source_event_id = row.source_event_id
+                    """,
+                    rows=batch,
+                )
+            else:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (parent:Claim {uid: row.parent_uid})
+                    MATCH (child:Claim {uid: row.child_uid})
+                    MERGE (parent)-[r:DECOMPOSES_TO]->(child)
+                    ON CREATE SET r.source_event_id = row.source_event_id
+                    """,
+                    rows=batch,
+                )
 
-        # CONTAINS (Investigation -> Claim)
-        rows = _fetch_rows(
-            conn,
-            "SELECT investigation_uid, claim_uid FROM claim ORDER BY claim_uid",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (i:Investigation {uid: row.investigation_uid})
-                MATCH (c:Claim {uid: row.claim_uid})
-                MERGE (i)-[r:CONTAINS]->(c)
-                ON CREATE SET r.source_event_id = ''
-                """,
-                rows=batch,
+        # CONTAINS (Investigation -> Claim). When dedupe: CONTAINS_CLAIM with claim_uid on rel
+        if dedupe_evidence_by_content_hash:
+            rows = _fetch_rows(
+                conn,
+                "SELECT investigation_uid, claim_uid, claim_text FROM claim ORDER BY claim_uid",
             )
+            for r in rows:
+                r["claim_content_hash"] = _claim_content_hash(r.get("claim_text"))
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (i:Investigation {uid: row.investigation_uid})
+                    MATCH (c:Claim {uid: row.claim_content_hash})
+                    MERGE (i)-[r:CONTAINS_CLAIM]->(c)
+                    ON CREATE SET r.claim_uid = row.claim_uid
+                    """,
+                    rows=batch,
+                )
+        else:
+            rows = _fetch_rows(
+                conn,
+                "SELECT investigation_uid, claim_uid FROM claim ORDER BY claim_uid",
+            )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (i:Investigation {uid: row.investigation_uid})
+                    MATCH (c:Claim {uid: row.claim_uid})
+                    MERGE (i)-[r:CONTAINS]->(c)
+                    ON CREATE SET r.source_event_id = ''
+                    """,
+                    rows=batch,
+                )
 
-        # PROVIDED_BY
-        rows = _fetch_rows(
-            conn,
-            "SELECT evidence_uid, source_uid, coalesce(relationship,'') AS relationship, source_event_id FROM evidence_source_link ORDER BY evidence_uid, source_uid",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (e:EvidenceItem {uid: row.evidence_uid})
-                MATCH (s:Source {uid: row.source_uid})
-                MERGE (e)-[r:PROVIDED_BY]->(s)
-                ON CREATE SET
-                  r.source_event_id = row.source_event_id,
-                  r.relationship = CASE WHEN row.relationship <> '' THEN row.relationship END
-                """,
-                rows=batch,
+        # PROVIDED_BY (when dedupe: match EvidenceItem by content_hash)
+        if dedupe_evidence_by_content_hash:
+            rows = _fetch_rows(
+                conn,
+                """SELECT esl.evidence_uid, esl.source_uid, coalesce(esl.relationship,'') AS relationship,
+                          esl.source_event_id, ei.content_hash
+                   FROM evidence_source_link esl
+                   JOIN evidence_item ei ON esl.evidence_uid = ei.evidence_uid
+                   ORDER BY esl.evidence_uid, esl.source_uid""",
             )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (e:EvidenceItem {uid: row.content_hash})
+                    MATCH (s:Source {uid: row.source_uid})
+                    MERGE (e)-[r:PROVIDED_BY]->(s)
+                    ON CREATE SET
+                      r.source_event_id = row.source_event_id,
+                      r.relationship = CASE WHEN row.relationship <> '' THEN row.relationship END
+                    """,
+                    rows=batch,
+                )
+        else:
+            rows = _fetch_rows(
+                conn,
+                "SELECT evidence_uid, source_uid, coalesce(relationship,'') AS relationship, source_event_id FROM evidence_source_link ORDER BY evidence_uid, source_uid",
+            )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (e:EvidenceItem {uid: row.evidence_uid})
+                    MATCH (s:Source {uid: row.source_uid})
+                    MERGE (e)-[r:PROVIDED_BY]->(s)
+                    ON CREATE SET
+                      r.source_event_id = row.source_event_id,
+                      r.relationship = CASE WHEN row.relationship <> '' THEN row.relationship END
+                    """,
+                    rows=batch,
+                )
 
 
 def _sync_retractions(conn: sqlite3.Connection, driver: Any) -> None:
@@ -511,7 +707,9 @@ def sync_project_to_neo4j(
     """Sync a Chronicle project read model to Neo4j. Idempotent (MERGE). Full rebuild; retractions applied.
 
     When dedupe_evidence_by_content_hash is True (or set via NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1),
-    one EvidenceItem node is created per content_hash; lineage is preserved via (Investigation)-[:CONTAINS_EVIDENCE {evidence_uid}]->(EvidenceItem).
+    full deduplication is enabled: one EvidenceItem per content_hash and one Claim per hash(claim_text).
+    Lineage: (Investigation)-[:CONTAINS_EVIDENCE {evidence_uid}]->(EvidenceItem) and
+    (Investigation)-[:CONTAINS_CLAIM {claim_uid}]->(Claim).
     """
     project_dir = Path(project_dir)
     db_path = project_dir / CHRONICLE_DB

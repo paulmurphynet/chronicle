@@ -47,14 +47,14 @@ session.propose_claim(
 ```
 
 - **Single external ID:** Use `notes="key: value"` or `tags=["external:fc-12345"]`. The read model exposes `claim.notes` and `claim.tags_json`; exports and dashboards can join on these.
-- **Multiple external keys per claim:** Not yet supported. Planned **multi-key claim metadata** (e.g. `metadata_json` on claims) is in [To-do](to_do.md). Until then, use one note or one tag, or keep a mapping by `claim_uid`.
+- **Multiple external keys per claim:** Not yet supported. Until then, use one note or one tag, or keep a mapping by `claim_uid`. Multi-key claim metadata (e.g. `metadata_json`) may be added in a future release.
 
 ## Summary
 
 | Chronicle entity | Where to store external IDs |
 |------------------|-----------------------------|
 | **Evidence** | `metadata` at ingest → `metadata_json` in DB and exports. |
-| **Claim** | Use `propose_claim(..., notes=..., tags=...)` for one external ID. Multi-key (e.g. `metadata_json`) is in [To-do](to_do.md) if needed. |
+| **Claim** | Use `propose_claim(..., notes=..., tags=...)` for one external ID. Multi-key (e.g. `metadata_json`) not yet supported. |
 | **Investigation** | `tags_json` or similar if your version supports it; otherwise keep mapping in your system by `investigation_uid`. |
 
 This lets you say "this Chronicle claim_uid corresponds to that fact-check verdict" or "this evidence_uid corresponds to that C2PA assertion" without changing Chronicle’s core schema today.

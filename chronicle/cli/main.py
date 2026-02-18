@@ -1070,7 +1070,7 @@ def main() -> int:
     neo4j_sync_p.add_argument(
         "--dedupe-evidence-by-content-hash",
         action="store_true",
-        help="Merge evidence by content_hash (one EvidenceItem per content; lineage via CONTAINS_EVIDENCE). Can also set NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1",
+        help="Full deduplication: one EvidenceItem per content_hash, one Claim per hash(claim_text); lineage via CONTAINS_EVIDENCE and CONTAINS_CLAIM. Can also set NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1",
     )
 
     policy_p = subparsers.add_parser(
