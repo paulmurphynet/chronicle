@@ -56,7 +56,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 
 ## Docs
 
-**Essential:** [Eval contract](docs/eval_contract.md) (scorer I/O), [Verifier](docs/verifier.md) (.chronicle verification), [Technical report](docs/technical-report.md) (defensibility definition), [Guidebook](guidebook/README.md) (narrative), [Critical areas](critical_areas/README.md) (limits), [Troubleshooting](docs/troubleshooting.md) (common issues), [Glossary](docs/glossary.md) (terms). **Releases:** [CHANGELOG](CHANGELOG.md) and tagged versions for pinning.
+**Essential:** [Eval contract](docs/eval_contract.md) (scorer I/O), [Verifier](docs/verifier.md) (.chronicle verification), [Technical report](docs/technical-report.md) (defensibility definition), [Guidebook](guidebook/README.md) (narrative), [Critical areas](critical_areas/README.md) (limits), [Troubleshooting](docs/troubleshooting.md) (common issues), [Glossary](docs/glossary.md) (terms). **Releases:** [CHANGELOG](CHANGELOG.md) and tagged versions for pinning. **Citation:** [Technical report § Citation](docs/technical-report.md#5-citation) and [CITATION.cff](CITATION.cff).
 
 **By topic:**
 

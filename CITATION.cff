@@ -1,0 +1,21 @@
+# Citation File Format for chronicle-standard
+# https://citation-file-format.github.io/
+cff-version: 1.2.0
+message: "If you use this software or the defensibility definition and schema, please cite it as below."
+title: "chronicle-standard"
+version: "0.1.0"
+authors:
+  - name: "Chronicle"
+type: software
+description: "Defensibility scoring for RAG and evals. Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier. Includes technical report defining defensibility and core schema."
+license: MIT
+repository-code: "https://github.com/chronicle-standard/chronicle-standard"
+url: "https://github.com/chronicle-standard/chronicle-standard"
+keywords:
+  - defensibility
+  - RAG
+  - evidence
+  - claims
+  - evaluation
+# For the defensibility definition and schema, cite the in-repo technical report
+# (docs/technical-report.md) or the preprint when published (arXiv); see technical report Section 5.

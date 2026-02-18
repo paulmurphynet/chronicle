@@ -112,10 +112,24 @@ Defensibility can be queried **as of a point in time** (date or event_id), so ev
 
 To cite this technical report or Chronicle in research:
 
-- **In-repo document:** "Chronicle: Defensibility, Schema, and Use for Evaluation. Technical report. chronicle-standard repository. Available: [URL to this doc in the repo]."
-- **Preprint (when published):** Use the preprint identifier (e.g. arXiv) and standard citation format.
+- **In-repo technical report (until preprint is published):** Cite the repository and this document. Example (BibTeX):
 
-For the reference implementation and schemas: chronicle-standard (Chronicle reference implementation). https://github.com/chronicle-standard/chronicle-standard (or the canonical repo URL).
+  ```bibtex
+  @misc{chronicle-technical-report,
+    title        = {Chronicle: Defensibility, Schema, and Use for Evaluation},
+    author       = {Chronicle},
+    year         = {2025},
+    howpublished = {Technical report. chronicle-standard repository},
+    url          = {https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/technical-report.md},
+    note         = {Defensibility definition, core schema, and use for RAG/reasoning evaluation.}
+  }
+  ```
+
+  In prose: "Chronicle: Defensibility, Schema, and Use for Evaluation. Technical report. chronicle-standard repository. Available: [URL to this doc in the repo]."
+
+- **Preprint (planned):** An arXiv (or equivalent) preprint is planned so the defensibility definition and schema have a stable, citable identifier. Once published, use the preprint ID (e.g. arXiv:XXXX.XXXXX) and standard citation format; this section will be updated with the exact reference.
+
+- **Reference implementation:** chronicle-standard (Chronicle reference implementation). https://github.com/chronicle-standard/chronicle-standard (or the canonical repo URL). For machine-readable citation, see the repository root [CITATION.cff](../CITATION.cff).
 
 ---
 
