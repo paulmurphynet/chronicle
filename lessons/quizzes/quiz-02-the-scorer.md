@@ -22,12 +22,12 @@ Answer after reading the lesson and running the scorer at least once.
 
 ## Answer key
 
-1. **`query`** (string), **`answer`** (string), **`evidence`** (array). Evidence items can be strings or objects with `text` or `path`.
+1. **`query`** (string), **`answer`** (string), **`evidence`** (array). Evidence items can be strings or objects with `text`, `path` (file), or `url` (fetched with SSRF safeguards).
 
-2. It returns an **error object**, e.g. `{"error": "invalid_input", "message": "evidence must contain at least one non-empty text chunk..."}`. So: an object with an `error` key (and usually a `message` key).
+2. It returns an **error object**, e.g. `{"contract_version": "1.0", "error": "invalid_input", "message": "evidence must contain at least one non-empty text chunk..."}`. So: an object with `contract_version`, an `error` key (and usually a `message` key).
 
-3. It turns the raw `evidence` list into a list of **text strings**: keep non-empty strings, and for objects use `text` if present or read from `path` if it’s a file path; skip invalid or empty items.
+3. It turns the raw `evidence` list into a list of **text strings**: keep non-empty strings; for objects use `text` if present, read from `path` if it’s a file path, or fetch from `url` (with SSRF safeguards); skip invalid or empty items.
 
 4. The temp project gives the scorer an **isolated environment** for one run: ingest evidence, propose the claim, link support, compute defensibility, then discard. No need for a real project path or cleanup; one run = one temp dir.
 
-5. **Success:** a single JSON object with defensibility metrics (e.g. `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, …). **Failure:** a single JSON object with at least `error` (e.g. `invalid_input`) and usually `message`.
+5. **Success:** a single JSON object with `contract_version: "1.0"` and defensibility metrics (e.g. `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, …). **Failure:** a single JSON object with `contract_version`, at least `error` (e.g. `invalid_input`), and usually `message`.

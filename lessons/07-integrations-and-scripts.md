@@ -28,6 +28,7 @@ If the repo has `chronicle/integrations/langchain.py` or similar, open it and se
 
 Open **scripts/README.md** and find the **“First-class scripts”** table. These are the main entry points for pipelines and interop:
 
+- **chronicle quickstart-rag** — One-command RAG flow (temp project, investigation, ingest, claim, link, defensibility). See [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md).
 - **chronicle-verify** — Verify a .chronicle file (manifest, schema, evidence hashes). Stdlib only.
 - **standalone_defensibility_scorer.py** — One (query, answer, evidence) in → defensibility JSON out (Lesson 02).
 - **benchmark_data/run_defensibility_benchmark.py** — Fixed queries, RAG path, defensibility per answer.
@@ -83,14 +84,15 @@ So scripts are **thin orchestration**; the engine is the store and commands.
 
 ## Try it
 
-1. List the contents of **scripts/** and **scripts/adapters/**. Match the first-class scripts in **scripts/README.md** to their paths.
-2. Open **scripts/adapters/example_rag_to_scorer.py** and see how it reads JSON and calls **_run_scorer**. Run it with a one-line JSON input (query, answer, evidence) from stdin.
-3. (Optional) Install **`.[api]`**, set **CHRONICLE_PROJECT_PATH**, run **uvicorn chronicle.api.app:app**, and open **http://127.0.0.1:8000/docs** to try the API.
-4. Open **scripts/ingest_transcript_csv.py** and find where it calls **session.ingest_evidence**, **session.propose_claim**, and **session.link_support**. Confirm it follows the same pattern as the scorer (without the temp project).
+1. Run **chronicle quickstart-rag** from the repo root (with venv activated). Confirm you see defensibility output. See [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md) for options (`--path`, `--text`).
+2. List the contents of **scripts/** and **scripts/adapters/**. Match the first-class scripts in **scripts/README.md** to their paths.
+3. Open **scripts/adapters/example_rag_to_scorer.py** and see how it reads JSON and calls the scorer logic. Run it with a one-line JSON input (query, answer, evidence) from stdin.
+4. (Optional) Install **`.[api]`**, set **CHRONICLE_PROJECT_PATH**, run **uvicorn chronicle.api.app:app**, and open **http://127.0.0.1:8000/docs** to try the API.
+5. Open **scripts/ingest_transcript_csv.py** and find where it calls **session.ingest_evidence**, **session.propose_claim**, and **session.link_support**. Confirm it follows the same pattern as the scorer (without the temp project).
 
 ## Summary
 
-- **First-class scripts** (scripts/README.md): scorer, verifier, benchmark, eval harness adapter, export_for_ml, RAG demos. Use them to plug Chronicle into pipelines.
+- **First-class scripts and CLI** (scripts/README.md, CLI): **chronicle quickstart-rag** for a one-command RAG flow; scorer, verifier, benchmark, eval harness adapter, export_for_ml, RAG demos. Use them to plug Chronicle into pipelines.
 - **Adapters** (scripts/adapters/): RAG→scorer example, fact-checker→Chronicle, provenance→Chronicle. Copy-paste templates for interop.
 - **Optional HTTP API** (chronicle/api/, install `.[api]`): write/read/export over HTTP; same shapes as eval contract and defensibility schema.
 - **Integrations** (chronicle/integrations/) wire RAG frameworks to ChronicleSession so that runs record evidence and claims.

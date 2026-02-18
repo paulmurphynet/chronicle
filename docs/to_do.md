@@ -18,5 +18,3 @@ This keeps the repo from accumulating many one-off implementation-plan docs; one
 ## Current steps
 
 — none —
-
-*(Batch completed: evidence URL in scorer, contract_version in output, state-and-plan/verifier/eval-contract/defensibility-metrics/rag-evals/integrating docs updated, web verifier page and /verifier route added, coverage in CI, benchmark canonical one-liner, limits-of-standalone-scorer subsection. Add next batch when ready.)*

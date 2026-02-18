@@ -29,6 +29,7 @@ Open **chronicle/cli/main.py** and scan the **subparsers** (e.g. around lines 54
 
 | Subcommand | Purpose |
 |------------|---------|
+| **quickstart-rag** | One-command RAG demo: create temp project, investigation, ingest sample text, propose claim, link support, print defensibility. Use `--path` to keep the project; `--text` for your own file. See [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md). |
 | **init** | Initialize a Chronicle project directory (creates chronicle.db, schema). |
 | **create-investigation** | Create an investigation (title, etc.) in the project. |
 | **ingest** | Ingest a file as evidence into an investigation. |
@@ -54,13 +55,14 @@ So the CLI is a **wrapper** around the same session and commands used by the sco
 ## Try it
 
 1. Run **chronicle --help** and list all top-level subcommands.
-2. Run **chronicle init /tmp/test_chronicle** (or a temp path), then **chronicle create-investigation --path /tmp/test_chronicle --title "Test"**. Confirm the project has an investigation (e.g. list it or run defensibility after adding a claim via a script).
-3. From the repo, run **chronicle verify-chronicle path/to/sample.chronicle** (generate a sample first with scripts/generate_sample_chronicle.py if needed).
+2. Run **chronicle quickstart-rag** (no path: uses a temp dir). You should see project path, investigation UID, claim UID, and defensibility. Then try **chronicle quickstart-rag --path /tmp/my_rag** to keep the project.
+3. Run **chronicle init /tmp/test_chronicle** (or a temp path), then **chronicle create-investigation --path /tmp/test_chronicle --title "Test"**. Confirm the project has an investigation (e.g. list it or run defensibility after adding a claim via a script).
+4. From the repo, run **chronicle verify-chronicle path/to/sample.chronicle** (generate a sample first with scripts/generate_sample_chronicle.py if needed).
 
 ## Summary
 
 - The **chronicle** CLI is implemented in **chronicle/cli/main.py**; entry point in pyproject.toml.
-- **init**, **create-investigation**, **ingest**, **export**, **import**, **defensibility**, **reasoning-trail**, **reasoning-brief**, **verify**, **verify-chronicle**, **neo4j-sync**, **policy** are the main subcommands.
+- **quickstart-rag** gives a one-command RAG flow (project, investigation, evidence, claim, defensibility); **init**, **create-investigation**, **ingest**, **export**, **import**, **defensibility**, **reasoning-trail**, **reasoning-brief**, **verify**, **verify-chronicle**, **neo4j-sync**, **policy** are the other main subcommands.
 - **verify** = project invariants; **verify-chronicle** = .chronicle file verifier (same as chronicle-verify).
 
 **Quiz:** [quizzes/quiz-08-cli.md](quizzes/quiz-08-cli.md)

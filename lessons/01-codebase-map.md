@@ -70,6 +70,9 @@ When you run the **standalone scorer**, it uses: `create_project`, session, inge
 - **`docs/eval_contract_schema.json`** — JSON Schema for that contract.  
 - **`docs/defensibility-metrics-schema.md`** — Meaning of each field in the scorer output.  
 - **`docs/verifier.md`** — What the verifier checks and how to use it.  
+- **`docs/verification-guarantees.md`** — What the verifier and runtime guarantee (and do not); invariants, replay, audit.  
+- **`docs/implementer-checklist.md`** — Produce/consume .chronicle: checklist and pointers.  
+- **`docs/rag-in-5-minutes.md`** — One command (`chronicle quickstart-rag`) to try the flow; next steps to scorer and integration.  
 - **`docs/technical-report.md`** — Defensibility definition and schema (citable).  
 - **`docs/api.md`** — Optional HTTP API: install `.[api]`, set `CHRONICLE_PROJECT_PATH`, run uvicorn.  
 - **`docs/consuming-chronicle.md`** — How to read a .chronicle from another language or tool (ZIP, manifest, SQLite).  

@@ -21,12 +21,12 @@ Step-by-step annotated lessons that walk through **100% of the Chronicle codebas
 | [05](05-store-and-session.md) | Store, read model, and session API | `chronicle/store/` |
 | [06](06-defensibility-metrics.md) | How defensibility is computed | `chronicle/eval_metrics.py`, store |
 | [07](07-integrations-and-scripts.md) | Integrations and scripts | `chronicle/integrations/`, `scripts/` |
-| [08](08-cli.md) | The Chronicle CLI | `chronicle/cli/` |
+| [08](08-cli.md) | The Chronicle CLI (init, quickstart-rag, verify-chronicle, export, etc.) | `chronicle/cli/` |
 | [09](09-epistemic-tools.md) | Epistemic tools (decomposer, contradiction, type inference) | `chronicle/tools/` |
 | [10](10-export-import-neo4j.md) | Export, import, and Neo4j | `chronicle/store/export_import.py`, `neo4j_sync.py` |
 | [11](11-interoperability-api-and-tests.md) | Interoperability, API, and tests | Terminology, external IDs, provenance, HTTP API, tests, CI |
 
-The full path from 00 to 11 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI, epistemic tools, export/import/Neo4j, and interop/API/tests.
+The full path from 00 to 11 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag), epistemic tools, export/import/Neo4j, and interop/API/tests.
 
 ## Lesson format
 
@@ -49,8 +49,9 @@ Terms you’ll see across lessons (and in the code):
 - **.chronicle** — Our portable format (ZIP) for an investigation: manifest, schema, evidence, claims.
 - **Eval contract** — Input (query, answer, evidence) and output (defensibility metrics) for the scorer; see [docs/eval_contract.md](../docs/eval_contract.md).
 - **Event-sourced** — All changes are stored as events; we don’t overwrite history.
+- **quickstart-rag** — CLI command `chronicle quickstart-rag`: one-command RAG flow; see [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md).
 
-For more, see [Epistemology scope](../docs/epistemology-scope.md) and the [Technical report](../docs/technical-report.md).
+For more, see [Epistemology scope](../docs/epistemology-scope.md), the [Technical report](../docs/technical-report.md), and [Verification guarantees](../docs/verification-guarantees.md).
 
 ## For maintainers
 

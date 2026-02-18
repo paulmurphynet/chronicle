@@ -82,7 +82,9 @@ chronicle-verify path/to/file.chronicle
 | [State and plan](docs/state-and-plan.md) | What we have so far and the plan going forward. |
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
 | [Testing with Ollama](docs/testing-with-ollama.md) | Use local Ollama for real LLM-backed testing (decomposer, contradiction, type inference, etc.). |
-| [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee. |
+| [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee; runtime invariants and audit. |
+| [Implementer checklist](docs/implementer-checklist.md) | Produce or consume a .chronicle: checklist and pointers. |
+| [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
 | [Onboarding and open-source checklist](docs/ONBOARDING_AND_OPEN_SOURCE.md) | Plan for making the repo ready for colleagues and public release. |
 
 ## License

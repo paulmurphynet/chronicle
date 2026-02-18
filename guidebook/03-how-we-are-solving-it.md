@@ -18,13 +18,13 @@ We compute a **defensibility** result: strength of provenance, how many sources 
 
 ## One run in, one score out
 
-For RAG and evals, we keep the contract simple: **one (query, answer, evidence) in → one defensibility metrics object out.** No API server required. You can run our standalone scorer in a pipeline, or call the same logic from your own code. That makes it easy to add “Chronicle defensibility” as a metric alongside whatever else you already measure. We document this path in a single place—[RAG evals: defensibility as a standard metric](../docs/rag-evals-defensibility-metric.md)—so your harness can plug in with the same contract and schema.
+For RAG and evals, we keep the contract simple: **one (query, answer, evidence) in → one defensibility metrics object out.** No API server required. You can run our standalone scorer in a pipeline, or call the same logic from your own code. The fastest way to try it is **one command**: `chronicle quickstart-rag` (see [RAG in 5 minutes](../docs/rag-in-5-minutes.md)). For harness integration we document the path in [RAG evals: defensibility as a standard metric](../docs/rag-evals-defensibility-metric.md)—same contract and schema so your eval can plug in.
 
 ---
 
 ## .chronicle and “verify it yourself”
 
-We also define a portable format: **.chronicle**. It’s a package (e.g. a ZIP) that contains the investigation’s manifest, schema, evidence, and claims. Anyone can **verify** it with our verifier—no need to run our full stack or trust us. So “show your work” becomes a **verifiable artifact**, not a promise. That’s how we try to close the loop: you produce a defensible record; others can check it. We also document [how to consume a .chronicle](../docs/consuming-chronicle.md) from another language or tool (open the ZIP, read the DB, resolve evidence), so fact-checking UIs or dashboards can use the format without running our stack.
+We also define a portable format: **.chronicle**. It’s a package (e.g. a ZIP) that contains the investigation’s manifest, schema, evidence, and claims. Anyone can **verify** it with our verifier—no need to run our full stack or trust us. So “show your work” becomes a **verifiable artifact**, not a promise. What “verified” means (and what the verifier does *not* check—e.g. truth of claims, source independence) is spelled out in [Verification guarantees](../docs/verification-guarantees.md). We also document [how to consume a .chronicle](../docs/consuming-chronicle.md) from another language or tool (open the ZIP, read the DB, resolve evidence), and an [implementer checklist](../docs/implementer-checklist.md) for producing or consuming the format.
 
 ---
 

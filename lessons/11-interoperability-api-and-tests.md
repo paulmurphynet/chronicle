@@ -5,6 +5,9 @@
 **Key files:**
 
 - [docs/glossary.md](../docs/glossary.md) — “Terminology for interop” (claim≈statement, support/challenge≈evidence for/against)
+- [docs/verification-guarantees.md](../docs/verification-guarantees.md) — What the verifier and runtime guarantee; what they do not
+- [docs/implementer-checklist.md](../docs/implementer-checklist.md) — Produce/consume .chronicle checklist
+- [docs/rag-in-5-minutes.md](../docs/rag-in-5-minutes.md) — One-command RAG path (`chronicle quickstart-rag`) and next steps
 - [docs/external-ids.md](../docs/external-ids.md) — Storing fact-check IDs, C2PA claim IDs in evidence metadata
 - [docs/provenance-recording.md](../docs/provenance-recording.md) — We record source and evidence–source links; we don’t verify
 - [docs/claim-evidence-metrics-export.md](../docs/claim-evidence-metrics-export.md) — Stable JSON shape for one claim + evidence refs + defensibility
@@ -68,7 +71,7 @@ Open **chronicle/api/app.py** and skim the route list and the **\_get_project_pa
 
 Run tests: **`pytest tests/ -v`** (requires **`pip install -e ".[dev]"`**).
 
-**CI (.github/workflows/ci.yml):** On push/PR to main (or master), we run **ruff check** and **ruff format** on chronicle and tools, and **pytest tests/** on Python 3.11 and 3.12. That keeps the scorer, session, and verifier covered and the core code style consistent.
+**CI (.github/workflows/ci.yml):** On push/PR to main (or master), we run **ruff check** and **ruff format** on chronicle and tools, and **pytest tests/** (with coverage) on Python 3.11 and 3.12. That keeps the scorer, session, and verifier covered and the core code style consistent.
 
 ---
 

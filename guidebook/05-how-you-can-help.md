@@ -6,7 +6,7 @@ The first three chapters described the problem, why it exists, and how we’re s
 
 ## If you write code
 
-- **Run the scorer and verifier** and report what works and what doesn’t. File issues or suggest improvements.
+- **Try the one-command RAG path.** Run `chronicle quickstart-rag` (see [RAG in 5 minutes](../docs/rag-in-5-minutes.md)). Then run the **scorer** and **verifier** and report what works and what doesn’t. File issues or suggest improvements.
 - **Add defensibility to your evals.** Use the [eval contract](../docs/eval_contract.md) and the standalone scorer (or the session API) and share your experience—what was easy, what was missing. The [RAG evals](../docs/rag-evals-defensibility-metric.md) doc is the single entry point for “Chronicle defensibility as a standard metric” in your harness.
 - **Try the optional HTTP API or adapters.** Install with `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, and run the API for UIs or scripts that need HTTP. Or use the [adapters](../scripts/adapters/) (RAG→scorer, fact-checker→Chronicle, provenance→Chronicle) as templates and adapt them to your pipeline. See [docs/api.md](../docs/api.md) and [docs/provenance-recording.md](../docs/provenance-recording.md).
 - **Run tests and CI.** We have tests for the scorer, session flow, and verifier; CI runs ruff and pytest on push/PR. Run `pytest tests/ -v` locally (after `pip install -e ".[dev]"`) and keep the suite green when you change code.
@@ -18,7 +18,7 @@ The first three chapters described the problem, why it exists, and how we’re s
 ## If you write or teach
 
 - **Reference the technical report and the contract.** If you teach or publish in the space of RAG, evals, or evidence-based systems, citing our [technical report](../docs/technical-report.md) and [eval contract](../docs/eval_contract.md) helps others find us and understand defensibility.
-- **Improve the guidebook or docs.** The [guidebook](README.md) is for everyone. If a sentence is confusing or a chapter is missing, suggest an edit or open a PR. Same for the main [docs](../docs/) (eval contract, verifier, API, consuming .chronicle, external IDs, provenance, RAG evals, etc.).
+- **Improve the guidebook or docs.** The [guidebook](README.md) is for everyone. If a sentence is confusing or a chapter is missing, suggest an edit or open a PR. Same for the main [docs](../docs/) (eval contract, verifier, verification guarantees, implementer checklist, RAG in 5 minutes, API, consuming .chronicle, external IDs, provenance, RAG evals, etc.).
 
 ---
 

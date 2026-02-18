@@ -6,6 +6,7 @@
 
 - [tools/verify_chronicle/verify_chronicle.py](../tools/verify_chronicle/verify_chronicle.py) — verifier implementation  
 - [docs/verifier.md](../docs/verifier.md) — user-facing verifier doc  
+- [docs/verification-guarantees.md](../docs/verification-guarantees.md) — what the verifier guarantees and does not; runtime invariants and audit  
 
 ---
 
@@ -31,7 +32,7 @@ After `pip install -e .`, the CLI is:
 chronicle-verify path/to/file.chronicle
 ```
 
-You can also run the module directly: `python3 -m tools.verify_chronicle path/to/file.chronicle`. The entry point is in the package’s `pyproject.toml` or `setup`; the logic lives in `verify_chronicle.py`.
+You can also run the module directly: `python3 -m tools.verify_chronicle path/to/file.chronicle`. The entry point is in **pyproject.toml** (`chronicle-verify = "tools.verify_chronicle.verify_chronicle:main"`); the logic lives in `verify_chronicle.py`.
 
 ## Try it
 
@@ -47,6 +48,6 @@ If you don’t have one, generate it first (see [docs/verifier.md](../docs/verif
 
 - **.chronicle** = ZIP with manifest, schema, DB, evidence.  
 - **Verifier** = stdlib-only checks: manifest, DB schema, evidence hashes.  
-- **Code:** `tools/verify_chronicle/verify_chronicle.py`; **CLI:** `chronicle-verify`.
+- **Code:** `tools/verify_chronicle/verify_chronicle.py`; **CLI:** `chronicle-verify`. For the full list of guarantees and what the verifier does *not* check (e.g. event semantics, truth of claims), see [docs/verification-guarantees.md](../docs/verification-guarantees.md).
 
 **Quiz:** [quizzes/quiz-03-the-verifier.md](quizzes/quiz-03-the-verifier.md)
