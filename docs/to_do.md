@@ -25,7 +25,7 @@ This keeps the repo from accumulating many one-off implementation-plan docs; one
 
 - [x] **4. Session module: document or split** — Either (a) add a short module docstring at the top of `chronicle/store/session.py` stating that the file is an intentional facade of thin wrappers over the command layer, so future refactors are clearly optional, or (b) split `ChronicleSession` by domain (e.g. session_investigation, session_claims, session_evidence) and compose them in one `ChronicleSession` class. Choose one approach and implement it.
 
-- [ ] **5. Scripts: first-class vs optional** — In `scripts/README.md`, ensure every script is clearly labeled as first-class (eval, verification, export, RAG demos) or optional/advanced (ai_validation, verticals, utilities). Archive or remove any script that only served an old API/UI and has no remaining dependents; document in scripts/README which scripts were archived and where.
+- [x] **5. Scripts: first-class vs optional** — In `scripts/README.md`, ensure every script is clearly labeled as first-class (eval, verification, export, RAG demos) or optional/advanced (ai_validation, verticals, utilities). Archive or remove any script that only served an old API/UI and has no remaining dependents; document in scripts/README which scripts were archived and where.
 
 - [ ] **6. Lessons 04–07** — Either (a) add lessons 04–07 (events/core, store/session, defensibility, integrations/scripts) under `lessons/` with the same style as 00–03, or (b) update `lessons/README.md` to state that lessons 04–07 are coming later and that after lesson 03 readers should use the codebase map and technical report. Remove or update any references that assume 04–07 exist.
 
