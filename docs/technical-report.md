@@ -1,6 +1,6 @@
 # Chronicle: Defensibility, Schema, and Use for Evaluation
 
-**Technical report (in-repo).** This document can be cited by researchers and formalized as a preprint when ready. It defines defensibility, the core schema (evidence, claim, support/challenge, tension), and how Chronicle is used for evaluation of RAG and reasoning systems.
+**Technical report (in-repo).** This document can be cited by researchers. It defines defensibility, the core schema (evidence, claim, support/challenge, tension), and how Chronicle is used for evaluation of RAG and reasoning systems. For publication or preprint plans, see the project [To-do](to_do.md).
 
 **Repository:** chronicle-standard (reference implementation). **Companion:** [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Verifier](verifier.md).
 
@@ -127,7 +127,7 @@ To cite this technical report or Chronicle in research:
 
   In prose: "Chronicle: Defensibility, Schema, and Use for Evaluation. Technical report. chronicle-standard repository. Available: [URL to this doc in the repo]."
 
-- **Preprint (planned):** An arXiv (or equivalent) preprint is planned so the defensibility definition and schema have a stable, citable identifier. Once published, use the preprint ID (e.g. arXiv:XXXX.XXXXX) and standard citation format; this section will be updated with the exact reference.
+- **Preprint:** For preprint or publication plans (e.g. arXiv), see the project [To-do](to_do.md). Once a preprint exists, use its ID and standard citation format; this section will be updated with the reference.
 
 - **Reference implementation:** chronicle-standard (Chronicle reference implementation). https://github.com/chronicle-standard/chronicle-standard (or the canonical repo URL). For machine-readable citation, see the repository root [CITATION.cff](../CITATION.cff).
 

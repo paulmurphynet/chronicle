@@ -132,7 +132,7 @@ def _summary_and_suggestion(
         parts.append(part)
     summary = " ".join(parts)
     suggestion = (
-        f"Scenario validation: {scenario_id} — {summary} Add to to-do or fix app/playbook/scenario as needed."
+        f"Scenario validation: {scenario_id} — {summary} Add to docs/to_do.md or fix app/playbook/scenario as needed."
     )
     return summary, suggestion
 

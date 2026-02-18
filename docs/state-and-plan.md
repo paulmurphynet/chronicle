@@ -32,9 +32,9 @@ Doc links have been updated: [Benchmark](benchmark.md), [Verification guarantees
 
 ---
 
-## Planned work
+## What's next
 
-All pending work (features, improvements, doc updates) is in [To-do](to_do.md). This doc describes **current state** only.
+All pending work (features, improvements, doc updates) lives only in [To-do](to_do.md). This doc describes **current state**; do not add future-work items here.
 
 ---
 

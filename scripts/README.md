@@ -73,7 +73,7 @@ PYTHONPATH=. python3 scripts/generate_agent_tools.py
 
 ## Archived scripts
 
-**Assessment (to-do “Prune scripts”):** `ai_validation` and `verticals` use the current Chronicle API (session, read model, export). They are kept as optional/advanced; no scripts were archived. If a script is ever retired (e.g. superseded by another tool), it will be listed here and moved to an `archived/` directory or tagged.
+**Script lifecycle:** `ai_validation` and `verticals` use the current Chronicle API (session, read model, export). They are kept as optional/advanced. Any script retirement or archival is tracked in [To-do](../docs/to_do.md); retired scripts will be listed here and moved to an `archived/` directory or tagged.
 
 ---
 

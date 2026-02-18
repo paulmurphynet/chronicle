@@ -14,7 +14,9 @@
 
 3. ~~**Test coverage — phase 3 (session, scorer, identity; raise fail_under)**~~ — **Done.** Session: export/import and get_reasoning_brief covered in `tests/test_phase3_session_scorer_identity.py`. Scorer: URL fetch path tested with mocked `_fetch_url`. Identity: TraditionalIdP (state override, fallback to headers), get_identity_provider (traditional, gov_id/did/zk stub), NoneIdP actor_type=system in `tests/test_identity.py`. `fail_under` raised to 40% in pyproject.toml (current coverage ~42%); further raises (50% → 60% → 75%) as more tests land.
 
-4. **Future release** — When cutting a release: update [CHANGELOG](../../CHANGELOG.md), tag (e.g. `git tag vX.Y.Z`), push tag, optionally publish to PyPI. See [CONTRIBUTING](../../CONTRIBUTING.md#changelog-and-releases).
+4. ~~**Test coverage — phase 4 (toward 50%; raise fail_under)**~~ — **Done.** Tests in `tests/test_phase4_session_audit_trail.py`: get_defensibility_as_of (by event_id, by date, validation, event_id not found), export_minimal_for_claim, get_reasoning_trail_claim, get_accountability_chain, get_audit_export_bundle (basic, as_of_event_id, investigation not found, include_full_trail), get_reasoning_brief (as_of_date, as_of_event_id, with tension), get_human_decisions_audit_trail, get_investigation_event_history. Optional LLM/tools modules added to coverage omit so core bar is meaningful. `fail_under` raised to 50%.
+
+5. **Future release** — When cutting a release: update [CHANGELOG](../../CHANGELOG.md), tag (e.g. `git tag vX.Y.Z`), push tag, optionally publish to PyPI. See [CONTRIBUTING](../../CONTRIBUTING.md#changelog-and-releases).
 
 ---
 

@@ -102,9 +102,15 @@ omit = [
     "chronicle/store/postgres_event_store.py",
     "chronicle/tools/embeddings.py",
     "chronicle/tools/embedding_config.py",
+    "chronicle/tools/contradiction.py",
+    "chronicle/tools/decomposer.py",
+    "chronicle/tools/evidence_temporal.py",
+    "chronicle/tools/llm_client.py",
+    "chronicle/tools/llm_config.py",
+    "chronicle/tools/type_scope_inference.py",
     "chronicle/integrations/*",
 ]
 
 [tool.coverage.report]
-fail_under = 40  # Raised after Phase 3; target 75%. See docs/coverage-core.md. CI uses same value.
+fail_under = 50  # Raised after Phase 4; target 75%. See docs/coverage-core.md. CI uses same value.
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", 'if __name__ == "__main__":']
