@@ -373,7 +373,7 @@ def cmd_neo4j_export(path: Path, output: Path) -> int:
     return 0
 
 
-def cmd_neo4j_sync(path: Path) -> int:
+def cmd_neo4j_sync(path: Path, *, dedupe_evidence_by_content_hash: bool = False) -> int:
     """Sync read model to Neo4j (optional; requires [neo4j] and NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)."""
     import os
 
@@ -401,7 +401,13 @@ def cmd_neo4j_sync(path: Path) -> int:
         return 1
 
     try:
-        sync_project_to_neo4j(path, uri.strip(), user or "neo4j", password)
+        sync_project_to_neo4j(
+            path,
+            uri.strip(),
+            user or "neo4j",
+            password,
+            dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash,
+        )
         print("Synced read model to Neo4j.")
         return 0
     except FileNotFoundError as e:
@@ -1061,6 +1067,11 @@ def main() -> int:
         type=_path_arg,
         help="Project path (default: current directory)",
     )
+    neo4j_sync_p.add_argument(
+        "--dedupe-evidence-by-content-hash",
+        action="store_true",
+        help="Merge evidence by content_hash (one EvidenceItem per content; lineage via CONTAINS_EVIDENCE). Can also set NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1",
+    )
 
     policy_p = subparsers.add_parser(
         "policy", help="List, export, or import policy profiles (Phase 10)"
@@ -1180,7 +1191,12 @@ def main() -> int:
         if args.command == "neo4j-export":
             return cmd_neo4j_export(args.path, args.output)
         if args.command == "neo4j-sync":
-            return cmd_neo4j_sync(args.path)
+            return cmd_neo4j_sync(
+                args.path,
+                dedupe_evidence_by_content_hash=getattr(
+                    args, "dedupe_evidence_by_content_hash", False
+                ),
+            )
         if args.command == "policy":
             if args.policy_command == "list":
                 return cmd_policy_list(args.path)

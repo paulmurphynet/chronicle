@@ -106,6 +106,14 @@ chronicle neo4j-sync --path chronicle_graph_project
 
 Ensure `NEO4J_URI` and `NEO4J_PASSWORD` (and optionally `NEO4J_USER`) are set (e.g. from `.env` or exported in the shell).
 
+To **deduplicate evidence by content hash** (one EvidenceItem node per content across investigations; lineage via CONTAINS_EVIDENCE):
+
+```bash
+chronicle neo4j-sync --path chronicle_graph_project --dedupe-evidence-by-content-hash
+```
+
+Or set `NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1` in `.env`.
+
 ### 4. Query and analytics in Neo4j
 
 - Use **Neo4j Browser** (Aura console) or **cypher-shell** with the same URI/user/password.
@@ -120,7 +128,7 @@ Ensure `NEO4J_URI` and `NEO4J_PASSWORD` (and optionally `NEO4J_USER`) are set (e
 |-------|------------------|
 | **One project vs many** | One “graph project” that merges all imported investigations keeps a single sync target and a single Aura graph. Each investigation keeps its own `investigation_uid` in Neo4j, so attribution is preserved. |
 | **Re-import** | Re-importing the same `.chronicle` (same investigation_uid) can lead to duplicate events or conflicts depending on idempotency. Prefer importing each file once. |
-| **Deduplication** | Evidence/claims are not deduplicated across investigations (e.g. same text in two files → two nodes). Optional merge by content hash is in [To-do](to_do.md). |
+| **Deduplication** | **Evidence:** Optional merge by content hash. Set `NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1` or use `chronicle neo4j-sync --dedupe-evidence-by-content-hash`. When enabled, one EvidenceItem node per content_hash; lineage is preserved via `(Investigation)-[:CONTAINS_EVIDENCE {evidence_uid}]->(EvidenceItem)`. **Claims:** Not deduplicated (same claim text in two investigations → two Claim nodes). |
 | **Verification** | Only verified files should be ingested. The script runs the verifier first; do not bypass it for untrusted input. |
 | **What “verified” means** | See [Critical areas: What the verifier checks](../critical_areas/03-what-the-verifier-checks.md). Verified = structure and hashes, not truth or independence. |
 

@@ -8,9 +8,7 @@
 
 ## Current steps
 
-1. **Aura / Neo4j: deduplication by content hash** — Evidence and claims are not deduplicated across investigations (same text in two files → two nodes). Option: merge by content hash or keep separate for lineage. Document in [aura-graph-pipeline](aura-graph-pipeline.md) if implemented.
+1. **Guidebook enhancement** — Expand the guidebook (narrative, problem, approach, limits) after more features (e.g. interoperability) are in place to avoid repeated rewrites.
 
-2. **Guidebook enhancement** — Expand the guidebook (narrative, problem, approach, limits) after more features (e.g. interoperability) are in place to avoid repeated rewrites.
-
-3. **Tagged release** — When cutting a release: update CHANGELOG, tag (e.g. v0.1.0), and optionally publish to PyPI. Process is in [CONTRIBUTING](../CONTRIBUTING.md).
+2. **Tagged release** — When cutting a release: update CHANGELOG, tag (e.g. v0.1.0), and optionally publish to PyPI. Process is in [CONTRIBUTING](../CONTRIBUTING.md).
 

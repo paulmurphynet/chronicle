@@ -2,10 +2,12 @@
 
 Spec: schemas.md 14.5, neo4j-pipeline.md 16. Order: schema, nodes, relationships, retractions.
 Idempotent (MERGE). Full rebuild from read model; retractions applied per Phase 2.
+Optional: dedupe evidence by content_hash (one EvidenceItem node per content; lineage via CONTAINS_EVIDENCE).
 """
 
 from __future__ import annotations
 
+import os
 import sqlite3
 from pathlib import Path
 from typing import Any
@@ -48,7 +50,12 @@ def _run_schema(driver: Any) -> None:
             session.run(stmt)
 
 
-def _sync_nodes(conn: sqlite3.Connection, driver: Any) -> None:
+def _sync_nodes(
+    conn: sqlite3.Connection,
+    driver: Any,
+    *,
+    dedupe_evidence_by_content_hash: bool = False,
+) -> None:
     with driver.session() as session:
         # Investigations
         rows = _fetch_rows(
@@ -133,32 +140,76 @@ def _sync_nodes(conn: sqlite3.Connection, driver: Any) -> None:
                 rows=batch,
             )
 
-        # EvidenceItem (E2.3: provenance_type for human_created | ai_generated | unknown)
-        rows = _fetch_rows(
-            conn,
-            """SELECT evidence_uid, content_hash, uri, media_type, created_at,
-                      coalesce(provenance_type, '') AS provenance_type
-               FROM evidence_item ORDER BY evidence_uid""",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MERGE (e:EvidenceItem {uid: row.evidence_uid})
-                ON CREATE SET
-                  e.display_name = coalesce(CASE WHEN row.uri IS NOT NULL AND row.uri <> '' THEN row.uri END, row.evidence_uid),
-                  e.content_hash = row.content_hash,
-                  e.uri = row.uri,
-                  e.media_type = row.media_type,
-                  e.created_at = datetime(row.created_at),
-                  e.provenance_type = CASE WHEN row.provenance_type IS NOT NULL AND row.provenance_type <> '' THEN row.provenance_type ELSE null END
-                ON MATCH SET
-                  e.uri = coalesce(CASE WHEN row.uri IS NOT NULL AND row.uri <> '' THEN row.uri END, e.uri),
-                  e.media_type = coalesce(row.media_type, e.media_type),
-                  e.provenance_type = CASE WHEN row.provenance_type IS NOT NULL AND row.provenance_type <> '' THEN row.provenance_type ELSE e.provenance_type END
-                """,
-                rows=batch,
+        # EvidenceItem (E2.3: provenance_type; optional dedupe by content_hash)
+        if dedupe_evidence_by_content_hash:
+            rows = _fetch_rows(
+                conn,
+                """SELECT content_hash, evidence_uid, uri, media_type, created_at,
+                          coalesce(provenance_type, '') AS provenance_type
+                   FROM evidence_item ORDER BY content_hash, evidence_uid""",
             )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MERGE (e:EvidenceItem {uid: row.content_hash})
+                    ON CREATE SET
+                      e.display_name = coalesce(CASE WHEN row.uri IS NOT NULL AND row.uri <> '' THEN row.uri END, row.content_hash),
+                      e.content_hash = row.content_hash,
+                      e.uri = row.uri,
+                      e.media_type = row.media_type,
+                      e.created_at = datetime(row.created_at),
+                      e.provenance_type = CASE WHEN row.provenance_type IS NOT NULL AND row.provenance_type <> '' THEN row.provenance_type ELSE null END
+                    ON MATCH SET
+                      e.uri = coalesce(CASE WHEN row.uri IS NOT NULL AND row.uri <> '' THEN row.uri END, e.uri),
+                      e.media_type = coalesce(row.media_type, e.media_type),
+                      e.provenance_type = CASE WHEN row.provenance_type IS NOT NULL AND row.provenance_type <> '' THEN row.provenance_type ELSE e.provenance_type END
+                    """,
+                    rows=batch,
+                )
+            # Lineage: (Investigation)-[:CONTAINS_EVIDENCE {evidence_uid}]->(EvidenceItem)
+            rows = _fetch_rows(
+                conn,
+                """SELECT investigation_uid, evidence_uid, content_hash
+                   FROM evidence_item ORDER BY investigation_uid, evidence_uid""",
+            )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (i:Investigation {uid: row.investigation_uid})
+                    MATCH (e:EvidenceItem {uid: row.content_hash})
+                    MERGE (i)-[r:CONTAINS_EVIDENCE]->(e)
+                    ON CREATE SET r.evidence_uid = row.evidence_uid
+                    """,
+                    rows=batch,
+                )
+        else:
+            rows = _fetch_rows(
+                conn,
+                """SELECT evidence_uid, content_hash, uri, media_type, created_at,
+                          coalesce(provenance_type, '') AS provenance_type
+                   FROM evidence_item ORDER BY evidence_uid""",
+            )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MERGE (e:EvidenceItem {uid: row.evidence_uid})
+                    ON CREATE SET
+                      e.display_name = coalesce(CASE WHEN row.uri IS NOT NULL AND row.uri <> '' THEN row.uri END, row.evidence_uid),
+                      e.content_hash = row.content_hash,
+                      e.uri = row.uri,
+                      e.media_type = row.media_type,
+                      e.created_at = datetime(row.created_at),
+                      e.provenance_type = CASE WHEN row.provenance_type IS NOT NULL AND row.provenance_type <> '' THEN row.provenance_type ELSE null END
+                    ON MATCH SET
+                      e.uri = coalesce(CASE WHEN row.uri IS NOT NULL AND row.uri <> '' THEN row.uri END, e.uri),
+                      e.media_type = coalesce(row.media_type, e.media_type),
+                      e.provenance_type = CASE WHEN row.provenance_type IS NOT NULL AND row.provenance_type <> '' THEN row.provenance_type ELSE e.provenance_type END
+                    """,
+                    rows=batch,
+                )
 
         # EvidenceSpan
         rows = _fetch_rows(
@@ -225,24 +276,49 @@ def _sync_nodes(conn: sqlite3.Connection, driver: Any) -> None:
             )
 
 
-def _sync_relationships(conn: sqlite3.Connection, driver: Any) -> None:
+def _sync_relationships(
+    conn: sqlite3.Connection,
+    driver: Any,
+    *,
+    dedupe_evidence_by_content_hash: bool = False,
+) -> None:
     with driver.session() as session:
-        # Span IN EvidenceItem
-        rows = _fetch_rows(
-            conn,
-            "SELECT span_uid, evidence_uid, source_event_id FROM evidence_span ORDER BY span_uid",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (s:EvidenceSpan {uid: row.span_uid})
-                MATCH (e:EvidenceItem {uid: row.evidence_uid})
-                MERGE (s)-[r:IN]->(e)
-                ON CREATE SET r.source_event_id = row.source_event_id
-                """,
-                rows=batch,
+        # Span IN EvidenceItem (when dedupe: match EvidenceItem by content_hash)
+        if dedupe_evidence_by_content_hash:
+            rows = _fetch_rows(
+                conn,
+                """SELECT es.span_uid, ei.content_hash, es.source_event_id
+                   FROM evidence_span es
+                   JOIN evidence_item ei ON es.evidence_uid = ei.evidence_uid
+                   ORDER BY es.span_uid""",
             )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (s:EvidenceSpan {uid: row.span_uid})
+                    MATCH (e:EvidenceItem {uid: row.content_hash})
+                    MERGE (s)-[r:IN]->(e)
+                    ON CREATE SET r.source_event_id = row.source_event_id
+                    """,
+                    rows=batch,
+                )
+        else:
+            rows = _fetch_rows(
+                conn,
+                "SELECT span_uid, evidence_uid, source_event_id FROM evidence_span ORDER BY span_uid",
+            )
+            for batch in _batched(rows, BATCH_SIZE):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (s:EvidenceSpan {uid: row.span_uid})
+                    MATCH (e:EvidenceItem {uid: row.evidence_uid})
+                    MERGE (s)-[r:IN]->(e)
+                    ON CREATE SET r.source_event_id = row.source_event_id
+                    """,
+                    rows=batch,
+                )
 
         # SUPPORTS
         rows = _fetch_rows(
@@ -429,12 +505,24 @@ def sync_project_to_neo4j(
     uri: str,
     user: str,
     password: str,
+    *,
+    dedupe_evidence_by_content_hash: bool | None = None,
 ) -> None:
-    """Sync a Chronicle project read model to Neo4j. Idempotent (MERGE). Full rebuild; retractions applied."""
+    """Sync a Chronicle project read model to Neo4j. Idempotent (MERGE). Full rebuild; retractions applied.
+
+    When dedupe_evidence_by_content_hash is True (or set via NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1),
+    one EvidenceItem node is created per content_hash; lineage is preserved via (Investigation)-[:CONTAINS_EVIDENCE {evidence_uid}]->(EvidenceItem).
+    """
     project_dir = Path(project_dir)
     db_path = project_dir / CHRONICLE_DB
     if not db_path.is_file():
         raise FileNotFoundError(f"Not a Chronicle project (no {CHRONICLE_DB}): {project_dir}")
+
+    if dedupe_evidence_by_content_hash is None:
+        dedupe_evidence_by_content_hash = (
+            os.environ.get("NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH", "").strip().lower()
+            in ("1", "true", "yes")
+        )
 
     from neo4j import GraphDatabase  # type: ignore[attr-defined]
 
@@ -449,8 +537,10 @@ def sync_project_to_neo4j(
         conn = sqlite3.connect(str(db_path))
         try:
             _run_schema(driver)
-            _sync_nodes(conn, driver)
-            _sync_relationships(conn, driver)
+            _sync_nodes(conn, driver, dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash)
+            _sync_relationships(
+                conn, driver, dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash
+            )
             _sync_retractions(conn, driver)
         finally:
             conn.close()
