@@ -59,6 +59,8 @@ By the end you’ll understand:
 | [05](05-how-you-can-help.md) | How you can help | Ways to contribute: code, docs, testing, feedback, sharing the story. |
 | [06](06-epistemology-scope-tables.md) | Epistemology: what we implement and what we don’t | Canonical tables: what Chronicle implements (and why) and what we do not implement (and why not). |
 
+**Where we're headed:** [North star](../docs/north-star.md) — Chronicle's ultimate potential (shared infrastructure, one model napkin→courtroom, ecosystem). Use it to guide roadmap and scope.
+
 ---
 
 ## One paragraph

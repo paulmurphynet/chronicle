@@ -11,6 +11,7 @@ Chronicle answers: *How well is this answer supported by evidence?* It’s for R
 **Two paths:**
 
 - **I want to understand the project** — Read the [Story](story/README.md) (mission, vision, problem, approach, limits), then the [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](critical_areas/README.md) (what defensibility and “verified” do *not* guarantee).
+- **I want to see where we're headed** — Read the [North star](docs/north-star.md) (ultimate potential: shared infrastructure, one model napkin→courtroom, ecosystem).
 - **I want to run the scorer or verifier** — Use the [Quick start](#quick-start) below, or the full [Getting started](docs/getting-started.md) page. For common issues (e.g. `chronicle: command not found`), see [Troubleshooting](docs/troubleshooting.md).
 
 **Concepts:** [Glossary](docs/glossary.md) defines defensibility, claim, evidence, .chronicle, and related terms.
@@ -85,6 +86,7 @@ Fixed queries, RAG run, recorded scores: `PYTHONPATH=. python3 scripts/benchmark
 - **chronicle-verify** — CLI to verify a .chronicle (ZIP) manifest, schema, and evidence hashes. Stdlib only; no Chronicle package needed for verification.
 - **Chronicle package** — Event store, read model, defensibility computation, session API for ingest → claim → link support → get defensibility. Used by the scorer and by integrations.
 - **Optional:** HTTP API (`pip install -e ".[api]"`) and Neo4j sync (`.[neo4j]`) for project-based and graph workflows; see [API](docs/api.md) and [Neo4j](docs/neo4j.md).
+- **Frontend** — The [Reference UI](frontend/README.md) (human-in-the-loop) lives in `frontend/` in this repo. It will consume only the API; see [Reference UI plan](docs/reference-ui-plan.md) for the same-repo strategy and what we'll bring from V1.
 
 The **.chronicle** format is “show your work”: export your investigation and anyone can verify it with `chronicle-verify`. We encourage tooling that consumes .chronicle (dashboards, fact-checking UIs, or other pipelines); see [Consuming .chronicle](docs/consuming-chronicle.md) and [Claim–evidence–metrics export](docs/claim-evidence-metrics-export.md).
 
@@ -136,6 +138,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [User manual](docs/manual/README.md) | Short how-to manual (install, scorer, verifier, format, integration, limits). |
 | [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
 | [Human-in-the-loop and attestation](docs/human-in-the-loop-and-attestation.md) | Human-curated data, actor identity (CLI env, API headers), attestation and verification level; curation workflow. |
+| [Reference UI plan](docs/reference-ui-plan.md) | Same-repo strategy for the Reference UI; what to bring from V1 (friction tiers, Propose–Confirm, Reading-lite). |
 | [Onboarding and open-source checklist](docs/ONBOARDING_AND_OPEN_SOURCE.md) | Plan for making the repo ready for colleagues and public release. |
 | [Getting started](docs/getting-started.md) | One page: what Chronicle is, install, scorer + verifier quick start, next steps. |
 
