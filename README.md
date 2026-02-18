@@ -85,6 +85,7 @@ chronicle-verify path/to/file.chronicle
 | [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee; runtime invariants and audit. |
 | [Implementer checklist](docs/implementer-checklist.md) | Produce or consume a .chronicle: checklist and pointers. |
 | [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
+| [Human-in-the-loop and attestation](docs/human-in-the-loop-and-attestation.md) | Human-curated data, actor identity (CLI env, API headers), attestation and verification level; curation workflow. |
 | [Onboarding and open-source checklist](docs/ONBOARDING_AND_OPEN_SOURCE.md) | Plan for making the repo ready for colleagues and public release. |
 
 ## License

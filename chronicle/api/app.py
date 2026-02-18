@@ -15,18 +15,29 @@ import os
 import tempfile
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from chronicle.core.identity import get_effective_actor_from_request
 from chronicle.store.project import create_project, project_exists
 from chronicle.store.session import ChronicleSession
 
 # Project path from env; None if not set
 PROJECT_PATH_ENV = "CHRONICLE_PROJECT_PATH"
+
+
+def _get_actor(request: Request) -> tuple[str, str, str]:
+    """Resolve (actor_id, actor_type, verification_level) from request (IdP or X-Actor-Id / X-Actor-Type). Fallback: default, human, none."""
+    actor_id, actor_type, verification_level = get_effective_actor_from_request(request)
+    if not actor_id or not actor_id.strip():
+        actor_id = "default"
+    if actor_type not in ("human", "tool", "system"):
+        actor_type = "human"
+    return (actor_id, actor_type, verification_level or "none")
 
 
 def _get_project_path() -> Path:
@@ -91,16 +102,18 @@ def verifier_page() -> FileResponse:
 
 
 @app.post("/investigations")
-def create_investigation(body: CreateInvestigationBody) -> dict[str, Any]:
+def create_investigation(request: Request, body: CreateInvestigationBody) -> dict[str, Any]:
     """Create an investigation. Returns event_id, investigation_uid."""
+    actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         event_id, inv_uid = session.create_investigation(
             body.title,
             description=body.description,
             investigation_key=body.investigation_key,
-            actor_id="api",
-            actor_type="tool",
+            actor_id=actor_id,
+            actor_type=actor_type,
+            verification_level=verification_level,
         )
         return {"event_id": event_id, "investigation_uid": inv_uid}
 
@@ -161,6 +174,7 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
             status_code=400,
             detail="Provide JSON body with content or content_base64, or multipart file",
         )
+    actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
@@ -170,8 +184,9 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
             blob,
             media_type,
             original_filename=original_filename or "evidence",
-            actor_id="api",
-            actor_type="tool",
+            actor_id=actor_id,
+            actor_type=actor_type,
+            verification_level=verification_level,
         )
         text = blob.decode("utf-8", errors="replace")
         _, span_uid = session.anchor_span(
@@ -180,8 +195,9 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
             "text_offset",
             {"start_char": 0, "end_char": len(text)},
             quote=text[:2000] if len(text) > 2000 else text,
-            actor_id="api",
-            actor_type="tool",
+            actor_id=actor_id,
+            actor_type=actor_type,
+            verification_level=verification_level,
         )
         return {"event_id": event_id, "evidence_uid": ev_uid, "span_uid": span_uid}
 
@@ -190,8 +206,11 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
 
 
 @app.post("/investigations/{investigation_uid}/claims")
-def propose_claim(investigation_uid: str, body: ProposeClaimBody) -> dict[str, Any]:
+def propose_claim(
+    request: Request, investigation_uid: str, body: ProposeClaimBody
+) -> dict[str, Any]:
     """Propose a claim. Returns event_id, claim_uid."""
+    actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
@@ -200,8 +219,9 @@ def propose_claim(investigation_uid: str, body: ProposeClaimBody) -> dict[str, A
             investigation_uid,
             body.text,
             initial_type=body.initial_type,
-            actor_id="api",
-            actor_type="tool",
+            actor_id=actor_id,
+            actor_type=actor_type,
+            verification_level=verification_level,
         )
         return {"event_id": event_id, "claim_uid": claim_uid}
 
@@ -210,8 +230,9 @@ def propose_claim(investigation_uid: str, body: ProposeClaimBody) -> dict[str, A
 
 
 @app.post("/investigations/{investigation_uid}/links/support")
-def link_support(investigation_uid: str, body: LinkBody) -> dict[str, Any]:
+def link_support(request: Request, investigation_uid: str, body: LinkBody) -> dict[str, Any]:
     """Link a span as supporting a claim. Returns event_id, link_uid."""
+    actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
@@ -220,15 +241,17 @@ def link_support(investigation_uid: str, body: LinkBody) -> dict[str, Any]:
             investigation_uid,
             body.span_uid,
             body.claim_uid,
-            actor_id="api",
-            actor_type="tool",
+            actor_id=actor_id,
+            actor_type=actor_type,
+            verification_level=verification_level,
         )
         return {"event_id": event_id, "link_uid": link_uid}
 
 
 @app.post("/investigations/{investigation_uid}/links/challenge")
-def link_challenge(investigation_uid: str, body: LinkBody) -> dict[str, Any]:
+def link_challenge(request: Request, investigation_uid: str, body: LinkBody) -> dict[str, Any]:
     """Link a span as challenging a claim. Returns event_id, link_uid."""
+    actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
@@ -237,8 +260,9 @@ def link_challenge(investigation_uid: str, body: LinkBody) -> dict[str, Any]:
             investigation_uid,
             body.span_uid,
             body.claim_uid,
-            actor_id="api",
-            actor_type="tool",
+            actor_id=actor_id,
+            actor_type=actor_type,
+            verification_level=verification_level,
         )
         return {"event_id": event_id, "link_uid": link_uid}
 
@@ -247,8 +271,11 @@ def link_challenge(investigation_uid: str, body: LinkBody) -> dict[str, Any]:
 
 
 @app.post("/investigations/{investigation_uid}/tensions")
-def declare_tension(investigation_uid: str, body: DeclareTensionBody) -> dict[str, Any]:
+def declare_tension(
+    request: Request, investigation_uid: str, body: DeclareTensionBody
+) -> dict[str, Any]:
     """Declare a tension between two claims. Returns event_id, tension_uid."""
+    actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
@@ -258,8 +285,9 @@ def declare_tension(investigation_uid: str, body: DeclareTensionBody) -> dict[st
             body.claim_a_uid,
             body.claim_b_uid,
             tension_kind=body.tension_kind,
-            actor_id="api",
-            actor_type="tool",
+            actor_id=actor_id,
+            actor_type=actor_type,
+            verification_level=verification_level,
         )
         return {"event_id": event_id, "tension_uid": tension_uid}
 
@@ -346,7 +374,7 @@ def export_investigation(investigation_uid: str) -> Response:
 
 
 @app.post("/import")
-async def import_chronicle(file: UploadFile = File(...)) -> dict[str, Any]:
+async def import_chronicle(file: Annotated[UploadFile, File()]) -> dict[str, Any]:
     """Import a .chronicle file into the project. Accepts multipart file upload."""
     if not file.filename or not file.filename.endswith(".chronicle"):
         raise HTTPException(status_code=400, detail="File must have .chronicle extension")
@@ -372,4 +400,4 @@ def health() -> dict[str, str]:
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=503, detail=str(e)) from e

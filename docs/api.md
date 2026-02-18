@@ -15,6 +15,20 @@ Default: `http://127.0.0.1:8000`. OpenAPI docs: `http://127.0.0.1:8000/docs`.
 
 ---
 
+## Request identity and attestation
+
+Every **write** request (create investigation, ingest evidence, propose claim, link support/challenge, declare tension) records an **actor** (who did it). The server resolves the actor from:
+
+1. **Identity Provider (IdP)** — When `CHRONICLE_IDENTITY_PROVIDER` is set (e.g. `traditional`) and auth middleware sets the principal, the server uses that as `actor_id` and can store a verification level (see [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md)).
+2. **Headers** — When no IdP binding is present, the server reads **X-Actor-Id** and **X-Actor-Type** (e.g. `X-Actor-Id: jane_doe`, `X-Actor-Type: human`). So a human or client can identify themselves on each request.
+3. **Default** — If neither is set, the server uses `actor_id=default`, `actor_type=human`.
+
+So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so the ledger attributes them to you. When you run behind auth and configure an IdP, the server can override with the authenticated principal.
+
+**Verification level:** When the IdP returns a verification level (e.g. `verified_credential`), the server persists it on each write event in the payload as `_verification_level` (and optionally `_attestation_ref`). This is payload-only; the event schema is unchanged. See [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md).
+
+---
+
 ## Configuration
 
 | Env | Description |

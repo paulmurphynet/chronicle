@@ -43,6 +43,7 @@ from chronicle.core.uid import (
     generate_event_id,
 )
 from chronicle.core.validation import MAX_CLAIM_TEXT_LENGTH
+from chronicle.store.commands.attestation import apply_attestation_to_payload
 from chronicle.store.protocols import EventStore, ReadModel
 from chronicle.store.read_model import DefensibilityScorecard, WeakestLink
 from chronicle.store.read_model.models import EvidenceTrustAssessment, LinkWithInherited
@@ -62,6 +63,8 @@ def propose_claim(
     actor_type: str = "human",
     workspace: str = "spark",
     idempotency_key: str | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """ProposeClaim command. Returns (event_id, claim_uid). Spec 1.5.1, 1.5.1a."""
     key = (idempotency_key or "").strip()
@@ -85,6 +88,11 @@ def propose_claim(
         initial_type=initial_type,
         parent_claim_uid=parent_claim_uid,
         created_by=ActorRef(actor_type=actor_type, actor_id=actor_id),
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -96,7 +104,7 @@ def propose_claim(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
         idempotency_key=key or None,
     )
     store.append(event)

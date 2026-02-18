@@ -4,9 +4,12 @@ Ingest a transcript CSV into Chronicle: one row = one evidence item + one span +
 Use this for inquests, hearings, interviews: each line becomes evidence and an attributable claim
 so you can export to .chronicle and push to the Aura graph. Optional: speaker column → actor_id.
 
+For attribution: set CHRONICLE_ACTOR_ID (and optionally CHRONICLE_ACTOR_TYPE) so the investigation
+creation and run are attributed to the curator, e.g. CHRONICLE_ACTOR_ID=jane_doe.
+
 Run from repo root:
   PYTHONPATH=. python scripts/ingest_transcript_csv.py transcript.csv --text-col "text" --out lizzie_borden.chronicle
-  PYTHONPATH=. python scripts/ingest_transcript_csv.py transcript.csv --text-col "statement" --speaker-col "speaker" --title "Lizzie Borden inquest" --out lizzie_borden.chronicle
+  CHRONICLE_ACTOR_ID=jane_doe PYTHONPATH=. python scripts/ingest_transcript_csv.py transcript.csv --text-col "statement" --speaker-col "speaker" --title "Lizzie Borden inquest" --out lizzie_borden.chronicle
 
 Then ingest into your graph:
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py lizzie_borden.chronicle
@@ -18,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -117,7 +121,13 @@ def main() -> int:
         tmp_path = Path(tmp)
         create_project(tmp_path)
         with ChronicleSession(tmp_path) as session:
-            session.create_investigation(args.title)
+            curator_id = os.environ.get("CHRONICLE_ACTOR_ID") or "default"
+            curator_type = os.environ.get("CHRONICLE_ACTOR_TYPE") or "human"
+            session.create_investigation(
+                args.title,
+                actor_id=curator_id,
+                actor_type=curator_type,
+            )
             inv_uid = session.read_model.list_investigations()[0].investigation_uid
 
             for i, row in enumerate(rows):

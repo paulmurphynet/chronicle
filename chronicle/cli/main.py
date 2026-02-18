@@ -3,6 +3,7 @@
 import argparse
 import json
 import mimetypes
+import os
 import sqlite3
 import sys
 import tempfile
@@ -21,6 +22,13 @@ def _path_arg(s: str) -> Path:
     return Path(s).resolve()
 
 
+def _actor_from_args(args: argparse.Namespace) -> tuple[str, str]:
+    """Resolve (actor_id, actor_type) from args (--actor-id/--actor-type) or env CHRONICLE_ACTOR_ID/CHRONICLE_ACTOR_TYPE."""
+    aid = getattr(args, "actor_id", None) or os.environ.get("CHRONICLE_ACTOR_ID") or "default"
+    atype = getattr(args, "actor_type", None) or os.environ.get("CHRONICLE_ACTOR_TYPE") or "human"
+    return (aid or "default", atype or "human")
+
+
 def cmd_init(path: Path) -> int:
     """Initialize a directory as a Chronicle project (creates chronicle.db and schema)."""
     if (path / CHRONICLE_DB).exists():
@@ -31,7 +39,14 @@ def cmd_init(path: Path) -> int:
     return 0
 
 
-def cmd_create_investigation(title: str, path: Path, description: str | None) -> int:
+def cmd_create_investigation(
+    title: str,
+    path: Path,
+    description: str | None,
+    *,
+    actor_id: str = "default",
+    actor_type: str = "human",
+) -> int:
     """Create a new investigation in the project. Spec 1.5.1."""
     if not project_exists(path):
         print(
@@ -41,14 +56,23 @@ def cmd_create_investigation(title: str, path: Path, description: str | None) ->
         return 1
     with ChronicleSession(path) as session:
         _event_id, investigation_uid = session.create_investigation(
-            title, description=description or None
+            title,
+            description=description or None,
+            actor_id=actor_id,
+            actor_type=actor_type,
         )
         print(f"Created investigation {investigation_uid}")
         return 0
 
 
 def cmd_ingest_evidence(
-    file_path: Path, investigation_uid: str, path: Path, media_type: str | None
+    file_path: Path,
+    investigation_uid: str,
+    path: Path,
+    media_type: str | None,
+    *,
+    actor_id: str = "default",
+    actor_type: str = "human",
 ) -> int:
     """Ingest a file as evidence into an investigation. Spec 1.5.1; media type guessed if omitted."""
     if not project_exists(path):
@@ -74,12 +98,22 @@ def cmd_ingest_evidence(
             blob,
             mt,
             original_filename=original_filename,
+            actor_id=actor_id,
+            actor_type=actor_type,
         )
         print(f"Ingested {original_filename} as {evidence_uid}")
         return 0
 
 
-def cmd_set_tier(investigation_uid: str, tier: str, path: Path, reason: str | None) -> int:
+def cmd_set_tier(
+    investigation_uid: str,
+    tier: str,
+    path: Path,
+    reason: str | None,
+    *,
+    actor_id: str = "default",
+    actor_type: str = "human",
+) -> int:
     """Set investigation tier (spark -> forge -> vault). Phase 1."""
     if not project_exists(path):
         print(
@@ -88,7 +122,13 @@ def cmd_set_tier(investigation_uid: str, tier: str, path: Path, reason: str | No
         )
         return 1
     with ChronicleSession(path) as session:
-        event_id = session.set_tier(investigation_uid, tier, reason=reason)
+        event_id = session.set_tier(
+            investigation_uid,
+            tier,
+            reason=reason,
+            actor_id=actor_id,
+            actor_type=actor_type,
+        )
         inv = session.read_model.get_investigation(investigation_uid)
         tier_display = inv.current_tier if inv else tier.strip().lower()
         print(f"Tier set to {tier_display} (event_id={event_id})")
@@ -446,7 +486,13 @@ def cmd_reasoning_brief(
     return 0
 
 
-def cmd_quickstart_rag(path: Path | None, text_file: Path | None) -> int:
+def cmd_quickstart_rag(
+    path: Path | None,
+    text_file: Path | None,
+    *,
+    actor_id: str = "default",
+    actor_type: str = "human",
+) -> int:
     """Run a minimal RAG-style flow: create project, investigation, ingest, claim, link; print defensibility. Phase 1 RAG friction."""
     if path is None:
         tmp = tempfile.mkdtemp(prefix="chronicle_rag_")
@@ -463,23 +509,46 @@ def cmd_quickstart_rag(path: Path | None, text_file: Path | None) -> int:
     blob = sample_text.encode("utf-8")
 
     with ChronicleSession(path) as session:
-        session.create_investigation("RAG quickstart")
+        session.create_investigation(
+            "RAG quickstart",
+            actor_id=actor_id,
+            actor_type=actor_type,
+        )
         inv_uid = session.read_model.list_investigations()[0].investigation_uid
-        _, ev_uid = session.ingest_evidence(inv_uid, blob, "text/plain")
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            blob,
+            "text/plain",
+            actor_id=actor_id,
+            actor_type=actor_type,
+        )
         claim_text = (
             "Revenue in Q1 2024 was $1.2M."
             if "1.2" in sample_text and "revenue" in sample_text.lower()
             else (sample_text[:200] + "..." if len(sample_text) > 200 else sample_text)
         )
-        _, claim_uid = session.propose_claim(inv_uid, claim_text)
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            claim_text,
+            actor_id=actor_id,
+            actor_type=actor_type,
+        )
         _, span_uid = session.anchor_span(
             inv_uid,
             ev_uid,
             "text_offset",
             {"start_char": 0, "end_char": len(blob.decode("utf-8"))},
             quote=sample_text[:500] if len(sample_text) > 500 else sample_text,
+            actor_id=actor_id,
+            actor_type=actor_type,
         )
-        session.link_support(inv_uid, span_uid, claim_uid)
+        session.link_support(
+            inv_uid,
+            span_uid,
+            claim_uid,
+            actor_id=actor_id,
+            actor_type=actor_type,
+        )
         scorecard = session.get_defensibility_score(claim_uid)
         print(f"Investigation: {inv_uid}")
         print(f"Claim:        {claim_uid}")
@@ -522,7 +591,9 @@ def main() -> int:
     # Load .env so NEO4J_* etc. are set (optional: requires python-dotenv)
     try:
         import logging
+
         from dotenv import load_dotenv
+
         logging.getLogger("dotenv").setLevel(logging.ERROR)  # avoid parse warnings to stderr
         load_dotenv()  # cwd first
         # Also try project root (repo root when installed with pip install -e .)
@@ -534,6 +605,16 @@ def main() -> int:
         pass
     parser = argparse.ArgumentParser(
         prog="chronicle", description="Chronicle — epistemic ledger for investigations"
+    )
+    parser.add_argument(
+        "--actor-id",
+        default=os.environ.get("CHRONICLE_ACTOR_ID"),
+        help="Actor ID for attribution on write commands (env: CHRONICLE_ACTOR_ID)",
+    )
+    parser.add_argument(
+        "--actor-type",
+        default=os.environ.get("CHRONICLE_ACTOR_TYPE") or "human",
+        help="Actor type: human, tool, or system (env: CHRONICLE_ACTOR_TYPE)",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -900,16 +981,42 @@ def main() -> int:
 
     args = parser.parse_args()
     try:
+        actor_id, actor_type = _actor_from_args(args)
         if args.command == "init":
             return cmd_init(args.path)
         if args.command == "quickstart-rag":
-            return cmd_quickstart_rag(args.path, args.text_file)
+            return cmd_quickstart_rag(
+                args.path,
+                args.text_file,
+                actor_id=actor_id,
+                actor_type=actor_type,
+            )
         if args.command == "create-investigation":
-            return cmd_create_investigation(args.title, args.path, args.description)
+            return cmd_create_investigation(
+                args.title,
+                args.path,
+                args.description,
+                actor_id=actor_id,
+                actor_type=actor_type,
+            )
         if args.command == "ingest-evidence":
-            return cmd_ingest_evidence(args.file, args.investigation, args.path, args.media_type)
+            return cmd_ingest_evidence(
+                args.file,
+                args.investigation,
+                args.path,
+                args.media_type,
+                actor_id=actor_id,
+                actor_type=actor_type,
+            )
         if args.command == "set-tier":
-            return cmd_set_tier(args.investigation_uid, args.tier, args.path, args.reason)
+            return cmd_set_tier(
+                args.investigation_uid,
+                args.tier,
+                args.path,
+                args.reason,
+                actor_id=actor_id,
+                actor_type=actor_type,
+            )
         if args.command == "export":
             return cmd_export(args.investigation, args.output, args.path)
         if args.command == "export-minimal":

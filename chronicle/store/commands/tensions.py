@@ -21,6 +21,7 @@ from chronicle.core.payloads import (
 )
 from chronicle.core.policy import require_workspace_for_command
 from chronicle.core.uid import generate_event_id, generate_suggestion_uid, generate_tension_uid
+from chronicle.store.commands.attestation import apply_attestation_to_payload
 from chronicle.store.protocols import EventStore, ReadModel
 
 _TENSION_STATUSES = frozenset(
@@ -62,6 +63,8 @@ def declare_tension(
     actor_type: str = "human",
     workspace: str = "spark",
     idempotency_key: str | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """DeclareTension command. Returns (event_id, tension_uid). Forge+ tier. Spec 1.5.1, 1.5.1a."""
     key = (idempotency_key or "").strip()
@@ -91,6 +94,11 @@ def declare_tension(
         claim_b_uid=claim_b_uid,
         tension_kind=tension_kind,
         notes=notes,
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -102,7 +110,7 @@ def declare_tension(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
         idempotency_key=key or None,
     )
     store.append(event)

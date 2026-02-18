@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Chronicle curation</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    h2 { font-size: 1rem; margin-top: 1.5rem; }
+    section { margin: 1rem 0; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; }
+    label { display: block; margin: 0.4rem 0 0.15rem; font-weight: 500; }
+    input[type="text"], input[type="url"], textarea { width: 100%; box-sizing: border-box; padding: 0.4rem; }
+    button { margin-top: 0.5rem; padding: 0.4rem 0.8rem; cursor: pointer; }
+    .out { margin-top: 0.5rem; font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; }
+    .out.ok { color: #0a0; }
+    .out.err { color: #c00; }
+    ul { margin: 0.25rem 0; padding-left: 1.25rem; }
+    footer { margin-top: 2rem; font-size: 0.85rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Chronicle curation</h1>
+  <p>Minimal UI to create investigations, add evidence, propose claims, and link support via the API. All writes use your identity (X-Actor-Id). Set <code>CHRONICLE_PROJECT_PATH</code> and run the API (e.g. <code>uvicorn chronicle.api.app:app</code>).</p>
+
+  <section>
+    <h2>Identity &amp; API</h2>
+    <label>API base URL</label>
+    <input type="url" id="baseUrl" placeholder="http://127.0.0.1:8000" value="">
+    <label>Actor ID (your identifier for attribution)</label>
+    <input type="text" id="actorId" placeholder="e.g. jane_doe" value="">
+    <label>Actor type (optional)</label>
+    <input type="text" id="actorType" placeholder="human" value="human">
+  </section>
+
+  <section>
+    <h2>Create investigation</h2>
+    <label>Title</label>
+    <input type="text" id="invTitle" placeholder="My curation run">
+    <button id="btnCreateInv">Create</button>
+    <div id="createInvOut" class="out"></div>
+  </section>
+
+  <section>
+    <h2>List investigations</h2>
+    <button id="btnListInv">Refresh list</button>
+    <ul id="invList"></ul>
+  </section>
+
+  <section>
+    <h2>Investigation actions</h2>
+    <label>Investigation UID (from list or create)</label>
+    <input type="text" id="invUid" placeholder="inv_...">
+    <p><strong>Add evidence</strong> (text)</p>
+    <textarea id="evidenceContent" rows="3" placeholder="Paste or type evidence text"></textarea>
+    <button id="btnIngest">Ingest evidence</button>
+    <div id="ingestOut" class="out"></div>
+    <p><strong>Propose claim</strong></p>
+    <input type="text" id="claimText" placeholder="Claim text">
+    <button id="btnPropose">Propose claim</button>
+    <div id="proposeOut" class="out"></div>
+    <p><strong>Link support</strong> (span supports claim)</p>
+    <input type="text" id="spanUid" placeholder="span_uid">
+    <input type="text" id="claimUid" placeholder="claim_uid">
+    <button id="btnLink">Link support</button>
+    <div id="linkOut" class="out"></div>
+  </section>
+
+  <footer>Writes go to the Chronicle API with X-Actor-Id and X-Actor-Type. See docs/human-in-the-loop-and-attestation.md in the repo.</footer>
+
+  <script>
+    (function () {
+      if (!window.location.origin.includes('127.0.0.1') && window.location.port === '') {
+        document.getElementById('baseUrl').value = window.location.origin;
+      } else {
+        document.getElementById('baseUrl').value = 'http://127.0.0.1:8000';
+      }
+
+      function base() { return document.getElementById('baseUrl').value.replace(/\/$/, ''); }
+      function headers() {
+        const h = { 'Content-Type': 'application/json' };
+        const aid = document.getElementById('actorId').value.trim();
+        const atype = document.getElementById('actorType').value.trim();
+        if (aid) h['X-Actor-Id'] = aid;
+        if (atype) h['X-Actor-Type'] = atype;
+        return h;
+      }
+      function show(el, text, ok) {
+        el.textContent = text;
+        el.className = 'out ' + (ok ? 'ok' : 'err');
+        el.hidden = false;
+      }
+
+      document.getElementById('btnCreateInv').onclick = async function () {
+        const out = document.getElementById('createInvOut');
+        const title = document.getElementById('invTitle').value.trim();
+        if (!title) { show(out, 'Enter a title.', false); return; }
+        try {
+          const r = await fetch(base() + '/investigations', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ title: title })
+          });
+          const j = await r.json();
+          if (!r.ok) { show(out, j.detail || r.status, false); return; }
+          show(out, 'Created: ' + j.investigation_uid, true);
+          document.getElementById('invUid').value = j.investigation_uid;
+        } catch (e) { show(out, e.message, false); }
+      };
+
+      document.getElementById('btnListInv').onclick = async function () {
+        const ul = document.getElementById('invList');
+        ul.innerHTML = '';
+        try {
+          const r = await fetch(base() + '/investigations', { headers: headers() });
+          const j = await r.json();
+          if (!r.ok) { ul.innerHTML = '<li class="err">' + (j.detail || r.status) + '</li>'; return; }
+          (j.investigations || []).forEach(function (i) {
+            const li = document.createElement('li');
+            li.textContent = i.investigation_uid + ' — ' + (i.title || '');
+            ul.appendChild(li);
+          });
+        } catch (e) { ul.innerHTML = '<li class="err">' + e.message + '</li>'; }
+      };
+
+      document.getElementById('btnIngest').onclick = async function () {
+        const out = document.getElementById('ingestOut');
+        const invUid = document.getElementById('invUid').value.trim();
+        const content = document.getElementById('evidenceContent').value;
+        if (!invUid) { show(out, 'Set investigation UID.', false); return; }
+        if (!content) { show(out, 'Enter evidence content.', false); return; }
+        try {
+          const r = await fetch(base() + '/investigations/' + encodeURIComponent(invUid) + '/evidence', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ content: content, media_type: 'text/plain' })
+          });
+          const j = await r.json();
+          if (!r.ok) { show(out, j.detail || r.status, false); return; }
+          show(out, 'evidence_uid: ' + j.evidence_uid + '\nspan_uid: ' + j.span_uid, true);
+          document.getElementById('spanUid').value = j.span_uid || '';
+        } catch (e) { show(out, e.message, false); }
+      };
+
+      document.getElementById('btnPropose').onclick = async function () {
+        const out = document.getElementById('proposeOut');
+        const invUid = document.getElementById('invUid').value.trim();
+        const text = document.getElementById('claimText').value.trim();
+        if (!invUid) { show(out, 'Set investigation UID.', false); return; }
+        if (!text) { show(out, 'Enter claim text.', false); return; }
+        try {
+          const r = await fetch(base() + '/investigations/' + encodeURIComponent(invUid) + '/claims', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ text: text })
+          });
+          const j = await r.json();
+          if (!r.ok) { show(out, j.detail || r.status, false); return; }
+          show(out, 'claim_uid: ' + j.claim_uid, true);
+          document.getElementById('claimUid').value = j.claim_uid || '';
+        } catch (e) { show(out, e.message, false); }
+      };
+
+      document.getElementById('btnLink').onclick = async function () {
+        const out = document.getElementById('linkOut');
+        const invUid = document.getElementById('invUid').value.trim();
+        const spanUid = document.getElementById('spanUid').value.trim();
+        const claimUid = document.getElementById('claimUid').value.trim();
+        if (!invUid || !spanUid || !claimUid) { show(out, 'Set investigation UID, span_uid, and claim_uid.', false); return; }
+        try {
+          const r = await fetch(base() + '/investigations/' + encodeURIComponent(invUid) + '/links/support', {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ span_uid: spanUid, claim_uid: claimUid })
+          });
+          const j = await r.json();
+          if (!r.ok) { show(out, j.detail || r.status, false); return; }
+          show(out, 'Linked: link_uid ' + (j.link_uid || ''), true);
+        } catch (e) { show(out, e.message, false); }
+      };
+    })();
+  </script>
+</body>
+</html>

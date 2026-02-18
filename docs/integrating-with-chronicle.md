@@ -24,6 +24,12 @@ When the same scenario (e.g. query id or scenario id) is run multiple times, you
 
 ---
 
+## Human-curated data and attestation
+
+When a human (or tool) curates evidence and claims—e.g. transcript ingestion, manual link confirmation—you can attribute every write to an actor. Use **CLI:** set `CHRONICLE_ACTOR_ID` and optionally `CHRONICLE_ACTOR_TYPE` (or pass `--actor-id` / `--actor-type` on write commands). Use **HTTP API:** set headers `X-Actor-Id` and `X-Actor-Type` on each write request. The ledger records who did what; with an IdP you can optionally persist verification level. See [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md) for the full workflow (identity, human_confirm/human_override, export for verification).
+
+---
+
 ## References
 
 | Doc | Description |
@@ -33,3 +39,4 @@ When the same scenario (e.g. query id or scenario id) is run multiple times, you
 | [Eval contract](eval_contract.md) | Input/output for the scorer; plugging into eval harnesses. |
 | [Eval and benchmarking](eval-and-benchmarking.md) | Running pipelines and extracting metrics. |
 | [Defensibility metrics schema](defensibility-metrics-schema.md) | Scorecard fields and API. |
+| [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md) | Actor identity, curation workflow, attestation. |

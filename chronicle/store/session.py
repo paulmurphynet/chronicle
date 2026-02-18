@@ -110,6 +110,8 @@ class ChronicleSession:
         workspace: str = "spark",
         idempotency_key: str | None = None,
         investigation_key: str | None = None,
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Create investigation; returns (event_id, investigation_uid). When idempotency_key or investigation_key is set, repeated calls with the same key return the same investigation_uid (get-or-create)."""
         key = (idempotency_key or investigation_key or "").strip() or None
@@ -121,6 +123,8 @@ class ChronicleSession:
             actor_type=actor_type,
             workspace=workspace,
             idempotency_key=key,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def archive_investigation(
@@ -131,6 +135,8 @@ class ChronicleSession:
         actor_id: str = "default",
         actor_type: str = "human",
         workspace: str = "spark",
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> str:
         """Archive investigation; returns event_id."""
         return archive_investigation(
@@ -141,6 +147,8 @@ class ChronicleSession:
             actor_id=actor_id,
             actor_type=actor_type,
             workspace=workspace,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def set_tier(
@@ -152,6 +160,8 @@ class ChronicleSession:
         actor_id: str = "default",
         actor_type: str = "human",
         workspace: str = "spark",
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> str:
         """Set investigation tier (Spark -> Forge -> Vault). Returns event_id. Phase 1."""
         return set_tier(
@@ -163,6 +173,8 @@ class ChronicleSession:
             actor_id=actor_id,
             actor_type=actor_type,
             workspace=workspace,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def ingest_evidence(
@@ -179,6 +191,8 @@ class ChronicleSession:
         actor_type: str = "human",
         workspace: str = "spark",
         idempotency_key: str | None = None,
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Ingest evidence; returns (event_id, evidence_uid). E2.3: optional provenance_type."""
         return ingest_evidence(
@@ -195,6 +209,8 @@ class ChronicleSession:
             actor_type=actor_type,
             workspace=workspace,
             idempotency_key=idempotency_key,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def propose_claim(
@@ -208,6 +224,8 @@ class ChronicleSession:
         actor_type: str = "human",
         workspace: str = "spark",
         idempotency_key: str | None = None,
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Propose a claim; returns (event_id, claim_uid)."""
         return propose_claim(
@@ -220,6 +238,8 @@ class ChronicleSession:
             actor_type=actor_type,
             workspace=workspace,
             idempotency_key=idempotency_key,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def anchor_span(
@@ -235,6 +255,8 @@ class ChronicleSession:
         actor_type: str = "human",
         workspace: str = "spark",
         idempotency_key: str | None = None,
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Anchor a span in evidence; returns (event_id, span_uid)."""
         return anchor_span(
@@ -250,6 +272,8 @@ class ChronicleSession:
             actor_type=actor_type,
             workspace=workspace,
             idempotency_key=idempotency_key,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def link_support(
@@ -264,6 +288,8 @@ class ChronicleSession:
         actor_type: str = "human",
         workspace: str = "spark",
         idempotency_key: str | None = None,
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Link a span as supporting a claim; returns (event_id, link_uid)."""
         return link_support(
@@ -278,6 +304,8 @@ class ChronicleSession:
             actor_type=actor_type,
             workspace=workspace,
             idempotency_key=idempotency_key,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def link_challenge(
@@ -292,6 +320,8 @@ class ChronicleSession:
         actor_type: str = "human",
         workspace: str = "spark",
         idempotency_key: str | None = None,
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Link a span as challenging a claim; returns (event_id, link_uid)."""
         return link_challenge(
@@ -306,6 +336,8 @@ class ChronicleSession:
             actor_type=actor_type,
             workspace=workspace,
             idempotency_key=idempotency_key,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def retract_support(
@@ -772,6 +804,8 @@ class ChronicleSession:
         actor_type: str = "human",
         workspace: str = "spark",
         idempotency_key: str | None = None,
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Declare a tension between two claims; returns (event_id, tension_uid)."""
         return declare_tension(
@@ -786,6 +820,8 @@ class ChronicleSession:
             actor_type=actor_type,
             workspace=workspace,
             idempotency_key=idempotency_key,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def emit_tension_suggestions(

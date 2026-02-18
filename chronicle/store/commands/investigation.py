@@ -21,6 +21,7 @@ from chronicle.core.payloads import (
 from chronicle.core.uid import generate_event_id, generate_investigation_uid
 from chronicle.core.validation import MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH
 from chronicle.store import export_import as export_import_mod
+from chronicle.store.commands.attestation import apply_attestation_to_payload
 from chronicle.store.protocols import EventStore, ReadModel
 
 
@@ -33,6 +34,8 @@ def create_investigation(
     actor_type: str = "human",
     workspace: str = "spark",
     idempotency_key: str | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """CreateInvestigation command. Returns (event_id, investigation_uid). Validates title non-empty and within length limits."""
     key = (idempotency_key or "").strip()
@@ -55,6 +58,11 @@ def create_investigation(
         title=t,
         description=description,
         created_by=ActorRef(actor_type=actor_type, actor_id=actor_id),
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -66,7 +74,7 @@ def create_investigation(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
         idempotency_key=key or None,
     )
     store.append(event)
@@ -83,6 +91,8 @@ def set_tier(
     actor_id: str = "default",
     actor_type: str = "human",
     workspace: str = "spark",
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> str:
     """SetTier(investigation_uid, tier, reason?): validate exists and transition allowed; emit TierChanged. Returns event_id. Phase 1."""
     inv = read_model.get_investigation(investigation_uid)
@@ -117,6 +127,11 @@ def set_tier(
         to_tier=tier_lower,
         reason=reason,
         changed_by=ActorRef(actor_type=actor_type, actor_id=actor_id),
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -128,7 +143,7 @@ def set_tier(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=tier_lower,
-        payload=payload.to_dict(),
+        payload=payload,
     )
     store.append(event)
     return event_id
@@ -143,6 +158,8 @@ def archive_investigation(
     actor_id: str = "default",
     actor_type: str = "human",
     workspace: str = "spark",
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> str:
     """ArchiveInvestigation(investigation_uid): validate exists; emit InvestigationArchived. Returns event_id. Spec 1.5.1."""
     inv = read_model.get_investigation(investigation_uid)
@@ -158,6 +175,11 @@ def archive_investigation(
         investigation_uid=investigation_uid,
         reason=reason,
         archived_by=ActorRef(actor_type=actor_type, actor_id=actor_id),
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -169,7 +191,7 @@ def archive_investigation(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
     )
     store.append(event)
     return event_id

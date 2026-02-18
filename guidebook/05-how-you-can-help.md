@@ -12,6 +12,7 @@ The first three chapters described the problem, why it exists, and how we’re s
 - **Run tests and CI.** We have tests for the scorer, session flow, and verifier; CI runs ruff and pytest on push/PR. Run `pytest tests/ -v` locally (after `pip install -e ".[dev]"`) and keep the suite green when you change code.
 - **Contribute to the repo.** We have a [to-do list](../docs/to_do.md). Pick an item, open a PR, or discuss in an issue.
 - **Use the lessons.** If you’re new to the codebase, go through the [lessons](../lessons/README.md) (including [Lesson 11](../lessons/11-interoperability-api-and-tests.md) on interop, API, and tests). If something is wrong or unclear, suggest a change.
+- **Human-curated data and attestation.** If you run ingestion or curation (e.g. transcripts, manual links), set actor identity (CLI: `CHRONICLE_ACTOR_ID` / `--actor-id`; API: `X-Actor-Id` header) so the ledger attributes who did what. See [Human-in-the-loop and attestation](../docs/human-in-the-loop-and-attestation.md) for the full workflow.
 
 ---
 

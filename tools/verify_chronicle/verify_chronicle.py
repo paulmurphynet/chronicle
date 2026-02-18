@@ -58,9 +58,7 @@ def verify_db_schema(conn: sqlite3.Connection, results: list) -> None:
 
     missing = []
     for table in REQUIRED_TABLES:
-        cur = conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,)
-        )
+        cur = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
         if cur.fetchone() is None:
             missing.append(table)
     if missing:
@@ -118,7 +116,9 @@ def verify_append_only_ledger(conn: sqlite3.Connection, results: list) -> None:
         prev = ""
         for eid, rec in rows:
             if rec < prev:
-                _report("append_only_ledger", False, f"recorded_at reversal at event_id={eid}", results)
+                _report(
+                    "append_only_ledger", False, f"recorded_at reversal at event_id={eid}", results
+                )
                 return
             prev = rec
         _report("append_only_ledger", True, f"{len(rows)} events in order", results)
@@ -148,7 +148,9 @@ def _summary_from_chronicle(zf: zipfile.ZipFile, conn: sqlite3.Connection) -> di
     return out
 
 
-def verify_chronicle_file(path: Path, *, run_invariants: bool = True) -> list[tuple[str, bool, str]]:
+def verify_chronicle_file(
+    path: Path, *, run_invariants: bool = True
+) -> list[tuple[str, bool, str]]:
     """
     Validate a .chronicle file (ZIP). Returns list of (check_name, passed, detail).
     Checks: manifest, DB schema, evidence hashes; optionally append_only ledger.
@@ -224,7 +226,7 @@ def main() -> int:
             "Usage: chronicle-verify <path/to/file.chronicle> [--no-invariants] [--summary] [--json]\n"
             "       python -m tools.verify_chronicle <file.chronicle> [options]\n"
             "Options:\n  --no-invariants  Skip append-only ledger check\n"
-            "  --summary         Print 'What\'s inside' (investigation, claims, evidence count) when verified\n"
+            "  --summary         Print 'What's inside' (investigation, claims, evidence count) when verified\n"
             "  --json            Output machine-readable result (verified, checks, optional summary)",
             file=sys.stderr if not args else sys.stdout,
         )
@@ -240,9 +242,10 @@ def main() -> int:
         }
         if all_passed and show_summary:
             try:
-                with zipfile.ZipFile(path, "r") as zf, tempfile.TemporaryDirectory(
-                    prefix="chronicle_verify_"
-                ) as tmp:
+                with (
+                    zipfile.ZipFile(path, "r") as zf,
+                    tempfile.TemporaryDirectory(prefix="chronicle_verify_") as tmp,
+                ):
                     db_path = Path(tmp) / "chronicle.db"
                     db_path.write_bytes(zf.read("chronicle.db"))
                     conn = sqlite3.connect(str(db_path))
@@ -262,9 +265,10 @@ def main() -> int:
         print("Result: VERIFIED")
         if show_summary:
             try:
-                with zipfile.ZipFile(path, "r") as zf, tempfile.TemporaryDirectory(
-                    prefix="chronicle_verify_"
-                ) as tmp:
+                with (
+                    zipfile.ZipFile(path, "r") as zf,
+                    tempfile.TemporaryDirectory(prefix="chronicle_verify_") as tmp,
+                ):
                     db_path = Path(tmp) / "chronicle.db"
                     db_path.write_bytes(zf.read("chronicle.db"))
                     conn = sqlite3.connect(str(db_path))

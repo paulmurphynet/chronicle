@@ -45,6 +45,7 @@ from chronicle.core.uid import (
     generate_supersession_uid,
 )
 from chronicle.core.validation import MAX_EVIDENCE_BYTES
+from chronicle.store.commands.attestation import apply_attestation_to_payload
 from chronicle.store.protocols import EventStore, EvidenceStore, ReadModel
 
 # MIME type: type/subtype (optional params after ;). Spec 1.5.1a.
@@ -67,6 +68,8 @@ def ingest_evidence(
     actor_type: str = "human",
     workspace: str = "spark",
     idempotency_key: str | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """IngestEvidence command. Store blob first, then emit EvidenceIngested. Returns (event_id, evidence_uid). Spec 1.5.1, 1.5.1a; evidence.md 4.2. E2.3: optional provenance_type (human_created | ai_generated | unknown)."""
     key = (idempotency_key or "").strip()
@@ -99,6 +102,11 @@ def ingest_evidence(
         file_metadata=file_metadata,
         metadata=metadata,
         provenance_type=provenance_type or "unknown",
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event_id = generate_event_id()
     event = Event(
@@ -111,7 +119,7 @@ def ingest_evidence(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
         idempotency_key=key or None,
     )
     store.append(event)
@@ -191,6 +199,8 @@ def anchor_span(
     actor_type: str = "human",
     workspace: str = "spark",
     idempotency_key: str | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """AnchorSpan command. Returns (event_id, span_uid). Spec 1.5.1, 1.5.1a."""
     key = (idempotency_key or "").strip()
@@ -219,6 +229,11 @@ def anchor_span(
         anchor=anchor,
         quote=quote,
         notes=notes,
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -230,7 +245,7 @@ def anchor_span(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
         idempotency_key=key or None,
     )
     store.append(event)
@@ -250,6 +265,8 @@ def link_support(
     actor_type: str = "human",
     workspace: str = "spark",
     idempotency_key: str | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """LinkSupport command. Returns (event_id, link_uid). Spec 1.5.1, 1.5.1a."""
     key = (idempotency_key or "").strip()
@@ -266,6 +283,11 @@ def link_support(
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     payload = EvidenceLinkPayload(
         link_uid=link_uid, claim_uid=claim_uid, span_uid=span_uid, strength=strength, notes=notes
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -277,7 +299,7 @@ def link_support(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
         idempotency_key=key or None,
     )
     store.append(event)
@@ -297,6 +319,8 @@ def link_challenge(
     actor_type: str = "human",
     workspace: str = "spark",
     idempotency_key: str | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """LinkChallenge command. Returns (event_id, link_uid). Spec 1.5.1, 1.5.1a."""
     key = (idempotency_key or "").strip()
@@ -313,6 +337,11 @@ def link_challenge(
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     payload = EvidenceLinkPayload(
         link_uid=link_uid, claim_uid=claim_uid, span_uid=span_uid, strength=strength, notes=notes
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -324,7 +353,7 @@ def link_challenge(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
         idempotency_key=key or None,
     )
     store.append(event)

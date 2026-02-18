@@ -67,3 +67,21 @@ def test_session_requires_existing_project(tmp_path: Path) -> None:
     # tmp_path exists but we never call create_project; no chronicle.db
     with pytest.raises(FileNotFoundError, match="Not a Chronicle project"):
         ChronicleSession(tmp_path)
+
+
+def test_session_verification_level_persisted_in_payload(tmp_path: Path) -> None:
+    """When verification_level (and attestation_ref) are passed, they are stored in event payload."""
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        session.create_investigation(
+            "Attested run",
+            actor_id="alice",
+            actor_type="human",
+            verification_level="verified_credential",
+            attestation_ref="att-123",
+        )
+        events = session.store.read_all(limit=5)
+    assert len(events) >= 1
+    created = next((e for e in events if e.event_type == "InvestigationCreated"), events[0])
+    assert created.payload.get("_verification_level") == "verified_credential"
+    assert created.payload.get("_attestation_ref") == "att-123"
