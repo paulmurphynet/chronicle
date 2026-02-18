@@ -156,3 +156,46 @@ def test_session_defensibility_metrics_contract(tmp_path: Path) -> None:
     assert "challenge_count" in corr
     assert "independent_sources_count" in corr
     assert metrics.get("contradiction_status") in ("none", "open", "acknowledged", "resolved")
+
+
+def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
+    """build_claim_evidence_metrics_export returns stable JSON shape (claim + evidence refs + defensibility)."""
+    from chronicle.store.commands.generic_export import build_claim_evidence_metrics_export
+
+    create_project(tmp_path)
+    text = b"The company reported revenue of $1.2M in Q1 2024."
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Export test", actor_id="test", actor_type="tool"
+        )
+        _, ev_uid = session.ingest_evidence(
+            inv_uid, text, "text/plain", original_filename="doc.txt", actor_id="test", actor_type="tool"
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": len(text.decode())},
+            quote=text.decode(), actor_id="test", actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid, "Revenue was $1.2M in Q1 2024.", actor_id="test", actor_type="tool"
+        )
+        session.link_support(inv_uid, span_uid, claim_uid, actor_id="test", actor_type="tool")
+        data = build_claim_evidence_metrics_export(
+            session.read_model,
+            session.get_defensibility_score,
+            inv_uid,
+        )
+    assert data["schema_version"] == 1
+    assert data["investigation_uid"] == inv_uid
+    assert len(data["claims"]) == 1
+    claim = data["claims"][0]
+    assert claim["claim_uid"] == claim_uid
+    assert "Revenue" in claim["claim_text"]
+    assert claim["support_count"] == 1
+    assert claim["challenge_count"] == 0
+    assert len(claim["evidence_refs"]) == 1
+    ref = claim["evidence_refs"][0]
+    assert ref["evidence_uid"] == ev_uid
+    assert ref.get("span_uid") == span_uid
+    assert ref["link_type"] == "SUPPORT"
+    assert "defensibility" in claim
+    assert claim["defensibility"].get("provenance_quality") in ("strong", "medium", "weak", "challenged")

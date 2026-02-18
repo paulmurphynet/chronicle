@@ -8,6 +8,8 @@ The **standalone verifier** validates a `.chronicle` export file (ZIP) so that r
 
 **What it is:** A `.chronicle` file is a ZIP package of an investigation (database, evidence files, and a manifest) that you can verify without running the full Chronicle app.
 
+**Get a sample .chronicle:** To try the verifier without a real submission, generate a sample file from the repo root: `PYTHONPATH=. python3 scripts/generate_sample_chronicle.py` (writes a sample to the path shown in the script output, or use the default). Then run `chronicle-verify path/to/that.chronicle`. See [scripts/README.md](../scripts/README.md) for first-class scripts.
+
 **Recipient obligation:** Before relying on a submission, run the verifier on the .chronicle file (CLI or web below) to confirm structural integrity and evidence hashes.
 
 **How to verify:**

@@ -120,7 +120,7 @@ Ensure `NEO4J_URI` and `NEO4J_PASSWORD` (and optionally `NEO4J_USER`) are set (e
 |-------|------------------|
 | **One project vs many** | One “graph project” that merges all imported investigations keeps a single sync target and a single Aura graph. Each investigation keeps its own `investigation_uid` in Neo4j, so attribution is preserved. |
 | **Re-import** | Re-importing the same `.chronicle` (same investigation_uid) can lead to duplicate events or conflicts depending on idempotency. Prefer importing each file once. |
-| **Deduplication** | Evidence/claims are not deduplicated across investigations (e.g. same text in two files → two nodes). Future work could merge by content hash or keep separate for lineage. |
+| **Deduplication** | Evidence/claims are not deduplicated across investigations (e.g. same text in two files → two nodes). Optional merge by content hash is in [To-do](to_do.md). |
 | **Verification** | Only verified files should be ingested. The script runs the verifier first; do not bypass it for untrusted input. |
 | **What “verified” means** | See [Critical areas: What the verifier checks](../critical_areas/03-what-the-verifier-checks.md). Verified = structure and hashes, not truth or independence. |
 

@@ -39,10 +39,19 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 
 - User-fixable failures (validation, missing project, missing entity, policy rules) should raise **ChronicleUserError** or **ChronicleProjectNotFoundError** from `chronicle.core.errors`. The CLI catches these and exits 1 with a clean message; the API can map them to 400/404/429. See [docs/errors.md](docs/errors.md) for the full hierarchy, when to use which type, and how CLI/API map them.
 
+## Changelog and releases
+
+- **Changelog:** Meaningful user-facing changes (new features, contract changes, breaking changes) should be reflected in [CHANGELOG.md](CHANGELOG.md). Add a new `[X.Y.Z]` section with a short list of changes; link the version to the release tag when the release is cut.
+- **Releases:** Tagged releases (e.g. `v0.1.0`) allow downstream users to pin a version. When cutting a release, update the changelog, tag, and (if applicable) publish to PyPI.
+
 ## Code style and linting
 
 - The project uses **ruff** for linting. Run `ruff check .` and `ruff format .` from the repo root (see `pyproject.toml` for config).
-- Type hints are used; run `mypy chronicle` if mypy is configured.
+- Type hints are used; run `mypy chronicle` (see **Mypy** below).
+
+## Mypy
+
+- Run `mypy chronicle tools` from the repo root. Core code uses strict typing (`ignore_missing_imports = false` for `chronicle.*`). Optional modules (API, Neo4j, integrations) have overrides so mypy does not require their dependencies: `chronicle.api.*`, `chronicle.store.neo4j_*`, and `chronicle.integrations.*` use `ignore_missing_imports = true`. If you add code that imports optional packages (e.g. `fastapi`, `neo4j`), either add a mypy override for that module in `pyproject.toml` or install the optional extra (e.g. `pip install -e ".[api]"`) when running mypy.
 
 ## Tests
 

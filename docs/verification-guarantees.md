@@ -76,10 +76,10 @@ Neither the verifier nor the Chronicle runtime guarantees:
 
 **Audit today:**
 
-- **Project database:** Run `chronicle verify --path /project` to execute the full invariant suite (append-only ledger, referential integrity, status consistency, projection completeness, checkpoint consistency, evidence integrity on disk). The project is audited as a whole. Event history is available via the CLI for inspection; for a formal replay-from-N or time-range replay, that is a possible future extension.
+- **Project database:** Run `chronicle verify --path /project` to execute the full invariant suite (append-only ledger, referential integrity, status consistency, projection completeness, checkpoint consistency, evidence integrity on disk). The project is audited as a whole. Event history is available via the CLI for inspection. Replay-from-N or time-range replay is in [To-do](to_do.md) if added.
 - **.chronicle file:** Run the standalone verifier (CLI or web) as in Section 1. The verifier checks the exported snapshot (structure, hashes, optional append-only); it does not run the full invariant suite.
 
-**Future (scale):** For very large projects, **checkpointing or snapshots** (e.g. snapshot of read model at event N plus tail events) may be added to speed up replay or recovery. When we add checkpointing, the verification story will be: **verify snapshot integrity and tail events, or verify full replay**; this doc will be updated accordingly. Today there is no snapshot path, only full replay.
+For very large projects, checkpointing or snapshots may be added later; see [To-do](to_do.md). Today there is no snapshot path, only full replay.
 
 ---
 

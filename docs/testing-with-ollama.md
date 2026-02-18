@@ -65,4 +65,4 @@ For **embeddings** (optional):
 - **Without Ollama** — Scorer and session tests that don’t call the LLM can run in CI or locally with no env set. LLM-backed features are skipped when `CHRONICLE_LLM_ENABLED` is not set (or the code uses heuristic-only paths).
 - **With Ollama** — Set `CHRONICLE_LLM_ENABLED=true` and run your test or script; any code that uses `LlmClient` or `analyze_claim_decomposition(use_llm=True)` will hit your local Ollama. Useful for integration-style tests while developing.
 
-If we add pytest later, we can use a marker (e.g. `@pytest.mark.ollama`) for tests that require Ollama and skip them when the env is unset or Ollama is unreachable, so CI stays fast and local runs can exercise the full stack.
+Use the **`@pytest.mark.ollama`** marker for tests that require Ollama. They are skipped when `CHRONICLE_LLM_ENABLED` is not set or when Ollama is unreachable, so CI stays fast and local runs can exercise the full stack. The marker is registered in `pyproject.toml`; skip logic lives in `tests/conftest.py`.

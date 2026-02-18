@@ -1,38 +1,52 @@
 # Implementation to-do
 
-**Single place for implementation steps.** No separate "implementation plan" docs — we keep one list here, check items off as we go, and clear the list when the batch is done and user docs are updated.
+**Single source of truth for pending work.** All planned features, improvements, and deferred items live here. No separate implementation-plan, horizon, or onboarding checklist docs — one list, check off as you go.
 
-**Guidebook:** Enhancement deferred until after more features (interoperability, etc.) to avoid repeated rewrites.
+**Doc updates (guidebook, lessons, quizzes, critical areas, and other documentation) are done at the end** after implementing the new features below, so docs stay in sync with the product.
 
 ## How to use this file
 
-1. **When starting a set of changes** — Add the steps to "Current steps" below (e.g. 10 items). Use `- [ ]` for open and `- [x]` for done.
-2. **While working** — Mark items done as you complete them. Leave all items in the list so we can see what was in scope.
-3. **When the batch is finished** — Confirm the features are reflected in normal user documentation (README, eval_contract, verifier, etc.). Then **empty** the "Current steps" section (delete the list or leave "— none —") so the file is clean.
-4. **Next batch** — Add the next set of steps to "Current steps" and repeat.
-
-This keeps the repo from accumulating many one-off implementation-plan docs; one file, one list, reset when done.
+1. **When starting a set of changes** — Pick items from "Current steps" (or add new ones). Use `- [ ]` for open and `- [x]` for done.
+2. **While working** — Mark items done as you complete them. Leave completed items in the list until the batch is finished.
+3. **When a batch is finished** — Update user-facing docs (README, eval_contract, verifier, etc.) as needed. Then either leave the list as-is for the next batch or empty "Current steps" to "— none —" and add the next batch.
+4. **Doc pass at the end** — After implementing features, update guidebook, lessons, quizzes, critical areas, and any other docs that need to reflect the new behavior or narrative.
 
 ---
 
 ## Current steps
 
-- [x] **1. Test coverage: session integration tests** — Add 2–3 tests under `tests/` that exercise `ChronicleSession` end-to-end: create project, create investigation, ingest evidence, propose claim, link support, then call `get_defensibility_score` and assert on scorecard shape. These complement the standalone scorer tests and protect the core defensibility path when refactoring.
+### Implementation and features
 
-- [x] **2. Test coverage: CI gate** — In `pyproject.toml`, set `[tool.coverage.report] fail_under` to a concrete value (e.g. 40 or 50). In `.github/workflows/ci.yml`, add `--cov-fail-under=33` to the pytest step so CI fails if coverage drops below the bar (33% current; raise as tests grow).
+- [x] **Claim–evidence–metrics export helper** — Add a single API/helper (e.g. `build_claim_evidence_metrics_export`) that returns the stable JSON shape for one claim + evidence refs + defensibility, so callers don’t assemble from `build_generic_export_json` + read model + scorecards by hand. See [claim-evidence-metrics-export](claim-evidence-metrics-export.md) for the shape.
 
-- [x] **3. Test coverage: narrow omit list** — Review `[tool.coverage.run] omit` in `pyproject.toml`. Keep excluding optional/plugin modules (api, neo4j_sync, postgres_event_store, encryption, integrations) if desired; consider removing any core command or read_model paths from omit so their coverage counts, and document in `docs/coverage-core.md` (or similar) what is in scope for the coverage target.
+- [ ] **Multi-key claim metadata** — If needed: add `metadata_json` (or equivalent) to claims so multiple external keys per claim are supported; document in [external-ids](external-ids.md). Until then, a single note or tag is enough for one external ID.
 
-- [x] **4. Session module: document or split** — Either (a) add a short module docstring at the top of `chronicle/store/session.py` stating that the file is an intentional facade of thin wrappers over the command layer, so future refactors are clearly optional, or (b) split `ChronicleSession` by domain (e.g. session_investigation, session_claims, session_evidence) and compose them in one `ChronicleSession` class. Choose one approach and implement it.
+- [ ] **Verification: replay-from-N or time-range replay** — Optional extension for project verification: formal replay from event N or time-range replay. Document in [verification-guarantees](verification-guarantees.md) if added.
 
-- [x] **5. Scripts: first-class vs optional** — In `scripts/README.md`, ensure every script is clearly labeled as first-class (eval, verification, export, RAG demos) or optional/advanced (ai_validation, verticals, utilities). Archive or remove any script that only served an old API/UI and has no remaining dependents; document in scripts/README which scripts were archived and where.
+- [ ] **Verification: checkpointing or snapshots (scale)** — For very large projects: snapshot of read model at event N plus tail events to speed up replay or recovery; verification story becomes “verify snapshot integrity and tail events, or full replay.” Update [verification-guarantees](verification-guarantees.md) when added.
 
-- [x] **6. Lessons 04–07** — Either (a) add lessons 04–07 (events/core, store/session, defensibility, integrations/scripts) under `lessons/` with the same style as 00–03, or (b) update `lessons/README.md` to state that lessons 04–07 are coming later and that after lesson 03 readers should use the codebase map and technical report. Remove or update any references that assume 04–07 exist.
+- [ ] **Aura / Neo4j: deduplication by content hash** — Evidence and claims are not deduplicated across investigations (same text in two files → two nodes). Option: merge by content hash or keep separate for lineage. Document in [aura-graph-pipeline](aura-graph-pipeline.md) if implemented.
 
-- [x] **7. Error surface: consistent user errors** — Ensure all user-facing validation and capacity errors (e.g. missing project, invalid input, idempotency cap) use `ChronicleUserError` or a documented subclass from `chronicle/core/errors.py`. Add a short "Errors" subsection in CONTRIBUTING or in `docs/` (e.g. in troubleshooting or a new errors.md) describing when to use which error type and how CLI/API map them to exit codes and HTTP status.
+- [x] **Ollama tests: pytest marker** — Add a marker (e.g. `@pytest.mark.ollama`) for tests that require Ollama; skip when env is unset or Ollama unreachable so CI stays fast and local runs can exercise the full stack. See [testing-with-ollama](testing-with-ollama.md).
 
-- [ ] **8. Changelog** — Add `CHANGELOG.md` at repo root with at least one entry (e.g. "0.1.0 – initial release" or current version). Document in CONTRIBUTING or README that meaningful changes should be reflected in the changelog; keep it updated as releases or notable changes happen.
+- [ ] **Prune scripts (ai_validation, verticals)** — If ai_validation or verticals assume the old API or full UI and have no remaining dependents, archive or remove them and document in [scripts/README](../scripts/README.md). Otherwise leave as optional/advanced.
 
-- [ ] **9. Mypy and optional dependencies** — Resolve mypy issues for optional deps (neo4j, fastapi, etc.): either add stub packages (e.g. `types-*`) in dev optional-deps or add mypy overrides for those modules so `chronicle.*` can keep `ignore_missing_imports = false` without failing when optional extras are not installed. Document in CONTRIBUTING how to run mypy with optional deps if needed.
+- [ ] **Guidebook enhancement** — Expand the guidebook (narrative, problem, approach, limits) after more features (e.g. interoperability) are in place to avoid repeated rewrites.
 
-- [ ] **10. Integrations: happy path and smoke tests** — For each integration (LangChain, LlamaIndex, Haystack): (a) ensure one "happy path" is documented (e.g. in `docs/integrating-with-chronicle.md` or the integration module docstring) with a minimal runnable example; (b) if feasible, add a single smoke test per integration (e.g. import the integration module and perform a minimal call or build a minimal pipeline) so refactors don’t break them silently. Integrations can remain excluded from coverage; the goal is documentation and a basic test.
+- [ ] **Technical report as preprint** — Publish the technical report (e.g. arXiv) so researchers can cite the defensibility definition and schema. External; not a code change.
+
+- [ ] **Tagged release** — When cutting a release: update CHANGELOG, tag (e.g. v0.1.0), and optionally publish to PyPI. Process is in [CONTRIBUTING](../CONTRIBUTING.md).
+
+- [ ] **Optional minimal API** — If useful: tiny “run scorer as a service” (POST JSON, get defensibility) or read-only API for .chronicle inspection. Can live in this repo or a separate one.
+
+- [ ] **Optional depth (warrant / rationale)** — If it clearly improves evals or adoption: optional “support rationale” or “warrant” field (why this evidence supports this claim), or tighter link to NLI/entailment evals. [Epistemology scope](epistemology-scope.md) sets boundaries.
+
+- [ ] **Eval-harness integration (RAGAS, Trulens, LangSmith)** — Document or provide a thin adapter so Chronicle defensibility can be added as a metric in popular frameworks. Goal: “add defensibility to your RAG eval in one step.” (Doc and adapter template already in [integrating-with-chronicle](integrating-with-chronicle.md); further framework-specific adapters as needed.)
+
+- [x] **.chronicle as interchange positioning** — Clarify in docs/README that the .chronicle format is “show your work”: anyone can export and others can verify; encourage tooling that consumes .chronicle.
+
+### Doc updates (after features)
+
+- [ ] **Update guidebook, lessons, quizzes, critical areas** — After implementing the new features above, update the guidebook, lessons (and quizzes), and critical areas so they reflect current behavior and narrative. No separate “plan” docs; keep to_do as the single list.
+
+- [ ] **Update ONBOARDING checklist** — In [ONBOARDING_AND_OPEN_SOURCE](ONBOARDING_AND_OPEN_SOURCE.md), mark completed items (e.g. README “New here?”, CONTRIBUTING, troubleshooting, glossary, getting-started, changelog, personas, example .chronicle) so the checklist matches reality, or retire the doc and keep only to_do.

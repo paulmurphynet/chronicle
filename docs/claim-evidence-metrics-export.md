@@ -73,7 +73,7 @@ A full export for one investigation can be a single JSON object:
 }
 ```
 
-This is a **thin wrapper**: you build it from the same data as [generic export](GENERIC_EXPORT.md) plus evidence_link and `get_defensibility_score`. The repo does not yet provide a single API that returns exactly this wrapper; you can assemble it from `build_generic_export_json`, the read model’s evidence_link listing, and defensibility scorecards. A future helper (e.g. `build_claim_evidence_metrics_export`) could standardize it in code.
+This is a **thin wrapper**: you build it from the same data as [generic export](GENERIC_EXPORT.md) plus evidence_link and `get_defensibility_score`. Use the helper **`build_claim_evidence_metrics_export`** in `chronicle.store.commands.generic_export`: pass the read model, a callable that returns a defensibility scorecard for a claim (e.g. session’s `get_defensibility_score`), and the investigation UID; it returns the JSON object above.
 
 ---
 

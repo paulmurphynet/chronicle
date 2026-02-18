@@ -19,7 +19,7 @@ This doc lists what was brought into the RAG/evals Chronicle repo from the old p
 | **tools/** | decomposer, type_scope_inference, contradiction, embeddings, evidence_temporal, llm_client/config, embedding_config | Used by session/evidence/claims flows (e.g. type inference, contradiction detection); scorer path can stay minimal but package stays coherent. |
 | **http_client.py, verify.py** | HTTP client for API; verify for .chronicle checks | Client useful when someone runs an API elsewhere; verifier is standalone and critical. |
 
-**Not brought: `chronicle/api/`** — Routers, FastAPI app, deps, webhook, Neo4j client, tension cache, static (verifier.html, learn guides). The RAG/evals product is scorer + verifier + session API; a separate API/frontend can be added later or live in another repo. Leaving it out keeps this repo focused and dependency-light.
+**Not brought: `chronicle/api/`** — Routers, FastAPI app, deps, webhook, Neo4j client, tension cache, static (verifier.html, learn guides). The RAG/evals product is scorer + verifier + session API; a separate API/frontend can live in this repo or another (see [To-do](to_do.md)). Leaving it out keeps this repo focused and dependency-light.
 
 ---
 
@@ -29,7 +29,7 @@ This doc lists what was brought into the RAG/evals Chronicle repo from the old p
 |----------|------|-----|
 | **API and server** | `chronicle/api/` (app, routers, deps, schemas, static) | Out of scope for "best RAG/evals": no HTTP server, no auth, no web UI. Integrations use session API or scorer stdin/stdout. |
 | **Frontend** | `frontend/` (full UI) | Out of scope. Eval users need scorer output and .chronicle verification, not the full app UI. |
-| **Tests** | `tests/` | Not copied to avoid carrying suite that targets API/frontend. We can add a focused test set later (scorer, session, verifier). |
+| **Tests** | `tests/` | Not copied to avoid carrying suite that targets API/frontend. A focused test set (scorer, session, verifier) exists in this repo. |
 | **Spec docs** | `docs/spec/` (index, schemas, core-entities, epistemic-tools, etc.) | Large spec surface; not needed to run scorer or verifier. Technical report and defensibility/eval docs are the source of truth here. Some in-repo links still point to spec — we can fix those to point to technical-report or remove. |
 | **Most of docs/** | ~85 other docs (roadmap, vision, deployment, security reviews, verticals, learn, integration-story, etc.) | Only eval- and defensibility-critical docs were brought: eval_contract, eval_contract_schema.json, defensibility-metrics-schema, eval-and-benchmarking, technical-report, verifier. Keeps the repo readable and avoids outdated product/process docs. |
 | **Benchmark sample data** | `benchmark/`, `docs/benchmark.md` | Sample investigations and benchmark doc not copied. Scripts reference them; we can add a minimal benchmark/samples or point to "generate with script" only. |
@@ -46,7 +46,7 @@ This doc lists what was brought into the RAG/evals Chronicle repo from the old p
 | **scripts/benchmark_data/** (e.g. run_defensibility_benchmark, generate_benchmark_samples, export_for_ml, evals_to_preference_pair, etc.) | — | Supports benchmark and training-data export; some assume API or full project (we may prune or document assumptions). |
 | **scripts/eval_harness_adapter.py** | — | Single RAG run + metrics out; depends on LangChain + Chronicle integration. |
 | **scripts/*_rag_chronicle.py** (langchain, llamaindex, haystack, cross_framework) | — | Demo integrations; optional. |
-| **scripts/ai_validation/, scripts/verticals/** | — | Brought as-is; may be pruned later if they assume API or full UI. |
+| **scripts/ai_validation/, scripts/verticals/** | — | Brought as-is; first-class vs optional is in [scripts/README](../scripts/README.md). Pruning is in [To-do](to_do.md) if needed. |
 | **scripts/** (normalize_quotes_in_docs, check_doc_links, generate_sample_chronicle, etc.) | — | Utility and demos; keep or prune by use. |
 | **tools/verify_chronicle/** | — | Standalone verifier; required. |
 

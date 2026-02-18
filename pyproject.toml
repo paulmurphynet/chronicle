@@ -69,6 +69,25 @@ ignore_missing_imports = false
 module = "tests.*"
 ignore_missing_imports = true
 
+# Optional deps (api, neo4j, integrations): no stubs required when extras not installed
+[[tool.mypy.overrides]]
+module = "chronicle.api.*"
+ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = "chronicle.store.neo4j_sync"
+ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = "chronicle.store.neo4j_export"
+ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = "chronicle.integrations.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+    "ollama: tests that require Ollama (skip when CHRONICLE_LLM_ENABLED unset or Ollama unreachable). See docs/testing-with-ollama.md.",
+]
+
 [tool.coverage.run]
 source = ["chronicle"]
 branch = false

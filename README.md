@@ -11,9 +11,11 @@ Chronicle answers: *How well is this answer supported by evidence?* It’s for R
 **Two paths:**
 
 - **I want to understand the project** — Read the [Guidebook](guidebook/README.md) (the story: problem, approach, limits), then the [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](critical_areas/README.md) (what defensibility and “verified” do *not* guarantee).
-- **I want to run the scorer or verifier** — Use the [Quick start](#quick-start) below. For common issues (e.g. `chronicle: command not found`), see [Troubleshooting](docs/troubleshooting.md).
+- **I want to run the scorer or verifier** — Use the [Quick start](#quick-start) below, or the full [Getting started](docs/getting-started.md) page. For common issues (e.g. `chronicle: command not found`), see [Troubleshooting](docs/troubleshooting.md).
 
 **Concepts:** [Glossary](docs/glossary.md) defines defensibility, claim, evidence, .chronicle, and related terms.
+
+**Personas:** **Researchers / evaluators** → [Eval contract](docs/eval_contract.md), scorer, [Technical report](docs/technical-report.md). **Engineers integrating** → [Integrating with Chronicle](docs/integrating-with-chronicle.md), session API, [RAG in 5 minutes](docs/rag-in-5-minutes.md). **Contributors** → [CONTRIBUTING](CONTRIBUTING.md), [Lessons](lessons/README.md).
 
 ## Quick start
 
@@ -41,6 +43,8 @@ chronicle-verify path/to/file.chronicle
 - **chronicle-verify** — CLI to verify a .chronicle (ZIP) manifest, schema, and evidence hashes. Stdlib only; no Chronicle package needed for verification.
 - **Chronicle package** — Event store, read model, defensibility computation, session API for ingest → claim → link support → get defensibility. Used by the scorer and by integrations.
 
+The **.chronicle** format is “show your work”: export your investigation and anyone can verify it with `chronicle-verify`. We encourage tooling that consumes .chronicle (dashboards, fact-checking UIs, or other pipelines); see [Consuming .chronicle](docs/consuming-chronicle.md) and [Claim–evidence–metrics export](docs/claim-evidence-metrics-export.md).
+
 ## Learning and narrative
 
 | Resource | Purpose |
@@ -52,7 +56,7 @@ chronicle-verify path/to/file.chronicle
 
 ## Docs
 
-**Essential:** [Eval contract](docs/eval_contract.md) (scorer I/O), [Verifier](docs/verifier.md) (.chronicle verification), [Technical report](docs/technical-report.md) (defensibility definition), [Guidebook](guidebook/README.md) (narrative), [Critical areas](critical_areas/README.md) (limits), [Troubleshooting](docs/troubleshooting.md) (common issues), [Glossary](docs/glossary.md) (terms).
+**Essential:** [Eval contract](docs/eval_contract.md) (scorer I/O), [Verifier](docs/verifier.md) (.chronicle verification), [Technical report](docs/technical-report.md) (defensibility definition), [Guidebook](guidebook/README.md) (narrative), [Critical areas](critical_areas/README.md) (limits), [Troubleshooting](docs/troubleshooting.md) (common issues), [Glossary](docs/glossary.md) (terms). **Releases:** [CHANGELOG](CHANGELOG.md) and tagged versions for pinning.
 
 **By topic:**
 
@@ -88,6 +92,7 @@ chronicle-verify path/to/file.chronicle
 | [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
 | [Human-in-the-loop and attestation](docs/human-in-the-loop-and-attestation.md) | Human-curated data, actor identity (CLI env, API headers), attestation and verification level; curation workflow. |
 | [Onboarding and open-source checklist](docs/ONBOARDING_AND_OPEN_SOURCE.md) | Plan for making the repo ready for colleagues and public release. |
+| [Getting started](docs/getting-started.md) | One page: what Chronicle is, install, scorer + verifier quick start, next steps. |
 
 ## License
 

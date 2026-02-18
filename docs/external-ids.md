@@ -36,14 +36,14 @@ The claim table has **`notes`** and **`tags_json`** columns; the event payload s
 - **Option A:** Keep a mapping in your system (e.g. `claim_uid` → `fact_check_id`) when you create claims from fact-check verdicts.
 - **Option B:** A small change can expose `notes=` and `tags=` on `propose_claim` so you can store e.g. `notes="fact_check_id: fc-12345"` or `tags=["external:fc-12345"]` at proposal time.
 
-If you need **multiple** external keys per claim, a future schema change could add `metadata_json` to claims; until then, a single note or tag is enough for one external ID once the API exposes it.
+If you need **multiple** external keys per claim, see [To-do](to_do.md) for planned multi-key claim metadata; until then, a single note or tag is enough for one external ID once the API exposes it.
 
 ## Summary
 
 | Chronicle entity | Where to store external IDs |
 |------------------|-----------------------------|
 | **Evidence** | `metadata` at ingest → `metadata_json` in DB and exports. |
-| **Claim** | Use `notes` or `tags` for a single external ref; multi-key claim metadata may be added later. |
+| **Claim** | Use `notes` or `tags` for a single external ref. Multi-key claim metadata is in [To-do](to_do.md) if needed. |
 | **Investigation** | `tags_json` or similar if your version supports it; otherwise keep mapping in your system by `investigation_uid`. |
 
 This lets you say "this Chronicle claim_uid corresponds to that fact-check verdict" or "this evidence_uid corresponds to that C2PA assertion" without changing Chronicle’s core schema today.

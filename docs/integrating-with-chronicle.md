@@ -18,6 +18,33 @@ No RAG framework is required: the [standalone defensibility scorer](eval_contrac
 
 ---
 
+## Happy path by framework
+
+Each integration follows the same pattern: create project/investigation, ingest retrieved docs as evidence, propose the answer as a claim, link support, then read defensibility. Minimal runnable demos are in `scripts/`; use them as templates.
+
+| Framework | Script | Happy path |
+|-----------|--------|------------|
+| **LangChain** | `scripts/langchain_rag_chronicle.py` | Install `chronicle-standard` and `langchain-core` (or `langchain`). Add `ChronicleRagCallbackHandler(project_path=..., investigation_title=...)` to your chain's `callbacks`. On retriever end, docs are ingested as evidence; on chain end, the answer is proposed as a claim and linked to that evidence. Run the script for a minimal example. |
+| **LlamaIndex** | `scripts/llamaindex_rag_chronicle.py` | Install `chronicle-standard` and `llama-index-core` (or `llama-index`). Attach a Chronicle callback to the query engine's callback manager. RETRIEVE events → evidence; SYNTHESIZE end → claim + support links. Run the script for a minimal example. |
+| **Haystack** | `scripts/haystack_rag_chronicle.py` | Install `chronicle-standard` and `haystack-ai`. Add `ChronicleEvidenceWriter` to your pipeline after the retriever/generator; connect documents and (optionally) claim output. Run the script for a minimal example. |
+| **Cross-framework** | `scripts/cross_framework_rag_chronicle.py` | Same flow across frameworks; use when you want one demo that compares or switches. |
+
+Integration modules live in `chronicle/integrations/` (langchain.py, llamaindex.py, haystack.py). Each module docstring describes required packages and usage.
+
+---
+
+## Adding defensibility to an eval harness
+
+To add Chronicle defensibility as a **metric** in a RAG eval framework (e.g. RAGAS, Trulens, LangSmith evals, or a custom harness):
+
+1. **Contract:** One run = one (query, answer, evidence) in → one defensibility metrics object out. See [Eval contract](eval_contract.md) and [eval_contract_schema.json](eval_contract_schema.json).
+2. **Invoke the scorer:** Pipe JSON to `scripts/standalone_defensibility_scorer.py` or call `defensibility_metrics_for_claim(session, claim_uid)` after building the session (ingest → propose claim → link support). The output shape is stable (claim_uid, provenance_quality, corroboration, contradiction_status, optional knowability).
+3. **Adapter:** Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py) as a copy-paste template: read (query, answer, evidence) from your harness (stdin or file), call the scorer, print metrics JSON. Your harness then parses the JSON and records the metric per run.
+
+No Chronicle-specific server is required; the scorer runs in-process. For benchmarks and reporting, see [Eval and benchmarking](eval-and-benchmarking.md) and [Defensibility benchmark](benchmark.md).
+
+---
+
 ## Idempotency for agents and pipelines
 
 When the same scenario (e.g. query id or scenario id) is run multiple times, you can reuse the same investigation by passing an **investigation_key** (or equivalent) so that the backend creates or looks up the investigation by that key. That way "same question, different config" can be compared in one place. Implementation details depend on your API or session wrapper; the event store supports idempotency keys for commands where applicable.

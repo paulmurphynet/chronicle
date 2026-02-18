@@ -5,9 +5,13 @@ from __future__ import annotations
 import csv
 import io
 import zipfile
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
+
+from chronicle.eval_metrics import scorecard_to_metrics_dict
+from chronicle.store.read_model import DefensibilityScorecard
 
 GENERIC_EXPORT_SCHEMA_VERSION = 1
+CLAIM_EVIDENCE_METRICS_SCHEMA_VERSION = 1
 
 
 class ReadModelLike(Protocol):
@@ -23,6 +27,10 @@ class ReadModelLike(Protocol):
     def list_tensions(
         self, investigation_uid: str, *, status: str | None = ..., limit: int = ...
     ) -> list: ...
+    def get_support_for_claim(self, claim_uid: str) -> list: ...
+    def get_challenges_for_claim(self, claim_uid: str) -> list: ...
+    def get_evidence_span(self, span_uid: str) -> Any: ...
+    def get_evidence_item(self, evidence_uid: str) -> Any: ...
 
 
 def _row_to_dict(obj: Any) -> dict[str, Any]:
@@ -52,6 +60,75 @@ def build_generic_export_json(
         "claims": [_row_to_dict(c) for c in claims],
         "evidence": [_row_to_dict(e) for e in evidence],
         "tensions": [_row_to_dict(t) for t in tensions],
+    }
+
+
+DefensibilityGetter = Callable[[str], DefensibilityScorecard | None]
+
+
+def build_claim_evidence_metrics_export(
+    read_model: ReadModelLike,
+    get_defensibility_score: DefensibilityGetter,
+    investigation_uid: str,
+    *,
+    claim_limit: int = 10_000,
+) -> dict[str, Any]:
+    """Build claim–evidence–metrics export for one investigation (stable JSON for fact-checking UIs).
+
+    Returns a single JSON object with schema_version, investigation_uid, and a claims array. Each
+    claim has claim_uid, claim_text, evidence_refs (evidence_uid, span_uid, link_type, uri),
+    support_count, challenge_count, and defensibility (scorecard). Shape is defined in
+    docs/claim-evidence-metrics-export.md.
+    """
+    inv = read_model.get_investigation(investigation_uid)
+    if inv is None:
+        raise ValueError("Investigation not found")
+    inv_uid = getattr(inv, "investigation_uid", investigation_uid)
+    claims = read_model.list_claims_by_type(
+        investigation_uid=investigation_uid, limit=claim_limit
+    )
+    out_claims: list[dict[str, Any]] = []
+    for c in claims:
+        claim_uid = getattr(c, "claim_uid", None)
+        claim_text = getattr(c, "claim_text", "") or ""
+        support_links = read_model.get_support_for_claim(claim_uid)
+        challenge_links = read_model.get_challenges_for_claim(claim_uid)
+        evidence_refs: list[dict[str, Any]] = []
+        for link in support_links + challenge_links:
+            span = read_model.get_evidence_span(getattr(link, "span_uid", ""))
+            evidence_uid = getattr(span, "evidence_uid", None) if span else None
+            uri: str | None = None
+            if evidence_uid:
+                item = read_model.get_evidence_item(evidence_uid)
+                uri = getattr(item, "uri", None) if item else None
+            link_type = (getattr(link, "link_type", "") or "").replace("SUPPORTS", "SUPPORT").replace("CHALLENGES", "CHALLENGE")
+            ref: dict[str, Any] = {
+                "evidence_uid": evidence_uid or "",
+                "link_type": link_type or "SUPPORT",
+            }
+            if getattr(link, "span_uid", None):
+                ref["span_uid"] = link.span_uid
+            if uri is not None:
+                ref["uri"] = uri
+            evidence_refs.append(ref)
+        scorecard = get_defensibility_score(claim_uid)
+        defensibility: dict[str, Any] = (
+            scorecard_to_metrics_dict(claim_uid, scorecard) if scorecard else {}
+        )
+        out_claims.append({
+            "claim_uid": claim_uid,
+            "claim_text": claim_text,
+            "investigation_uid": inv_uid,
+            "evidence_refs": evidence_refs,
+            "support_count": len(support_links),
+            "challenge_count": len(challenge_links),
+            "defensibility": defensibility,
+        })
+    return {
+        "schema_version": CLAIM_EVIDENCE_METRICS_SCHEMA_VERSION,
+        "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/claim-evidence-metrics-export.md",
+        "investigation_uid": inv_uid,
+        "claims": out_claims,
     }
 
 
