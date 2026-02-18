@@ -42,7 +42,11 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 ## Changelog and releases
 
 - **Changelog:** Meaningful user-facing changes (new features, contract changes, breaking changes) should be reflected in [CHANGELOG.md](CHANGELOG.md). Add a new `[X.Y.Z]` section with a short list of changes; link the version to the release tag when the release is cut.
-- **Releases:** Tagged releases (e.g. `v0.1.0`) allow downstream users to pin a version. When cutting a release, update the changelog, tag, and (if applicable) publish to PyPI.
+- **Releases:** Tagged releases (e.g. `v0.1.0`) allow downstream users to pin a version. When cutting a release:
+  1. Update [CHANGELOG.md](CHANGELOG.md) with a new `[X.Y.Z]` section and release date.
+  2. Commit the changelog (and any version bumps), then create the tag: `git tag vX.Y.Z`.
+  3. Push the tag: `git push origin vX.Y.Z`.
+  4. (Optional) Publish to PyPI if the project is set up for it.
 
 ## Code style and linting
 
