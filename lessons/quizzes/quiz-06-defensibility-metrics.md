@@ -18,6 +18,8 @@ Answer these after reading the lesson and the claims/eval_metrics code. Try not 
 
 5. Does defensibility depend on an external API or LLM? (Yes or no, and why.)
 
+6. What is **sources_backing_claim** in the defensibility response, and what optional fields can each source include?
+
 ---
 
 ## Answer key
@@ -31,6 +33,8 @@ Answer these after reading the lesson and the claims/eval_metrics code. Try not 
 4. **scorecard_to_metrics_dict(claim_uid, scorecard)** in **`chronicle/eval_metrics.py`**.
 
 5. **No.** Defensibility is computed entirely from the **read model** (support/challenge counts, sources, tensions, claim status). No external API or LLM is called in get_defensibility_score.
+
+6. **sources_backing_claim** is an optional list of sources that back the claim (when present in the API/export). Each entry can include **source_uid**, **display_name**, **independence_notes**, and **reliability_notes** (user-supplied; we record, we don't verify).
 
 ---
 

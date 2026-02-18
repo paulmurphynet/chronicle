@@ -12,8 +12,11 @@ Short definitions of terms you’ll see in Chronicle docs, lessons, and code. Fo
 | **Eval contract** | Input (query, answer, evidence) and output (defensibility metrics) for the standalone scorer. Lets eval harnesses plug in without depending on implementation details. See [Eval contract](eval_contract.md). |
 | **Event-sourced** | All changes are stored as append-only events (e.g. EvidenceIngested, ClaimProposed, SupportLinked). State is derived by replaying events; history is never overwritten. |
 | **Investigation** | Top-level container for one line of inquiry: one set of claims, evidence, and tensions (e.g. one RAG run or one case). |
-| **Support / challenge** | Link types from an evidence span to a claim. *Support* = this evidence backs the claim; *challenge* = this evidence undermines it. Corroboration and defensibility use these counts. |
-| **Tension** | An explicit record that two claims conflict or weaken each other. Status can be open, acknowledged, or resolved. Tensions are first-class and affect defensibility. |
+| **Support / challenge** | Link types from an evidence span to a claim. *Support* = this evidence backs the claim; *challenge* = this evidence undermines it. Optional **rationale** (warrant) and **defeater_kind** (e.g. rebutting, undercutting) on links; optional defeater_kind on tensions. We record these; we don't verify them. Corroboration and defensibility use the counts. |
+| **Tension** | An explicit record that two claims conflict or weaken each other. Status can be open, acknowledged, or resolved. Optional **defeater_kind**. Tensions are first-class and affect defensibility. |
+| **Source** | A real-world origin for evidence. Optional **independence_notes** and **reliability_notes** (user-supplied; we record, we don't verify). Used for corroboration (e.g. independent_sources_count). |
+| **Epistemic stance** | Optional label on a claim (e.g. working_hypothesis, asserted_established). Structural only; we don't commit to a theory of knowledge. |
+| **Policy rationale** | Optional rationale or citation on a policy profile (why thresholds were chosen). We record; we don't validate. |
 | **Verifier** | Standalone tool (`chronicle-verify`) that checks a .chronicle file: manifest, DB schema, evidence hashes. Does *not* check truth, semantics, or source independence. See [Verifier](verifier.md) and [Verification guarantees](verification-guarantees.md). |
 
 ## Terminology for interop

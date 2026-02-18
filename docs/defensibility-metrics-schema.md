@@ -29,6 +29,8 @@ Eval harnesses can rely on the following fields. All are present in the API resp
 | `contradiction_status` | string | `none` \| `open` \| `acknowledged` \| `resolved`. |
 | `knowability` | object (optional) | When set: `known_as_of` (ISO8601 or null), `knowable_from` (string or null). "When could we first defend this claim?" |
 
+**sources_backing_claim** (optional): when present, list of sources backing the claim, each with `source_uid`, `display_name`, and optional `independence_notes` / `reliability_notes` (user-supplied; we record, we don't verify). Support/challenge links may include optional **rationale** (warrant) and **defeater_kind** (e.g. rebutting, undercutting on challenges); we record, we don't verify.
+
 Additional fields in the full scorecard (temporal_validity, attribution_posture, decomposition_precision, contradiction_handling, evidence_integrity, evidence_trust, risk_signals, weakest_link) are stable but not required for a minimal eval metrics subset.
 
 ---

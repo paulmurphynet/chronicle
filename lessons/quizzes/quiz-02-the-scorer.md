@@ -18,6 +18,8 @@ Answer after reading the lesson and running the scorer at least once.
 
 5. The scorer prints exactly **one** JSON object to stdout. What are the two possible kinds of that object (success vs failure)?
 
+6. Does the default scorer **validate** that each evidence chunk actually supports the claim? What should you do for higher assurance?
+
 ---
 
 ## Answer key
@@ -31,6 +33,8 @@ Answer after reading the lesson and running the scorer at least once.
 4. The temp project gives the scorer an **isolated environment** for one run: ingest evidence, propose the claim, link support, compute defensibility, then discard. No need for a real project path or cleanup; one run = one temp dir.
 
 5. **Success:** a single JSON object with `contract_version: "1.0"` and defensibility metrics (e.g. `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, …). **Failure:** a single JSON object with `contract_version`, at least `error` (e.g. `invalid_input`), and usually `message`.
+
+6. **No.** The default scorer links *every* evidence chunk as support without validating that evidence actually supports the claim. For higher assurance, validate or curate links (e.g. human or NLI) and then record them via the session or API; see the caveat in the eval contract and lesson.
 
 ---
 

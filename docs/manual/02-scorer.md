@@ -20,6 +20,8 @@ echo '{"query": "What was revenue?", "answer": "Revenue was $1.2M.", "evidence":
 - **Input:** `query` (string), `answer` (string), `evidence` (array of strings or objects with `text`/`path`/`url`).
 - **Output:** `contract_version`, `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, and more. See [Eval contract](../eval_contract.md) and [Defensibility metrics schema](../defensibility-metrics-schema.md).
 
+**Important:** The default scorer links *every* evidence chunk as support for the single claim. It does *not* validate that evidence actually supports the claim. For higher assurance (e.g. human-curated or NLI-validated links), record links via the session or API after validation; see the caveat in [Eval contract](../eval_contract.md).
+
 ---
 
 ## CLI flags

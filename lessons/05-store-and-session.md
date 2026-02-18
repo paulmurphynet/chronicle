@@ -26,8 +26,8 @@ Open **`chronicle/store/session.py`**.
 - **create_investigation(title, ...)** — Appends `InvestigationCreated`; returns `(event_id, investigation_uid)`.
 - **ingest_evidence(inv_uid, content_bytes, media_type, ...)** — Writes the blob to the evidence store, appends `EvidenceIngested`; returns `(event_id, evidence_uid)`.
 - **anchor_span(inv_uid, evidence_uid, anchor_type, anchor_value, quote=...)** — Appends `SpanAnchored`; returns `(event_id, span_uid)`.
-- **propose_claim(inv_uid, claim_text, ...)** — Appends `ClaimProposed`; returns `(event_id, claim_uid)`.
-- **link_support(inv_uid, span_uid, claim_uid)** — Appends `SupportLinked`. Same pattern for **link_challenge** and **declare_tension**.
+- **propose_claim(inv_uid, claim_text, ...)** — Appends `ClaimProposed`; returns `(event_id, claim_uid)`. Optional **epistemic_stance** (e.g. working_hypothesis, asserted_established).
+- **link_support(inv_uid, span_uid, claim_uid, rationale=..., strength=...)** — Appends `SupportLinked`. Optional **rationale** (warrant: why this evidence supports this claim). Same pattern for **link_challenge** (optional rationale, **defeater_kind** e.g. rebutting/undercutting) and **declare_tension** (optional **defeater_kind**). **register_source** accepts optional **reliability_notes** (user-supplied; we record, we don't verify).
 - **get_defensibility_score(claim_uid)** — Reads from the read model (via the claims command) and returns a **DefensibilityScorecard**. We’ll see how that’s computed in Lesson 06.
 
 The **scorer** (Lesson 02) does exactly this: create project → open session → create investigation → for each evidence chunk: ingest_evidence, anchor_span → propose_claim (answer) → link_support for each span → get_defensibility_score → serialize to JSON.

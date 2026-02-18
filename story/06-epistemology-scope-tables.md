@@ -1,6 +1,6 @@
 # Epistemology: what we implement and what we don’t
 
-This chapter is the **canonical reference** for Chronicle’s epistemic scope. Two tables spell out: (1) what we implement—and why it fits our purposes—and (2) what we do *not* implement—and why we don’t. They align with [Epistemology scope](../docs/epistemology-scope.md) and with the [thought experiment](../thought_experiments/01-epistemologists-conference-review.md) in which four epistemologists reviewed the project. Some rows in the first table refer to **planned** features (tracked in the [to-do list](../docs/to_do.md)); the rest are already in place.
+This chapter is the **canonical reference** for Chronicle’s epistemic scope. Two tables spell out: (1) what we implement—and why it fits our purposes—and (2) what we do *not* implement—and why we don’t. They align with [Epistemology scope](../docs/epistemology-scope.md) and with the [thought experiment](../thought_experiments/01-epistemologists-conference-review.md) in which four epistemologists reviewed the project. All items in the first table are implemented; the [to-do list](../docs/to_do.md) tracks completed epistemology-optimal items (e.g. defeater_kind, reliability_notes, epistemic_stance, policy_rationale).
 
 ---
 
@@ -19,11 +19,11 @@ Epistemic options and features we implement (or will implement), and the reason 
 | **Defensibility** | Structural, policy-relative scorecard (provenance_quality, corroboration, contradiction_status, weakest_link, etc.). | Single summary for “how well does this claim hold up?” for evals and dashboards; not truth. |
 | **Temporal** | known_as_of; as-of defensibility queries; full event history. | Reproducibility; “defensibility at T”; audit trail. |
 | **Attribution and trail** | Who asserted; optional confidence; reasoning trail (events that built/modified the claim). | Accountability; agent-centred interpretation; audit. |
-| **Link rationale / warrant** | Optional rationale (or warrant) on support/challenge links—first-class and stable (planned). | “Why this evidence supports this claim” for justification-sensitive workflows; as asserted, not verified. |
-| **Defeater type** | Optional rebutting vs undercutting on challenges/tensions (planned). | Richer explanation of why defensibility changed; aligns with formal epistemology; optional. |
-| **Source reliability metadata** | Optional user-supplied reliability/authority on sources (planned). | Distinguish strong vs weak sources in structure; we record, we don’t verify. |
-| **Policy rationale** | Optional rationale/citation for threshold choices (planned). | Evaluators can assess whether the bar is appropriate; applied epistemology. |
-| **Epistemic stance** | Optional stance on claims, e.g. working hypothesis vs asserted (planned). | Domains that need “we believe but don’t claim to know” without a full theory of knowledge. |
+| **Link rationale / warrant** | Optional rationale (or warrant) on support/challenge links—first-class and stable. | “Why this evidence supports this claim” for justification-sensitive workflows; as asserted, not verified. |
+| **Defeater type** | Optional defeater_kind (e.g. rebutting vs undercutting) on challenge links and tensions; we record, we don't verify. | Richer explanation of why defensibility changed; aligns with formal epistemology; optional. |
+| **Source reliability metadata** | Optional reliability_notes on sources (user-supplied); we record, we don't verify. | Distinguish strong vs weak sources in structure; we record, we don’t verify. |
+| **Policy rationale** | Optional policy_rationale on policy profiles; we record, we don't validate. | Evaluators can assess whether the bar is appropriate; applied epistemology. |
+| **Epistemic stance** | Optional epistemic_stance on claims (e.g. working hypothesis vs asserted). | Domains that need “we believe but don’t claim to know” without a full theory of knowledge. |
 | **Verifier and .chronicle** | Standalone verifier (structure, schema, evidence hashes); portable format. | “Show your work” is checkable by anyone; no overclaim (verified = well-formed, not true). |
 | **Explicit limits** | Critical areas; epistemology-scope; verification-guarantees. | Prevents over-trust; defensibility ≠ truth; independence/support “as modeled,” not verified. |
 

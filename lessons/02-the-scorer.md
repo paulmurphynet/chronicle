@@ -21,6 +21,8 @@ High-level flow:
 4. Compute defensibility and serialize it to the contract output shape.  
 5. Print one JSON object to stdout (metrics or error).
 
+**Important:** The default scorer links *every* evidence chunk as **support** for the single claim. It does **not** validate that evidence actually supports the claim. For higher assurance (e.g. human-curated or NLI-validated links), record links via the session or API after validation; see the caveat in [eval contract](../docs/eval_contract.md) and [benchmark](../docs/benchmark.md).
+
 ## Key code: input and validation
 
 Open **`scripts/standalone_defensibility_scorer.py`**.

@@ -51,18 +51,18 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 |--------|------|-------------|
 | POST | `/investigations` | Create investigation. Body: `{ "title", "description?", "investigation_key?" }`. Returns `event_id`, `investigation_uid`. |
 | POST | `/investigations/{id}/evidence` | Ingest evidence. JSON body: `{ "content"? \| "content_base64"?`, `media_type?`, `original_filename?` } **or** multipart form with field `file`. Returns `event_id`, `evidence_uid`, `span_uid`. |
-| POST | `/investigations/{id}/claims` | Propose claim. Body: `{ "text", "initial_type?" }`. Returns `event_id`, `claim_uid`. |
+| POST | `/investigations/{id}/claims` | Propose claim. Body: `{ "text", "initial_type?", "epistemic_stance?" }`. Optional **epistemic_stance** (e.g. working_hypothesis, asserted_established). Returns `event_id`, `claim_uid`. |
 | POST | `/investigations/{id}/links/support` | Link span as support. Body: `{ "span_uid", "claim_uid", "rationale"? }`. Returns `event_id`, `link_uid`. |
-| POST | `/investigations/{id}/links/challenge` | Link span as challenge. Body: `{ "span_uid", "claim_uid", "rationale"? }`. Optional **rationale**: why this evidence supports/challenges this claim (warrant). |
-| POST | `/investigations/{id}/tensions` | Declare tension. Body: `{ "claim_a_uid", "claim_b_uid", "tension_kind?" }`. Returns `event_id`, `tension_uid`. |
+| POST | `/investigations/{id}/links/challenge` | Link span as challenge. Body: `{ "span_uid", "claim_uid", "rationale?", "defeater_kind?" }`. Optional **rationale** (warrant), **defeater_kind** (e.g. rebutting, undercutting). |
+| POST | `/investigations/{id}/tensions` | Declare tension. Body: `{ "claim_a_uid", "claim_b_uid", "tension_kind?", "defeater_kind?" }`. Optional **defeater_kind**. Returns `event_id`, `tension_uid`. |
 
 ### Read
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/investigations` | List investigations. |
-| GET | `/claims/{claim_uid}` | Get claim. |
-| GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output). Query: `use_strength_weighting=false`. |
+| GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output). Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
+| GET | `/claims/{claim_uid}` | Get claim (includes optional **epistemic_stance** when set). |
 | GET | `/claims/{claim_uid}/reasoning-brief` | Reasoning brief (claim, defensibility, support/challenge, tensions, trail). Query: `limit?`. |
 
 ### Export / import

@@ -18,6 +18,8 @@ Answer these after reading the lesson and the store/session code. Try not to pee
 
 5. What does **get_defensibility_score** return? (Type or shape.)
 
+6. What **optional** parameters can you pass when linking support, linking challenge, or declaring a tension? (Hint: warrant, defeater type, source metadata.)
+
 ---
 
 ## Answer key
@@ -31,6 +33,8 @@ Answer these after reading the lesson and the store/session code. Try not to pee
 4. **handle_support_linked** inserts a row into the **evidence_link** table (span_uid, claim_uid, link_type=SUPPORT, etc.).
 
 5. **get_defensibility_score** returns a **DefensibilityScorecard** (or None if claim not found or withdrawn)—a dataclass with provenance_quality, corroboration, contradiction_status, weakest_link, knowability, etc.
+
+6. **link_support**: optional **rationale** (warrant), **strength**. **link_challenge**: optional **rationale**, **defeater_kind** (e.g. rebutting, undercutting). **declare_tension**: optional **defeater_kind**. **register_source**: optional **reliability_notes**. **propose_claim**: optional **epistemic_stance**. We record these; we don't verify them.
 
 ---
 

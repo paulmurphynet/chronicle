@@ -42,9 +42,9 @@ Open **`chronicle/core/payloads.py`**.
 
 - Each event type has a **payload class** (dataclass) that defines the shape of its data. Examples:
   - **EvidenceIngestedPayload** — evidence_uid, content_hash, media_type, uri, optional provenance_type.
-  - **ClaimProposedPayload** — claim_uid, claim_text, optional type, parent_claim_uid, etc.
-  - **SupportLinked** / **ChallengeLinked** — span_uid, claim_uid, link_type, optional strength.
-  - **TensionDeclaredPayload** — claim_a_uid, claim_b_uid, tension_kind, notes.
+  - **ClaimProposedPayload** — claim_uid, claim_text, optional type, parent_claim_uid, optional **epistemic_stance** (e.g. working_hypothesis, asserted_established), etc.
+  - **SupportLinked** / **ChallengeLinked** — span_uid, claim_uid, link_type, optional strength, optional **rationale** (warrant), optional **defeater_kind** (on challenges, e.g. rebutting, undercutting).
+  - **TensionDeclaredPayload** — claim_a_uid, claim_b_uid, tension_kind, notes, optional **defeater_kind**.
 - Payloads have **to_dict** and **from_dict** (or equivalent) so they can be serialized to JSON for storage and deserialized when replaying.
 
 You don’t need to memorize every payload; the point is: **the core package defines what can happen**. The store (next lesson) appends events and runs **projections** that update the read model from these events.

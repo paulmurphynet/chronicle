@@ -12,7 +12,7 @@
 
 ## What defensibility is (recap)
 
-Defensibility is **not** a truth value. It’s a **structural and policy-relative** summary: given the recorded evidence, support/challenge links, tensions, and (optionally) policy rules, how well does the claim hold up? The scorecard includes: **provenance_quality** (strong | medium | weak | challenged), **corroboration** (support_count, challenge_count, independent_sources_count), **contradiction_status** (none | open | acknowledged | resolved), **weakest_link**, and optional **knowability**. See [Critical areas: Defensibility is not truth](../critical_areas/01-defensibility-is-not-truth.md).
+Defensibility is **not** a truth value. It’s a **structural and policy-relative** summary: given the recorded evidence, support/challenge links, tensions, and (optionally) policy rules, how well does the claim hold up? The scorecard includes: **provenance_quality** (strong | medium | weak | challenged), **corroboration** (support_count, challenge_count, independent_sources_count), **contradiction_status** (none | open | acknowledged | resolved), **weakest_link**, and optional **knowability**. When available, **sources_backing_claim** lists sources backing the claim with optional **independence_notes** and **reliability_notes** (user-supplied; we record, we don't verify). Policy profiles may include optional **policy_rationale**. See [Critical areas: Defensibility is not truth](../critical_areas/01-defensibility-is-not-truth.md) and [epistemology scope](../docs/epistemology-scope.md).
 
 ## Where it’s computed
 

@@ -28,7 +28,7 @@ Each item in the export is one claim with evidence references and defensibility.
 | `evidence_refs` | array | List of evidence references (see below). |
 | `support_count` | int | Number of support links (spans → this claim). |
 | `challenge_count` | int | Number of challenge links. |
-| `defensibility` | object | Defensibility scorecard (see [Defensibility metrics schema](defensibility-metrics-schema.md)). At least: `provenance_quality`, `corroboration`, `contradiction_status`. |
+| `defensibility` | object | Defensibility scorecard (see [Defensibility metrics schema](defensibility-metrics-schema.md)). At least: `provenance_quality`, `corroboration`, `contradiction_status`. When present, may include `sources_backing_claim` (sources backing the claim with optional `independence_notes`, `reliability_notes`). |
 
 **evidence_refs** entry:
 
