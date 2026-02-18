@@ -62,6 +62,7 @@ chronicle-verify path/to/file.chronicle
 | [Eval contract schema](docs/eval_contract_schema.json) | JSON Schema for contract input/output (machine-readable validation). |
 | [Defensibility metrics schema](docs/defensibility-metrics-schema.md) | Field semantics for the scorer output. |
 | [Eval and benchmarking](docs/eval-and-benchmarking.md) | How to run pipelines and report Chronicle defensibility. |
+| [HTTP API](docs/api.md) | Optional minimal API: `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run uvicorn. Write/read/export/import. |
 | [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness (standard metric). |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |

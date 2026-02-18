@@ -26,6 +26,7 @@ When the same scenario (e.g. query id or scenario id) is run multiple times, you
 
 | Doc | Description |
 |-----|-------------|
+| [HTTP API](api.md) | Optional minimal API: write/read/export over HTTP when you install `.[api]`. |
 | [Eval contract](eval_contract.md) | Input/output for the scorer; plugging into eval harnesses. |
 | [Eval and benchmarking](eval-and-benchmarking.md) | Running pipelines and extracting metrics. |
 | [Defensibility metrics schema](defensibility-metrics-schema.md) | Scorecard fields and API. |

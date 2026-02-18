@@ -17,7 +17,13 @@ Thanks for your interest in contributing. This file explains how to set up a dev
    ```bash
    pip install -e .
    ```
-   For Neo4j-related work (sync, Aura pipeline):
+   For the optional HTTP API:
+   ```bash
+   pip install -e ".[api]"
+   export CHRONICLE_PROJECT_PATH=/path/to/project
+   uvicorn chronicle.api.app:app --reload
+   ```
+   See [docs/api.md](docs/api.md). For Neo4j-related work (sync, Aura pipeline):
    ```bash
    pip install -e ".[neo4j]"
    ```

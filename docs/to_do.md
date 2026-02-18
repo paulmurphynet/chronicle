@@ -58,7 +58,7 @@ This keeps the repo from accumulating many one-off implementation-plan docs; one
 
 **API and conventions**
 
-- [ ] **Minimal HTTP API** — Add a minimal HTTP API (e.g. FastAPI in-repo or chronicle-server): write (investigation, evidence, claim, link, tension), read (claim, defensibility, reasoning trail), export/import .chronicle. Same response shapes as eval contract and defensibility schema. Enables fact-checking/provenance UIs to call Chronicle over HTTP. *Deferred: larger follow-up; session + scorer + adapters cover most integration needs for now.*
+- [x] **Minimal HTTP API** — Add a minimal HTTP API (e.g. FastAPI in-repo or chronicle-server): write (investigation, evidence, claim, link, tension), read (claim, defensibility, reasoning trail), export/import .chronicle. Same response shapes as eval contract and defensibility schema. Enables fact-checking/provenance UIs to call Chronicle over HTTP. Implemented as optional `[api]` extra: `chronicle.api.app`, see [api.md](api.md).
 - [x] **Terminology / glossary for interop** — Add a short "Terminology" or extend glossary: map Chronicle terms to common ones (claim ≈ statement, support/challenge ≈ evidence_for/evidence_against, tension ≈ contradiction). Help fact-checkers and argumentation tools align.
 - [x] **External IDs** — Document how external IDs (e.g. fact-check ID, C2PA claim ID) can be stored (e.g. in claim or evidence metadata) so "this Chronicle claim = that external claim" is possible; implement if not already present.
 
@@ -71,6 +71,6 @@ This keeps the repo from accumulating many one-off implementation-plan docs; one
 ### When this batch is done
 
 - [x] **Update user docs** — Ensure README, eval_contract, verifier, state-and-plan reflect any script pruning and new docs.
-- [ ] **Clear this list** — Empty "Current steps" once the above are done and user docs are updated (one item remains: minimal HTTP API, deferred).
+- [ ] **Clear this list** — Empty "Current steps" once the above are done and user docs are updated.
 
 *(Mark items with `- [x]` when done. Clear the list when the batch is finished.)*
