@@ -1,6 +1,6 @@
 # What we brought from ChronicleV1 (and what we didn't)
 
-This doc lists what was brought into the RAG/evals Chronicle repo from the old project (ChronicleV1), what was left behind, and why. Goal: **only what we need to be best** — scorer, verifier, defensibility model, and eval story — without pulling in product surface that doesn't serve that focus.
+This doc lists what was brought into the RAG/evals Chronicle repo from the old project (ChronicleV1), what was left behind, and why. Goal: **only what we need for a focused RAG/evals story** — scorer, verifier, defensibility model, and eval story — without pulling in product surface that doesn't serve that focus.
 
 ---
 
@@ -27,7 +27,7 @@ This doc lists what was brought into the RAG/evals Chronicle repo from the old p
 
 | Category | What | Why |
 |----------|------|-----|
-| **API and server** | `chronicle/api/` (app, routers, deps, schemas, static) | Out of scope for "best RAG/evals": no HTTP server, no auth, no web UI. Integrations use session API or scorer stdin/stdout. |
+| **API and server** | `chronicle/api/` (app, routers, deps, schemas, static) | Out of scope for this focus: no HTTP server, no auth, no web UI. Integrations use session API or scorer stdin/stdout. |
 | **Frontend** | `frontend/` (full UI) | Out of scope. Eval users need scorer output and .chronicle verification, not the full app UI. |
 | **Tests** | `tests/` | Not copied to avoid carrying suite that targets API/frontend. A focused test set (scorer, session, verifier) exists in this repo. |
 | **Spec docs** | `docs/spec/` (index, schemas, core-entities, epistemic-tools, etc.) | Large spec surface; not needed to run scorer or verifier. Technical report and defensibility/eval docs are the source of truth here. Some in-repo links still point to spec — we can fix those to point to technical-report or remove. |

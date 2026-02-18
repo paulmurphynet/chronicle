@@ -41,4 +41,4 @@ The first three chapters described the problem, why it exists, and how we’re s
 
 We’re a small effort with a clear goal: make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. Every bit of help—code, docs, testing, or word of mouth—gets us closer. Thank you for reading, and for caring about “show your work.”
 
-**← Previous:** [04 — Where challenges remain](04-where-challenges-remain.md) | **Index:** [Story](README.md)
+**← Previous:** [04 — Where challenges remain](04-where-challenges-remain.md) | **Index:** [Story](README.md) | **End of story**

@@ -12,7 +12,7 @@ Our **mission** is to make defensibility a first-class, verifiable part of how t
 
 ## Vision
 
-Our **vision** is a world where every answer can show its work and anyone can check it. Defensibility becomes a standard metric in RAG and evals; the .chronicle format and verifier make "show your work" something you can prove, not just promise. Adoption means eval frameworks, labs, and tooling use defensibility and the portable format—so the feedback loop (eval → improve → eval) treats evidence-backed answers as a first-class signal.
+Our **vision** is a world where every answer can show its work and anyone can check it. Defensibility becomes a standard metric in RAG and evals; the .chronicle format and verifier make "show your work" something you can verify (the package is well-formed), not just promise. Adoption means eval frameworks, labs, and tooling use defensibility and the portable format—so the feedback loop (eval → improve → eval) treats evidence-backed answers as a first-class signal.
 
 ---
 
@@ -34,7 +34,7 @@ By the end you’ll understand:
 - **Why defensibility matters** — What goes wrong when answers aren’t backed by visible evidence, and what we mean (and don’t mean) by “defensibility.”
 - **Why the problem is here to stay** — The forces (scale, AI/RAG, trust, evals) that made “show your work” both essential and under-served.
 - **How Chronicle addresses it** — Evidence and claims, a defensibility score, a portable .chronicle format, a verifier (with clear [verification guarantees](../docs/verification-guarantees.md)), and how we fit into your ecosystem: one-command RAG path, standalone scorer, POST /score (scorer-as-a-service), optional API and adapters, optional link rationale and Neo4j deduplication, and provenance recording.
-- **What’s hard and what we don’t do** — Honest limits so you don’t over-trust the score or the verifier.
+- **What’s hard and what we don’t do** — Honest limits so you don’t over-trust the score or the verifier. The [critical areas](../critical_areas/README.md) spell these out.
 - **How you can help** — Concrete ways to contribute code, docs, feedback, or simply spread the story.
 
 ---
@@ -42,7 +42,7 @@ By the end you’ll understand:
 ## How to read the story
 
 1. **Read in order.** [01](01-the-problem.md) → [02](02-why-this-problem-exists.md) → [03](03-how-we-are-solving-it.md) → [04](04-where-challenges-remain.md) → [05](05-how-you-can-help.md). The chapters build on each other.
-2. **On GitHub:** Each chapter has **← Previous | Index | Next →** at the bottom so you can move without returning here.
+2. **On GitHub:** Each chapter has **← Previous | Index | Next →** at the bottom (chapter 05 has **End of story** instead of Next) so you can move without returning here.
 3. **Before you rely on scores or verification,** read the [critical areas](../critical_areas/README.md). They spell out what defensibility and “verified” do *not* guarantee, so the system isn’t over-trusted.
 4. **For technical depth,** use the [docs](../docs/README.md) and [lessons](../lessons/README.md). The story stays high-level; contracts, schemas, and code live there.
 

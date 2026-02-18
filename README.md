@@ -37,11 +37,14 @@ chronicle-verify path/to/file.chronicle
 
 (Activate the project venv first: `source .venv/bin/activate`, or run with `./.venv/bin/chronicle-verify` from the repo root.)
 
+**Run the defensibility benchmark** (fixed queries, RAG run, record scores): `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py`. See [Benchmark](docs/benchmark.md).
+
 ## What's in this repo
 
 - **Standalone defensibility scorer** — `scripts/standalone_defensibility_scorer.py`: (query, answer, evidence) in, defensibility JSON out. No API or RAG stack required. Implements the [eval contract](docs/eval_contract.md).
 - **chronicle-verify** — CLI to verify a .chronicle (ZIP) manifest, schema, and evidence hashes. Stdlib only; no Chronicle package needed for verification.
 - **Chronicle package** — Event store, read model, defensibility computation, session API for ingest → claim → link support → get defensibility. Used by the scorer and by integrations.
+- **Optional:** HTTP API (`pip install -e ".[api]"`) and Neo4j sync (`.[neo4j]`) for project-based and graph workflows; see [API](docs/api.md) and [Neo4j](docs/neo4j.md).
 
 The **.chronicle** format is “show your work”: export your investigation and anyone can verify it with `chronicle-verify`. We encourage tooling that consumes .chronicle (dashboards, fact-checking UIs, or other pipelines); see [Consuming .chronicle](docs/consuming-chronicle.md) and [Claim–evidence–metrics export](docs/claim-evidence-metrics-export.md).
 
@@ -89,6 +92,8 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Testing with Ollama](docs/testing-with-ollama.md) | Use local Ollama for real LLM-backed testing (decomposer, contradiction, type inference, etc.). |
 | [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee; runtime invariants and audit. |
 | [Implementer checklist](docs/implementer-checklist.md) | Produce or consume a .chronicle: checklist and pointers. |
+| [Integration quick reference](docs/integration-quick-reference.md) | One page: score one run, verify .chronicle, add to harness, optional API/adapters. |
+| [User manual](docs/manual/README.md) | Short how-to manual (install, scorer, verifier, format, integration, limits). |
 | [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
 | [Human-in-the-loop and attestation](docs/human-in-the-loop-and-attestation.md) | Human-curated data, actor identity (CLI env, API headers), attestation and verification level; curation workflow. |
 | [Onboarding and open-source checklist](docs/ONBOARDING_AND_OPEN_SOURCE.md) | Plan for making the repo ready for colleagues and public release. |

@@ -47,11 +47,16 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 ## Changelog and releases
 
 - **Changelog:** Meaningful user-facing changes (new features, contract changes, breaking changes) should be reflected in [CHANGELOG.md](CHANGELOG.md). Add a new `[X.Y.Z]` section with a short list of changes; link the version to the release tag when the release is cut.
-- **Releases:** Tagged releases (e.g. `v0.1.0`) allow downstream users to pin a version. When cutting a release:
-  1. Update [CHANGELOG.md](CHANGELOG.md) with a new `[X.Y.Z]` section and release date.
-  2. Commit the changelog (and any version bumps), then create the tag: `git tag vX.Y.Z`.
-  3. Push the tag: `git push origin vX.Y.Z`.
-  4. (Optional) Publish to PyPI if the project is set up for it.
+- **Releases:** Tagged releases (e.g. `v0.1.0`) allow downstream users to pin a version.
+
+**Release checklist** (when cutting a release):
+
+1. [ ] Update [CHANGELOG.md](CHANGELOG.md) with a new `[X.Y.Z]` section and release date.
+2. [ ] Bump version in `pyproject.toml` if desired (e.g. `version = "0.1.1"`).
+3. [ ] Commit the changelog and version bump.
+4. [ ] Create the tag: `git tag vX.Y.Z`.
+5. [ ] Push the tag: `git push origin vX.Y.Z`.
+6. [ ] (Optional) Publish to PyPI if the project is set up for it: `pip install build twine && python -m build && twine upload dist/*`.
 
 ## Code style and linting
 
@@ -65,8 +70,8 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 ## Tests
 
 - Tests live under `tests/` (when present). Run with `pytest` from the repo root (e.g. `pytest tests/ -v`). Requires dev deps: `pip install -e ".[dev]"`.
-- Coverage: scorer (valid/invalid input), session (ingest → claim → link → defensibility), verifier (on a .chronicle export). The standalone scorer and verifier can also be used as integration smoke tests (see Development setup above).
-- **CI:** Currently disabled (workflow runs only on manual trigger). See [.github/workflows/ci.yml](.github/workflows/ci.yml) and "Project notes" above.
+- **Coverage:** Scorer, session (ingest → claim → link → defensibility), verifier, identity, attestation, and core store are covered. The same coverage threshold and omit list are used locally and in CI: `fail_under = 50` for the `chronicle` package (see `pyproject.toml` and [docs/coverage-core.md](docs/coverage-core.md)). To enforce locally: `pytest tests/ --cov=chronicle --cov-report=term-missing --cov-fail-under=50`.
+- **CI:** Currently disabled (workflow runs only on manual trigger). When run, CI uses the same `--cov-fail-under=50` and uploads a coverage report artifact. See [.github/workflows/ci.yml](.github/workflows/ci.yml) and "Project notes" above.
 
 ## Documentation
 

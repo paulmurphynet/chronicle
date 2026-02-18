@@ -24,7 +24,7 @@ In many domains—journalism, legal, compliance, research—trust is earned by s
 
 ## Evals that don’t reward defensibility
 
-Evaluation drives behavior. If evals only measure accuracy, speed, or relevance, systems optimize for those. If we want systems to **improve** at being defensible, we need evals that **include** defensibility. Today that’s missing in most pipelines—so the problem persists partly because the feedback loop (eval → improve → eval) doesn’t yet treat defensibility as a first-class signal.
+Evaluation drives behavior. If evals only measure accuracy, speed, or relevance, systems optimize for those. If we want systems to **improve** at being defensible, we need evals that **include** defensibility. Today that’s missing in most pipelines—so the problem persists partly because the feedback loop (eval → improve → eval) doesn’t yet treat defensibility as a first-class signal. Together, scale, AI/RAG, trust, and evals make defensibility both essential and under-served.
 
 ---
 

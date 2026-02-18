@@ -1,6 +1,6 @@
 # Chronicle lessons
 
-Step-by-step annotated lessons that walk through **100% of the Chronicle codebase**. Designed for new and junior engineers: each lesson references real source code in this repo so you can read the code as you go.
+Step-by-step annotated lessons that walk through **every important area of the Chronicle codebase**. Designed for new and junior engineers: each lesson references real source code in this repo so you can read the code as you go.
 
 ## How to use these lessons
 

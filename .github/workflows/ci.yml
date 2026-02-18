@@ -35,4 +35,15 @@ jobs:
         run: ruff format --check chronicle tools
 
       - name: Pytest with coverage (core)
-        run: pytest tests/ -v --cov=chronicle --cov=tools --cov-report=term-missing --cov-fail-under=33
+        run: pytest tests/ -v --cov=chronicle --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=50
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: |
+            htmlcov/
+            coverage.xml
+
+      - name: Check doc links
+        run: python3 scripts/check_doc_links.py .

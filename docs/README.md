@@ -12,8 +12,9 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [**Lessons**](../lessons/README.md) | Step-by-step codebase walkthrough for developers. Numbered 00–12; each lesson has **← Previous \| Index \| Next →** (or End of lessons) at the bottom. Lesson 12 fully covers the .chronicle file format and data schema. |
 | [**Critical areas**](../critical_areas/README.md) | What defensibility and verification do *not* guarantee. Read before relying on scores or "verified." Each doc links back to the index and to the next. |
 | [**Getting started**](getting-started.md) | One page: install, scorer + verifier quick start, next steps. |
+| [**Integration quick reference**](integration-quick-reference.md) | One page: score one run, verify .chronicle, add to harness, optional API/adapters. |
 
-**User manual:** A single user manual (how-to and reference) is planned under `manual/`. Until then, topic-based reference lives in the files listed below and in the main [README Docs section](../README.md#docs).
+**User manual:** A short manual (how-to and reference) lives under [manual/](manual/README.md) with chapter stubs. Topic-based reference also lives in the files listed below and in the main [README Docs section](../README.md#docs).
 
 ---
 
@@ -28,6 +29,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Glossary](glossary.md) | Terms: defensibility, claim, evidence, .chronicle, etc. |
 | [Troubleshooting](troubleshooting.md) | Common issues and fixes. |
 | [To-do](to_do.md) | Implementation to-do list (single source of truth for pending work). |
+| [Project review](PROJECT_REVIEW.md) | Full project review: strengths, weaknesses, and recommended new or improved features. |
 
 ---
 
