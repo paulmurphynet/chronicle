@@ -13,7 +13,7 @@ That’s the problem we’re solving. We call it **defensibility**.
 - **You can’t check the work.** An answer appears without a visible chain from evidence to claim. You’re asked to trust the output, not the process.
 - **Contradictions hide.** Multiple claims or sources might conflict, but there’s no structured way to record that, so it doesn’t show up in any score or report.
 - **Evals focus on other things.** Many evaluation frameworks measure relevance, fluency, or factuality, but not “how well is this answer supported by this evidence?” So systems get tuned to look good on those metrics, not on defensibility.
-- **“Show your work” is a slogan, not a standard.** There’s no common format or verifier that lets anyone—auditors, users, partners—independently check that the work was actually shown and that the story hangs together.
+- **“Show your work” is a slogan, not a standard.** There’s no common format or verifier that lets anyone—auditors, users, partners—independently check that the work was actually shown and that the story hangs together. Without a **portable interchange format** and a **single verifier**, every tool invents its own story; you can’t hand off a “show your work” package and have someone else validate it the same way.
 
 The result: more and more answers, less and less ability to see how they hold up.
 

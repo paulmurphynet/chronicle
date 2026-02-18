@@ -34,11 +34,23 @@ Under the hood, we record **events**—every ingest, every claim, every link—a
 
 ---
 
+## Interoperability at a glance
+
+Chronicle is designed to plug into many workflows without locking you in:
+
+- **One format, one verifier.** The **.chronicle** package (ZIP + manifest + SQLite + evidence) is the interchange format. Anyone can verify it with our verifier—no Chronicle server required. Consumers can [open the package](../docs/consuming-chronicle.md) and read claims, evidence, and links in a standard way.
+- **Scorer with or without a project.** You can run the **standalone scorer** (stdin or CLI flags) for one-off (query, answer, evidence) → defensibility. For HTTP, the optional API exposes **POST /score**: same contract, no project path—ideal for “scorer as a service” or serverless. The rest of the API (investigations, claims, links, export) is project-based and optional.
+- **Same contract everywhere.** The [eval contract](../docs/eval_contract.md) and [defensibility metrics schema](../docs/defensibility-metrics-schema.md) are stable. Whether you call the scorer script, the session, or POST /score, the output shape is the same—so eval harnesses and UIs can swap backends.
+- **Optional depth for evals.** Support and challenge links can carry an optional **rationale** (why this evidence supports or challenges this claim). That helps NLI or entailment-style evals record “warrant” without committing to full argument schemas; see [epistemology scope](../docs/epistemology-scope.md).
+- **Graph and deduplication.** For graph RAG or analytics, you can sync a Chronicle project to **Neo4j/Aura** ([aura-graph-pipeline](../docs/aura-graph-pipeline.md)). Optional **full deduplication** (one EvidenceItem per content hash, one Claim per hash of claim text) keeps the graph compact while preserving lineage via CONTAINS_EVIDENCE and CONTAINS_CLAIM.
+
+---
+
 ## Fitting into your ecosystem
 
 We want Chronicle to work alongside fact-checking tools, provenance systems, and RAG pipelines:
 
-- **Same shapes everywhere.** The defensibility scorecard and eval contract are stable and documented. Whether you use the standalone scorer, the session API, or the optional **HTTP API** ([docs/api.md](../docs/api.md)—install with `.[api]`, set a project path, run uvicorn), you get the same response shapes. That makes it easier for UIs and harnesses to swap one for another.
+- **Same shapes everywhere.** The defensibility scorecard and eval contract are stable and documented. Whether you use the standalone scorer, the session API, **POST /score** (no project), or the full optional **HTTP API** ([docs/api.md](../docs/api.md)—install with `.[api]`, set a project path for project-based endpoints, run uvicorn), you get the same response shapes. That makes it easier for UIs and harnesses to swap one for another.
 - **Adapters and terminology.** We provide example **adapters** (RAG→scorer, fact-checker output→Chronicle, provenance assertions→Chronicle) and a **terminology** table ([glossary](../docs/glossary.md#terminology-for-interop)) so you can map our terms (claim, support, challenge, tension) to yours (statement, evidence for/against, contradiction).
 - **External IDs and provenance.** You can store **external IDs** (e.g. fact-check ID, C2PA claim ID) in evidence metadata and in claim **notes** or **tags** (one per claim) so “this Chronicle claim” lines up with “that external record.” We can **record** source and evidence–source links from provenance assertions (e.g. C2PA/CR); we don’t *verify* those assertions—we persist them so defensibility and reasoning trails can reference your provenance model. See [external IDs](../docs/external-ids.md) and [provenance recording](../docs/provenance-recording.md).
 - **Claim–evidence–metrics and eval harnesses.** For fact-checking UIs and dashboards we provide a **claim–evidence–metrics** export (one claim + evidence refs + defensibility in a stable JSON shape); see [claim-evidence-metrics-export](../docs/claim-evidence-metrics-export.md). Eval frameworks (RAGAS, Trulens, LangSmith) can add defensibility as a custom metric; see [integrating with Chronicle](../docs/integrating-with-chronicle.md).

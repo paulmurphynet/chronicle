@@ -6,7 +6,7 @@ We’ve made progress, but real challenges are still ahead. Being clear about th
 
 ## What we’re not
 
-Chronicle does **not** certify truth, verify that sources are independent in the real world, or model deep epistemology (e.g. warrants, belief revision). The defensibility score and the verifier have precise, limited meanings. **Before you rely on scores or “verified” in production or research,** read the [critical areas](../critical_areas/README.md). They spell out what defensibility and verification do and don’t guarantee—so the system isn’t over-trusted. That’s the “handle with care” layer that keeps our story honest.
+Chronicle does **not** certify truth, verify that sources are independent in the real world, or model deep epistemology (e.g. full Toulmin warrants, belief revision). We do support an optional **rationale** on each support/challenge link (why this evidence supports or challenges this claim)—enough for NLI-style evals—but we don’t model full argument schemas or justification theory. The defensibility score and the verifier have precise, limited meanings. **Before you rely on scores or “verified” in production or research,** read the [critical areas](../critical_areas/README.md). They spell out what defensibility and verification do and don’t guarantee—so the system isn’t over-trusted. That’s the “handle with care” layer that keeps our story honest. For a crisp list of what we cover and what we don’t, see [epistemology scope](../docs/epistemology-scope.md).
 
 ---
 
@@ -24,7 +24,7 @@ The **core is in place** and maintained as first-class: the standalone scorer, t
 
 ## Scope and limits
 
-We’re explicit about what we **don’t** do (see [critical areas](../critical_areas/README.md) and [epistemology scope](../docs/epistemology-scope.md)). The remaining challenge is **communication**: making sure users and researchers see those limits up front, so they know what defensibility does and doesn’t guarantee and we don’t overclaim.
+We’re explicit about what we **don’t** do (see [critical areas](../critical_areas/README.md) and [epistemology scope](../docs/epistemology-scope.md)). For example: the Neo4j sync can run with or without **deduplication** (one node per content); when you enable it, evidence and claims are merged by content so the graph stays compact—but that’s an optional choice, not a guarantee we impose everywhere. The remaining challenge is **communication**: making sure users and researchers see those limits up front, so they know what defensibility does and doesn’t guarantee and we don’t overclaim.
 
 ---
 
