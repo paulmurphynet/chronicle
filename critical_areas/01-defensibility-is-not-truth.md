@@ -8,7 +8,7 @@
 
 Chronicle computes **defensibility**: how well a claim holds up *given the evidence and links that were recorded* and *given the policy rules you use* (e.g. how many supports, how many independent sources). We aggregate that into a label: `strong`, `medium`, `weak`, or `challenged`.
 
-We **never** assert that a claim is true. We don’t have access to the world; we only have the events and the read model. So:
+We **never** assert that a claim is true. We don’t have access to the world; we only have the events and the read model. The rules that map counts to labels are policy-driven (see [05 — Policy and thresholds](05-policy-and-thresholds.md)). So:
 
 - **Strong** means: given what’s in the system (supports, sources, tensions), the structural and policy conditions for “strong” are met. It does **not** mean “this claim is factually correct.”
 - **Weak** or **challenged** means: structurally, support is lacking or there are open challenges/tensions. It does **not** mean “this claim is false.”
@@ -29,4 +29,5 @@ Defensibility is **structural and policy-relative**. Truth is a different questi
 - **Defensibility = structure + policy, not truth.** Use the score to see how well the *recorded* evidence and *recorded* links support the claim—not to decide whether the claim is correct in the world.
 - **Document this** when you present scores (e.g. in dashboards or reports): e.g. “Defensibility reflects support structure and policy; it does not certify factual correctness.”
 ---
+
 **← [Critical areas index](README.md)** | **Next →:** [02 — Source independence is not verified](02-source-independence-is-not-verified.md)

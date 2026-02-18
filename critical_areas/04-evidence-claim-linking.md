@@ -37,4 +37,5 @@ Over-relying on link counts as if they reflected validated support/entailment is
 - In the scorer path, “all evidence chunks linked as support” is a **default for evals**, not a semantic guarantee. For higher assurance, evidence–claim relationships would need to be curated or validated (e.g. by humans or by a separate NLI step) and then recorded; Chronicle would still only record the links, not perform that validation itself.
 - When explaining defensibility, clarify: “Support and challenge are recorded relationships; we do not verify that the evidence actually supports or contradicts the claim.”
 ---
+
 **← [Critical areas index](README.md)** | **Next →:** [05 — Policy and thresholds](05-policy-and-thresholds.md)

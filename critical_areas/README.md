@@ -4,7 +4,20 @@ This folder documents the **areas of Chronicle that most affect epistemological 
 
 Chronicle is built to help people see how well a claim is supported by evidence—not to certify truth, verify real-world facts, or guarantee that “support” means logical entailment. These documents explain **what the system does and does not do** in the places where misunderstanding would be most dangerous. Each document combines **narrative** (why this matters, what the risk is) with **technical** pointers (where in the code this shows up) so that both decision-makers and engineers can align on the boundaries.
 
-**On GitHub:** Use the table below. Each document has **← Critical areas index** and **Next →** at the bottom so you can read in order or jump back to this index.
+**On GitHub:** Use the table below. Each document has **← Critical areas index** and **Next →** (or **← Previous** on the last) at the bottom so you can read in order or jump back to this index.
+
+---
+
+## At a glance
+
+| # | Risk | Don’t assume … |
+|---|------|----------------|
+| 01 | Truth | … that a strong score means the claim is true. |
+| 02 | Independence | … that “N independent sources” means N actually independent sources in reality. |
+| 03 | Verifier | … that “verified” means content is correct or trustworthy. |
+| 04 | Support links | … that a support link means we validated that evidence actually supports the claim. |
+| 05 | Policy | … that thresholds are domain-validated or scientifically grounded. |
+| 06 | Actor identity | … that actor_id or verification_level means we verified who acted. |
 
 ---
 
@@ -25,13 +38,15 @@ Chronicle is built to help people see how well a claim is supported by evidence�
 | [03 — What the verifier does and does not check](03-what-the-verifier-checks.md) | Assuming “verified” means content is correct or trustworthy. | Verified = structural integrity, schema, hashes; not semantics, truth, or independence. |
 | [04 — Evidence–claim linking: how it works and its limits](04-evidence-claim-linking.md) | Assuming “support” implies entailment or that we validated the link. | We record that a link exists; we do not model *why* or verify that evidence actually supports the claim. |
 | [05 — Policy and thresholds](05-policy-and-thresholds.md) | Treating policy thresholds as domain-validated or scientifically grounded. | Policy drives scores; thresholds are configurable and not empirically validated per domain. |
+| [06 — Actor identity is not verified](06-actor-identity-is-not-verified.md) | Assuming actor_id or verification_level means Chronicle verified who acted. | We record who the writer says did it; identity and credentials are not verified by us. |
 
 ---
 
 ## How to use these documents
 
-- **Before relying on scores or verification:** Read at least 01, 02, and 03. They cover the three most common over-trust risks (truth, independence, verifier scope).
+- **Before relying on scores or verification:** Read at least 01, 02, and 03. They cover the most common over-trust risks (truth, independence, verifier scope).
 - **Before designing evals or integrations:** Read 04 and 05 so you know how linking and policy affect the numbers.
+- **Before audit or compliance use:** Read 06 so you understand that actor identity and verification_level are as asserted by your deployment, not verified by Chronicle.
 - **When documenting or presenting Chronicle:** Point stakeholders and users to this folder so “defensibility” and “verified” are understood within these boundaries.
 
 ---
@@ -39,5 +54,6 @@ Chronicle is built to help people see how well a claim is supported by evidence�
 ## Relationship to other docs
 
 - **[Epistemology scope](../docs/epistemology-scope.md)** — Full list of what we cover and what we don’t; critical_areas zooms in on the **highest-risk** boundaries and ties them to code.
+- **[Verification guarantees](../docs/verification-guarantees.md)** — What “verified” guarantees (structure, hashes) and what it does not (truth, independence, actor identity, event semantics); critical_areas 03 and 06 spell out the risks.
 - **[Technical report](../docs/technical-report.md)** — Defensibility definition and schema; critical_areas explains **limits** of that definition.
 - **[Story](../story/README.md)** — The Chronicle story (mission, vision, narrative); critical_areas is the “handle with care” layer that keeps that story honest.

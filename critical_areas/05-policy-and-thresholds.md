@@ -19,8 +19,8 @@ Over-relying on the score as if it were backed by domain-validated or scientific
 
 ## Technical
 
-- **Where thresholds appear:** `chronicle/store/commands/claims.py`, `get_defensibility_score()`. The provenance_quality logic uses fixed conditions: e.g. support_count ≥ 2 and independent_sources_count ≥ 2 for “strong.” Policy can influence the score via `policy_profile` (e.g. evidence_trust, risk_signals); the core strong/medium/weak/challenged logic is in this file.
-- **Policy and compatibility:** `chronicle/core/policy.py` and `chronicle/core/policy_compat.py` define and apply policy; the read model and commands can take an optional policy profile. Thresholds and rules are defined in policy structures, not by external validation.
+- **Where thresholds appear:** `chronicle/store/commands/claims.py`, `get_defensibility_score()`. The provenance_quality logic uses fixed conditions: e.g. support_count ≥ 2 and independent_sources_count ≥ 2 for “strong.” Policy can influence the score via `policy_profile` (e.g. evidence_trust, risk_signals); the core strong/medium/weak/challenged logic is in this file. Default thresholds are in code, not in a user-editable config file.
+- **Policy and compatibility:** `chronicle/core/policy.py` and `chronicle/core/policy_compat.py` define and apply policy. Project-level policy can be loaded from `policy.json` (see `POLICY_FILENAME`); shareable profiles live under `policy_profiles/`. The read model and commands take an optional policy profile. Thresholds and rules are defined in these policy structures (or hard-coded in claims.py for the default logic), not by external validation.
 - **Docs:** `docs/epistemology-scope.md` states that defensibility is “structural and policy-driven (counts, thresholds, open tensions)” and that we have “no commitment to foundationalism, coherentism, or reliabilism.”
 
 ---
@@ -31,6 +31,6 @@ Over-relying on the score as if it were backed by domain-validated or scientific
 - When documenting or deploying a policy, state clearly that it reflects your (or your org’s) choices and that Chronicle does not certify that it meets any external standard.
 - For domain-specific assurance, policy would need to be validated against domain requirements outside Chronicle; Chronicle only applies whatever policy is configured.
 
-
 ---
-**← [Critical areas index](README.md)**
+
+**← [Critical areas index](README.md)** | **Next →:** [06 — Actor identity is not verified](06-actor-identity-is-not-verified.md)
