@@ -2,7 +2,9 @@
 
 This directory is the home for the **Chronicle Reference UI**: the official human-in-the-loop frontend that talks only to the Chronicle HTTP API. We keep it in the **same repo** as the core so that docs and API/UI changes stay in sync and one PR can touch both when needed.
 
-**Current state:** This folder holds static assets used by the project (e.g. `public/sample.chronicle` for demos and sample loading). The full Reference UI app (e.g. React/Vite) will be added here when we implement it.
+**Current state:** Full first version: **Home** (Try sample), **Investigations** list and detail (overview, tier + tier history, evidence, claims, links, defensibility, tensions, tension suggestions with confirm/dismiss, export .chronicle and submission package), **Learn** (step-by-step guides per vertical from `public/guides.json`). Static assets (e.g. `public/sample.chronicle`) live here for demos.
+
+**Run the UI:** From this directory: `npm install` then `npm run dev`. Open http://localhost:5173. Configure the API base URL via env `VITE_API_BASE_URL` (default: use proxy `/api` → http://127.0.0.1:8000 when running dev).
 
 **Plan:** See [Reference UI plan](../docs/reference-ui-plan.md) for:
 

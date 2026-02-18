@@ -34,6 +34,14 @@ Every event stores **actor_id** and **actor_type** (`human` | `tool` | `system`)
 
 The **identity module** (`chronicle.core.identity`) can bind the acting identity to a request (or CLI run) and return a **verification level**: e.g. `none`, `claimed`, `account`, `verified_credential`, `decentralized`, `zk_attested`. When the API or CLI uses this, we can store **verification_level** (and optionally an attestation ref) so that "attested with verified credential" is queryable. See [Persisting verification level](#persisting-verification-level) below.
 
+### Propose–Confirm and progressive disclosure
+
+The Reference UI and API are designed so the **system (or optional AI) proposes** and the **user confirms or dismisses**. Examples: tension suggestions (list → confirm by declaring the tension, or dismiss), link suggestions, type/scope suggestions. The user’s job is “is this right?”—accept or dismiss with optional rationale. **Progressive disclosure** keeps the first tier (Spark) minimal (e.g. required fields only); structure (type, scope, tensions) can be added at Forge/Vault or at publish/checkpoint. See [Reference UI plan](reference-ui-plan.md) for friction tiers and Propose–Confirm in the UI.
+
+### Dismissal as data (human-over-machine in the audit trail)
+
+When a human **dismisses** a suggestion (e.g. tension suggestion, link suggestion), that decision is recorded in the ledger: **SuggestionDismissed** or **TensionSuggestionDismissed** with optional rationale. So the audit trail shows “machine suggested X; human dismissed it (reason: …).” That supports accountability and epistemology: human-over-machine is explicit and queryable. The API exposes tension suggestions (list, confirm via `POST /tensions`, dismiss via `POST .../tension-suggestions/{id}/dismiss`). See [API](api.md) for endpoints.
+
 ### Human decision events
 
 **record_human_confirm** and **record_human_override** record explicit human decisions (e.g. "publish despite weak defensibility") with a **required rationale** and the acting **actor_id** / **actor_type**. Use these when a human formally signs off or overrides a policy warning.

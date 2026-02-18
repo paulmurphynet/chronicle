@@ -32,6 +32,11 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [To-do](to_do.md) | Implementation to-do list (single source of truth for pending work). |
 | [Project review](PROJECT_REVIEW.md) | Full project review: strengths, weaknesses, and recommended new or improved features. |
 | [Reference UI plan](reference-ui-plan.md) | Same-repo strategy for the human-in-the-loop frontend; what to bring from V1 (tiers, Propose–Confirm, Reading-lite). |
+| [Quickstart](quickstart.md) | First investigation in ~15 min (API or CLI). |
+| [Zero to submission](zero-to-submission.md) | One path to a verifiable submission package in ~30 min. |
+| [Reasoning brief](reasoning-brief.md) | Primary shareable artifact per claim; when to use vs .chronicle. |
+| [When to use Chronicle](when-to-use-chronicle.md) | Scope vs data lineage / ML provenance. |
+| [Policy profiles](policy-profiles/README.md) | Example JSON profiles (journalism, legal, compliance) for verticals. |
 | [North star](north-star.md) | Ultimate potential: shared infrastructure, one model napkin→courtroom, ecosystem; what stays in scope and what doesn't. |
 
 ---

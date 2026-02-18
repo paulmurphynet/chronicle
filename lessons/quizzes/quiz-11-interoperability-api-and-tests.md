@@ -26,6 +26,8 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 9. Where is the **minimal curation UI** served when the API is running? What does it let you do?
 
+10. What is the **Reference UI** and where does it live? What does **Try sample** do?
+
 ---
 
 ## Answer key
@@ -47,6 +49,8 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 8. The API resolves the actor from an **Identity Provider (IdP)** when configured, or from request **headers**: **X-Actor-Id** and **X-Actor-Type**. Clients can send those headers so the ledger records them as the actor. Default is `actor_id=default`, `actor_type=human`. See docs/api.md and chronicle/core/identity.py.
 
 9. **/static/curation.html** (e.g. http://127.0.0.1:8000/static/curation.html). It lets you set your Actor ID, create investigations, ingest evidence (paste text), propose claims, and link support—all writes are attributed to you via X-Actor-Id. See docs/human-in-the-loop-and-attestation.md.
+
+10. The **Reference UI** is the official human-in-the-loop frontend that talks only to the Chronicle HTTP API; it lives in **frontend/** in this repo (React + Vite + TypeScript). **Try sample** creates a minimal investigation (one evidence, one claim, one support link) via the API and opens it so you can see defensibility and export. See frontend/README.md and docs/reference-ui-plan.md.
 
 ---
 

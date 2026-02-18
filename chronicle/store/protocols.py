@@ -110,6 +110,10 @@ class ReadModel(Protocol):
         """Return evidence span by uid or None."""
         ...
 
+    def list_spans_for_evidence(self, evidence_uid: str, limit: int = 500) -> list[EvidenceSpan]:
+        """Return spans for an evidence item (for linking in UI)."""
+        ...
+
     def get_evidence_link(self, link_uid: str) -> EvidenceLink | None:
         """Return evidence link by uid or None (includes retracted). Phase 3."""
         ...

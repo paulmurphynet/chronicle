@@ -20,9 +20,9 @@ This doc captures the plan for a **Chronicle Reference UI**: a human-in-the-loop
 | **Friction tiers** (Spark → Forge → Vault) | Yes | Backend already has workspace gating. UI shows tier, tier history, and what's blocked; user advances tier when ready. |
 | **Propose–Confirm** | Yes | System (or optional AI) proposes links, tensions, types; user accepts or dismisses. Generalize as "suggestions" from API so the UI stays API-only. |
 | **Progressive disclosure** | Yes | Spark = minimal required fields; structure (type, scope, tensions) at Forge/Vault or at publish/checkpoint. |
-| **Reading surface** | Yes, simplified | Evidence list → open/paste content → create span (select or whole-doc) → "Support claim X" / "Challenge claim Y" from lists. No raw UIDs in main flow. |
-| **Writing surface** | Optional / later | Markdown + optional claim extraction; can be a later module. |
-| **Full V1 surface** | Subset first | First version: Investigations, Evidence & claims & links (Reading-lite), Defensibility, Tensions, Export/Verify. Publication, Policy, Graph can be added later or left to vertical UIs. |
+| **Reading surface** | Yes, simplified | Evidence list → open/paste content → create span (select or whole-doc) → "Support claim X" / "Challenge claim Y" from lists. No raw UIDs in main flow. **In scope and implemented:** evidence content, select text → create span + link. |
+| **Writing surface** | Yes | Markdown + add as evidence, propose claim (whole or from selection). **In scope and implemented.** |
+| **Full V1 surface** | First version done | Investigations, Evidence & claims & links (Reading), Defensibility, Tensions, Export/Verify. **Publication, Policy, Graph in scope and implemented:** Publication tab (readiness + submission package), Policy tab (profiles + docs link), Graph tab (nodes/edges visualization). |
 
 **Improvements over V1:** Reference UI is an **API-only client** (no private backend coupling). Suggestions can be an explicit part of the API contract. Tier and policy behavior are documented in the API so the UI can reflect "blocked" / "allowed" without guessing.
 
@@ -67,7 +67,7 @@ A full scan of ChronicleV1 compared to this repo identified the following. All a
 
 | Item | V1 had | We have | Action |
 |------|--------|---------|--------|
-| **Example policy profiles** | `docs/spec/profiles/*.json` (journalism, legal, compliance, etc.). | Policy in core; no example shareable JSON profiles in repo. | Add **example policy profiles** (e.g. one per vertical) as JSON for reference and for vertical-specific Reference UI or vendors. |
+| **Example policy profiles** | `docs/spec/profiles/*.json` (journalism, legal, compliance, etc.). | Policy in core; example profiles added. | **Done:** [docs/policy-profiles/](policy-profiles/README.md) — journalism, legal, compliance JSON + README for reference and vertical UIs. |
 
 ### Already aligned (no change)
 

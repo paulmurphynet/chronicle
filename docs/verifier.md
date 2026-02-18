@@ -31,9 +31,9 @@ The **standalone verifier** validates a `.chronicle` export file (ZIP) so that r
 
 ### If you receive a submission package (ZIP)
 
-A **submission package** is a ZIP that contains `investigation.chronicle`, a `reasoning_briefs/` folder (HTML per claim), `citations.bib`, `citations.json`, and optionally `chain-of-custody.html`. It is produced from the Publication page ("Export submission package") or via `GET /investigations/{id}/submission-package`.
+A **submission package** is a ZIP that contains `{investigation_uid}.chronicle`, a `reasoning_briefs/` folder (one HTML file per claim), and `manifest.json`. It is produced from the Reference UI ("Export submission package") or via the API: `POST /investigations/{id}/submission-package`.
 
-**What to do:** Extract the ZIP. Then (1) **verify** the file `investigation.chronicle` as above (CLI or web verifier). (2) **Read** the reasoning briefs by opening the HTML files in `reasoning_briefs/` in your browser. (3) Use `citations.bib` or `citations.json` in your editing or fact-check workflow as needed.
+**What to do:** Extract the ZIP. Then (1) **verify** the `.chronicle` file (CLI or web verifier). (2) **Read** the reasoning briefs by opening the HTML files in `reasoning_briefs/` in your browser. (3) Use `manifest.json` to see the list of claims and investigation metadata.
 
 ---
 

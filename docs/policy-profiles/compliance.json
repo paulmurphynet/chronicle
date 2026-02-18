@@ -1,0 +1,57 @@
+{
+  "format_version": 1,
+  "profile_id": "policy_compliance",
+  "display_name": "Compliance / Audit",
+  "description": "Evidence admissibility and exception workflow; checkpoint requires all tensions addressed",
+  "policy_rationale": "Audit trail and compliance: document evidence types, address tensions, optional exception workflow.",
+  "mes_rules": [
+    {
+      "target_claim_type": "SEF",
+      "min_independent_sources": 1,
+      "required_evidence_types": [],
+      "preferred_evidence_types": ["official_record", "primary_document"],
+      "disallowed_evidence_types": [],
+      "min_confidence": 0.6,
+      "notes": "At least one source; prefer official or primary evidence for audit"
+    }
+  ],
+  "evidence_admissibility": {
+    "admissible_types": [
+      "primary_document",
+      "official_record",
+      "witness_statement",
+      "expert_analysis",
+      "physical_evidence"
+    ],
+    "inadmissible_for_sef": [],
+    "no_sef_from_ai_only": false,
+    "notes": "Broad admissibility; provenance and assessments used for audit"
+  },
+  "tension_rules": {
+    "blocks_vault_publication": ["OPEN", "DISPUTED"],
+    "blocks_forge_export": [],
+    "allows_publication": ["RESOLVED", "ACK", "SUPERSEDED", "DEFERRED"],
+    "requires_justification": ["INTRACTABLE", "DEFERRED", "ESCALATED"],
+    "notes": "Tensions must be addressed; DEFERRED allowed with justification"
+  },
+  "checkpoint_rules": {
+    "requires_all_claims_typed": true,
+    "requires_all_tensions_addressed": true,
+    "requires_tension_resolution_rationale": false,
+    "requires_at_least_one_sef": false,
+    "requires_chain_of_custody": false,
+    "warn_if_one_sided": true,
+    "block_checkpoint_if_one_sided": false,
+    "notes": "All tensions addressed; one-sided claims warned"
+  },
+  "tier_overrides": {
+    "spark": { "allow_untyped_claims": true, "allow_unanchored_evidence": true },
+    "forge": { "allow_untyped_claims": false, "allow_unanchored_evidence": false },
+    "vault": { "allow_untyped_claims": false, "allow_unanchored_evidence": false }
+  },
+  "exception_workflow": true,
+  "vocabulary": {
+    "defensibility": "Audit readiness",
+    "claim": "Assertion"
+  }
+}

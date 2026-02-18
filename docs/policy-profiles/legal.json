@@ -1,0 +1,58 @@
+{
+  "format_version": 1,
+  "profile_id": "policy_legal",
+  "display_name": "Legal / Briefs",
+  "description": "Stricter MES and admissibility; chain-of-custody and tension resolution for checkpoints",
+  "policy_rationale": "Briefs and discovery workflows: citeable evidence, chain of custody, resolved tensions before checkpoint.",
+  "mes_rules": [
+    {
+      "target_claim_type": "SEF",
+      "min_independent_sources": 2,
+      "required_evidence_types": ["primary_document", "official_record"],
+      "preferred_evidence_types": ["witness_statement", "expert_analysis"],
+      "disallowed_evidence_types": ["anonymous_tip_alone", "social_media_unverified"],
+      "min_confidence": 0.8,
+      "min_sources_with_independence_notes": 1,
+      "notes": "Legal standard: two independent sources; at least one with independence noted"
+    }
+  ],
+  "evidence_admissibility": {
+    "admissible_types": [
+      "primary_document",
+      "official_record",
+      "witness_statement",
+      "expert_analysis",
+      "physical_evidence"
+    ],
+    "inadmissible_for_sef": [
+      "anonymous_tip_alone",
+      "social_media_unverified",
+      "narrator_testimony_alone"
+    ],
+    "no_sef_from_ai_only": true,
+    "notes": "AI-only evidence cannot alone support SEF; chain of custody required where applicable"
+  },
+  "tension_rules": {
+    "blocks_vault_publication": ["OPEN", "DISPUTED"],
+    "blocks_forge_export": ["OPEN"],
+    "allows_publication": ["RESOLVED", "ACK", "SUPERSEDED"],
+    "requires_justification": ["INTRACTABLE", "DEFERRED", "ESCALATED"],
+    "notes": "All tensions must be resolved or acknowledged with rationale before checkpoint"
+  },
+  "checkpoint_rules": {
+    "requires_all_claims_typed": true,
+    "requires_all_tensions_addressed": true,
+    "requires_tension_resolution_rationale": true,
+    "requires_at_least_one_sef": false,
+    "requires_chain_of_custody": true,
+    "warn_if_one_sided": true,
+    "block_checkpoint_if_one_sided": false,
+    "notes": "Chain of custody and tension rationales required for legal checkpoint"
+  },
+  "tier_overrides": {
+    "spark": { "allow_untyped_claims": true, "allow_unanchored_evidence": true },
+    "forge": { "allow_untyped_claims": false, "allow_unanchored_evidence": false, "require_source_registration": true },
+    "vault": { "allow_untyped_claims": false, "allow_unanchored_evidence": false, "require_source_registration": true, "require_chain_of_custody_report": true }
+  },
+  "exception_workflow": true
+}

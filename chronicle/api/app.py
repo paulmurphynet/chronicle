@@ -11,9 +11,13 @@ Run: uvicorn chronicle.api.app:app --reload
 from __future__ import annotations
 
 import base64
+import io
+import json
 import os
 import tempfile
+import zipfile
 from dataclasses import asdict
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -22,8 +26,10 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from chronicle.core.errors import ChronicleUserError
 from chronicle.core.identity import get_effective_actor_from_request
 from chronicle.scorer_contract import run_scorer_contract
+from chronicle.store.commands.reasoning_brief import reasoning_brief_to_html
 from chronicle.store.project import create_project, project_exists
 from chronicle.store.session import ChronicleSession
 
@@ -80,6 +86,11 @@ class DeclareTensionBody(BaseModel):
     claim_b_uid: str
     tension_kind: str = "contradiction"
     defeater_kind: str | None = None  # Optional: rebutting | undercutting
+
+
+class SetTierBody(BaseModel):
+    tier: str  # spark | forge | vault
+    reason: str | None = None
 
 
 class ScoreBody(BaseModel):
@@ -167,6 +178,330 @@ def list_investigations() -> dict[str, Any]:
         }
 
 
+@app.get("/investigations/{investigation_uid}")
+def get_investigation(investigation_uid: str) -> dict[str, Any]:
+    """Get a single investigation by uid. 404 if not found."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        inv = session.read_model.get_investigation(investigation_uid)
+        if inv is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        return {
+            "investigation_uid": inv.investigation_uid,
+            "title": inv.title,
+            "description": inv.description,
+            "is_archived": bool(inv.is_archived),
+            "current_tier": inv.current_tier,
+            "tier_changed_at": getattr(inv, "tier_changed_at", None),
+            "created_at": inv.created_at,
+            "updated_at": getattr(inv, "updated_at", None),
+        }
+
+
+@app.post("/investigations/{investigation_uid}/tier")
+def set_investigation_tier(
+    request: Request, investigation_uid: str, body: SetTierBody
+) -> dict[str, Any]:
+    """Set investigation tier (spark → forge → vault). Returns event_id. 400 if transition not allowed."""
+    actor_id, actor_type, verification_level = _get_actor(request)
+    path = _get_project_path()
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                raise HTTPException(status_code=404, detail="Investigation not found")
+            event_id = session.set_tier(
+                investigation_uid,
+                body.tier.strip().lower(),
+                reason=body.reason,
+                actor_id=actor_id,
+                actor_type=actor_type,
+                verification_level=verification_level,
+            )
+            return {"event_id": event_id}
+    except ChronicleUserError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.get("/investigations/{investigation_uid}/tier-history")
+def get_tier_history(
+    investigation_uid: str,
+    limit: int = 100,
+) -> dict[str, Any]:
+    """List tier transitions for an investigation, newest first."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        entries = session.read_model.list_tier_history(investigation_uid, limit=limit)
+        return {
+            "tier_history": [
+                {
+                    "from_tier": e.from_tier,
+                    "to_tier": e.to_tier,
+                    "reason": e.reason,
+                    "occurred_at": e.occurred_at,
+                    "actor_id": e.actor_id,
+                    "event_id": e.event_id,
+                }
+                for e in entries
+            ]
+        }
+
+
+@app.get("/investigations/{investigation_uid}/tension-suggestions")
+def list_tension_suggestions(
+    investigation_uid: str,
+    status: str | None = "pending",  # pending | confirmed | dismissed | None for all
+    limit: int = 500,
+) -> dict[str, Any]:
+    """List tension suggestions for an investigation. Default status=pending for Propose–Confirm UI."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        suggestions = session.read_model.list_tension_suggestions(
+            investigation_uid, status=status, limit=limit
+        )
+        return {
+            "tension_suggestions": [
+                {
+                    "suggestion_uid": s.suggestion_uid,
+                    "investigation_uid": s.investigation_uid,
+                    "claim_a_uid": s.claim_a_uid,
+                    "claim_b_uid": s.claim_b_uid,
+                    "suggested_tension_kind": s.suggested_tension_kind,
+                    "confidence": s.confidence,
+                    "rationale": s.rationale,
+                    "status": s.status,
+                    "tool_module_id": s.tool_module_id,
+                    "created_at": s.created_at,
+                    "source_event_id": s.source_event_id,
+                    "updated_at": s.updated_at,
+                    "confirmed_tension_uid": s.confirmed_tension_uid,
+                    "dismissed_at": s.dismissed_at,
+                }
+                for s in suggestions
+            ]
+        }
+
+
+@app.post("/investigations/{investigation_uid}/tension-suggestions/{suggestion_uid}/dismiss")
+def dismiss_tension_suggestion(
+    request: Request, investigation_uid: str, suggestion_uid: str
+) -> dict[str, Any]:
+    """Dismiss a tension suggestion. Returns event_id. 400 if suggestion not pending."""
+    actor_id, actor_type, _ = _get_actor(request)
+    path = _get_project_path()
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                raise HTTPException(status_code=404, detail="Investigation not found")
+            event_id = session.dismiss_tension_suggestion(
+                suggestion_uid,
+                actor_id=actor_id,
+                actor_type=actor_type,
+            )
+            return {"event_id": event_id}
+    except ChronicleUserError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.get("/investigations/{investigation_uid}/evidence")
+def list_investigation_evidence(investigation_uid: str, limit: int = 2000) -> dict[str, Any]:
+    """List evidence items for an investigation. For Reference UI and vendors."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        items = session.read_model.list_evidence_by_investigation(
+            investigation_uid, limit=limit
+        )
+        return {
+            "evidence": [
+                {
+                    "evidence_uid": e.evidence_uid,
+                    "investigation_uid": e.investigation_uid,
+                    "created_at": e.created_at,
+                    "ingested_by_actor_id": e.ingested_by_actor_id,
+                    "original_filename": e.original_filename,
+                    "media_type": e.media_type,
+                    "file_size_bytes": e.file_size_bytes,
+                    "content_hash": e.content_hash,
+                }
+                for e in items
+            ]
+        }
+
+
+@app.get("/investigations/{investigation_uid}/claims")
+def list_investigation_claims(
+    investigation_uid: str, include_withdrawn: bool = True, limit: int = 2000
+) -> dict[str, Any]:
+    """List claims for an investigation. For Reference UI and vendors."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        claims = session.read_model.list_claims_by_type(
+            investigation_uid=investigation_uid,
+            include_withdrawn=include_withdrawn,
+            limit=limit,
+        )
+        return {
+            "claims": [
+                {
+                    "claim_uid": c.claim_uid,
+                    "investigation_uid": c.investigation_uid,
+                    "claim_text": c.claim_text,
+                    "claim_type": c.claim_type,
+                    "current_status": c.current_status,
+                    "created_at": c.created_at,
+                    "updated_at": c.updated_at,
+                    "epistemic_stance": getattr(c, "epistemic_stance", None),
+                }
+                for c in claims
+            ]
+        }
+
+
+@app.get("/investigations/{investigation_uid}/tensions")
+def list_investigation_tensions(
+    investigation_uid: str, status: str | None = None, limit: int = 500
+) -> dict[str, Any]:
+    """List tensions for an investigation. For Reference UI and vendors."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        tensions = session.read_model.list_tensions(
+            investigation_uid, status=status, limit=limit
+        )
+        return {
+            "tensions": [
+                {
+                    "tension_uid": t.tension_uid,
+                    "investigation_uid": t.investigation_uid,
+                    "claim_a_uid": t.claim_a_uid,
+                    "claim_b_uid": t.claim_b_uid,
+                    "tension_kind": t.tension_kind,
+                    "status": t.status,
+                    "notes": t.notes,
+                    "created_at": t.created_at,
+                    "defeater_kind": getattr(t, "defeater_kind", None),
+                }
+                for t in tensions
+            ]
+        }
+
+
+@app.get("/investigations/{investigation_uid}/graph")
+def get_investigation_graph(investigation_uid: str) -> dict[str, Any]:
+    """Return nodes (claims, evidence) and edges (support/challenge) for graph visualization."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        claims = session.read_model.list_claims_by_type(
+            investigation_uid=investigation_uid, limit=2000
+        )
+        evidence_items = session.read_model.list_evidence_by_investigation(
+            investigation_uid, limit=2000
+        )
+        nodes: list[dict[str, Any]] = []
+        for c in claims:
+            nodes.append(
+                {"id": c.claim_uid, "type": "claim", "label": (c.claim_text or "")[:80]}
+            )
+        for e in evidence_items:
+            nodes.append(
+                {
+                    "id": e.evidence_uid,
+                    "type": "evidence",
+                    "label": e.original_filename or e.evidence_uid,
+                }
+            )
+        edges: list[dict[str, Any]] = []
+        for c in claims:
+            for link in session.read_model.get_support_for_claim(c.claim_uid):
+                span = session.read_model.get_evidence_span(link.span_uid)
+                if span:
+                    edges.append(
+                        {
+                            "from": span.evidence_uid,
+                            "to": c.claim_uid,
+                            "link_type": "support",
+                            "link_uid": link.link_uid,
+                        }
+                    )
+            for link in session.read_model.get_challenges_for_claim(c.claim_uid):
+                span = session.read_model.get_evidence_span(link.span_uid)
+                if span:
+                    edges.append(
+                        {
+                            "from": span.evidence_uid,
+                            "to": c.claim_uid,
+                            "link_type": "challenge",
+                            "link_uid": link.link_uid,
+                        }
+                    )
+        return {"nodes": nodes, "edges": edges}
+
+
+@app.get("/evidence/{evidence_uid}/spans")
+def list_evidence_spans(evidence_uid: str, limit: int = 500) -> dict[str, Any]:
+    """List spans for an evidence item (for linking support/challenge in UI)."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        item = session.read_model.get_evidence_item(evidence_uid)
+        if item is None:
+            raise HTTPException(status_code=404, detail="Evidence not found")
+        spans = session.read_model.list_spans_for_evidence(evidence_uid, limit=limit)
+        return {
+            "spans": [
+                {
+                    "span_uid": s.span_uid,
+                    "evidence_uid": s.evidence_uid,
+                    "anchor_type": s.anchor_type,
+                    "created_at": s.created_at,
+                }
+                for s in spans
+            ]
+        }
+
+
+@app.get("/evidence/{evidence_uid}/content")
+def get_evidence_content(evidence_uid: str) -> Response:
+    """Return evidence file content. For text/* returns text/plain; else binary. 404 if not found."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        item = session.read_model.get_evidence_item(evidence_uid)
+        if item is None:
+            raise HTTPException(status_code=404, detail="Evidence not found")
+        if not session.evidence.exists(item.uri):
+            raise HTTPException(status_code=404, detail="Evidence file not found")
+        blob = session.evidence.retrieve(item.uri)
+        mt = (item.media_type or "application/octet-stream").split(";")[0].strip()
+        if mt.startswith("text/"):
+            return Response(
+                content=blob.decode("utf-8", errors="replace"),
+                media_type="text/plain; charset=utf-8",
+            )
+        return Response(
+            content=blob,
+            media_type=mt,
+            headers={"Content-Disposition": f'inline; filename="{item.original_filename or evidence_uid}"'},
+        )
+
+
+class AnchorSpanBody(BaseModel):
+    """Create a text_offset span (e.g. from selection)."""
+
+    evidence_uid: str
+    start_char: int
+    end_char: int
+    quote: str | None = None
+
+
 # ----- Evidence -----
 
 
@@ -231,7 +566,33 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
         return {"event_id": event_id, "evidence_uid": ev_uid, "span_uid": span_uid}
 
 
-# ----- Claims -----
+@app.post("/investigations/{investigation_uid}/spans")
+def create_span(
+    request: Request, investigation_uid: str, body: AnchorSpanBody
+) -> dict[str, Any]:
+    """Create a text_offset span (e.g. from selection in Reading UI). Returns event_id, span_uid."""
+    actor_id, actor_type, verification_level = _get_actor(request)
+    path = _get_project_path()
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                raise HTTPException(status_code=404, detail="Investigation not found")
+            item = session.read_model.get_evidence_item(body.evidence_uid)
+            if item is None or item.investigation_uid != investigation_uid:
+                raise HTTPException(status_code=404, detail="Evidence not found in this investigation")
+            event_id, span_uid = session.anchor_span(
+                investigation_uid,
+                body.evidence_uid,
+                "text_offset",
+                {"start_char": body.start_char, "end_char": body.end_char},
+                quote=body.quote,
+                actor_id=actor_id,
+                actor_type=actor_type,
+                verification_level=verification_level,
+            )
+            return {"event_id": event_id, "span_uid": span_uid}
+    except ChronicleUserError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.post("/investigations/{investigation_uid}/claims")
@@ -414,6 +775,60 @@ def export_investigation(investigation_uid: str) -> Response:
             )
         finally:
             out_path.unlink(missing_ok=True)
+
+
+@app.post("/investigations/{investigation_uid}/submission-package")
+def export_submission_package(investigation_uid: str) -> Response:
+    """Export a submission package: ZIP containing .chronicle, reasoning_briefs/ (HTML per claim), and manifest.json.
+    For human handoff and verification. 404 if investigation not found."""
+    path = _get_project_path()
+    with ChronicleSession(path) as session:
+        inv = session.read_model.get_investigation(investigation_uid)
+        if inv is None:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:
+            chronicle_path = Path(f.name)
+        try:
+            session.export_investigation(investigation_uid, chronicle_path)
+            chronicle_bytes = chronicle_path.read_bytes()
+        finally:
+            chronicle_path.unlink(missing_ok=True)
+
+        claims = session.read_model.list_claims_by_type(
+            investigation_uid=investigation_uid, limit=10_000
+        )
+        generated_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        manifest = {
+            "investigation_uid": investigation_uid,
+            "title": inv.title,
+            "claim_uids": [c.claim_uid for c in claims],
+            "generated_at": generated_at,
+        }
+
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(f"{investigation_uid}.chronicle", chronicle_bytes)
+            zf.writestr(
+                "manifest.json",
+                json.dumps(manifest, indent=2),
+            )
+            for c in claims:
+                brief = session.get_reasoning_brief(c.claim_uid)
+                if brief:
+                    html = reasoning_brief_to_html(brief)
+                    zf.writestr(
+                        f"reasoning_briefs/{c.claim_uid}.html",
+                        html.encode("utf-8"),
+                    )
+
+        buf.seek(0)
+        return Response(
+            content=buf.getvalue(),
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f'attachment; filename="{investigation_uid}-submission.zip"'
+            },
+        )
 
 
 @app.post("/import")

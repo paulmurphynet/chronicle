@@ -412,6 +412,26 @@ class SqliteReadModel:
             source_event_id=row[6],
         )
 
+    def list_spans_for_evidence(self, evidence_uid: str, limit: int = 500) -> list[EvidenceSpan]:
+        """Return spans for an evidence item (for linking in UI)."""
+        cur = self._conn.execute(
+            """SELECT span_uid, evidence_uid, anchor_type, anchor_json, created_at, created_by_actor_id, source_event_id
+               FROM evidence_span WHERE evidence_uid = ? ORDER BY created_at ASC LIMIT ?""",
+            (evidence_uid, min(limit, MAX_LIST_LIMIT)),
+        )
+        return [
+            EvidenceSpan(
+                span_uid=r[0],
+                evidence_uid=r[1],
+                anchor_type=r[2],
+                anchor_json=r[3],
+                created_at=r[4],
+                created_by_actor_id=r[5],
+                source_event_id=r[6],
+            )
+            for r in cur.fetchall()
+        ]
+
     def get_support_for_claim(self, claim_uid: str) -> list[EvidenceLink]:
         return self._get_links_for_claim(claim_uid, "SUPPORTS")
 

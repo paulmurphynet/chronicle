@@ -1,0 +1,54 @@
+{
+  "format_version": 1,
+  "profile_id": "policy_investigative_journalism",
+  "display_name": "Investigative Journalism Standard",
+  "description": "Two-source rule, named sources preferred, tensions block publication",
+  "policy_rationale": "Common editorial standard for established facts; at least two independent sources.",
+  "mes_rules": [
+    {
+      "target_claim_type": "SEF",
+      "min_independent_sources": 2,
+      "required_evidence_types": ["primary_document", "witness_statement"],
+      "preferred_evidence_types": ["official_record", "physical_evidence"],
+      "disallowed_evidence_types": ["anonymous_tip_alone"],
+      "min_confidence": 0.7,
+      "notes": "At least two independent sources required for established facts"
+    }
+  ],
+  "evidence_admissibility": {
+    "admissible_types": [
+      "primary_document",
+      "witness_statement",
+      "official_record",
+      "physical_evidence",
+      "expert_analysis"
+    ],
+    "inadmissible_for_sef": [
+      "narrator_testimony_alone",
+      "anonymous_tip_alone",
+      "social_media_unverified"
+    ],
+    "notes": "Anonymous tips may support SAC but never alone promote to SEF"
+  },
+  "tension_rules": {
+    "blocks_vault_publication": ["OPEN", "DISPUTED"],
+    "blocks_forge_export": [],
+    "allows_publication": ["ACK", "RESOLVED", "SUPERSEDED"],
+    "requires_justification": ["INTRACTABLE", "DEFERRED", "ESCALATED"],
+    "notes": "Open and disputed tensions must be resolved or acknowledged before Vault publication"
+  },
+  "checkpoint_rules": {
+    "requires_all_claims_typed": true,
+    "requires_all_tensions_addressed": true,
+    "requires_at_least_one_sef": false,
+    "min_decomposition_status": "partially_decomposed",
+    "warn_if_one_sided": false,
+    "block_checkpoint_if_one_sided": false,
+    "notes": "All claims must have a type, all tensions must be non-OPEN."
+  },
+  "tier_overrides": {
+    "spark": { "allow_untyped_claims": true, "allow_unanchored_evidence": true },
+    "forge": { "allow_untyped_claims": false, "allow_unanchored_evidence": false },
+    "vault": { "allow_untyped_claims": false, "allow_unanchored_evidence": false }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "verticals": [
+    {
+      "id": "journalism",
+      "display_name": "Investigative journalism",
+      "description": "Two-source rule, named sources, tensions block publication.",
+      "steps": [
+        { "title": "Create an investigation", "body": "Create an investigation for your story or fact-check run. Use a clear title (e.g. \"Q1 revenue claim\")." },
+        { "title": "Add evidence", "body": "Ingest primary documents, witness statements, official records. Each item becomes evidence you can link to claims." },
+        { "title": "Propose claims", "body": "Add claims (assertions you want to defend). Start as working hypotheses; type and scope can be refined at Forge/Vault." },
+        { "title": "Link support and challenge", "body": "Link evidence spans to claims as support or challenge. Use the Reading flow: open evidence, pick span (or whole doc), then \"Support claim X\" or \"Challenge claim Y\"." },
+        { "title": "Review tension suggestions", "body": "If the system suggests tensions between claims (e.g. contradiction), confirm or dismiss. Open tensions block Vault publication under the journalism policy." },
+        { "title": "Advance tier and export", "body": "Move to Forge when structure is ready; to Vault when ready to publish. Export .chronicle for verification or the submission package (reasoning briefs + manifest) for handoff." }
+      ]
+    },
+    {
+      "id": "legal",
+      "display_name": "Legal / briefs",
+      "description": "Stricter MES, chain of custody, tension resolution for checkpoints.",
+      "steps": [
+        { "title": "Create investigation", "body": "One investigation per matter or brief. Set tier when appropriate (Spark for draft, Forge for structured, Vault for checkpoint)." },
+        { "title": "Ingest evidence", "body": "Add primary documents and official records. Register sources when required by policy (Forge/Vault)." },
+        { "title": "Propose claims", "body": "Claims map to legal assertions. Link support and challenge with rationale (warrant)." },
+        { "title": "Resolve tensions", "body": "Address all tension suggestions: confirm (declare tension) or dismiss with rationale. Legal policy typically requires tension resolution before checkpoint." },
+        { "title": "Chain of custody", "body": "Under the legal profile, checkpoints may require chain-of-custody. Use export and reasoning briefs for audit." },
+        { "title": "Export submission package", "body": "Download the submission package (ZIP: .chronicle + reasoning_briefs/ + manifest) for filing or handoff. Verify the .chronicle with chronicle-verify." }
+      ]
+    },
+    {
+      "id": "compliance",
+      "display_name": "Compliance / audit",
+      "description": "Evidence admissibility, exception workflow, all tensions addressed.",
+      "steps": [
+        { "title": "Create investigation", "body": "One investigation per audit or compliance run. Use a descriptive title and optional investigation_key for idempotency." },
+        { "title": "Add evidence", "body": "Ingest evidence; prefer official records and primary documents. Policy may warn on one-sided claims (single source, no challenges)." },
+        { "title": "Propose claims", "body": "Claims represent assertions under review. Link support and challenge; document rationale." },
+        { "title": "Address tensions", "body": "Review tension suggestions. Confirm or dismiss. Compliance profile may allow DEFERRED with justification; all tensions should be addressed before checkpoint." },
+        { "title": "Exception workflow", "body": "If using exception workflow (due dates, assigned_to), track overdue tensions and remediation type." },
+        { "title": "Export and verify", "body": "Export .chronicle and/or submission package. Verify with chronicle-verify before archiving or sharing." }
+      ]
+    }
+  ]
+}

@@ -57,6 +57,16 @@ Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_
 
 ---
 
+## Building with Chronicle (agents and RAG builders)
+
+One-page checklist for agent/RAG builders: idempotency, actor and tool provenance, and defensibility reads.
+
+- **Idempotency** — Use **investigation_key** when creating investigations so the same scenario (e.g. query id) reuses the same investigation across runs. The backend can create or look up by key; the event store supports idempotency keys where applicable. See [Eval and benchmarking](eval-and-benchmarking.md) for stable keys per scenario.
+- **Actor and tool provenance** — Every write records **actor_id** and **actor_type** (`human` | `tool` | `system`). Set `X-Actor-Id` and `X-Actor-Type` (API) or `CHRONICLE_ACTOR_ID` / `CHRONICLE_ACTOR_TYPE` (CLI) so the ledger attributes ingest, claims, and links to your agent or pipeline. Use `actor_type=tool` for automated runs and `human` when a human is curating.
+- **Defensibility reads** — After building an investigation (evidence + claim + links), read defensibility via **session:** `session.get_defensibility_score(claim_uid)`; **API:** `GET /claims/{claim_uid}/defensibility`; **reasoning brief:** `GET /claims/{claim_uid}/reasoning-brief` for the full shareable artifact. Same scorecard shape as the [eval contract](eval_contract.md) and [defensibility metrics schema](defensibility-metrics-schema.md).
+
+---
+
 ## Idempotency for agents and pipelines
 
 When the same scenario (e.g. query id or scenario id) is run multiple times, you can reuse the same investigation by passing an **investigation_key** (or equivalent) so that the backend creates or looks up the investigation by that key. That way "same question, different config" can be compared in one place. Implementation details depend on your API or session wrapper; the event store supports idempotency keys for commands where applicable.

@@ -54,13 +54,25 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 | POST | `/investigations/{id}/claims` | Propose claim. Body: `{ "text", "initial_type?", "epistemic_stance?" }`. Optional **epistemic_stance** (e.g. working_hypothesis, asserted_established). Returns `event_id`, `claim_uid`. |
 | POST | `/investigations/{id}/links/support` | Link span as support. Body: `{ "span_uid", "claim_uid", "rationale"? }`. Returns `event_id`, `link_uid`. |
 | POST | `/investigations/{id}/links/challenge` | Link span as challenge. Body: `{ "span_uid", "claim_uid", "rationale?", "defeater_kind?" }`. Optional **rationale** (warrant), **defeater_kind** (e.g. rebutting, undercutting). |
-| POST | `/investigations/{id}/tensions` | Declare tension. Body: `{ "claim_a_uid", "claim_b_uid", "tension_kind?", "defeater_kind?" }`. Optional **defeater_kind**. Returns `event_id`, `tension_uid`. |
+| POST | `/investigations/{id}/tier` | Set investigation tier (spark → forge → vault). Body: `{ "tier", "reason?" }`. Returns `event_id`. 400 if transition not allowed. |
+| POST | `/investigations/{id}/tensions` | Declare tension. Body: `{ "claim_a_uid", "claim_b_uid", "tension_kind?", "defeater_kind?" }`. To **confirm** a tension suggestion, call this with the suggestion's claim pair; the suggestion is then marked confirmed. Returns `event_id`, `tension_uid`. |
+| POST | `/investigations/{id}/tension-suggestions/{suggestion_uid}/dismiss` | Dismiss a tension suggestion. Returns `event_id`. 400 if suggestion not pending. |
 
 ### Read
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/investigations` | List investigations. |
+| GET | `/investigations` | List investigations (uid, title, current_tier, etc.). |
+| GET | `/investigations/{id}` | Get single investigation (includes current_tier, tier_changed_at, created_at, updated_at). |
+| GET | `/investigations/{id}/tier-history` | List tier transitions, newest first. Query: `limit?` (default 100). |
+| GET | `/investigations/{id}/tension-suggestions` | List tension suggestions. Query: `status?` (pending \| confirmed \| dismissed; default pending), `limit?` (default 500). |
+| GET | `/investigations/{id}/evidence` | List evidence items for the investigation. Query: `limit?` (default 2000). |
+| GET | `/investigations/{id}/claims` | List claims for the investigation. Query: `include_withdrawn?` (default true), `limit?` (default 2000). |
+| GET | `/investigations/{id}/tensions` | List tensions for the investigation. Query: `status?`, `limit?` (default 500). |
+| GET | `/evidence/{evidence_uid}/spans` | List spans for an evidence item (for linking support/challenge in UI). Query: `limit?` (default 500). |
+| GET | `/evidence/{evidence_uid}/content` | Return evidence file content (text/plain for text/*; binary otherwise). For Reading UI. |
+| GET | `/investigations/{id}/graph` | Nodes (claims, evidence) and edges (support/challenge) for graph visualization. |
+| POST | `/investigations/{id}/spans` | Create a text_offset span (e.g. from selection). Body: `{ "evidence_uid", "start_char", "end_char", "quote?" }`. Returns `event_id`, `span_uid`. |
 | GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output). Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
 | GET | `/claims/{claim_uid}` | Get claim (includes optional **epistemic_stance** when set). |
 | GET | `/claims/{claim_uid}/reasoning-brief` | Reasoning brief (claim, defensibility, support/challenge, tensions, trail). Query: `limit?`. |
@@ -70,6 +82,7 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/investigations/{id}/export` | Export investigation as .chronicle (ZIP). Returns binary attachment. |
+| POST | `/investigations/{id}/submission-package` | Export submission package: ZIP with `{id}.chronicle`, `reasoning_briefs/{claim_uid}.html` per claim, and `manifest.json`. For human handoff and verification. |
 | POST | `/import` | Import .chronicle file (multipart `file`). Merges into project. |
 
 ### Health

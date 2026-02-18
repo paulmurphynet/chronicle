@@ -60,6 +60,8 @@ See [Benchmark](benchmark.md) for options and sample generation.
 
 ## Next steps
 
-- **Understand the project** — Read the [Story](story/README.md) (mission, vision, problem, approach, limits), then [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](../critical_areas/README.md).
+- **First investigation to submission** — [Quickstart](quickstart.md) (first investigation in ~15 min); [Zero to submission](zero-to-submission.md) (one path to a verifiable submission package in ~30 min).
+- **Understand the project** — [Reference UI plan](reference-ui-plan.md) (what we're building); before relying on scores or verification, read [Critical areas](../critical_areas/README.md) if present.
 - **Run the scorer in your pipeline** — [Eval contract](eval_contract.md), [RAG evals: defensibility metric](rag-evals-defensibility-metric.md), [Integrating with Chronicle](integrating-with-chronicle.md).
-- **Contribute** — [CONTRIBUTING](../CONTRIBUTING.md), [Lessons](lessons/README.md).
+- **When to use Chronicle** — [When to use Chronicle](when-to-use-chronicle.md) (scope vs data lineage / ML provenance).
+- **Contribute** — [CONTRIBUTING](../CONTRIBUTING.md) when present; [Lessons](lessons/README.md) for codebase walkthrough if present.
