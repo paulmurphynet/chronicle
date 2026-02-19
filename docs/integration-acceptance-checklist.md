@@ -25,6 +25,7 @@ Use this checklist before publishing or merging a Chronicle integration (adapter
 1. Python checks pass (`ruff`, `pytest`, `mypy`) for touched code.
 2. Doc links pass (`python3 scripts/check_doc_links.py .`).
 3. If Neo4j behavior is affected, run `python3 scripts/check_neo4j_contract.py`.
+4. For end-to-end confidence, run `python3 scripts/run_reference_workflows.py`.
 
 ## Documentation minimum
 

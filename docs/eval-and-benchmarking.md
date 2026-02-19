@@ -95,7 +95,7 @@ If your pipeline uses the Chronicle HTTP API, after proposing the claim and link
 
 ## 5. Fixed-query benchmark run
 
-A **fixed set of queries** can be run through the same Chronicle-backed RAG pipeline and defensibility recorded per answer. The script `scripts/benchmark_data/run_defensibility_benchmark.py` runs three queries, writes one investigation per query, and outputs a JSON file (or stdout) with `query_id`, `query`, `claim_uid`, and `metrics` for each. **How to reproduce:** From repo root, `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py` (optional `--output results.json` or `--stdout`). See [Benchmark](benchmark.md) Section 1.3 for the full description and output shape.
+A **fixed set of queries** can be run through the same Chronicle-backed benchmark pipeline and defensibility recorded per answer. The script `scripts/benchmark_data/run_defensibility_benchmark.py` runs three queries, writes one investigation per query, and outputs a JSON file (or stdout) with `query_id`, `query`, `claim_uid`, and `metrics` for each. **How to reproduce:** From repo root, `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py --mode session` (optional `--mode langchain`, `--output results.json`, or `--stdout`). See [Benchmark](benchmark.md) Section 1.3 for the full description and output shape.
 
 ---
 

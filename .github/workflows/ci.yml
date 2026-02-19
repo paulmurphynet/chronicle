@@ -51,6 +51,9 @@ jobs:
       - name: Check Neo4j contract parity
         run: python3 scripts/check_neo4j_contract.py
 
+      - name: Run reference workflows
+        run: python3 scripts/run_reference_workflows.py --output-dir /tmp/chronicle_reference_workflows_ci
+
   frontend-checks:
     runs-on: ubuntu-latest
     steps:

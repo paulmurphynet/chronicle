@@ -8,6 +8,16 @@ Each workflow is designed to be:
 2. Explicit about trust limitations.
 3. Reusable as a template for integrations.
 
+## One-command runner
+
+Run the full reference set (journalism, benchmark trust tracking, compliance report, Neo4j contract check):
+
+```bash
+PYTHONPATH=. python3 scripts/run_reference_workflows.py
+```
+
+This writes a consolidated JSON report under `reference_workflow_runs/<timestamp>/reference_workflow_report.json`.
+
 ## Workflow 1: Journalism conflict review
 
 Goal: build a small investigation with conflicting claims, verify the artifact, and inspect tensions.
@@ -32,7 +42,9 @@ Goal: run one RAG flow and produce an auditable report bundle.
 Run from repo root:
 
 ```bash
-PYTHONPATH=. python3 scripts/compliance_report_from_rag.py
+PYTHONPATH=. python3 scripts/compliance_report_from_rag.py \
+  --mode session \
+  --output-dir ./compliance_run
 ```
 
 Expected outcome:
@@ -49,6 +61,7 @@ Run from repo root:
 
 ```bash
 PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py \
+  --mode session \
   --output benchmark_defensibility_results.json
 PYTHONPATH=. python3 scripts/benchmark_data/trust_progress_report.py \
   --results benchmark_defensibility_results.json

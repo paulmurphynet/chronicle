@@ -12,10 +12,11 @@ These are the main entry points for integrating Chronicle into pipelines: scorin
 |------------------|---------|------------|
 | **chronicle-verify** | Verify a .chronicle file (manifest, schema, evidence hashes). Stdlib only. | `chronicle-verify path/to/file.chronicle` (after `pip install -e .`) or `PYTHONPATH=. python3 -m tools.verify_chronicle path/to/file.chronicle` |
 | **standalone_defensibility_scorer.py** | Defensibility scorer: read JSON from stdin, write metrics to stdout. Eval contract. | `PYTHONPATH=. python3 scripts/standalone_defensibility_scorer.py < input.json` or pipe from your harness. |
-| **benchmark_data/run_defensibility_benchmark.py** | Run defensibility benchmark (fixed queries, RAG, record scores). | `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py` (see [benchmark](../docs/benchmark.md)). |
+| **benchmark_data/run_defensibility_benchmark.py** | Run defensibility benchmark (fixed queries, score recording). `--mode auto|langchain|session`. | `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py --mode session` (see [benchmark](../docs/benchmark.md)). |
 | **benchmark_data/trust_progress_report.py** | Summarize trust KPIs and compare against baseline (`effective_unsupported_rate`). | `PYTHONPATH=. python3 scripts/benchmark_data/trust_progress_report.py --results benchmark_defensibility_results.json` |
 | **eval_harness_adapter.py** | Adapt your eval harness output to the scorer (e.g. wrap responses for contract input). | `PYTHONPATH=. python3 scripts/eval_harness_adapter.py` (see script `--help` and [eval contract](../docs/eval_contract.md)). |
 | **export_for_ml.py** | Export investigation data for ML/training. | `PYTHONPATH=. python3 scripts/export_for_ml.py` with `--path`, `--investigation`, etc. |
+| **run_reference_workflows.py** | Execute the reference workflow set and emit one consolidated JSON report. | `PYTHONPATH=. python3 scripts/run_reference_workflows.py` |
 | **rag_path_demo.py** | Minimal RAG/agent path (ChronicleSession: project, investigation, ingest, claim, link). | `PYTHONPATH=. python3 scripts/rag_path_demo.py` |
 | **haystack_rag_chronicle.py**, **langchain_rag_chronicle.py**, **llamaindex_rag_chronicle.py**, **cross_framework_rag_chronicle.py** | RAG + Chronicle demos (ingest, claim, link, score). | `PYTHONPATH=. python3 scripts/<script>.py` (see [integrating-with-chronicle](../docs/integrating-with-chronicle.md)). |
 | **generate_sample_chronicle.py** | Generate the default Try sample .chronicle; delegates to verticals/journalism. | `PYTHONPATH=. python3 scripts/generate_sample_chronicle.py` |
@@ -40,7 +41,7 @@ Scripts and directories for scenario validation, per-vertical samples, benchmark
 | **multi_run_investigation.py** | Multi-run investigation workflow (advanced). |
 | **ingest_chronicle_to_aura.py** | Ingest a .chronicle into Neo4j Aura (optional Neo4j path). |
 | **ingest_transcript_csv.py** | Ingest evidence from a transcript CSV into an investigation. |
-| **compliance_report_from_rag.py** | Generate a compliance-style report from a RAG + Chronicle run. |
+| **compliance_report_from_rag.py** | Generate a compliance-style report; supports `--mode session` and persistent `--output-dir`. |
 
 ---
 
