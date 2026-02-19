@@ -62,13 +62,33 @@ No active release blockers at this time. Keep validating changes against:
 
 ## Post-release high-value work
 
-No active post-release items in this file. Add new work here when discovered.
+Active implementation batch from `thought_experiments/decision-register.md` (2026-02-19), prioritized:
+
+1. **TE-01 (P1): Policy compatibility preflight surfaces (API + CLI + UI).**
+   Add a machine-readable compatibility endpoint plus CLI/UI preflight before checkpoint/export/submission actions.
+   Done when users can compare built-under vs viewing-under profiles and see explicit deltas in one command/page and JSON response.
+2. **TE-02 (P1): Link assurance metadata in defensibility outputs.**
+   Add `link_assurance_level` and caveat text to scorer/API/export outputs so auto-linked evidence is distinguishable from reviewed links.
+   Done when contract/schema/docs/tests cover the fields and backward compatibility is preserved.
+3. **TE-04 (P1): Unified reviewer decision ledger/report.**
+   Add a consolidated report/endpoint summarizing human confirmations, overrides, suggestion dismissals, unresolved tensions, and actor/time context.
+   Done when legal/compliance/editorial review can consume one artifact instead of multiple command outputs.
+4. **TE-05 (P2): Unified review packet generator.**
+   Produce a single review bundle combining reasoning brief, chain-of-custody report, policy compatibility summary, policy rationale summary, and decision-ledger snapshot.
+   Done when an investigator can generate this packet in one API/CLI action and the packet is documented in reference workflows.
+5. **TE-06 (P2): Role-based review checklists by policy profile.**
+   Add policy-linked checklist templates for journalism/legal/compliance workflows in docs/UI guidance.
+   Done when templates are available and linked from reference workflow docs and policy profile docs.
+6. **TE-03 (P2): Multi-vertical workflow parity expansion.**
+   Add research/history profile example and expand reproducible workflows for legal/compliance/history use cases.
+   Done when `scripts/run_reference_workflows.py` includes these scenarios with deterministic report output and docs are updated.
 
 ## Later / research backlog
 
 Keep this section for longer-horizon items that are intentionally deferred. Current deferred item:
 
 - Postgres read model parity (explicitly out of scope until SQLite baseline remains stable and maintainable).
+- TE-D01 temporal uncertainty extension (range/confidence fields beyond `known_as_of`) deferred until current TE batch is complete and a migration-safe schema design is approved.
 
 ## Done criteria
 
