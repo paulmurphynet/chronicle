@@ -131,6 +131,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Migration from V1](docs/migration-from-v1.md) | What we brought from the old project, what we didn't, and why. |
 | [State and plan](docs/state-and-plan.md) | What we have so far and the plan going forward. |
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
+| [Core vs reference architecture](docs/architecture-core-reference.md) | How trust-critical core differs from API/CLI/UI reference surfaces and why that boundary matters. |
 | [Testing with Ollama](docs/testing-with-ollama.md) | Use local Ollama for real LLM-backed testing (decomposer, contradiction, type inference, etc.). |
 | [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee; runtime invariants and audit. |
 | [Implementer checklist](docs/implementer-checklist.md) | Produce or consume a .chronicle: checklist and pointers. |

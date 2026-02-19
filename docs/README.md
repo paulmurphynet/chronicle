@@ -9,6 +9,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | Resource | Purpose |
 |----------|---------|
 | [**North star**](north-star.md) | **Where we're headed:** Chronicle's ultimate potential—shared infrastructure, one model napkin→courtroom, ecosystem. Use it to guide roadmap and scope. |
+| [**Core vs reference architecture**](architecture-core-reference.md) | Boundary between trust-critical core and replaceable reference surfaces (API/CLI/UI/integrations). |
 | [**Story**](../story/README.md) | The Chronicle story: mission, vision, the problem, why it exists, how we're solving it, challenges, how you can help. Read in order (01 → 06). |
 | [**Lessons**](../lessons/README.md) | Step-by-step codebase walkthrough for developers. Numbered 00–12; each lesson has **← Previous \| Index \| Next →** (or End of lessons) at the bottom. Lesson 12 fully covers the .chronicle file format and data schema. |
 | [**Critical areas**](../critical_areas/README.md) | What defensibility and verification do *not* guarantee. Read before relying on scores or "verified." Each doc links back to the index and to the next. |
@@ -32,6 +33,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [To-do](to_do.md) | Implementation to-do list (single source of truth for pending work). |
 | [Project review](PROJECT_REVIEW.md) | Full project review: strengths, weaknesses, and recommended new or improved features. |
 | [Reference UI plan](reference-ui-plan.md) | Same-repo strategy for the human-in-the-loop frontend; what to bring from V1 (tiers, Propose–Confirm, Reading-lite). |
+| [Core vs reference architecture](architecture-core-reference.md) | How the project is modularized into trust-critical core and adapter/reference layers. |
 | [Quickstart](quickstart.md) | First investigation in ~15 min (API or CLI). |
 | [Quickstart: Reference UI](quickstart-reference-ui.md) | Try sample, highlight to link, see defensibility update (Reference UI). |
 | [Zero to submission](zero-to-submission.md) | One path to a verifiable submission package in ~30 min. |

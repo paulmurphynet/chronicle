@@ -38,6 +38,13 @@ The optional HTTP API (`chronicle/api/app.py`) usually checks conditions before 
 - **ChronicleUserError** (validation, “investigation not found”, “claim not found”, etc.) → map to **400** Bad Request with `detail=str(e)`, or **404** if the message indicates a missing resource.
 - **ChronicleIdempotencyCapacityError** → map to **429** Too Many Requests.
 
+API responses also include a request correlation id:
+
+- Header: `X-Request-Id`
+- Error JSON: `{ "detail": ..., "request_id": "..." }`
+
+Clients can pass `X-Request-Id` on request to preserve their own trace id across logs and responses.
+
 ## See also
 
 - [Troubleshooting](troubleshooting.md) — common user-facing errors and fixes.

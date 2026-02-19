@@ -8,6 +8,7 @@ This doc captures the plan for a **Chronicle Reference UI**: a human-in-the-loop
 
 - **Core** (this repo) = Chronicle package + optional HTTP API + scorer + verifier. No first-party "product" UI in core; the API is the integration surface.
 - **Reference UI** = lives in this repo under **`frontend/`**. It is the official human-facing app that demonstrates the API is complete for human-in-the-loop. Built only against the public API (and verifier).
+- **Reference module boundary** = `chronicle/reference/*` provides reference-surface import paths (API/client) while trust-critical logic stays in core/store/verifier modules.
 - **Why same repo:** One place for docs (no cross-repo links going stale). Code changes that affect both API and UI can be one PR. No version matrix between "Reference UI 1.x" and "Core 0.y." Contributors get the full picture in one clone.
 - **Vendors** can build their own frontends (legal, compliance, journalism, research) on the same API and .chronicle format; the Reference UI is the template.
 

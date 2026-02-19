@@ -22,6 +22,10 @@ Thanks for your interest in contributing. This file explains how to set up a dev
    ```bash
    pip install -e .
    ```
+   For development checks and tests:
+   ```bash
+   pip install -e ".[dev]"
+   ```
    For the optional HTTP API:
    ```bash
    pip install -e ".[api]"
@@ -39,6 +43,34 @@ Thanks for your interest in contributing. This file explains how to set up a dev
      | PYTHONPATH=. python3 scripts/standalone_defensibility_scorer.py
    chronicle-verify path/to/any.chronicle   # or generate one with scripts/generate_sample_chronicle.py
    ```
+
+## Daily workflow (Makefile)
+
+Use the repo `Makefile` to run consistent checks from the project root:
+
+```bash
+make lint
+make typecheck
+make test
+make docs-check
+make check   # runs lint + typecheck + test + docs-check
+```
+
+If your venv lives somewhere else, override tool paths, e.g.:
+
+```bash
+make check PYTHON=.venv/bin/python RUFF=.venv/bin/ruff MYPY=.venv/bin/mypy PYTEST=.venv/bin/pytest
+```
+
+## Offline / no-network contributor workflow
+
+- Chronicle core development is designed to work locally once dependencies are installed.
+- If network/DNS is unavailable, skip fresh installs and use your existing `.venv`.
+- Run all gates locally with `make check`; these checks do not require internet access.
+- Optional surfaces that may need extra setup are:
+  - API extras (`pip install -e ".[api]"`)
+  - Neo4j extras (`pip install -e ".[neo4j]"`) and a reachable Neo4j instance
+  - Ollama-backed tests (only when explicitly enabled)
 
 ## Errors (user-facing)
 

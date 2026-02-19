@@ -35,6 +35,12 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 |-----|-------------|
 | `CHRONICLE_PROJECT_PATH` | **Required for project-based endpoints.** Path to the Chronicle project directory. If the directory does not exist it is created; if it exists but has no `chronicle.db`, the project is initialized. **Not required** for `POST /score`. |
 
+## Request tracing
+
+- The API returns `X-Request-Id` on every response.
+- You can supply your own `X-Request-Id` header; otherwise the server generates one.
+- Error responses include `request_id` in the JSON body so logs and client-side errors can be correlated quickly.
+
 ---
 
 ## Endpoints

@@ -13,9 +13,13 @@ from __future__ import annotations
 import base64
 import io
 import json
+import logging
 import os
 import tempfile
+import time
+import uuid
 import zipfile
+from collections.abc import Awaitable, Callable
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -39,6 +43,8 @@ from chronicle.store.session import ChronicleSession
 
 # Project path from env; None if not set
 PROJECT_PATH_ENV = "CHRONICLE_PROJECT_PATH"
+REQUEST_ID_HEADER = "X-Request-Id"
+log = logging.getLogger("chronicle.api")
 
 
 def _get_actor(request: Request) -> tuple[str, str, str]:
@@ -117,26 +123,96 @@ if _STATIC_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
 
+def _request_id_for(request: Request) -> str:
+    rid = getattr(request.state, "request_id", None)
+    if isinstance(rid, str) and rid.strip():
+        return rid.strip()
+    return "unknown"
+
+
+def _error_content(request: Request, detail: Any) -> dict[str, Any]:
+    return {"detail": detail, "request_id": _request_id_for(request)}
+
+
+@app.middleware("http")
+async def request_context_and_logging(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    request_id = (request.headers.get("x-request-id") or "").strip() or str(uuid.uuid4())
+    request.state.request_id = request_id[:128]
+    started = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        elapsed_ms = round((time.perf_counter() - started) * 1000.0, 2)
+        log.exception(
+            json.dumps(
+                {
+                    "event": "request_failed",
+                    "request_id": _request_id_for(request),
+                    "method": request.method,
+                    "path": request.url.path,
+                    "client_ip": request.client.host if request.client else None,
+                    "duration_ms": elapsed_ms,
+                }
+            )
+        )
+        raise
+    elapsed_ms = round((time.perf_counter() - started) * 1000.0, 2)
+    response.headers[REQUEST_ID_HEADER] = _request_id_for(request)
+    log.info(
+        json.dumps(
+            {
+                "event": "request_completed",
+                "request_id": _request_id_for(request),
+                "method": request.method,
+                "path": request.url.path,
+                "status_code": response.status_code,
+                "client_ip": request.client.host if request.client else None,
+                "duration_ms": elapsed_ms,
+            }
+        )
+    )
+    return response
+
+
 @app.exception_handler(ChronicleIdempotencyCapacityError)
 def handle_idempotency_capacity_error(
-    _request: Request, exc: ChronicleIdempotencyCapacityError
+    request: Request, exc: ChronicleIdempotencyCapacityError
 ) -> JSONResponse:
     """Map idempotency-capacity user errors to HTTP 429."""
-    return JSONResponse(status_code=429, content={"detail": str(exc)})
+    return JSONResponse(status_code=429, content=_error_content(request, str(exc)))
 
 
 @app.exception_handler(ChronicleProjectNotFoundError)
 def handle_project_not_found(
-    _request: Request, exc: ChronicleProjectNotFoundError
+    request: Request, exc: ChronicleProjectNotFoundError
 ) -> JSONResponse:
     """Map project-not-found user errors to HTTP 404."""
-    return JSONResponse(status_code=404, content={"detail": str(exc)})
+    return JSONResponse(status_code=404, content=_error_content(request, str(exc)))
 
 
 @app.exception_handler(ChronicleUserError)
-def handle_user_error(_request: Request, exc: ChronicleUserError) -> JSONResponse:
+def handle_user_error(request: Request, exc: ChronicleUserError) -> JSONResponse:
     """Map all Chronicle user errors to HTTP 400 by default."""
-    return JSONResponse(status_code=400, content={"detail": str(exc)})
+    return JSONResponse(status_code=400, content=_error_content(request, str(exc)))
+
+
+@app.exception_handler(HTTPException)
+def handle_http_error(request: Request, exc: HTTPException) -> JSONResponse:
+    """Ensure FastAPI HTTP errors include request_id for traceability."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=_error_content(request, exc.detail),
+        headers=exc.headers,
+    )
+
+
+@app.exception_handler(Exception)
+def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+    """Return a generic 500 with request_id while logging traceback server-side."""
+    log.exception("Unhandled Chronicle API exception request_id=%s", _request_id_for(request), exc_info=exc)
+    return JSONResponse(status_code=500, content=_error_content(request, "Internal server error"))
 
 
 @app.get("/verifier")
