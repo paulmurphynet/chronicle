@@ -8,7 +8,7 @@
 
 ## 1. Why use Chronicle for RAG evals
 
-RAG evaluation often measures retrieval quality, answer correctness, or citation faithfulness. Chronicle adds **defensibility** as a first-class metric: provenance quality, corroboration (support/challenge counts, independent sources), contradiction status, and optional knowability. For the minimal **input/output contract** (query, answer, evidence in; metrics or error out) that eval frameworks can depend on, see [Eval contract](eval_contract.md). By running your RAG pipeline with Chronicle attached, every answer becomes a **claim** linked to **evidence** in the ledger; you then read the **defensibility scorecard** for that claim and use it in your eval harness.
+RAG evaluation often measures retrieval quality, answer correctness, or citation faithfulness. Chronicle adds **defensibility** as an additional metric: provenance quality, corroboration (support/challenge counts, independent sources), contradiction status, and optional knowability. For the minimal **input/output contract** (query, answer, evidence in; metrics or error out) that eval frameworks can depend on, see [Eval contract](eval_contract.md). By running your RAG pipeline with Chronicle attached, every answer becomes a **claim** linked to **evidence** in the ledger; you then read the **defensibility scorecard** for that claim and use it in your eval harness.
 
 Benefits:
 

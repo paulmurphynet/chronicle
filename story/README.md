@@ -12,7 +12,7 @@ Our **mission** is to make defensibility a practical, verifiable part of how peo
 
 ## Vision
 
-Our **vision** is a world where more answers can show their work and more people can check it. Defensibility can become a common metric in RAG and evals; the .chronicle format and verifier make "show your work" something you can verify (the package is well-formed), not just promise. Adoption means eval frameworks, labs, and tooling can use defensibility and the portable format—so the feedback loop (eval → improve → eval) better reflects evidence-backed answers.
+Our **vision** is a world where more answers can show their work and more people can check it. Defensibility can become a practical metric in RAG and evals; the .chronicle format and verifier make "show your work" something you can verify (the package is well-formed), not just promise. Adoption means eval frameworks, labs, and tooling can use defensibility and the portable format—so the feedback loop (eval → improve → eval) better reflects evidence-backed answers.
 
 ---
 

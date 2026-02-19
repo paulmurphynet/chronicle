@@ -54,7 +54,7 @@ See [Critical areas](../critical_areas/README.md) and [Epistemology scope](epist
 
 ## One sentence
 
-**North star:** Chronicle aims to become a **widely used open standard and infrastructure for defensible, auditable claims**—for humans and AI—with one model from exploration to publication, one format and verifier, and an ecosystem of tools and domains built on the same epistemic layer.
+**North star:** Chronicle aims to provide the groundwork for a **widely used open standard and infrastructure for defensible, auditable claims**—for humans and AI—with one model from exploration to publication, one format and verifier, and an ecosystem of tools and domains built on the same epistemic layer.
 
 ---
 
