@@ -46,6 +46,7 @@ Generate benchmark results:
 
 ```bash
 PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py \
+  --mode session \
   --output benchmark_defensibility_results.json
 ```
 
@@ -88,4 +89,3 @@ These metrics do not:
 1. Prove factual truth.
 2. Prove semantic entailment between evidence and claim.
 3. Replace human review for high-stakes decisions.
-

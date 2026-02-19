@@ -33,4 +33,5 @@ Use this checklist before publishing or merging a Chronicle integration (adapter
 
 1. Integration usage is added to docs or script README with exact commands.
 2. Required environment variables and optional flags are listed.
-3. Non-goals and unsupported modes are listed to avoid overpromising.
+3. If field names are non-standard, include a mapping profile example for adapter users.
+4. Non-goals and unsupported modes are listed to avoid overpromising.

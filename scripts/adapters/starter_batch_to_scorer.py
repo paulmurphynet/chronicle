@@ -11,6 +11,12 @@ Example:
   PYTHONPATH=. python3 scripts/adapters/starter_batch_to_scorer.py \
     --input runs.jsonl \
     --output scored.jsonl
+
+Mapping profile example:
+  PYTHONPATH=. python3 scripts/adapters/starter_batch_to_scorer.py \
+    --profile scripts/adapters/examples/mapping_profile_nested.json \
+    --input scripts/adapters/examples/harness_runs_nested.jsonl \
+    --output scored.jsonl
 """
 
 from __future__ import annotations
@@ -38,16 +44,61 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Output JSONL file (default: stdout)",
     )
-    parser.add_argument("--query-key", default="query")
-    parser.add_argument("--answer-key", default="answer")
-    parser.add_argument("--evidence-key", default="evidence")
-    parser.add_argument("--run-id-key", default="run_id")
+    parser.add_argument(
+        "--profile",
+        type=Path,
+        default=None,
+        help="Optional mapping profile JSON (keys/paths and defaults)",
+    )
+    parser.add_argument("--query-key", default=None, help="Query key/path (dot-separated supported)")
+    parser.add_argument("--answer-key", default=None, help="Answer key/path (dot-separated supported)")
+    parser.add_argument(
+        "--evidence-key", default=None, help="Evidence key/path (dot-separated supported)"
+    )
+    parser.add_argument("--run-id-key", default=None, help="Run id key/path (dot-separated supported)")
     parser.add_argument(
         "--fail-fast",
         action="store_true",
         help="Stop on first input/scoring error",
     )
     return parser.parse_args(argv)
+
+
+def _profile_get(profile: dict[str, Any], key: str, aliases: list[str]) -> Any:
+    if key in profile:
+        return profile.get(key)
+    for alias in aliases:
+        if alias in profile:
+            return profile.get(alias)
+    return None
+
+
+def _load_profile(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("profile must be a JSON object")
+    return data
+
+
+def _resolve_config(args: argparse.Namespace) -> dict[str, Any]:
+    profile = _load_profile(args.profile)
+    query_key = args.query_key or _profile_get(profile, "query_key", ["query_path"]) or "query"
+    answer_key = args.answer_key or _profile_get(profile, "answer_key", ["answer_path"]) or "answer"
+    evidence_key = (
+        args.evidence_key or _profile_get(profile, "evidence_key", ["evidence_path"]) or "evidence"
+    )
+    run_id_key = args.run_id_key or _profile_get(profile, "run_id_key", ["run_id_path"]) or "run_id"
+    # CLI flag always wins; otherwise profile can set fail_fast default.
+    fail_fast = args.fail_fast or bool(profile.get("fail_fast", False))
+    return {
+        "query_key": str(query_key),
+        "answer_key": str(answer_key),
+        "evidence_key": str(evidence_key),
+        "run_id_key": str(run_id_key),
+        "fail_fast": fail_fast,
+    }
 
 
 def _load_lines(input_path: Path | None) -> list[str]:
@@ -73,6 +124,19 @@ def _format_output_row(
     return out
 
 
+def _extract_by_path(obj: dict[str, Any], path: str) -> tuple[bool, Any]:
+    if path == "":
+        return False, None
+    current: Any = obj
+    for part in path.split("."):
+        if not isinstance(current, dict):
+            return False, None
+        if part not in current:
+            return False, None
+        current = current.get(part)
+    return True, current
+
+
 def _map_row_to_contract_input(
     obj: dict[str, Any],
     *,
@@ -80,16 +144,19 @@ def _map_row_to_contract_input(
     answer_key: str,
     evidence_key: str,
 ) -> tuple[dict[str, Any] | None, str | None]:
-    if query_key not in obj:
+    has_query, query_value = _extract_by_path(obj, query_key)
+    if not has_query:
         return None, f"missing_query_key:{query_key}"
-    if answer_key not in obj:
+    has_answer, answer_value = _extract_by_path(obj, answer_key)
+    if not has_answer:
         return None, f"missing_answer_key:{answer_key}"
-    if evidence_key not in obj:
+    has_evidence, evidence_value = _extract_by_path(obj, evidence_key)
+    if not has_evidence:
         return None, f"missing_evidence_key:{evidence_key}"
     contract_input = {
-        "query": obj.get(query_key),
-        "answer": obj.get(answer_key),
-        "evidence": obj.get(evidence_key),
+        "query": query_value,
+        "answer": answer_value,
+        "evidence": evidence_value,
     }
     return contract_input, None
 
@@ -140,7 +207,9 @@ def run_rows(
                 break
             continue
 
-        rid = obj.get(run_id_key)
+        has_run_id, rid = _extract_by_path(obj, run_id_key)
+        if not has_run_id:
+            rid = None
         run_id = str(rid) if rid is not None else None
         contract_input, input_error = _map_row_to_contract_input(
             obj,
@@ -183,6 +252,19 @@ def _write_outputs(rows: list[dict[str, Any]], output_path: Path | None) -> None
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    try:
+        config = _resolve_config(args)
+    except (OSError, ValueError, json.JSONDecodeError) as e:
+        out = {
+            "row_index": None,
+            "run_id": None,
+            "ok": False,
+            "input_error": "invalid_profile",
+            "chronicle": {"contract_version": "1.0", "error": "invalid_input", "message": str(e)},
+        }
+        _write_outputs([out], args.output)
+        return 1
+
     lines = _load_lines(args.input)
     if not lines:
         out = {
@@ -197,11 +279,11 @@ def main(argv: list[str] | None = None) -> int:
 
     rows, code = run_rows(
         lines,
-        query_key=args.query_key,
-        answer_key=args.answer_key,
-        evidence_key=args.evidence_key,
-        run_id_key=args.run_id_key,
-        fail_fast=args.fail_fast,
+        query_key=config["query_key"],
+        answer_key=config["answer_key"],
+        evidence_key=config["evidence_key"],
+        run_id_key=config["run_id_key"],
+        fail_fast=config["fail_fast"],
     )
     _write_outputs(rows, args.output)
     return code

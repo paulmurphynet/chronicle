@@ -50,6 +50,14 @@ Open **chronicle/store/neo4j_sync.py**.
 
 So the **same** data you have in SQLite (read model) is mirrored in Neo4j for graph queries, visualization (e.g. Aura Browser), or graph RAG. Sync is **idempotent**: re-syncing the same project updates the graph to match the project.
 
+Before running export/import/sync in production workflows, run:
+
+```bash
+PYTHONPATH=. python3 scripts/check_neo4j_contract.py
+```
+
+This checks parity across sync code, CSV export, rebuild Cypher files, and schema docs so drift is caught early.
+
 **Graph schema reference:** **docs/neo4j-schema.md** documents node labels (Investigation, Claim, EvidenceItem, EvidenceSpan, Tension, etc.), relationship types (CONTAINS, SUPPORTS, CHALLENGES, BETWEEN, …), and example Cypher queries (e.g. claims in tension, evidence supporting a claim). Use it when building graph RAG or custom queries without reverse-engineering the sync output.
 
 ## .chronicle file format (recap)

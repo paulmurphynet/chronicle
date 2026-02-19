@@ -78,7 +78,7 @@ Use a venv (`source .venv/bin/activate`) or run `./.venv/bin/chronicle-verify` f
 
 **3. Run the defensibility benchmark**
 
-Fixed queries, RAG run, recorded scores: `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py`. See [Benchmark](docs/benchmark.md).
+Fixed queries, recorded defensibility scores: `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py --mode session`. See [Benchmark](docs/benchmark.md).
 
 ## What's in this repo
 

@@ -32,13 +32,21 @@ def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     examples_dir = args.examples_dir.resolve()
     harness_path = examples_dir / "harness_runs_valid.jsonl"
+    nested_harness_path = examples_dir / "harness_runs_nested.jsonl"
     scored_path = examples_dir / "scored_runs_example.jsonl"
+    nested_profile_path = examples_dir / "mapping_profile_nested.json"
 
     if not harness_path.is_file():
         print(f"Missing example file: {harness_path}")
         return 1
+    if not nested_harness_path.is_file():
+        print(f"Missing example file: {nested_harness_path}")
+        return 1
     if not scored_path.is_file():
         print(f"Missing example file: {scored_path}")
+        return 1
+    if not nested_profile_path.is_file():
+        print(f"Missing example file: {nested_profile_path}")
         return 1
 
     code = validator_main(["--input", str(scored_path)])
@@ -62,6 +70,25 @@ def main(argv: list[str] | None = None) -> int:
         code = validator_main(["--input", str(generated_path)])
         if code != 0:
             print("Generated scored output failed contract validation.")
+            return 1
+
+        nested_generated_path = Path(tmp) / "generated_nested_scored.jsonl"
+        code = starter_main(
+            [
+                "--profile",
+                str(nested_profile_path),
+                "--input",
+                str(nested_harness_path),
+                "--output",
+                str(nested_generated_path),
+            ]
+        )
+        if code != 0:
+            print("Starter adapter failed on nested harness example input + profile.")
+            return 1
+        code = validator_main(["--input", str(nested_generated_path)])
+        if code != 0:
+            print("Generated nested scored output failed contract validation.")
             return 1
 
     print("Adapter example checks passed.")

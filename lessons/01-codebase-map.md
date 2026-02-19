@@ -25,7 +25,7 @@ Open the repo root and look at the main folders:
 | **`chronicle/`** | The main Python package: events, store, session, defensibility, integrations. This is the “engine.” |
 | **`chronicle/api/`** | Optional HTTP API (install with `.[api]`): FastAPI app for write/read/export over HTTP. See [docs/api.md](../docs/api.md). |
 | **`scripts/`** | Runnable scripts: scorer, benchmark, eval harness adapter, RAG demos, adapters. See **scripts/README.md** for the **first-class** list. The **verifier** lives in **`tools/`**, not here. |
-| **`scripts/adapters/`** | Example adapters: RAG→scorer, fact-checker→Chronicle, provenance→Chronicle. Copy-paste templates for interop. |
+| **`scripts/adapters/`** | Example adapters: RAG→scorer starter, output validator, fact-checker→Chronicle, provenance→Chronicle. Copy-paste templates for interop. |
 | **`tools/`** | Standalone tooling. The important one is **`verify_chronicle/`** — the .chronicle verifier (stdlib only); CLI **`chronicle-verify`** is installed with the package and implemented here. |
 | **`frontend/`** | Reference UI: React + Vite + TypeScript app that talks only to the HTTP API (Try sample, investigations, evidence/claims/links, defensibility, export, Learn guides). See [frontend/README.md](../frontend/README.md). |
 | **`tests/`** | Pytest tests: scorer, session flow, verifier. CI runs ruff + pytest (see [.github/workflows/ci.yml](../.github/workflows/ci.yml)). |
@@ -63,8 +63,9 @@ When you run the **standalone scorer**, it uses: `create_project`, session, inge
 ## Scripts you’ll see in lessons
 
 - **`standalone_defensibility_scorer.py`** — The main scorer: JSON in (query, answer, evidence) → defensibility JSON out. Implements the [eval contract](../docs/eval_contract.md).  
-- **`run_defensibility_benchmark.py`** (in `scripts/benchmark_data/`) — Runs the scorer over many cases for benchmarking.  
+- **`run_defensibility_benchmark.py`** (in `scripts/benchmark_data/`) — Runs fixed benchmark queries and records defensibility (`--mode session` is the default reproducible path).  
 - **`eval_harness_adapter.py`** — Adapts a single RAG run to the eval contract (LangChain + Chronicle).  
+- **`run_reference_workflows.py`** — Runs the reference workflow suite and writes one consolidated JSON report.
 - **`*_rag_chronicle.py`** — Demos: LangChain, LlamaIndex, Haystack, cross-framework.
 
 ## Docs that define behavior

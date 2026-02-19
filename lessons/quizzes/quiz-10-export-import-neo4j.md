@@ -18,6 +18,8 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 
 5. Which script implements the full pipeline: verify a .chronicle → import into a graph project → sync to Neo4j?
 
+6. What command should you run to check Neo4j export/sync/docs/rebuild parity before syncing?
+
 ---
 
 ## Answer key
@@ -31,6 +33,8 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 4. The **evidence** folder holds only the **raw content** (blobs) of each evidence item. The **structure** (which claim, which links, which tensions) is in the **chronicle.db** SQLite database (read model tables: claim, evidence_link, tension, etc.). So the “meaning” is in the DB; the files are just content.
 
 5. **scripts/ingest_chronicle_to_aura.py** — it verifies the .chronicle, imports it into the graph project (default or CHRONICLE_GRAPH_PROJECT), then runs sync to Neo4j (using NEO4J_URI, etc.).
+
+6. `PYTHONPATH=. python3 scripts/check_neo4j_contract.py`
 
 ---
 

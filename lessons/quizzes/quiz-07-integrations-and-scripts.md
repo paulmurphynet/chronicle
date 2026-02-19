@@ -22,6 +22,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 
 7. How do you run the **optional HTTP API**? (Install extra, env var, command.)
 
+8. Which adapter scripts are intended for production onboarding when your harness rows are JSONL and may use nested fields?
+
 ---
 
 ## Answer key
@@ -39,6 +41,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 6. **scripts/adapters/** — example_rag_to_scorer.py (RAG harness output → scorer), fact_checker_to_chronicle.py (fact-checker output → evidence + claim + support/challenge), provenance_to_chronicle.py (provenance assertions → sources + evidence–source links). They are **copy-paste templates** for interop with external systems.
 
 7. **Install:** `pip install -e ".[api]"`. **Env:** Set **CHRONICLE_PROJECT_PATH** to the project directory. **Command:** `uvicorn chronicle.api.app:app` (optionally `--reload`). See docs/api.md.
+
+8. Use **`scripts/adapters/starter_batch_to_scorer.py`** (supports mapping profiles for nested paths) and **`scripts/adapters/validate_adapter_outputs.py`**. You can validate shipped examples with **`scripts/adapters/check_examples.py`**.
 
 ---
 

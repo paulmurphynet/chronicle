@@ -36,3 +36,8 @@ def test_starter_and_validator_on_checked_in_harness_example(tmp_path: Path) -> 
 def test_check_examples_script_passes() -> None:
     rc = check_examples.main(["--examples-dir", str(EXAMPLES_DIR)])
     assert rc == 0
+
+
+def test_nested_profile_example_files_exist() -> None:
+    assert (EXAMPLES_DIR / "harness_runs_nested.jsonl").is_file()
+    assert (EXAMPLES_DIR / "mapping_profile_nested.json").is_file()

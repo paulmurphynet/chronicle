@@ -48,10 +48,10 @@ chronicle-verify path/to/file.chronicle
 
 To get a sample .chronicle to verify: `PYTHONPATH=. python3 scripts/generate_sample_chronicle.py`, then verify the file it creates. See [Verifier](verifier.md).
 
-**3. Run the defensibility benchmark** (reproducible: fixed queries, RAG run, record scores):
+**3. Run the defensibility benchmark** (reproducible: fixed queries, record scores):
 
 ```bash
-PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py
+PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py --mode session
 ```
 
 See [Benchmark](benchmark.md) for options and sample generation.

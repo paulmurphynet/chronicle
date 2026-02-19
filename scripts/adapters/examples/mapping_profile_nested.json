@@ -1,0 +1,7 @@
+{
+  "query_path": "input.prompt",
+  "answer_path": "output.answer",
+  "evidence_path": "retrieval.chunks",
+  "run_id_path": "meta.run_id",
+  "fail_fast": false
+}

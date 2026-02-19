@@ -41,6 +41,52 @@ def test_starter_run_rows_mixed_valid_and_invalid() -> None:
     assert rows[1]["chronicle"]["error"] == "invalid_input"
 
 
+def test_starter_nested_path_mapping() -> None:
+    lines = [
+        json.dumps(
+            {
+                "meta": {"rid": "n1"},
+                "input": {"question": "What was revenue?"},
+                "output": {"response": "Revenue was $1.2M."},
+                "retrieval": {"contexts": ["The company reported revenue of $1.2M in Q1 2024."]},
+            }
+        )
+    ]
+    rows, code = starter.run_rows(
+        lines,
+        query_key="input.question",
+        answer_key="output.response",
+        evidence_key="retrieval.contexts",
+        run_id_key="meta.rid",
+    )
+    assert code == 0
+    assert len(rows) == 1
+    assert rows[0]["run_id"] == "n1"
+    assert rows[0]["ok"] is True
+    assert "error" not in rows[0]["chronicle"]
+
+
+def test_starter_resolve_config_from_profile(tmp_path: Path) -> None:
+    profile = tmp_path / "profile.json"
+    profile.write_text(
+        json.dumps(
+            {
+                "query_path": "input.q",
+                "answer_path": "out.a",
+                "evidence_path": "retrieval.ctx",
+                "run_id_path": "meta.id",
+            }
+        ),
+        encoding="utf-8",
+    )
+    args = starter._parse_args(["--profile", str(profile)])
+    config = starter._resolve_config(args)
+    assert config["query_key"] == "input.q"
+    assert config["answer_key"] == "out.a"
+    assert config["evidence_key"] == "retrieval.ctx"
+    assert config["run_id_key"] == "meta.id"
+
+
 def test_validator_accepts_success_and_error_payloads() -> None:
     success = {
         "contract_version": "1.0",

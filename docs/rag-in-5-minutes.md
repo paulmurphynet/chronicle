@@ -65,4 +65,4 @@ chronicle reasoning-brief <claim_uid> --path <project_path> --format html > brie
 |------|----------------|
 | Score one (query, answer, evidence) without a project | [Eval contract](eval_contract.md) — `scripts/standalone_defensibility_scorer.py` |
 | Integrate your RAG pipeline (session API) | [Integrating with Chronicle](integrating-with-chronicle.md) |
-| Run a fixed-query benchmark | [Benchmark](benchmark.md) — `scripts/benchmark_data/run_defensibility_benchmark.py` |
+| Run a fixed-query benchmark | [Benchmark](benchmark.md) — `scripts/benchmark_data/run_defensibility_benchmark.py --mode session` |

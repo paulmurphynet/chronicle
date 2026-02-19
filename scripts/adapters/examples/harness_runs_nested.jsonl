@@ -1,0 +1,2 @@
+{"meta":{"run_id":"nested-001"},"input":{"prompt":"What was revenue in Q1 2024?"},"output":{"answer":"Revenue in Q1 2024 was $1.2M."},"retrieval":{"chunks":["The company reported revenue of $1.2M in Q1 2024.","Growth was driven by enterprise contracts."]}}
+{"meta":{"run_id":"nested-002"},"input":{"prompt":"What drove growth?"},"output":{"answer":"Growth was driven by enterprise contracts."},"retrieval":{"chunks":["Growth was driven by enterprise contracts.","The company reported revenue of $1.2M in Q1 2024."]}}

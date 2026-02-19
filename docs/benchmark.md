@@ -2,7 +2,7 @@
 
 A **defensibility benchmark** uses Chronicle-formatted investigations and defensibility metrics to evaluate RAG or reasoning systems. This doc summarizes the concept and where to find scripts and data.
 
-**Citable benchmark:** The canonical run is **`scripts/benchmark_data/run_defensibility_benchmark.py`**: fixed queries, Chronicle-backed RAG path, defensibility recorded per answer. Reproducible with one command from the repo root; output shape is documented in [Eval and benchmarking](eval-and-benchmarking.md). Papers and blogs can cite "Chronicle defensibility benchmark (run_defensibility_benchmark.py)" and the [eval contract](eval_contract.md) for the metric definition.
+**Citable benchmark:** The canonical run is **`scripts/benchmark_data/run_defensibility_benchmark.py`**: fixed queries, Chronicle-backed benchmark path, defensibility recorded per answer. Reproducible with one command from the repo root; output shape is documented in [Eval and benchmarking](eval-and-benchmarking.md). Papers and blogs can cite "Chronicle defensibility benchmark (run_defensibility_benchmark.py)" and the [eval contract](eval_contract.md) for the metric definition.
 
 **Scorer default:** The default scorer links every evidence chunk as support for the single claim and does not validate that evidence actually supports the answer. For higher assurance, validate or curate evidence–claim links (e.g. human or NLI) then record; see [Eval contract](eval_contract.md#important-what-the-default-scorer-does-and-does-not-do).
 

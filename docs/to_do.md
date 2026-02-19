@@ -48,6 +48,9 @@ Chronicle should optimize for:
 - **Quality gate integration completed**: reference workflow suite added to Makefile `check` target and manual CI workflow.
 - **Integration starter tooling completed**: added adapter starter/validator (`scripts/adapters/starter_batch_to_scorer.py`, `scripts/adapters/validate_adapter_outputs.py`) with tests and docs wiring for contributor onboarding.
 - **Adapter examples automation completed**: added checked-in adapter example files, `scripts/adapters/check_examples.py`, tests, and CI/Makefile gates for example+contract validation.
+- **Documentation currency guard completed**: added `scripts/check_docs_currency.py` and integrated it into Makefile/CI to keep README/docs/lessons/quizzes aligned with current workflow commands.
+- **Adapter mapping profiles completed**: `starter_batch_to_scorer.py` now supports JSON mapping profiles (including nested key paths), with nested examples and tests.
+- **Documentation consistency sweep completed**: updated README/docs plus lessons/quizzes to reflect current benchmark, adapter, and Neo4j validation workflows.
 
 ## Release blockers
 
