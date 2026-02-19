@@ -12,6 +12,7 @@
 - [docs/eval-and-benchmarking.md](../docs/eval-and-benchmarking.md) — how to run pipelines and report defensibility
 - [docs/api.md](../docs/api.md) — HTTP API config and endpoints
 - [docs/rag-evals-defensibility-metric.md](../docs/rag-evals-defensibility-metric.md) — RAG evals: contract and scorer in your harness
+- [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) — professional framing for the transcript benchmark dataset
 
 ---
 
@@ -74,6 +75,16 @@ Beyond the first-class list, **scripts/README.md** also describes:
 
 All of these use the **session** (or the verifier, or the Neo4j sync) under the hood.
 
+## Case-study framing (required reading for transcript benchmarks)
+
+If you use `test_data/lb_inquest/inquest.csv`, read [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) first.
+
+Use that dataset as an evidence-quality benchmark, not as a vehicle for case adjudication:
+
+1. Keep language neutral and professional.
+2. Treat transcript statements as claims requiring support/challenge structure.
+3. Evaluate whether Chronicle improves citation quality and temporal consistency relative to baseline LLM answers.
+
 ## How scripts use the session
 
 Typical pattern:
@@ -93,6 +104,7 @@ So scripts are **thin orchestration**; the engine is the store and commands.
 4. Run `PYTHONPATH=. python3 scripts/adapters/check_examples.py` and verify adapter examples + validation flow pass.
 5. (Optional) Install **`.[api]`**, set **CHRONICLE_PROJECT_PATH**, run **uvicorn chronicle.api.app:app**, and open **http://127.0.0.1:8000/docs** to try the API.
 6. Open **scripts/ingest_transcript_csv.py** and find where it calls **session.ingest_evidence**, **session.propose_claim**, and **session.link_support**. Confirm it follows the same pattern as the scorer (without the temp project).
+7. Read [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) and note the two non-goals: no sensational framing and no claim to establish legal truth.
 
 ## Summary
 

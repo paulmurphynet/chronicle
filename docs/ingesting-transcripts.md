@@ -1,6 +1,8 @@
 # Ingesting transcripts (e.g. Lizzie Borden inquest) from CSV
 
-You have a transcript as a **perfectly formatted CSV**. This doc says how far we are from ingesting it into Chronicle and what tools you need.
+You have a transcript in a **structured CSV** format. This doc explains ingestion readiness and the tools required.
+
+For rationale and evaluation framing specific to the Lizzie dataset, see [Lizzie Borden case study](case-study-lizzie-borden.md).
 
 ---
 

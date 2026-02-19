@@ -129,6 +129,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Epistemology scope](docs/epistemology-scope.md) | What the project covers (and does not) regarding epistemology. |
 | [AI to populate epistemology](docs/ai-to-populate-epistemology.md) | How much AI is needed to fully populate claims, support/challenge, tensions. |
 | [Using Ollama locally](docs/using-ollama-locally.md) | Use local Ollama (no API key) for tension suggestion, decomposition, type inference. |
+| [Lizzie Borden case study](docs/case-study-lizzie-borden.md) | Rationale for using the inquest transcript as a trust benchmark (sworn-testimony scope, noisy web-training-data contrast, and neutral evaluation protocol). |
 | [State and plan](docs/state-and-plan.md) | What we have so far and the plan going forward. |
 | [30/60/90 roadmap](docs/roadmap-30-60-90.md) | Time-bound execution plan from trust baseline to design-partner readiness. |
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |

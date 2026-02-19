@@ -24,6 +24,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 
 8. Which adapter scripts are intended for production onboarding when your harness rows are JSONL and may use nested fields?
 
+9. For the Lizzie inquest transcript benchmark, what is the correct project framing and one explicit non-goal?
+
 ---
 
 ## Answer key
@@ -43,6 +45,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 7. **Install:** `pip install -e ".[api]"`. **Env:** Set **CHRONICLE_PROJECT_PATH** to the project directory. **Command:** `uvicorn chronicle.api.app:app` (optionally `--reload`). See docs/api.md.
 
 8. Use **`scripts/adapters/starter_batch_to_scorer.py`** (supports mapping profiles for nested paths) and **`scripts/adapters/validate_adapter_outputs.py`**. You can validate shipped examples with **`scripts/adapters/check_examples.py`**.
+
+9. Frame it as an **evidence-quality and trust-evaluation benchmark** (claim-evidence linkage, support/challenge, temporal consistency), grounded in a bounded transcript corpus. An explicit non-goal is **sensational retelling or claiming Chronicle establishes legal truth**.
 
 ---
 
