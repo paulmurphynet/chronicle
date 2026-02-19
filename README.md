@@ -1,6 +1,6 @@
 # Chronicle
 
-When a system—or a person—gives you an answer, you're often left to trust it. Is it actually backed by evidence? Can you see which sources support or challenge it? When claims conflict or evidence is thin, is that out in the open? Today, "show your work" is a slogan, not a standard: there's no common way to **score** how defensible an answer is or to **verify** that the work was actually shown. Chronicle changes that. We don't decide what's true—we make **how well a claim is supported** visible, scoreable, and verifiable. You get a defensibility scorecard (provenance strength, corroboration, contradictions), a portable **.chronicle** package you can hand to anyone, and a verifier so "show your work" becomes something you can check, not just promise.
+When a system—or a person—gives you an answer, you're often left to trust it. Is it actually backed by evidence? Can you see which sources support or challenge it? When claims conflict or evidence is thin, is that out in the open? Today, "show your work" is often a slogan: there's no common way to **score** how defensible an answer is or to **verify** that the work was actually shown. Chronicle is one approach to this gap. We don't decide what's true; we make **how well a claim is supported** visible, scoreable, and verifiable. You get a defensibility scorecard (provenance strength, corroboration, contradictions), a portable **.chronicle** package you can hand to anyone, and a verifier so "show your work" becomes something you can check, not just promise.
 
 ## New here?
 
@@ -11,7 +11,7 @@ Chronicle answers: *How well is this answer supported by evidence?* It’s for R
 **Two paths:**
 
 - **I want to understand the project** — Read the [Story](story/README.md) (mission, vision, problem, approach, limits), then the [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](critical_areas/README.md) (what defensibility and “verified” do *not* guarantee).
-- **I want to see where we're headed** — Read the [North star](docs/north-star.md) (ultimate potential: shared infrastructure, one model napkin→courtroom, ecosystem).
+- **I want to see where we're headed** — Read the [North star](docs/north-star.md) (long-term direction: shared infrastructure, one model from early draft to auditable package, ecosystem).
 - **I want to run the scorer or verifier** — Use the [Quick start](#quick-start) below, or the full [Getting started](docs/getting-started.md) page. For common issues (e.g. `chronicle: command not found`), see [Troubleshooting](docs/troubleshooting.md).
 
 **Concepts:** [Glossary](docs/glossary.md) defines defensibility, claim, evidence, .chronicle, and related terms.
@@ -112,7 +112,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Defensibility metrics schema](docs/defensibility-metrics-schema.md) | Field semantics for the scorer output. |
 | [Eval and benchmarking](docs/eval-and-benchmarking.md) | How to run pipelines and report Chronicle defensibility. |
 | [HTTP API](docs/api.md) | Optional minimal API: `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run uvicorn. Write/read/export/import. |
-| [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness (standard metric). |
+| [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness as a defensibility metric. |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
 | [Errors](docs/errors.md) | Error types (ChronicleUserError, etc.); when to use which; how CLI/API map to exit codes and HTTP status. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |

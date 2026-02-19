@@ -5,6 +5,7 @@
 **Key files:**
 
 - [chronicle/cli/main.py](../chronicle/cli/main.py) — CLI entry point and subparsers
+- [chronicle/cli/project_commands.py](../chronicle/cli/project_commands.py) — project/investigation command implementations extracted from `main.py`
 - [pyproject.toml](../pyproject.toml) — console script entry: `chronicle = chronicle.cli.main:main`
 - [docs/aura-graph-pipeline.md](../docs/aura-graph-pipeline.md) — Neo4j sync and ingest runbook
 
@@ -21,11 +22,11 @@ chronicle verify-chronicle --help
 chronicle neo4j-sync --path /path/to/project
 ```
 
-The entry point is defined in **pyproject.toml**: `chronicle = chronicle.cli.main:main`. So `main()` in **chronicle/cli/main.py** parses arguments and dispatches to the right handler.
+The entry point is defined in **pyproject.toml**: `chronicle = chronicle.cli.main:main`. So `main()` in **chronicle/cli/main.py** parses arguments and dispatches to command handlers; several project-oriented handlers are implemented in **chronicle/cli/project_commands.py**.
 
 ## Main subcommands
 
-Open **chronicle/cli/main.py** and scan the **subparsers** (e.g. around lines 540–890).
+Open **chronicle/cli/main.py** and scan the **subparsers**. Then open **chronicle/cli/project_commands.py** to see the extracted implementations for project/investigation operations.
 
 | Subcommand | Purpose |
 |------------|---------|
@@ -70,7 +71,7 @@ Scripts that use the session (e.g. **scripts/ingest_transcript_csv.py**) also re
 
 ## Summary
 
-- The **chronicle** CLI is implemented in **chronicle/cli/main.py**; entry point in pyproject.toml.
+- The **chronicle** CLI entry point and argument parsing live in **chronicle/cli/main.py**; several command implementations are factored into **chronicle/cli/project_commands.py**.
 - **quickstart-rag** gives a one-command RAG flow (project, investigation, evidence, claim, defensibility); **init**, **create-investigation**, **ingest-evidence**, **export**, **import**, **get-defensibility**, **reasoning-trail**, **reasoning-brief**, **verify**, **verify-chronicle**, **neo4j-sync**, **policy** are the other main subcommands.
 - Set **CHRONICLE_ACTOR_ID** (or **--actor-id**) so write commands are attributed to you; see human-in-the-loop doc.
 - **verify** = project invariants; **verify-chronicle** = .chronicle file verifier (same as chronicle-verify).

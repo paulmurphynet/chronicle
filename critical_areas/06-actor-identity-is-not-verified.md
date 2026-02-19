@@ -6,7 +6,7 @@
 
 ## Narrative
 
-Every event stores **actor_id** and **actor_type** (`human` | `tool` | `system`). Optionally, events can store **verification_level** (e.g. `claimed`, `account`, `verified_credential`) and attestation references. That supports audit trails and human-in-the-loop workflows: "who did what" is always recorded.
+Every event stores **actor_id** and **actor_type** (`human` | `tool` | `system`). Optionally, events can store **verification_level** (e.g. `claimed`, `account`, `verified_credential`) and attestation references. That supports audit trails and human-in-the-loop workflows: "who did what" is recorded on each write event.
 
 But **identity is as asserted by the writer** (or by the deployment’s auth layer). Chronicle persists the binding you give it; it does **not**:
 

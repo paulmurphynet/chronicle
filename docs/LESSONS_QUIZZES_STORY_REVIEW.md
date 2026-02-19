@@ -1,5 +1,9 @@
 # Lessons, Quizzes, and Story — Completeness Review
 
+> [!WARNING]
+> Archived working review from an earlier pass. Some implementation notes may be stale.
+> For current docs status, use [lessons/README](../lessons/README.md), [story/README](../story/README.md), and [to_do](to_do.md).
+
 **Implementation status:** The changes in Sections 1–4 below were implemented (lessons 01, 05, 06, 11; quizzes 01, 11; story ch 03). Optional Lesson 13 (Reference UI) was not added.
 
 This document summarizes what needs to be **added or updated** in the lessons, quizzes, and story so they stay complete and aligned with the project’s code. It was produced by reviewing the repo structure, lesson content, quiz questions/answers, story chapters, and the implemented code (API, store, frontend, docs).

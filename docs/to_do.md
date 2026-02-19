@@ -37,7 +37,7 @@ These are required before public MIT release.
 
 | ID | Item | Why it blocks release | Primary files | Done when |
 |---|---|---|---|---|
-| RB-04 | Modularization pass 1 for monolithic surfaces (`cli/main.py`, `store/session.py`). | Maintainability risk is high for solo development and community contributors. | `chronicle/cli/`, `chronicle/store/` | Core command/session responsibilities are split into coherent modules with behavior preserved. |
+| RB-04 | Modularization pass 1 for monolithic surfaces (`chronicle/cli/main.py`, `chronicle/store/session.py`). | Maintainability risk is high for solo development and community contributors. | `chronicle/cli/`, `chronicle/store/` | Core command/session responsibilities are split into coherent modules with behavior preserved. |
 
 ## Post-release high-value work
 

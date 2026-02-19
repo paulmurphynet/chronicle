@@ -1,12 +1,14 @@
 # What we brought from ChronicleV1 (and what we didn't)
 
-This doc lists what was brought into the RAG/evals Chronicle repo from the old project (ChronicleV1), what was left behind, and why. Goal: **only what we need for a focused RAG/evals story** — scorer, verifier, defensibility model, and eval story — without pulling in product surface that doesn't serve that focus.
+This document is a **historical migration snapshot** from the initial ChronicleV1 import. It explains what was brought first, what was deferred, and why.
+
+Current repo state has evolved since then (including API/frontend/tests/docs additions). For current architecture and status, see [Docs index](README.md), [Core vs reference architecture](architecture-core-reference.md), and [To-do](to_do.md).
 
 ---
 
-## Brought over
+## Brought over (initial migration phase)
 
-### Chronicle package (`chronicle/`) — **except** `api/`
+### Chronicle package (`chronicle/`) — initial migration excluded `api/`
 
 | Area | What | Why |
 |------|------|-----|
@@ -19,17 +21,17 @@ This doc lists what was brought into the RAG/evals Chronicle repo from the old p
 | **tools/** | decomposer, type_scope_inference, contradiction, embeddings, evidence_temporal, llm_client/config, embedding_config | Used by session/evidence/claims flows (e.g. type inference, contradiction detection); scorer path can stay minimal but package stays coherent. |
 | **http_client.py, verify.py** | HTTP client for API; verify for .chronicle checks | Client useful when someone runs an API elsewhere; verifier is standalone and critical. |
 
-**Not brought: `chronicle/api/`** — Routers, FastAPI app, deps, webhook, Neo4j client, tension cache, static (verifier.html, learn guides). The RAG/evals product is scorer + verifier + session API; a separate API/frontend can live in this repo or another (see [To-do](to_do.md)). Leaving it out keeps this repo focused and dependency-light.
+**Historical note:** `chronicle/api/` was intentionally deferred in the initial migration to keep first import scope small. API support now exists in this repo.
 
 ---
 
-## Not brought (and why)
+## Not brought at initial migration time (and why)
 
 | Category | What | Why |
 |----------|------|-----|
-| **API and server** | `chronicle/api/` (app, routers, deps, schemas, static) | Out of scope for this focus: no HTTP server, no auth, no web UI. Integrations use session API or scorer stdin/stdout. |
-| **Frontend** | `frontend/` (full UI) | Out of scope. Eval users need scorer output and .chronicle verification, not the full app UI. |
-| **Tests** | `tests/` | Not copied to avoid carrying suite that targets API/frontend. A focused test set (scorer, session, verifier) exists in this repo. |
+| **API and server** | `chronicle/api/` (app, routers, deps, schemas, static) | Deferred in first migration phase to keep scope tight. |
+| **Frontend** | `frontend/` (full UI) | Deferred in first migration phase. |
+| **Tests** | `tests/` | Migration note from first pass; test coverage has since been expanded in this repo. |
 | **Spec docs** | `docs/spec/` (index, schemas, core-entities, epistemic-tools, etc.) | Large spec surface; not needed to run scorer or verifier. Technical report and defensibility/eval docs are the source of truth here. Some in-repo links still point to spec — we can fix those to point to technical-report or remove. |
 | **Most of docs/** | ~85 other docs (roadmap, vision, deployment, security reviews, verticals, learn, integration-story, etc.) | Only eval- and defensibility-critical docs were brought: eval_contract, eval_contract_schema.json, defensibility-metrics-schema, eval-and-benchmarking, technical-report, verifier. Keeps the repo readable and avoids outdated product/process docs. |
 | **Benchmark sample data** | `benchmark/`, `docs/benchmark.md` | Sample investigations and benchmark doc not copied. Scripts reference them; we can add a minimal benchmark/samples or point to "generate with script" only. |
@@ -54,7 +56,7 @@ So: we brought **all scripts** from V1. Some are directly relevant (scorer, benc
 
 ---
 
-## Docs in this repo (after migration)
+## Docs in this repo (initial migration snapshot)
 
 - **eval_contract.md**, **eval_contract_schema.json** — Contract for scorer and harnesses.
 - **defensibility-metrics-schema.md** — Stable metrics shape.
@@ -64,7 +66,7 @@ So: we brought **all scripts** from V1. Some are directly relevant (scorer, benc
 - **neo4j.md** — Optional Neo4j use (added in new repo).
 - **epistemology-scope.md** — What we cover epistemically (added in new repo).
 
-Some of these still **link to missing docs** (e.g. `spec/index.md`, `benchmark.md`, `verification-guarantees.md`, `integrating-with-chronicle.md`, `chronicle-as-training-data.md`). Options: (1) copy over only the minimal sections we need into this repo, or (2) remove or rewrite the links so they don't point at missing files.
+At migration time, some of these linked to missing docs. Those link gaps were later addressed in the current repo.
 
 ---
 
@@ -75,16 +77,22 @@ Some of these still **link to missing docs** (e.g. `spec/index.md`, `benchmark.m
 
 ---
 
-## Summary
+## Historical summary (initial migration)
 
-| We have | We don't have (by choice) |
+| We had in first migration pass | Deferred in first migration pass |
 |---------|----------------------------|
-| Full event-sourced kernel (core + store, no API) | API, frontend, full spec docs |
-| Scorer, verifier, session API, eval_metrics | Tests, CI, most product/process docs |
-| Eval-focused docs + neo4j + epistemology scope | Benchmark sample data, verification-guarantees, integrating-with-chronicle (as files) |
+| Full event-sourced kernel (core + store) | API, frontend, full spec docs |
+| Scorer, verifier, session API, eval_metrics | Broader test/CI/doc surface |
+| Eval-focused docs + neo4j + epistemology scope | Some benchmark/docs pieces |
 | All V1 scripts (some to prune) | — |
 
-**Suggested next steps**
+## Current status (brief)
+
+- API, frontend, and expanded tests are now present in this repository.
+- Documentation coverage is broader than the initial migration snapshot.
+- Use this file as historical context for migration decisions, not as current feature inventory.
+
+**Historical suggested next steps (from migration period)**
 
 1. **Prune scripts** — Keep scorer, verify_chronicle, run_defensibility_benchmark, eval_harness_adapter, export_for_ml, and RAG demo scripts; drop or archive scripts that only serve the old API/UI (e.g. start_chronicle.sh, or ai_validation if it depends on API).
 2. **Fix broken doc links** — Either add minimal in-repo versions of benchmark.md, verification-guarantees.md, integrating-with-chronicle.md (and spec pointers) or change technical-report and other docs to reference only existing files.

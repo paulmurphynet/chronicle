@@ -28,7 +28,7 @@ Both use the same primitives: **actor_id**, **actor_type**, optional **verificat
 
 ### Actor on every event
 
-Every event stores **actor_id** and **actor_type** (`human` | `tool` | `system`). So "who did what" is always recorded. The ledger never lies about who created an investigation, proposed a claim, or linked support—it records what the writer sent (or what the server resolved from auth/headers).
+Every event stores **actor_id** and **actor_type** (`human` | `tool` | `system`). So "who did what" is recorded on each write event. The ledger records what the writer sent (or what the server resolved from auth/headers); correctness of identity depends on your deployment's auth and IdP setup.
 
 ### Identity and verification level
 

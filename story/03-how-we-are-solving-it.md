@@ -18,7 +18,7 @@ We compute a **defensibility** result: strength of provenance, how many sources 
 
 ## One run in, one score out
 
-For RAG and evals, we keep the contract simple: **one (query, answer, evidence) in → one defensibility metrics object out.** No API server required. You can run our standalone scorer in a pipeline, or call the same logic from your own code. The fastest way to try it is **one command**: `chronicle quickstart-rag` (see [RAG in 5 minutes](../docs/rag-in-5-minutes.md)). For harness integration we document the path in [RAG evals: defensibility as a standard metric](../docs/rag-evals-defensibility-metric.md)—same contract and schema so your eval can plug in.
+For RAG and evals, we keep the contract simple: **one (query, answer, evidence) in → one defensibility metrics object out.** No API server required. You can run our standalone scorer in a pipeline, or call the same logic from your own code. The fastest way to try it is **one command**: `chronicle quickstart-rag` (see [RAG in 5 minutes](../docs/rag-in-5-minutes.md)). For harness integration we document the path in [RAG evals: defensibility metric](../docs/rag-evals-defensibility-metric.md)—same contract and schema so your eval can plug in.
 
 ---
 

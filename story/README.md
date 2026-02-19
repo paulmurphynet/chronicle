@@ -6,13 +6,13 @@ This is the **narrative** of Chronicle: the problem we’re addressing, why it e
 
 ## Mission
 
-Our **mission** is to make defensibility a first-class, verifiable part of how the world evaluates and trusts answers. We don't try to say what's "true"—we help people see **how defensible** a claim is given the evidence and the rules they care about, and we give them a way to **verify** that the work was actually shown.
+Our **mission** is to make defensibility a practical, verifiable part of how people evaluate and trust answers. We don't try to say what's "true"—we help people see **how defensible** a claim is given the evidence and the rules they care about, and we give them a way to **verify** that the work was actually shown.
 
 ---
 
 ## Vision
 
-Our **vision** is a world where every answer can show its work and anyone can check it. Defensibility becomes a standard metric in RAG and evals; the .chronicle format and verifier make "show your work" something you can verify (the package is well-formed), not just promise. Adoption means eval frameworks, labs, and tooling use defensibility and the portable format—so the feedback loop (eval → improve → eval) treats evidence-backed answers as a first-class signal.
+Our **vision** is a world where more answers can show their work and more people can check it. Defensibility can become a common metric in RAG and evals; the .chronicle format and verifier make "show your work" something you can verify (the package is well-formed), not just promise. Adoption means eval frameworks, labs, and tooling can use defensibility and the portable format—so the feedback loop (eval → improve → eval) better reflects evidence-backed answers.
 
 ---
 
@@ -59,7 +59,7 @@ By the end you’ll understand:
 | [05](05-how-you-can-help.md) | How you can help | Ways to contribute: code, docs, testing, feedback, sharing the story. |
 | [06](06-epistemology-scope-tables.md) | Epistemology: what we implement and what we don’t | Canonical tables: what Chronicle implements (and why) and what we do not implement (and why not). |
 
-**Where we're headed:** [North star](../docs/north-star.md) — Chronicle's ultimate potential (shared infrastructure, one model napkin→courtroom, ecosystem). Use it to guide roadmap and scope.
+**Where we're headed:** [North star](../docs/north-star.md) — Chronicle's long-term direction (shared infrastructure, one model from early draft to auditable package, ecosystem). Use it to guide roadmap and scope.
 
 ---
 

@@ -51,7 +51,7 @@ This split keeps the trust-critical logic stable while allowing user interfaces 
 
 Near term:
 
-- Continue extracting monolithic modules (`cli/main.py`, `store/session.py`) into domain files while preserving public interfaces.
+- Continue extracting monolithic modules (`chronicle/cli/main.py`, `chronicle/store/session.py`) into domain files while preserving public interfaces.
 - Keep backward-compatible import paths (`chronicle.http_client`, `chronicle.api.app`).
 
 Longer term:

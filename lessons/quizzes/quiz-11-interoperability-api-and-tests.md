@@ -14,7 +14,7 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 3. Does Chronicle **verify** C2PA or CR provenance assertions, or only **record** what you give it?
 
-4. What is the **entry point doc** for adding “Chronicle defensibility as a standard metric” to your RAG eval harness? (One doc name.)
+4. What is the **entry point doc** for adding Chronicle defensibility to your RAG eval harness? (One doc name.)
 
 5. How do you run the **optional HTTP API**? (Install step, env var, and command.)
 

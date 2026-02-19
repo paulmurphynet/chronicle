@@ -1,6 +1,6 @@
-# RAG evals: Chronicle defensibility as a standard metric
+# RAG evals: Chronicle defensibility metric
 
-Use **Chronicle defensibility** in your RAG eval harness as a standard metric: one (query, answer, evidence) in → one defensibility score out. No API server required; pipe JSON to the scorer and read JSON back.
+Use **Chronicle defensibility** in your RAG eval harness as a defensibility metric: one (query, answer, evidence) in → one defensibility score out. No API server required; pipe JSON to the scorer and read JSON back.
 
 **Important:** The default scorer links every evidence chunk as support for the single claim and does **not** validate that evidence actually supports the answer. For higher assurance, validate or curate evidence–claim links (e.g. human or NLI) then record; see [Eval contract](eval_contract.md#important-what-the-default-scorer-does-and-does-not-do).
 
@@ -27,11 +27,11 @@ echo '{"query": "What was revenue?", "answer": "Revenue was $1.2M.", "evidence":
   | PYTHONPATH=. python3 scripts/standalone_defensibility_scorer.py
 ```
 
-**After install:** `pip install -e .` (or `chronicle-standard` when on PyPI). Then:
+**After install:** `pip install -e .` (or `chronicle-standard` when on PyPI). Then run the scorer script from the repo:
 
 ```bash
-echo '{"query": "...", "answer": "...", "evidence": ["..."]}' | standalone_defensibility_scorer.py
-# or use the entry point if exposed
+echo '{"query": "...", "answer": "...", "evidence": ["..."]}' \
+  | python3 scripts/standalone_defensibility_scorer.py
 ```
 
 **From Python (in-process):**
@@ -78,7 +78,7 @@ python3 scripts/standalone_defensibility_scorer.py \
 - **Stable contract** — Versioned 1.0; same shape from session, API, or standalone script.
 - **Eval-native** — Designed for “one run in, one metrics out” so harnesses can add defensibility alongside accuracy, latency, etc.
 
-Use this page as the entry point for “Chronicle defensibility as the standard metric” in RAG evals.
+Use this page as the entry point for integrating Chronicle defensibility into RAG evals.
 
 ---
 
