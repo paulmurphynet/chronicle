@@ -1,6 +1,6 @@
 # Chronicle
 
-When a system—or a person—gives you an answer, you're often left to trust it. Is it actually backed by evidence? Can you see which sources support or challenge it? When claims conflict or evidence is thin, is that out in the open? Today, "show your work" is often a slogan: there's no common way to **score** how defensible an answer is or to **verify** that the work was actually shown. Chronicle is one approach to this gap. We don't decide what's true; we make **how well a claim is supported** visible, scoreable, and verifiable. You get a defensibility scorecard (provenance strength, corroboration, contradictions), a portable **.chronicle** package you can hand to anyone, and a verifier so "show your work" becomes something you can check, not just promise.
+In the age of AI, generating answers is easy; deciding what to trust is hard. Systems can sound confident even when evidence is weak, missing, or contradictory. Chronicle does not try to define truth. Instead, it provides tools to examine and judge the quality of supporting evidence: link claims to evidence, surface support and challenge structure, score defensibility (provenance, corroboration, contradictions), and package the result in a portable **.chronicle** file that others can verify.
 
 ## New here?
 
