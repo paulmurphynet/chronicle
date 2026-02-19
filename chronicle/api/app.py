@@ -22,11 +22,15 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from chronicle.core.errors import ChronicleUserError
+from chronicle.core.errors import (
+    ChronicleIdempotencyCapacityError,
+    ChronicleProjectNotFoundError,
+    ChronicleUserError,
+)
 from chronicle.core.identity import get_effective_actor_from_request
 from chronicle.scorer_contract import run_scorer_contract
 from chronicle.store.commands.reasoning_brief import reasoning_brief_to_html
@@ -113,6 +117,28 @@ if _STATIC_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
 
+@app.exception_handler(ChronicleIdempotencyCapacityError)
+def handle_idempotency_capacity_error(
+    _request: Request, exc: ChronicleIdempotencyCapacityError
+) -> JSONResponse:
+    """Map idempotency-capacity user errors to HTTP 429."""
+    return JSONResponse(status_code=429, content={"detail": str(exc)})
+
+
+@app.exception_handler(ChronicleProjectNotFoundError)
+def handle_project_not_found(
+    _request: Request, exc: ChronicleProjectNotFoundError
+) -> JSONResponse:
+    """Map project-not-found user errors to HTTP 404."""
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(ChronicleUserError)
+def handle_user_error(_request: Request, exc: ChronicleUserError) -> JSONResponse:
+    """Map all Chronicle user errors to HTTP 400 by default."""
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
+
+
 @app.get("/verifier")
 def verifier_page() -> FileResponse:
     """Serve the drag-and-drop .chronicle verifier page. No data is uploaded; verification runs in the browser."""
@@ -159,11 +185,21 @@ def create_investigation(request: Request, body: CreateInvestigationBody) -> dic
 
 
 @app.get("/investigations")
-def list_investigations() -> dict[str, Any]:
+def list_investigations(
+    limit: int | None = None,
+    is_archived: bool | None = None,
+    created_since: str | None = None,
+    created_before: str | None = None,
+) -> dict[str, Any]:
     """List investigations (uid, title, etc.)."""
     path = _get_project_path()
     with ChronicleSession(path) as session:
-        invs = session.read_model.list_investigations()
+        invs = session.read_model.list_investigations(
+            limit=limit,
+            is_archived=is_archived,
+            created_since=created_since,
+            created_before=created_before,
+        )
         return {
             "investigations": [
                 {

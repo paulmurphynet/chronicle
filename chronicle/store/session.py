@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from chronicle.core.errors import ChronicleProjectNotFoundError, ChronicleUserError
-from chronicle.core.policy import POLICY_FILENAME, load_policy_profile
+from chronicle.core.policy import POLICY_FILENAME, WORKSPACES, load_policy_profile
 from chronicle.core.validation import MAX_LIST_LIMIT
 from chronicle.store.claim_embedding_store import ClaimEmbeddingStore
 from chronicle.store.commands import (
@@ -109,6 +109,21 @@ class ChronicleSession:
     def project_path(self) -> Path:
         """Project directory path (for API handlers that need path, e.g. policy file)."""
         return self._path
+
+    def _workspace_for_investigation(
+        self, investigation_uid: str, workspace: str | None
+    ) -> str:
+        """Resolve effective workspace: explicit value wins; otherwise use current tier."""
+        if workspace is not None:
+            candidate = workspace.strip().lower()
+            if candidate:
+                return candidate
+        inv = self.read_model.get_investigation(investigation_uid)
+        if inv is not None:
+            tier = (inv.current_tier or "").strip().lower()
+            if tier in WORKSPACES:
+                return tier
+        return "spark"
 
     def create_investigation(
         self,
@@ -485,6 +500,17 @@ class ChronicleSession:
             policy_profile=policy_profile,
         )
 
+    def get_sources_backing_claim(self, claim_uid: str) -> list[dict[str, Any]]:
+        """Return source-level backing details for a claim when supported by the read model."""
+        try:
+            getter = self.read_model.get_sources_backing_claim  # type: ignore[attr-defined]
+        except AttributeError:
+            return []
+        result = getter(claim_uid)
+        if isinstance(result, list):
+            return result
+        return []
+
     def get_weakest_link(self, claim_uid: str) -> WeakestLink | None:
         """GetWeakestLink: single most vulnerable dimension for a claim. Returns None if claim not found."""
         return get_weakest_link(self.read_model, claim_uid)
@@ -827,12 +853,13 @@ class ChronicleSession:
         notes: str | None = None,
         actor_id: str = "default",
         actor_type: str = "human",
-        workspace: str = "spark",
+        workspace: str | None = None,
         idempotency_key: str | None = None,
         verification_level: str | None = None,
         attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Declare a tension between two claims; returns (event_id, tension_uid)."""
+        resolved_workspace = self._workspace_for_investigation(investigation_uid, workspace)
         return declare_tension(
             self._store,
             self.read_model,
@@ -844,7 +871,7 @@ class ChronicleSession:
             notes=notes,
             actor_id=actor_id,
             actor_type=actor_type,
-            workspace=workspace,
+            workspace=resolved_workspace,
             idempotency_key=idempotency_key,
             verification_level=verification_level,
             attestation_ref=attestation_ref,

@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
+import socket
 import sys
 from pathlib import Path
-
-import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from chronicle.core.ssrf import is_ssrf_unsafe_host
+from chronicle.core.ssrf import is_ssrf_unsafe_host  # noqa: E402
 
 
 def test_ssrf_blocks_loopback() -> None:
@@ -40,6 +39,22 @@ def test_ssrf_blocks_empty() -> None:
 
 
 def test_ssrf_allows_public_hostname() -> None:
-    """Public hostnames that resolve to public IPs are not unsafe (may still fail at fetch)."""
-    # example.com resolves to public IPs
-    assert is_ssrf_unsafe_host("example.com") is False
+    """Public hostnames that resolve to public IPs are not unsafe."""
+
+    def fake_getaddrinfo(_host: str, _port: object, _family: int) -> list[tuple]:
+        return [
+            (
+                socket.AF_INET,
+                socket.SOCK_STREAM,
+                6,
+                "",
+                ("93.184.216.34", 0),
+            )
+        ]
+
+    orig = socket.getaddrinfo
+    socket.getaddrinfo = fake_getaddrinfo  # type: ignore[assignment]
+    try:
+        assert is_ssrf_unsafe_host("example.com") is False
+    finally:
+        socket.getaddrinfo = orig  # type: ignore[assignment]

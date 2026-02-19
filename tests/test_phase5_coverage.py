@@ -7,7 +7,6 @@ import zipfile
 from pathlib import Path
 
 import pytest
-
 from chronicle.store.commands.claims import get_defensibility_score
 from chronicle.store.export_import import export_investigation, import_investigation
 from chronicle.store.project import create_project
@@ -128,3 +127,41 @@ def test_import_investigation_merge_into_existing(tmp_path: Path) -> None:
     with ChronicleSession(proj_b) as session:
         invs = session.read_model.list_investigations(limit=10)
     assert len(invs) >= 2
+
+
+def test_import_investigation_merge_skips_duplicates_and_keeps_new_events(tmp_path: Path) -> None:
+    """Merge import should skip duplicate events per-event and still replay new events."""
+    proj_a = tmp_path / "proj_a"
+    proj_b = tmp_path / "proj_b"
+    create_project(proj_a)
+    create_project(proj_b)
+    chronicle_v1 = tmp_path / "export_v1.chronicle"
+    chronicle_v2 = tmp_path / "export_v2.chronicle"
+
+    with ChronicleSession(proj_a) as session:
+        _, inv_uid = session.create_investigation("Export", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"One",
+            "text/plain",
+            original_filename="one.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, chronicle_v1)
+        session.ingest_evidence(
+            inv_uid,
+            b"Two",
+            "text/plain",
+            original_filename="two.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, chronicle_v2)
+
+    import_investigation(chronicle_v1, proj_b)
+    import_investigation(chronicle_v2, proj_b)
+
+    with ChronicleSession(proj_b) as session:
+        evidence = session.read_model.list_evidence_by_investigation(inv_uid, limit=20)
+    assert len(evidence) == 2

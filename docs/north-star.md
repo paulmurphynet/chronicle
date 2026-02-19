@@ -64,4 +64,4 @@ See [Critical areas](../critical_areas/README.md) and [Epistemology scope](epist
 - **Scope** — When we’re unsure if something belongs, we ask: does it strengthen the epistemic layer, the format, the verifier, or the ecosystem? If not, it stays out.
 - **Messaging** — We describe Chronicle in terms of defensibility, verification, and “show your work,” not truth or guarantees we don’t provide.
 
-**← [Docs index](README.md)** | **[Story](story/README.md)** | **[Critical areas](../critical_areas/README.md)**
+**← [Docs index](README.md)** | **[Story](../story/README.md)** | **[Critical areas](../critical_areas/README.md)**

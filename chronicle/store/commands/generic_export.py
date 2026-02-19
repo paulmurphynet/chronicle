@@ -5,7 +5,8 @@ from __future__ import annotations
 import csv
 import io
 import zipfile
-from typing import Any, Callable, Protocol
+from collections.abc import Callable
+from typing import Any, Protocol
 
 from chronicle.eval_metrics import scorecard_to_metrics_dict
 from chronicle.store.read_model import DefensibilityScorecard
@@ -31,15 +32,16 @@ class ReadModelLike(Protocol):
     def get_challenges_for_claim(self, claim_uid: str) -> list: ...
     def get_evidence_span(self, span_uid: str) -> Any: ...
     def get_evidence_item(self, evidence_uid: str) -> Any: ...
+    def get_sources_backing_claim(self, claim_uid: str) -> list[dict[str, Any]]: ...
 
 
 def _get_sources_backing_claim_safe(read_model: ReadModelLike, claim_uid: str) -> list[dict[str, Any]]:
     """Return sources_backing_claim when read_model supports it (includes independence_notes)."""
-    if hasattr(read_model, "get_sources_backing_claim") and callable(
-        getattr(read_model, "get_sources_backing_claim")
-    ):
-        return getattr(read_model, "get_sources_backing_claim")(claim_uid)
-    return []
+    try:
+        result = read_model.get_sources_backing_claim(claim_uid)
+    except AttributeError:
+        return []
+    return result if isinstance(result, list) else []
 
 
 def _row_to_dict(obj: Any) -> dict[str, Any]:
@@ -98,7 +100,10 @@ def build_claim_evidence_metrics_export(
     )
     out_claims: list[dict[str, Any]] = []
     for c in claims:
-        claim_uid = getattr(c, "claim_uid", None)
+        raw_claim_uid = getattr(c, "claim_uid", None)
+        if not isinstance(raw_claim_uid, str) or not raw_claim_uid:
+            continue
+        claim_uid = raw_claim_uid
         claim_text = getattr(c, "claim_text", "") or ""
         support_links = read_model.get_support_for_claim(claim_uid)
         challenge_links = read_model.get_challenges_for_claim(claim_uid)
@@ -194,9 +199,9 @@ def build_generic_export_csv_zip(
             out = io.StringIO()
             w = csv.DictWriter(out, fieldnames=keys, extrasaction="ignore")
             w.writeheader()
-        for t in tensions:
-            w.writerow(_row_to_dict(t))
-        zf.writestr("tensions.csv", out.getvalue())
+            for t in tensions:
+                w.writerow(_row_to_dict(t))
+            zf.writestr("tensions.csv", out.getvalue())
 
     return buf.getvalue()
 

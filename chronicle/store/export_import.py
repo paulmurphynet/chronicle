@@ -1,6 +1,5 @@
 """Export/import .chronicle (ZIP + manifest). Spec evidence.md 4.1.1."""
 
-import contextlib
 import json
 import shutil
 import sqlite3
@@ -523,7 +522,7 @@ def import_investigation(chronicle_path: Path, target_dir: Path) -> None:
                           policy_profile_id, correlation_id, causation_id,
                           envelope_version, payload_version, payload,
                           idempotency_key, prev_event_hash, event_hash
-                   FROM events ORDER BY recorded_at ASC, event_id ASC"""
+                   FROM events ORDER BY rowid ASC"""
             )
             events = [_row_to_event(r) for r in cur.fetchall()]
             source_conn.close()
@@ -532,12 +531,24 @@ def import_investigation(chronicle_path: Path, target_dir: Path) -> None:
 
             target_store = SqliteEventStore(target_db, run_projection=True)
             target_store._connection()
+            skipped_duplicates = 0
             try:
-                with contextlib.suppress(sqlite3.IntegrityError):
-                    for event in events:
+                for event in events:
+                    try:
                         target_store.append(event)
+                    except sqlite3.IntegrityError:
+                        # Merge import is idempotent by event_id. Skip duplicate events and
+                        # continue replaying remaining events so mixed duplicate/new imports
+                        # do not stop at the first duplicate.
+                        skipped_duplicates += 1
             finally:
                 target_store.close()
+            if skipped_duplicates:
+                log.info(
+                    "Import merge skipped %d duplicate event(s) while replaying %d event(s)",
+                    skipped_duplicates,
+                    len(events),
+                )
 
             # Copy evidence files from temp to target (overwrite by path)
             src_evidence = tmp_path / EVIDENCE_DIR

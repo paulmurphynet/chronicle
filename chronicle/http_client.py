@@ -1,37 +1,8 @@
-"""
-Thin HTTP client for the Chronicle API (T5.3). E.5: dashboard helpers.
-
-Use this when your pipeline or script runs in a separate process and talks to
-Chronicle over HTTP. For in-process use (same Python process), use
-ChronicleSession from chronicle.store.session instead.
-
-Requires only the Python standard library. All requests use X-Project-Path;
-optional X-Actor-Id, X-Actor-Type, Idempotency-Key for writes.
-
-Example (pipeline):
-
-    from chronicle.http_client import ChronicleClient
-
-    client = ChronicleClient("http://localhost:8000", "/path/to/project")
-    client.init_project()
-    inv = client.create_investigation("My investigation")
-    ev = client.ingest_evidence_from_url(inv["investigation_uid"], "https://example.com/doc.pdf")
-    claim = client.propose_claim(inv["investigation_uid"], "The document states X.")
-    # ... anchor span, link support (see API docs) ...
-    scorecard = client.get_defensibility(claim["claim_uid"])
-    zip_bytes = client.get_submission_package(inv["investigation_uid"])
-
-Example (dashboard: list investigations, load summary, graph):
-
-    invs = client.list_investigations(limit=20, is_archived=False)
-    inv = client.get_investigation(invs[0]["investigation_uid"])
-    claims = client.list_claims(inv["investigation_uid"])
-    def_batch = client.get_investigation_defensibility(inv["investigation_uid"])
-    graph = client.get_investigation_graph(inv["investigation_uid"])
-"""
+"""Thin HTTP client for the Chronicle API."""
 
 from __future__ import annotations
 
+import base64
 import contextlib
 import json
 import urllib.error
@@ -65,6 +36,10 @@ class ChronicleClient:
         self.project_path = str(project_path).strip()
         self.actor_id = actor_id
         self.actor_type = actor_type
+
+    @staticmethod
+    def _quote(value: str) -> str:
+        return urllib.parse.quote(value, safe="")
 
     def _headers(self, idempotency_key: str | None = None) -> dict[str, str]:
         h: dict[str, str] = {
@@ -120,8 +95,12 @@ class ChronicleClient:
         return raw
 
     def init_project(self) -> None:
-        """POST /project/init — ensure project exists."""
-        self._request("POST", "/project/init", body={"project_path": self.project_path})
+        """Ensure project path is configured and reachable.
+
+        The API auto-initializes on first project endpoint access, so there is no
+        explicit /project/init route.
+        """
+        self._request("GET", "/health")
 
     def list_investigations(
         self,
@@ -142,12 +121,16 @@ class ChronicleClient:
         if created_before is not None:
             params["created_before"] = created_before
         out = self._request("GET", "/investigations", params=params or None)
-        return cast(list[dict[str, Any]], out) if isinstance(out, list) else []
+        if isinstance(out, dict):
+            invs = out.get("investigations")
+            if isinstance(invs, list):
+                return cast(list[dict[str, Any]], invs)
+        return []
 
     def get_investigation(self, investigation_uid: str) -> dict[str, Any]:
         """GET /investigations/{uid} — one investigation (title, description, etc.). E.5."""
         out = self._request(
-            "GET", f"/investigations/{urllib.parse.quote(investigation_uid, safe='')}"
+            "GET", f"/investigations/{self._quote(investigation_uid)}"
         )
         if not out:
             raise ChronicleClientError("Investigation not found", status=404, body=out)
@@ -160,23 +143,34 @@ class ChronicleClient:
         include_withdrawn: bool = False,
         limit: int | None = None,
     ) -> list[dict[str, Any]]:
-        """GET /claims?investigation_uid= — list claims for an investigation. E.5."""
+        """GET /investigations/{uid}/claims — list claims for an investigation."""
         params: dict[str, str | int | bool | None] = {
-            "investigation_uid": investigation_uid,
             "include_withdrawn": include_withdrawn,
         }
         if limit is not None:
             params["limit"] = limit
-        out = self._request("GET", "/claims", params=params)
-        return cast(list[dict[str, Any]], out) if isinstance(out, list) else []
+        out = self._request(
+            "GET",
+            f"/investigations/{self._quote(investigation_uid)}/claims",
+            params=params,
+        )
+        if isinstance(out, dict):
+            claims = out.get("claims")
+            if isinstance(claims, list):
+                return cast(list[dict[str, Any]], claims)
+        return []
 
     def list_evidence(self, investigation_uid: str) -> list[dict[str, Any]]:
         """GET /investigations/{uid}/evidence — list evidence items. E.5."""
         out = self._request(
             "GET",
-            f"/investigations/{urllib.parse.quote(investigation_uid, safe='')}/evidence",
+            f"/investigations/{self._quote(investigation_uid)}/evidence",
         )
-        return cast(list[dict[str, Any]], out) if isinstance(out, list) else []
+        if isinstance(out, dict):
+            evidence = out.get("evidence")
+            if isinstance(evidence, list):
+                return cast(list[dict[str, Any]], evidence)
+        return []
 
     def get_investigation_defensibility(
         self,
@@ -184,22 +178,37 @@ class ChronicleClient:
         *,
         use_strength_weighting: bool = False,
     ) -> dict[str, Any]:
-        """GET /investigations/{uid}/defensibility — batch defensibility for all claims. E.5."""
-        params: dict[str, str | int | bool | None] = {}
-        if use_strength_weighting:
-            params["use_strength_weighting"] = True
-        out = self._request(
-            "GET",
-            f"/investigations/{urllib.parse.quote(investigation_uid, safe='')}/defensibility",
-            params=params or None,
-        )
-        return cast(dict[str, Any], out)
+        """Compute batch defensibility by listing claims and fetching each scorecard."""
+        claims = self.list_claims(investigation_uid, include_withdrawn=False)
+        defensibility_by_claim: dict[str, Any] = {}
+        for claim in claims:
+            claim_uid = claim.get("claim_uid")
+            if not isinstance(claim_uid, str) or not claim_uid:
+                continue
+            params: dict[str, str | int | bool | None] | None = None
+            if use_strength_weighting:
+                params = {"use_strength_weighting": True}
+            try:
+                score = self._request(
+                    "GET",
+                    f"/claims/{self._quote(claim_uid)}/defensibility",
+                    params=params,
+                )
+            except ChronicleClientError as e:
+                if e.status == 404:
+                    continue
+                raise
+            defensibility_by_claim[claim_uid] = score
+        return {
+            "investigation_uid": investigation_uid,
+            "defensibility_by_claim": defensibility_by_claim,
+        }
 
     def get_investigation_graph(self, investigation_uid: str) -> dict[str, Any]:
         """GET /investigations/{uid}/graph — nodes (claims, evidence) and edges (support, challenge). E.5."""
         out = self._request(
             "GET",
-            f"/investigations/{urllib.parse.quote(investigation_uid, safe='')}/graph",
+            f"/investigations/{self._quote(investigation_uid)}/graph",
         )
         if not isinstance(out, dict):
             return {"nodes": [], "edges": []}
@@ -236,7 +245,7 @@ class ChronicleClient:
             dict[str, Any],
             self._request(
                 "POST",
-                f"/investigations/{investigation_uid}/claims",
+                f"/investigations/{self._quote(investigation_uid)}/claims",
                 body={"text": text},
                 idempotency_key=idempotency_key,
             ),
@@ -246,7 +255,7 @@ class ChronicleClient:
         """GET /claims/{uid}/defensibility — scorecard for a claim."""
         return cast(
             dict[str, Any] | None,
-            self._request("GET", f"/claims/{claim_uid}/defensibility"),
+            self._request("GET", f"/claims/{self._quote(claim_uid)}/defensibility"),
         )
 
     def get_submission_package(
@@ -255,9 +264,42 @@ class ChronicleClient:
         *,
         include_chain_of_custody: bool = False,
     ) -> bytes:
-        """GET /investigations/{uid}/submission-package — ZIP bytes."""
-        path = f"/investigations/{investigation_uid}/submission-package?include_chain_of_custody={str(include_chain_of_custody).lower()}"
-        return cast(bytes, self._request("GET", path, parse_json=False))
+        """POST /investigations/{uid}/submission-package — ZIP bytes.
+
+        include_chain_of_custody is reserved for compatibility and currently ignored
+        by the API.
+        """
+        _ = include_chain_of_custody
+        path = f"/investigations/{self._quote(investigation_uid)}/submission-package"
+        return cast(bytes, self._request("POST", path, parse_json=False))
+
+    def ingest_evidence(
+        self,
+        investigation_uid: str,
+        content: str | bytes,
+        *,
+        original_filename: str = "evidence",
+        media_type: str = "text/plain",
+        idempotency_key: str | None = None,
+    ) -> dict[str, Any]:
+        """POST /investigations/{uid}/evidence — ingest text or binary evidence."""
+        body: dict[str, Any] = {
+            "original_filename": original_filename,
+            "media_type": media_type,
+        }
+        if isinstance(content, str):
+            body["content"] = content
+        else:
+            body["content_base64"] = base64.b64encode(content).decode("ascii")
+        return cast(
+            dict[str, Any],
+            self._request(
+                "POST",
+                f"/investigations/{self._quote(investigation_uid)}/evidence",
+                body=body,
+                idempotency_key=idempotency_key,
+            ),
+        )
 
     def ingest_evidence_from_url(
         self,
@@ -268,17 +310,30 @@ class ChronicleClient:
         provenance_type: str | None = None,
         idempotency_key: str | None = None,
     ) -> dict[str, Any]:
-        """POST /investigations/{id}/evidence/from-url — fetch URL and ingest as evidence."""
-        body: dict[str, Any] = {"url": url[:4096]}
-        if title is not None:
-            body["title"] = title[:500]
-        if provenance_type is not None:
+        """Fetch URL client-side, then ingest via /investigations/{uid}/evidence.
+
+        The API intentionally does not provide a server-side from-url endpoint.
+        """
+        req = urllib.request.Request(url[:4096], method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                blob = resp.read()
+                mt = resp.headers.get_content_type() or "application/octet-stream"
+        except urllib.error.URLError as e:
+            raise ChronicleClientError(f"URL fetch failed: {e}") from e
+        filename = (title or "").strip() or Path(urllib.parse.urlparse(url).path).name or "evidence"
+        body: dict[str, Any] = {
+            "content_base64": base64.b64encode(blob).decode("ascii"),
+            "original_filename": filename[:500],
+            "media_type": mt,
+        }
+        if provenance_type:
             body["provenance_type"] = provenance_type
         return cast(
             dict[str, Any],
             self._request(
                 "POST",
-                f"/investigations/{investigation_uid}/evidence/from-url",
+                f"/investigations/{self._quote(investigation_uid)}/evidence",
                 body=body,
                 idempotency_key=idempotency_key,
             ),

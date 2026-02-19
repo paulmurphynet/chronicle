@@ -13,23 +13,36 @@ import re
 import sys
 from pathlib import Path
 
-
-# Match [text](url) with url not starting with http://, https://, mailto:, #
-LINK_PATTERN = re.compile(
-    r"\]\s*\(\s*(?!https?://|mailto:)([^#)\s]+)(?:#([^)]*))?\s*\)"
-)
+# Match markdown links [text](target) with no whitespace between "](" so checklist
+# items like "[ ] (Optional)" are not treated as links.
+LINK_PATTERN = re.compile(r"(?<!!)\[[^\]]+\]\(([^)#]+)(?:#([^)]*))?\)")
+SCHEME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
 
 
 def get_links(content: str) -> list[tuple[str, str | None]]:
     """Return list of (path, anchor) from relative links in content."""
-    out = []
+    out: list[tuple[str, str | None]] = []
     for m in LINK_PATTERN.finditer(content):
         path_part = m.group(1).strip()
         anchor = m.group(2)
-        if path_part.startswith("#"):
+        if not path_part or path_part.startswith("#"):
+            continue
+        if SCHEME_PATTERN.match(path_part):
             continue
         out.append((path_part, anchor))
     return out
+
+
+def _target_exists(base_dir: Path, link_path: str) -> bool:
+    """Return True when the markdown link resolves to an existing local target."""
+    raw_target = (base_dir / link_path).resolve()
+    if raw_target.exists():
+        return True
+    # Common shorthand in docs: link without extension points to markdown file.
+    if not raw_target.suffix and raw_target.with_suffix(".md").exists():
+        return True
+    # Directory links are common in this repo (e.g., ../docs/).
+    return bool(raw_target.is_dir())
 
 
 def check_doc_links(root: Path) -> list[tuple[Path, str, str | None, str]]:
@@ -46,14 +59,8 @@ def check_doc_links(root: Path) -> list[tuple[Path, str, str | None, str]]:
             continue
         base_dir = path.parent
         for link_path, anchor in get_links(content):
-            # Resolve relative to current file's directory
-            target = (base_dir / link_path).resolve()
-            if not target.suffix:
-                target = target.with_suffix(".md")
-            if not target.exists():
+            if not _target_exists(base_dir, link_path):
                 errors.append((path, link_path, anchor, "target not found"))
-            elif not target.is_file():
-                errors.append((path, link_path, anchor, "target is not a file"))
     return errors
 
 

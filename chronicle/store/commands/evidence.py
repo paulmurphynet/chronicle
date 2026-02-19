@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any
 
 from chronicle.core.errors import ChronicleUserError
-from chronicle.core.validation import validate_defeater_kind
 from chronicle.core.events import (
     EVENT_CHAIN_OF_CUSTODY_REPORT_GENERATED,
     EVENT_CHALLENGE_LINKED,
@@ -45,7 +44,7 @@ from chronicle.core.uid import (
     generate_span_uid,
     generate_supersession_uid,
 )
-from chronicle.core.validation import MAX_EVIDENCE_BYTES
+from chronicle.core.validation import MAX_EVIDENCE_BYTES, validate_defeater_kind
 from chronicle.store.commands.attestation import apply_attestation_to_payload
 from chronicle.store.protocols import EventStore, EvidenceStore, ReadModel
 

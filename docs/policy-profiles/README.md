@@ -22,4 +22,4 @@ Shareable policy profiles for different verticals. Each JSON file can be used as
 - **Reference UI / vendors:** The Reference UI (or vertical UIs) can show “blocked” / “allowed” by tier and policy; use these JSONs as templates or load them by `profile_id`.
 - **Compare policies:** Use `get_policy_compatibility(built_under, viewing_under)` in [policy_compat.py](../../chronicle/core/policy_compat.py) to diff two profiles.
 
-See [Reference UI plan](reference-ui-plan.md) and [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md) for how policy and tiers affect the UI.
+See [Reference UI plan](../reference-ui-plan.md) and [Human-in-the-loop and attestation](../human-in-the-loop-and-attestation.md) for how policy and tiers affect the UI.

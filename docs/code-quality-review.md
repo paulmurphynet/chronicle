@@ -1,5 +1,9 @@
 # Code quality review
 
+> [!WARNING]
+> Archived review snapshot from an earlier phase. Numbers and status in this file may be stale.
+> For current gates and priorities, use [coverage-core](coverage-core.md), [to_do](to_do.md), and [CONTRIBUTING](../CONTRIBUTING.md).
+
 This document summarizes a project-wide review covering **logic errors**, **security**, and **test coverage**. It reflects the state of the repo after the hardening and tests added in this pass.
 
 ---

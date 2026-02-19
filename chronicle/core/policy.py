@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from chronicle.core.errors import ChronicleUserError
+
 # Conventional project-level policy file (Phase 6). Active policy for the project.
 POLICY_FILENAME = "policy.json"
 # Directory for multiple shareable profiles (Phase 10). Files: {profile_id}.json or {profile_id}_v1.json.
@@ -695,17 +697,17 @@ def import_policy_to_project(
 
 
 def require_workspace_for_command(workspace: str, command_name: str) -> None:
-    """Raise ValueError if workspace tier does not allow this command. Spec 1.5.1 Required Tier."""
+    """Raise ChronicleUserError if workspace tier does not allow this command."""
     if workspace not in WORKSPACES:
-        raise ValueError(f"workspace must be one of {WORKSPACES!r}, got {workspace!r}")
+        raise ChronicleUserError(f"workspace must be one of {WORKSPACES!r}, got {workspace!r}")
     if command_name in VAULT_ONLY_COMMANDS:
         if workspace != WORKSPACE_VAULT:
-            raise ValueError(
+            raise ChronicleUserError(
                 f"command {command_name!r} requires Vault workspace (got {workspace!r})"
             )
         return
     if command_name in FORGE_PLUS_COMMANDS and workspace == WORKSPACE_SPARK:
-        raise ValueError(
+        raise ChronicleUserError(
             f"command {command_name!r} requires Forge or Vault workspace (got {workspace!r})"
         )
 
@@ -716,12 +718,12 @@ def validate_mes_for_sef(
     evidence_types: list[str],
     max_assertion_confidence: float | None,
 ) -> None:
-    """Raise ValueError if claim does not meet MES and evidence admissibility for SEF. Spec 1.5.1a."""
+    """Raise ChronicleUserError if claim does not meet MES/admissibility for SEF."""
     mes = next((r for r in profile.mes_rules if r.target_claim_type == "SEF"), None)
     if mes is None:
         return
     if distinct_evidence_count < mes.min_independent_sources:
-        raise ValueError(
+        raise ChronicleUserError(
             f"PromoteToSEF requires at least {mes.min_independent_sources} independent source(s) "
             f"(policy: {profile.profile_id}); got {distinct_evidence_count}"
         )
@@ -730,14 +732,14 @@ def validate_mes_for_sef(
         and mes.min_confidence > 0
         and (max_assertion_confidence is None or max_assertion_confidence < mes.min_confidence)
     ):
-        raise ValueError(
+        raise ChronicleUserError(
             f"PromoteToSEF requires assertion confidence >= {mes.min_confidence} "
             f"(policy: {profile.profile_id}); max confidence is {max_assertion_confidence}"
         )
     if profile.evidence_admissibility and profile.evidence_admissibility.inadmissible_for_sef:
         for et in evidence_types:
             if et in profile.evidence_admissibility.inadmissible_for_sef:
-                raise ValueError(
+                raise ChronicleUserError(
                     f"PromoteToSEF: evidence type {et!r} is inadmissible for SEF "
                     f"(policy: {profile.profile_id})"
                 )
@@ -752,16 +754,16 @@ def validate_checkpoint_scope(
     investigation_has_sef: bool,
     tensions_have_rationale: list[bool] | None = None,
 ) -> None:
-    """Raise ValueError if checkpoint scope does not meet profile checkpoint_rules. Spec 1.5.1a. Phase 3: requires_tension_resolution_rationale."""
+    """Raise ChronicleUserError if checkpoint scope misses policy requirements."""
     cr = profile.checkpoint_rules
     if cr is None:
         return
     if cr.requires_all_claims_typed and not all(claims_typed):
-        raise ValueError(
+        raise ChronicleUserError(
             "CreateCheckpoint: all referenced claims must be typed (policy checkpoint_rules)"
         )
     if cr.requires_all_tensions_addressed and not all(tensions_addressed):
-        raise ValueError(
+        raise ChronicleUserError(
             "CreateCheckpoint: all referenced tensions must be addressed / non-OPEN (policy checkpoint_rules)"
         )
     if (
@@ -769,11 +771,11 @@ def validate_checkpoint_scope(
         and tensions_have_rationale is not None
         and not all(tensions_have_rationale)
     ):
-        raise ValueError(
+        raise ChronicleUserError(
             "CreateCheckpoint: all addressed tensions in scope must have non-empty resolution rationale (policy checkpoint_rules requires_tension_resolution_rationale)"
         )
     if cr.requires_at_least_one_sef and not investigation_has_sef:
-        raise ValueError(
+        raise ChronicleUserError(
             "CreateCheckpoint: investigation must have at least one SEF claim (policy checkpoint_rules)"
         )
 

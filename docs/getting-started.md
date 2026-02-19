@@ -1,6 +1,6 @@
 # Getting started with Chronicle
 
-One page: what Chronicle is, how to install it, and how to run the scorer and verifier. After this, go to the [Story](story/README.md) for the story or [Lessons](lessons/README.md) for the codebase walkthrough.
+One page: what Chronicle is, how to install it, and how to run the scorer and verifier. After this, go to the [Story](../story/README.md) for the story or [Lessons](../lessons/README.md) for the codebase walkthrough.
 
 ---
 
@@ -64,4 +64,4 @@ See [Benchmark](benchmark.md) for options and sample generation.
 - **Understand the project** — [Reference UI plan](reference-ui-plan.md) (what we're building); before relying on scores or verification, read [Critical areas](../critical_areas/README.md) if present.
 - **Run the scorer in your pipeline** — [Eval contract](eval_contract.md), [RAG evals: defensibility metric](rag-evals-defensibility-metric.md), [Integrating with Chronicle](integrating-with-chronicle.md).
 - **When to use Chronicle** — [When to use Chronicle](when-to-use-chronicle.md) (scope vs data lineage / ML provenance).
-- **Contribute** — [CONTRIBUTING](../CONTRIBUTING.md) when present; [Lessons](lessons/README.md) for codebase walkthrough if present.
+- **Contribute** — [CONTRIBUTING](../CONTRIBUTING.md) when present; [Lessons](../lessons/README.md) for codebase walkthrough if present.

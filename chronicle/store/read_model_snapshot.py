@@ -6,6 +6,7 @@ is then "restore snapshot and replay tail events" instead of full replay from ze
 
 from __future__ import annotations
 
+import contextlib
 import json
 import sqlite3
 from pathlib import Path
@@ -18,7 +19,6 @@ from chronicle.store.schema import (
     run_read_model_ddl_only,
     truncate_read_model_tables,
 )
-
 
 SNAPSHOT_META_DDL = """
 CREATE TABLE IF NOT EXISTS snapshot_meta (
@@ -150,10 +150,8 @@ def restore_from_snapshot(
         main_conn.execute("ATTACH DATABASE ? AS snap", (str(snapshot_path),))
         try:
             for table in _INSERT_ORDER:
-                try:
+                with contextlib.suppress(sqlite3.OperationalError):
                     main_conn.execute(f"INSERT INTO {table} SELECT * FROM snap.{table}")
-                except sqlite3.OperationalError:
-                    pass
             main_conn.commit()
         finally:
             main_conn.execute("DETACH DATABASE snap")

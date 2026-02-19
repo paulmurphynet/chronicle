@@ -7,7 +7,6 @@ runs in a temporary project. Implements docs/eval_contract.md.
 
 from __future__ import annotations
 
-import json
 import tempfile
 import urllib.request
 from pathlib import Path
@@ -47,7 +46,7 @@ def _fetch_url(url: str) -> str | None:
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Chronicle-Scorer/1.0"})
         with opener.open(req, timeout=30) as resp:
-            raw = resp.read(_URL_FETCH_MAX_BYTES + 1)
+            raw: bytes = resp.read(_URL_FETCH_MAX_BYTES + 1)
             if len(raw) > _URL_FETCH_MAX_BYTES:
                 return None
             return raw.decode("utf-8", errors="replace").strip()

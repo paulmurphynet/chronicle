@@ -28,4 +28,4 @@ PYTHONPATH=. python3 scripts/verticals/journalism/generate_sample.py
 
 ## Examples as tests
 
-CI can run each generator and then run the verifier on each output. See [Vertical testing and improvement loop](../docs/vertical-testing-and-improvement-loop.md) for the workflow and testing log.
+CI can run each generator and then run the verifier on each output. See [Benchmark](../../docs/benchmark.md) and [Eval and benchmarking](../../docs/eval-and-benchmarking.md) for workflow guidance.

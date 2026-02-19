@@ -62,7 +62,7 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/investigations` | List investigations (uid, title, current_tier, etc.). |
+| GET | `/investigations` | List investigations (uid, title, current_tier, etc.). Query: `limit?`, `is_archived?`, `created_since?`, `created_before?`. |
 | GET | `/investigations/{id}` | Get single investigation (includes current_tier, tier_changed_at, created_at, updated_at). |
 | GET | `/investigations/{id}/tier-history` | List tier transitions, newest first. Query: `limit?` (default 100). |
 | GET | `/investigations/{id}/tension-suggestions` | List tension suggestions. Query: `status?` (pending \| confirmed \| dismissed; default pending), `limit?` (default 500). |

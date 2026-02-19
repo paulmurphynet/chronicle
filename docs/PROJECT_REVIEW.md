@@ -1,5 +1,9 @@
 # Chronicle: Project review
 
+> [!WARNING]
+> Archived review snapshot. This file contains historical assessments and may include stale status/threshold values.
+> For current priorities and implementation status, use [to_do](to_do.md), [coverage-core](coverage-core.md), and [CONTRIBUTING](../CONTRIBUTING.md).
+
 A full review of the repository—strengths, weaknesses, and recommended new or improved features. Use this to prioritize work and communicate project health to stakeholders.
 
 ---
@@ -25,7 +29,7 @@ A full review of the repository—strengths, weaknesses, and recommended new or 
 
 ### Clarity of purpose and boundaries
 
-- **Mission and vision** are stated in the [Story](story/README.md): defensibility as a first-class, verifiable signal; "show your work" that can be verified, not just promised. The narrative is clear and avoids overclaiming.
+- **Mission and vision** are stated in the [Story](../story/README.md): defensibility as a first-class, verifiable signal; "show your work" that can be verified, not just promised. The narrative is clear and avoids overclaiming.
 - **Critical areas** (six documents) spell out what defensibility and "verified" do *not* guarantee (truth, source independence, verifier scope, evidence–claim validation, policy grounding, actor identity). This reduces over-trust and supports safe adoption.
 - **Epistemology scope** and **verification guarantees** are documented; the technical report is citable and defines defensibility and the core schema precisely.
 
