@@ -53,6 +53,18 @@ Expected outcome:
 2. Report artifacts are written with claim/evidence mappings.
 3. Defensibility is available for each produced claim.
 
+Optional one-shot review packet (TE-05) for legal/compliance/editorial handoff:
+
+```bash
+chronicle review-packet <investigation_uid> --path /path/to/project --output review_packet.json
+```
+
+Or via API:
+
+```bash
+curl "http://127.0.0.1:8000/investigations/<investigation_uid>/review-packet"
+```
+
 ## Workflow 3: Benchmark trust tracking
 
 Goal: track trust KPI trends over time with benchmark outputs.

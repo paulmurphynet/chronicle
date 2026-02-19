@@ -261,7 +261,7 @@ class EvidenceTrustAssessment:
 class DefensibilityScorecard:
     """Defensibility scorecard for a claim. Spec epistemic-tools 7.3, product-roadmap 9.6. Phase 4: contradiction_handling. Phase B.2: corroboration may include support_weighted_sum, challenge_weighted_sum when strength weighting used.
 
-    Stable metrics for eval harnesses (D.1): claim_uid, provenance_quality, corroboration (support_count, challenge_count, independent_sources_count), contradiction_status, knowability. Same shape from get_defensibility_score and GET /claims/{uid}/defensibility. See docs/defensibility-metrics-schema.md."""
+    Stable metrics for eval harnesses (D.1): claim_uid, provenance_quality, corroboration (support_count, challenge_count, independent_sources_count), contradiction_status, knowability, link_assurance_level. Same shape from get_defensibility_score and GET /claims/{uid}/defensibility. See docs/defensibility-metrics-schema.md."""
 
     claim_uid: str
     provenance_quality: str  # strong | medium | weak | challenged
@@ -288,6 +288,10 @@ class DefensibilityScorecard:
     )
     # Phase 6: risk signals for UX badges (single_origin_support, bulk_single_actor_ingest, high_contradiction_count)
     risk_signals: list[str] | None = None
+    # TE-02: linkage assurance posture (human_reviewed | tool_generated | mixed_human_tool | unknown | no_links)
+    link_assurance_level: str = "unknown"
+    # TE-02: caveat text to reduce over-trust in support/challenge counts.
+    link_assurance_caveat: str | None = None
 
 
 @dataclass

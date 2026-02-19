@@ -766,6 +766,76 @@ def _compute_risk_signals(
     return signals
 
 
+def _link_actor_type_breakdown(read_model: ReadModel, claim_uid: str) -> dict[str, int]:
+    """Best-effort actor_type counts for active links on a claim."""
+    getter = getattr(read_model, "get_link_actor_type_breakdown_for_claim", None)
+    if not callable(getter):
+        return {}
+    try:
+        out = getter(claim_uid)
+    except Exception:
+        return {}
+    if not isinstance(out, dict):
+        return {}
+    cleaned: dict[str, int] = {}
+    for k, v in out.items():
+        if not isinstance(k, str):
+            continue
+        try:
+            cleaned[k.strip().lower() or "unknown"] = int(v)
+        except (TypeError, ValueError):
+            continue
+    return cleaned
+
+
+def _link_assurance(
+    actor_type_counts: dict[str, int],
+    total_links: int,
+) -> tuple[str, str]:
+    """Return (link_assurance_level, caveat) for defensibility consumers."""
+    if total_links <= 0:
+        return (
+            "no_links",
+            "No support/challenge links are recorded for this claim.",
+        )
+    if not actor_type_counts:
+        return (
+            "unknown",
+            "Link actor provenance is unavailable; review link quality before high-trust use.",
+        )
+
+    human = actor_type_counts.get("human", 0)
+    tool = actor_type_counts.get("tool", 0)
+    system = actor_type_counts.get("system", 0)
+    unknown = actor_type_counts.get("unknown", 0)
+    automated = tool + system
+
+    if human == total_links and automated == 0 and unknown == 0:
+        return (
+            "human_reviewed",
+            "Links were recorded by human actors; Chronicle still does not verify semantic entailment.",
+        )
+    if automated == total_links and human == 0 and unknown == 0:
+        return (
+            "tool_generated",
+            "Links were recorded only by tool/system actors; human review is recommended for high-assurance uses.",
+        )
+    if human > 0 and automated > 0:
+        return (
+            "mixed_human_tool",
+            "Links combine human and tool/system actors; treat assurance as mixed and review critical claims.",
+        )
+    if unknown > 0:
+        return (
+            "unknown",
+            "Some link actor types are unknown; review link provenance before relying on support counts.",
+        )
+    return (
+        "mixed_human_tool",
+        "Link provenance is mixed; review critical links before high-trust decisions.",
+    )
+
+
 def get_defensibility_score(
     read_model: ReadModel,
     claim_uid: str,
@@ -917,6 +987,12 @@ def get_defensibility_score(
             risk_signals = list(risk_signals) if risk_signals else []
             risk_signals.append("sources_without_independence_rationale")
 
+    actor_type_counts = _link_actor_type_breakdown(read_model, claim_uid)
+    link_assurance_level, link_assurance_caveat = _link_assurance(
+        actor_type_counts,
+        support_count + challenge_count,
+    )
+
     return DefensibilityScorecard(
         claim_uid=claim_uid,
         provenance_quality=provenance_quality,
@@ -930,6 +1006,8 @@ def get_defensibility_score(
         evidence_integrity=evidence_integrity,
         evidence_trust=evidence_trust,
         risk_signals=risk_signals if risk_signals else None,
+        link_assurance_level=link_assurance_level,
+        link_assurance_caveat=link_assurance_caveat,
     )
 
 

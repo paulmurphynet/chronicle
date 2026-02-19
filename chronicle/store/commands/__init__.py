@@ -8,7 +8,10 @@ from chronicle.store.commands.artifacts_checkpoints import (
     freeze_artifact_version,
     get_checkpoint_diff,
 )
-from chronicle.store.commands.audit_trail import get_human_decisions_audit_trail
+from chronicle.store.commands.audit_trail import (
+    get_human_decisions_audit_trail,
+    get_reviewer_decision_ledger,
+)
 from chronicle.store.commands.claims import (
     analyze_claim_atomicity,
     assert_claim,
@@ -93,6 +96,7 @@ __all__ = [
     "get_source_reliability",
     "get_sources_backing_claim",
     "get_human_decisions_audit_trail",
+    "get_reviewer_decision_ledger",
     "get_investigation_event_history",
     "declare_tension",
     "decompose_claim",

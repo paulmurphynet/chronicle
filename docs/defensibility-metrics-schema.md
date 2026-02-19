@@ -27,6 +27,8 @@ Eval harnesses can rely on the following fields. All are present in the API resp
 | `corroboration.challenge_count` | int | Number of challenge links. |
 | `corroboration.independent_sources_count` | int | Count of distinct sources (as linked by the user) backing support; not independently verified. In the **standalone scorer** path, evidence is not linked to sources, so this is typically 0. |
 | `contradiction_status` | string | `none` \| `open` \| `acknowledged` \| `resolved`. |
+| `link_assurance_level` | string (optional) | `human_reviewed` \| `tool_generated` \| `mixed_human_tool` \| `unknown` \| `no_links`. Indicates who created support/challenge links. |
+| `link_assurance_caveat` | string (optional) | Caveat text for interpreting link-based metrics; reminds readers that Chronicle does not verify entailment. |
 | `knowability` | object (optional) | When set: `known_as_of` (ISO8601 or null), `knowable_from` (string or null). "When could we first defend this claim?" |
 
 **sources_backing_claim** (optional): when present, list of sources backing the claim, each with `source_uid`, `display_name`, and optional `independence_notes` / `reliability_notes` (user-supplied; we record, we don't verify). Support/challenge links may include optional **rationale** (warrant) and **defeater_kind** (e.g. rebutting, undercutting on challenges); we record, we don't verify.
@@ -55,6 +57,8 @@ For "defensibility as of event E or timestamp T" (e.g. for audits or time-series
     "challenge_count": 0,
     "independent_sources_count": 1
   },
+  "link_assurance_level": "tool_generated",
+  "link_assurance_caveat": "Links were recorded only by tool/system actors; human review is recommended for high-assurance uses.",
   "contradiction_status": "none",
   "knowability": {
     "known_as_of": "2024-01-15",

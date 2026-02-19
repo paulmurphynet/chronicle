@@ -52,6 +52,9 @@ Chronicle should optimize for:
 - **Adapter mapping profiles completed**: `starter_batch_to_scorer.py` now supports JSON mapping profiles (including nested key paths), with nested examples and tests.
 - **Documentation consistency sweep completed**: updated README/docs plus lessons/quizzes to reflect current benchmark, adapter, and Neo4j validation workflows.
 - **TE-01 completed**: policy compatibility preflight shipped across session API (`get_policy_compatibility_preflight`), HTTP (`GET /investigations/{id}/policy-compatibility`), CLI (`chronicle policy compat`), and Reference UI policy tab; frontend route parity regenerated and regression tests added for session/CLI.
+- **TE-02 completed**: added `link_assurance_level` and `link_assurance_caveat` to defensibility metrics surfaced by scorer/session/API/export (including eval contract docs/schema updates and regression tests) so auto-linked vs human-reviewed link posture is explicit.
+- **TE-04 completed**: shipped a unified reviewer decision ledger/report across session/API/CLI (`get_reviewer_decision_ledger`, `GET /investigations/{id}/reviewer-decision-ledger`, `chronicle reviewer-decision-ledger`) consolidating confirmations, overrides, dismissals, tier transitions, actor/time context, and unresolved tensions in one artifact.
+- **TE-05 completed**: shipped a unified review packet generator across session/API/CLI (`get_review_packet`, `GET /investigations/{id}/review-packet`, `chronicle review-packet`) combining policy compatibility, policy rationale summary, decision ledger snapshot, chain-of-custody report metadata, reasoning briefs, and audit export bundle in one action.
 
 ## Release blockers
 
@@ -65,19 +68,10 @@ No active release blockers at this time. Keep validating changes against:
 
 Active implementation batch from `thought_experiments/decision-register.md` (2026-02-19), prioritized:
 
-1. **TE-02 (P1): Link assurance metadata in defensibility outputs.**
-   Add `link_assurance_level` and caveat text to scorer/API/export outputs so auto-linked evidence is distinguishable from reviewed links.
-   Done when contract/schema/docs/tests cover the fields and backward compatibility is preserved.
-2. **TE-04 (P1): Unified reviewer decision ledger/report.**
-   Add a consolidated report/endpoint summarizing human confirmations, overrides, suggestion dismissals, unresolved tensions, and actor/time context.
-   Done when legal/compliance/editorial review can consume one artifact instead of multiple command outputs.
-3. **TE-05 (P2): Unified review packet generator.**
-   Produce a single review bundle combining reasoning brief, chain-of-custody report, policy compatibility summary, policy rationale summary, and decision-ledger snapshot.
-   Done when an investigator can generate this packet in one API/CLI action and the packet is documented in reference workflows.
-4. **TE-06 (P2): Role-based review checklists by policy profile.**
+1. **TE-06 (P2): Role-based review checklists by policy profile.**
    Add policy-linked checklist templates for journalism/legal/compliance workflows in docs/UI guidance.
    Done when templates are available and linked from reference workflow docs and policy profile docs.
-5. **TE-03 (P2): Multi-vertical workflow parity expansion.**
+2. **TE-03 (P2): Multi-vertical workflow parity expansion.**
    Add research/history profile example and expand reproducible workflows for legal/compliance/history use cases.
    Done when `scripts/run_reference_workflows.py` includes these scenarios with deterministic report output and docs are updated.
 

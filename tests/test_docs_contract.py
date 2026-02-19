@@ -21,6 +21,8 @@ def test_readme_quickstart_scorer_example_is_valid() -> None:
     assert out.get("error") != "invalid_input"
     assert out.get("contract_version") == "1.0"
     assert "claim_uid" in out
+    assert out.get("link_assurance_level") == "tool_generated"
+    assert isinstance(out.get("link_assurance_caveat"), str)
 
 
 def test_api_score_works_without_project_path(monkeypatch: pytest.MonkeyPatch) -> None:

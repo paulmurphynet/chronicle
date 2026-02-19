@@ -55,6 +55,7 @@ def test_session_flow_ingest_propose_link_defensibility(tmp_path: Path) -> None:
     assert scorecard.provenance_quality in ("strong", "medium", "weak", "challenged")
     assert scorecard.corroboration.get("support_count", 0) >= 1
     assert scorecard.contradiction_status in ("none", "open", "acknowledged", "resolved")
+    assert scorecard.link_assurance_level == "tool_generated"
 
 
 def test_session_requires_existing_project(tmp_path: Path) -> None:
@@ -151,6 +152,8 @@ def test_session_defensibility_metrics_contract(tmp_path: Path) -> None:
     assert "challenge_count" in corr
     assert "independent_sources_count" in corr
     assert metrics.get("contradiction_status") in ("none", "open", "acknowledged", "resolved")
+    assert metrics.get("link_assurance_level") == "tool_generated"
+    assert isinstance(metrics.get("link_assurance_caveat"), str)
 
 
 def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
@@ -194,6 +197,7 @@ def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
     assert ref["link_type"] == "SUPPORT"
     assert "defensibility" in claim
     assert claim["defensibility"].get("provenance_quality") in ("strong", "medium", "weak", "challenged")
+    assert claim["defensibility"].get("link_assurance_level") == "tool_generated"
 
 
 def test_session_policy_compatibility_preflight(tmp_path: Path) -> None:
@@ -223,3 +227,49 @@ def test_session_policy_compatibility_preflight(tmp_path: Path) -> None:
     assert result["viewing_under"] == "policy_strict_test"
     assert isinstance(result.get("deltas"), list)
     assert any("min_independent_sources" in d.get("rule", "") for d in result["deltas"])
+
+
+def test_session_link_assurance_human_reviewed(tmp_path: Path) -> None:
+    """Human-created links should surface human_reviewed assurance level."""
+    create_project(tmp_path)
+    text = b"Claim support text."
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Human assurance test",
+            actor_id="alice",
+            actor_type="human",
+        )
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            text,
+            "text/plain",
+            original_filename="doc.txt",
+            actor_id="alice",
+            actor_type="human",
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": len(text.decode("utf-8"))},
+            quote=text.decode("utf-8"),
+            actor_id="alice",
+            actor_type="human",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "Supported claim.",
+            actor_id="alice",
+            actor_type="human",
+        )
+        session.link_support(
+            inv_uid,
+            span_uid,
+            claim_uid,
+            actor_id="alice",
+            actor_type="human",
+        )
+        scorecard = session.get_defensibility_score(claim_uid)
+    assert scorecard is not None
+    assert scorecard.link_assurance_level == "human_reviewed"
+    assert isinstance(scorecard.link_assurance_caveat, str)

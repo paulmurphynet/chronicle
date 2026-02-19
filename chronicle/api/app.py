@@ -386,6 +386,60 @@ def get_policy_compatibility_preflight(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
+@app.get("/investigations/{investigation_uid}/reviewer-decision-ledger")
+def get_reviewer_decision_ledger(
+    investigation_uid: str,
+    limit: int = 500,
+) -> dict[str, Any]:
+    """TE-04: Consolidated reviewer decision ledger and unresolved tensions snapshot."""
+    effective_limit = _clamp_limit(limit, default=500)
+    path = _get_project_path()
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                raise HTTPException(status_code=404, detail="Investigation not found")
+            return session.get_reviewer_decision_ledger(investigation_uid, limit=effective_limit)
+    except ChronicleUserError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.get("/investigations/{investigation_uid}/review-packet")
+def get_review_packet(
+    investigation_uid: str,
+    limit_claims: int = 200,
+    decision_limit: int = 500,
+    include_reasoning_briefs: bool = True,
+    include_full_trail: bool = False,
+    as_of_date: str | None = None,
+    as_of_event_id: str | None = None,
+    viewing_profile_id: str | None = None,
+    built_under_profile_id: str | None = None,
+    built_under_policy_version: str | None = None,
+) -> dict[str, Any]:
+    """TE-05: Build a unified review packet for legal/compliance/editorial handoff."""
+    effective_claim_limit = _clamp_limit(limit_claims, default=200)
+    effective_decision_limit = _clamp_limit(decision_limit, default=500)
+    path = _get_project_path()
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                raise HTTPException(status_code=404, detail="Investigation not found")
+            return session.get_review_packet(
+                investigation_uid,
+                limit_claims=effective_claim_limit,
+                decision_limit=effective_decision_limit,
+                include_reasoning_briefs=include_reasoning_briefs,
+                include_full_trail=include_full_trail,
+                as_of_date=as_of_date,
+                as_of_event_id=as_of_event_id,
+                viewing_profile_id=viewing_profile_id,
+                built_under_profile_id=built_under_profile_id,
+                built_under_policy_version=built_under_policy_version,
+            )
+    except ChronicleUserError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
 @app.post("/investigations/{investigation_uid}/tier")
 def set_investigation_tier(
     request: Request, investigation_uid: str, body: SetTierBody

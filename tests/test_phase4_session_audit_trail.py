@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from chronicle.core.errors import ChronicleUserError
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
@@ -160,9 +159,10 @@ def test_session_get_audit_export_bundle_with_as_of_event_id(tmp_path: Path) -> 
 def test_session_get_audit_export_bundle_investigation_not_found(tmp_path: Path) -> None:
     """get_audit_export_bundle raises when investigation does not exist."""
     create_project(tmp_path)
-    with ChronicleSession(tmp_path) as session:
-        with pytest.raises(ChronicleUserError, match="Investigation not found"):
-            session.get_audit_export_bundle("nonexistent-inv-uid")
+    with ChronicleSession(tmp_path) as session, pytest.raises(
+        ChronicleUserError, match="Investigation not found"
+    ):
+        session.get_audit_export_bundle("nonexistent-inv-uid")
 
 
 def test_session_get_reasoning_brief_with_as_of_date(tmp_path: Path) -> None:
@@ -193,6 +193,101 @@ def test_session_get_human_decisions_audit_trail(tmp_path: Path) -> None:
         _, inv_uid = session.create_investigation("Decisions", actor_id="t", actor_type="tool")
         trail = session.get_human_decisions_audit_trail(inv_uid, limit=100)
     assert isinstance(trail, list)
+
+
+def test_session_get_reviewer_decision_ledger(tmp_path: Path) -> None:
+    """get_reviewer_decision_ledger returns consolidated decisions plus unresolved tensions."""
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("Ledger", actor_id="editor", actor_type="human")
+        _, claim_a_uid = session.propose_claim(
+            inv_uid,
+            "Claim A.",
+            actor_id="editor",
+            actor_type="human",
+        )
+        _, claim_b_uid = session.propose_claim(
+            inv_uid,
+            "Claim B.",
+            actor_id="editor",
+            actor_type="human",
+        )
+        session.record_human_override(
+            claim_a_uid,
+            "defensibility_warning",
+            "Reviewed by senior editor.",
+            actor_id="editor",
+            actor_type="human",
+        )
+        session.record_human_confirm(
+            "claim",
+            claim_a_uid,
+            "editorial_review",
+            "Confirmed after review.",
+            actor_id="editor",
+            actor_type="human",
+        )
+        session.set_tier(
+            inv_uid,
+            "forge",
+            actor_id="editor",
+            actor_type="human",
+        )
+        _, tension_uid = session.declare_tension(
+            inv_uid,
+            claim_a_uid,
+            claim_b_uid,
+            tension_kind="contradiction",
+            notes="Potential conflict under review.",
+            actor_id="editor",
+            actor_type="human",
+            workspace="forge",
+        )
+
+        ledger = session.get_reviewer_decision_ledger(inv_uid, limit=200)
+
+    assert ledger["investigation_uid"] == inv_uid
+    assert "generated_at" in ledger
+    assert isinstance(ledger["decisions"], list)
+    assert isinstance(ledger["unresolved_tensions"], list)
+    assert any(d.get("decision_kind") == "human_overrode" for d in ledger["decisions"])
+    assert any(d.get("decision_kind") == "human_confirmed" for d in ledger["decisions"])
+    assert any(d.get("decision_kind") == "tier_changed" for d in ledger["decisions"])
+    assert any(t.get("tension_uid") == tension_uid for t in ledger["unresolved_tensions"])
+
+    summary = ledger["summary"]
+    assert summary["total_decisions"] >= 3
+    assert summary["tier_changed_count"] >= 1
+    assert summary["human_overrode_count"] >= 1
+    assert summary["human_confirmed_count"] >= 1
+    assert summary["unresolved_tensions_count"] >= 1
+
+
+def test_session_get_review_packet(tmp_path: Path) -> None:
+    """get_review_packet returns one artifact with policy, decisions, reasoning, and audit sections."""
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("ReviewPacket", actor_id="t", actor_type="tool")
+        _, claim_uid = session.propose_claim(inv_uid, "Packet claim", actor_id="t", actor_type="tool")
+        session.set_tier(inv_uid, "forge", actor_id="t", actor_type="human")
+
+        packet = session.get_review_packet(
+            inv_uid,
+            limit_claims=50,
+            decision_limit=100,
+            include_reasoning_briefs=True,
+        )
+
+    assert packet["investigation_uid"] == inv_uid
+    assert packet["investigation_title"] == "ReviewPacket"
+    assert "generated_at" in packet
+    assert packet["policy_compatibility"]["investigation_uid"] == inv_uid
+    assert packet["reviewer_decision_ledger"]["investigation_uid"] == inv_uid
+    assert packet["audit_export_bundle"]["investigation_uid"] == inv_uid
+    assert isinstance(packet["reasoning_briefs"], list)
+    assert any(r.get("claim_uid") == claim_uid for r in packet["reasoning_briefs"])
+    assert isinstance(packet["chain_of_custody_reports"], list)
+    assert isinstance(packet["warnings"], list)
 
 
 def test_session_get_investigation_event_history(tmp_path: Path) -> None:

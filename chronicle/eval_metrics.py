@@ -47,7 +47,11 @@ def scorecard_to_metrics_dict(
         "provenance_quality": scorecard.provenance_quality,
         "corroboration": _stable_corroboration(scorecard.corroboration),
         "contradiction_status": scorecard.contradiction_status,
+        "link_assurance_level": getattr(scorecard, "link_assurance_level", "unknown"),
     }
+    caveat = getattr(scorecard, "link_assurance_caveat", None)
+    if isinstance(caveat, str) and caveat.strip():
+        out["link_assurance_caveat"] = caveat.strip()
     if scorecard.knowability:
         out["knowability"] = _stable_knowability(scorecard.knowability)
     return out

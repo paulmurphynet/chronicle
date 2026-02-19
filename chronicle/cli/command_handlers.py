@@ -10,6 +10,7 @@ import tempfile
 from pathlib import Path
 
 from chronicle.cli import project_commands
+from chronicle.core.errors import ChronicleUserError
 from chronicle.store.project import (
     CHRONICLE_DB,
     create_project,
@@ -405,6 +406,74 @@ def cmd_audit_trail(investigation_uid: str, path: Path, limit: int = 500) -> int
         trail = session.get_human_decisions_audit_trail(investigation_uid, limit=limit)
         print(json.dumps(trail, indent=2))
     return 0
+
+
+def cmd_reviewer_decision_ledger(investigation_uid: str, path: Path, limit: int = 500) -> int:
+    """TE-04: Print unified reviewer decision ledger for an investigation."""
+    if not project_exists(path):
+        print(
+            f"Not a Chronicle project (no {CHRONICLE_DB}). Run: chronicle init {path}",
+            file=sys.stderr,
+        )
+        return 1
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            print(f"Investigation not found: {investigation_uid}", file=sys.stderr)
+            return 1
+        ledger = session.get_reviewer_decision_ledger(investigation_uid, limit=limit)
+        print(json.dumps(ledger, indent=2))
+    return 0
+
+
+def cmd_review_packet(
+    investigation_uid: str,
+    path: Path,
+    *,
+    output: Path | None = None,
+    limit_claims: int = 200,
+    decision_limit: int = 500,
+    include_reasoning_briefs: bool = True,
+    include_full_trail: bool = False,
+    as_of_date: str | None = None,
+    as_of_event_id: str | None = None,
+    viewing_profile_id: str | None = None,
+    built_under_profile_id: str | None = None,
+    built_under_policy_version: str | None = None,
+) -> int:
+    """TE-05: Build one review packet artifact for an investigation."""
+    if not project_exists(path):
+        print(
+            f"Not a Chronicle project (no {CHRONICLE_DB}). Run: chronicle init {path}",
+            file=sys.stderr,
+        )
+        return 1
+    try:
+        with ChronicleSession(path) as session:
+            packet = session.get_review_packet(
+                investigation_uid,
+                limit_claims=limit_claims,
+                decision_limit=decision_limit,
+                include_reasoning_briefs=include_reasoning_briefs,
+                include_full_trail=include_full_trail,
+                as_of_date=as_of_date,
+                as_of_event_id=as_of_event_id,
+                viewing_profile_id=viewing_profile_id,
+                built_under_profile_id=built_under_profile_id,
+                built_under_policy_version=built_under_policy_version,
+            )
+        out_json = json.dumps(packet, indent=2)
+        if output is not None:
+            output.write_text(out_json, encoding="utf-8")
+            print(f"Review packet written to {output}", file=sys.stderr)
+        else:
+            print(out_json)
+        return 0
+    except (ChronicleUserError, ValueError) as e:
+        if "not found" in str(e).lower():
+            print(f"Investigation not found: {investigation_uid}", file=sys.stderr)
+        else:
+            print(str(e), file=sys.stderr)
+        return 1
 
 
 def cmd_audit_export(

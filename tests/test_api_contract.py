@@ -87,6 +87,7 @@ def test_api_example_flow_and_identity_headers(tmp_path: Path, monkeypatch: pyte
         defs = client.get(f"/claims/{claim_uid}/defensibility")
         assert defs.status_code == 200, defs.text
         assert defs.json()["claim_uid"] == claim_uid
+        assert defs.json().get("link_assurance_level") == "tool_generated"
 
         listed = client.get("/investigations", params={"limit": 10, "is_archived": False})
         assert listed.status_code == 200
@@ -304,3 +305,90 @@ def test_api_policy_compatibility_preflight(
         assert body["viewing_under"] == "policy_strict_test"
         assert isinstance(body.get("deltas"), list)
         assert any("min_independent_sources" in d.get("rule", "") for d in body["deltas"])
+
+
+def test_api_reviewer_decision_ledger(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reviewer decision ledger endpoint returns decisions summary and unresolved tensions."""
+    project_path = tmp_path / "api-reviewer-ledger"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+
+        claim_a = client.post(
+            f"/investigations/{inv_uid}/claims",
+            json={"text": "Claim A"},
+            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
+        )
+        assert claim_a.status_code == 200, claim_a.text
+        claim_a_uid = claim_a.json()["claim_uid"]
+
+        claim_b = client.post(
+            f"/investigations/{inv_uid}/claims",
+            json={"text": "Claim B"},
+            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
+        )
+        assert claim_b.status_code == 200, claim_b.text
+        claim_b_uid = claim_b.json()["claim_uid"]
+
+        tension = client.post(
+            f"/investigations/{inv_uid}/tensions",
+            json={
+                "claim_a_uid": claim_a_uid,
+                "claim_b_uid": claim_b_uid,
+                "tension_kind": "contradiction",
+            },
+            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
+        )
+        assert tension.status_code == 200, tension.text
+
+        tier = client.post(
+            f"/investigations/{inv_uid}/tier",
+            json={"tier": "forge", "reason": "Escalate to review"},
+            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
+        )
+        assert tier.status_code == 200, tier.text
+
+        ledger = client.get(
+            f"/investigations/{inv_uid}/reviewer-decision-ledger",
+            params={"limit": 200},
+        )
+        assert ledger.status_code == 200, ledger.text
+        body = ledger.json()
+        assert body["investigation_uid"] == inv_uid
+        assert isinstance(body.get("decisions"), list)
+        assert isinstance(body.get("unresolved_tensions"), list)
+        assert any(d.get("decision_kind") == "tier_changed" for d in body["decisions"])
+        assert body["summary"]["tier_changed_count"] >= 1
+        assert body["summary"]["unresolved_tensions_count"] >= 1
+
+
+def test_api_review_packet(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Unified review packet endpoint returns combined packet sections."""
+    project_path = tmp_path / "api-review-packet"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+        claim = client.post(
+            f"/investigations/{inv_uid}/claims",
+            json={"text": "Packet claim"},
+            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
+        )
+        assert claim.status_code == 200, claim.text
+
+        packet = client.get(
+            f"/investigations/{inv_uid}/review-packet",
+            params={"limit_claims": 50, "decision_limit": 100},
+        )
+        assert packet.status_code == 200, packet.text
+        body = packet.json()
+        assert body["investigation_uid"] == inv_uid
+        assert "policy_compatibility" in body
+        assert "policy_rationale_summary" in body
+        assert "reviewer_decision_ledger" in body
+        assert "audit_export_bundle" in body

@@ -1107,6 +1107,27 @@ class SqliteReadModel:
             for r in cur.fetchall()
         ]
 
+    def get_link_actor_type_breakdown_for_claim(self, claim_uid: str) -> dict[str, int]:
+        """Return active link counts by actor_type for this claim.
+
+        Uses evidence_link.source_event_id -> events.event_id to classify links as
+        human/tool/system when available.
+        """
+        cur = self._conn.execute(
+            """SELECT LOWER(TRIM(e.actor_type)) AS actor_type, COUNT(*)
+               FROM evidence_link el
+               LEFT JOIN evidence_link_retraction r ON el.link_uid = r.link_uid
+               LEFT JOIN events e ON e.event_id = el.source_event_id
+               WHERE el.claim_uid = ? AND r.link_uid IS NULL
+               GROUP BY LOWER(TRIM(e.actor_type))""",
+            (claim_uid,),
+        )
+        out: dict[str, int] = {}
+        for actor_type, count in cur.fetchall():
+            key = actor_type if isinstance(actor_type, str) and actor_type.strip() else "unknown"
+            out[key] = int(count)
+        return out
+
     def list_graph_links(
         self,
         investigation_uid: str,

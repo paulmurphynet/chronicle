@@ -82,6 +82,8 @@ For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_pa
 | GET | `/investigations` | List investigations (uid, title, current_tier, etc.). Query: `limit?`, `cursor?`, `is_archived?`, `created_since?`, `created_before?`. Returns `page` metadata. |
 | GET | `/investigations/{id}` | Get single investigation (includes current_tier, tier_changed_at, created_at, updated_at). |
 | GET | `/investigations/{id}/policy-compatibility` | Policy compatibility preflight (built-under vs viewing-under). Query: `viewing_profile_id?`, `built_under_profile_id?`, `built_under_policy_version?`. Returns rule-level `deltas` plus `message` when no comparison basis is available. |
+| GET | `/investigations/{id}/reviewer-decision-ledger` | Unified reviewer decision ledger/report (TE-04): consolidated decision events (confirmations, overrides, dismissals, tier transitions) with actor/time context and unresolved tensions snapshot. Query: `limit?` (default 500). |
+| GET | `/investigations/{id}/review-packet` | Unified review packet (TE-05): one artifact combining policy compatibility, policy rationale summary, reviewer decision ledger, chain-of-custody report metadata, reasoning briefs, and audit export bundle. Query: `limit_claims?`, `decision_limit?`, `include_reasoning_briefs?`, `include_full_trail?`, `as_of_date?`, `as_of_event_id?`, `viewing_profile_id?`, `built_under_profile_id?`, `built_under_policy_version?`. |
 | GET | `/investigations/{id}/tier-history` | List tier transitions, newest first. Query: `limit?` (default 100). |
 | GET | `/investigations/{id}/tension-suggestions` | List tension suggestions. Query: `status?` (pending \| confirmed \| dismissed; default pending), `limit?` (default 500), `cursor?`. Returns `page` metadata. |
 | GET | `/investigations/{id}/evidence` | List evidence items for the investigation. Query: `limit?` (default 2000), `cursor?`. Returns `page` metadata. |
@@ -91,7 +93,7 @@ For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_pa
 | GET | `/evidence/{evidence_uid}/content` | Return evidence file content (text/plain for text/*; binary otherwise). For Reading UI. |
 | GET | `/investigations/{id}/graph` | Nodes (claims, evidence) plus paged edges (support/challenge). Query: `node_limit?`, `edge_limit?`, `edge_cursor?`. Returns `edges_page` metadata. |
 | POST | `/investigations/{id}/spans` | Create a text_offset span (e.g. from selection). Body: `{ "evidence_uid", "start_char", "end_char", "quote?" }`. Returns `event_id`, `span_uid`. |
-| GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output). Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
+| GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output), including optional `link_assurance_level` and `link_assurance_caveat` to contextualize support/challenge link provenance. Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
 | GET | `/claims/{claim_uid}` | Get claim (includes **notes**, **tags_json**, and optional **epistemic_stance** when set). |
 | GET | `/claims/{claim_uid}/reasoning-brief` | Reasoning brief (claim, defensibility, support/challenge, tensions, trail). Query: `limit?`. |
 

@@ -10,6 +10,7 @@ from datetime import (
 from typing import Any
 
 from chronicle.core.errors import ChronicleUserError
+from chronicle.core.events import EVENT_CHAIN_OF_CUSTODY_REPORT_GENERATED
 from chronicle.core.policy import (
     POLICY_FILENAME,
     load_policy_profile,
@@ -32,6 +33,7 @@ from chronicle.store.commands import (
     get_investigation_event_history,
     get_reasoning_trail_checkpoint,
     get_reasoning_trail_claim,
+    get_reviewer_decision_ledger,
     get_tension_impact,
     get_weakest_link,
 )
@@ -163,6 +165,22 @@ class ChronicleSessionQueryMixin:
     ) -> list[dict]:
         """E6: Audit trail of human decisions (tier changes, suggestion dismissals) for an investigation."""
         return get_human_decisions_audit_trail(self._store, investigation_uid, limit=limit)
+
+    def get_reviewer_decision_ledger(
+        self,
+        investigation_uid: str,
+        *,
+        limit: int = 500,
+    ) -> dict[str, Any]:
+        """TE-04: Consolidated reviewer decision ledger with unresolved tensions summary."""
+        if self.read_model.get_investigation(investigation_uid) is None:
+            raise ChronicleUserError("Investigation not found")
+        return get_reviewer_decision_ledger(
+            self._store,
+            self.read_model,
+            investigation_uid,
+            limit=limit,
+        )
 
     def get_investigation_event_history(
         self,
@@ -389,6 +407,149 @@ class ChronicleSessionQueryMixin:
             "viewing": viewing_resolution,
         }
         return out
+
+    def get_review_packet(
+        self,
+        investigation_uid: str,
+        *,
+        limit_claims: int = 200,
+        decision_limit: int = 500,
+        include_reasoning_briefs: bool = True,
+        include_full_trail: bool = False,
+        as_of_date: str | None = None,
+        as_of_event_id: str | None = None,
+        viewing_profile_id: str | None = None,
+        built_under_profile_id: str | None = None,
+        built_under_policy_version: str | None = None,
+    ) -> dict[str, Any]:
+        """TE-05: Build one review-ready packet for legal/compliance/editorial handoff."""
+        inv = self.read_model.get_investigation(investigation_uid)
+        if inv is None:
+            raise ChronicleUserError("Investigation not found")
+        if as_of_date is not None and as_of_event_id is not None:
+            raise ChronicleUserError("At most one of as_of_date or as_of_event_id may be set")
+
+        policy_compatibility = self.get_policy_compatibility_preflight(
+            investigation_uid,
+            viewing_profile_id=viewing_profile_id,
+            built_under_profile_id=built_under_profile_id,
+            built_under_policy_version=built_under_policy_version,
+        )
+        reviewer_decision_ledger = self.get_reviewer_decision_ledger(
+            investigation_uid,
+            limit=decision_limit,
+        )
+        audit_export_bundle = self.get_audit_export_bundle(
+            investigation_uid,
+            include_full_trail=include_full_trail,
+            limit_claims=limit_claims,
+            as_of_date=as_of_date,
+            as_of_event_id=as_of_event_id,
+        )
+
+        active_profile = load_policy_profile(self._path / POLICY_FILENAME)
+        viewing_id = policy_compatibility.get("viewing_under")
+        viewing_profile = (
+            load_policy_profile_by_id(self._path, viewing_id)
+            if isinstance(viewing_id, str) and viewing_id.strip()
+            else None
+        )
+        if viewing_profile is None:
+            viewing_profile = active_profile
+        profile_dict = viewing_profile.to_dict()
+        policy_rationale_summary = {
+            "profile_id": viewing_profile.profile_id,
+            "display_name": viewing_profile.display_name,
+            "description": viewing_profile.description,
+            "policy_rationale": viewing_profile.policy_rationale,
+            "mes_rules": [
+                {
+                    "target_claim_type": r.target_claim_type,
+                    "min_independent_sources": r.min_independent_sources,
+                    "required_evidence_types": list(r.required_evidence_types),
+                    "min_confidence": r.min_confidence,
+                    "min_sources_with_independence_notes": r.min_sources_with_independence_notes,
+                }
+                for r in viewing_profile.mes_rules
+            ],
+            "checkpoint_rules": profile_dict.get("checkpoint_rules"),
+            "tension_rules": profile_dict.get("tension_rules"),
+        }
+
+        report_events = self._store.read_by_investigation(investigation_uid, limit=20_000)
+        chain_of_custody_reports: list[dict[str, Any]] = []
+        for ev in report_events:
+            if ev.event_type != EVENT_CHAIN_OF_CUSTODY_REPORT_GENERATED:
+                continue
+            payload = ev.payload or {}
+            report_uri = payload.get("report_uri")
+            report_exists = False
+            if isinstance(report_uri, str) and report_uri.strip():
+                report_exists = (self._path / report_uri).is_file()
+            chain_of_custody_reports.append(
+                {
+                    "event_id": ev.event_id,
+                    "recorded_at": ev.recorded_at,
+                    "actor_id": ev.actor_id,
+                    "actor_type": ev.actor_type,
+                    "report_uid": payload.get("report_uid"),
+                    "scope": payload.get("scope"),
+                    "scope_uid": payload.get("scope_uid"),
+                    "format": payload.get("format"),
+                    "generated_at": payload.get("generated_at"),
+                    "content_hash": payload.get("content_hash"),
+                    "report_uri": report_uri,
+                    "report_exists": report_exists,
+                    "items_included": payload.get("items_included") or [],
+                }
+            )
+        chain_of_custody_reports.sort(
+            key=lambda x: (x.get("generated_at") or x.get("recorded_at") or ""),
+            reverse=True,
+        )
+
+        reasoning_briefs: list[dict[str, Any]] = []
+        if include_reasoning_briefs:
+            claims = self.read_model.list_claims_by_type(
+                investigation_uid=investigation_uid,
+                limit=limit_claims,
+                include_withdrawn=True,
+            )
+            for claim in claims:
+                brief = self.get_reasoning_brief(
+                    claim.claim_uid,
+                    limit=500,
+                    as_of_date=as_of_date,
+                    as_of_event_id=as_of_event_id,
+                )
+                if brief is None:
+                    continue
+                reasoning_briefs.append({"claim_uid": claim.claim_uid, "brief": brief})
+
+        warnings: list[str] = []
+        if not chain_of_custody_reports:
+            warnings.append(
+                "No chain-of-custody report found. Generate one for the investigation if the review workflow requires it."
+            )
+        unresolved_count = reviewer_decision_ledger.get("summary", {}).get("unresolved_tensions_count", 0)
+        if isinstance(unresolved_count, int) and unresolved_count > 0:
+            warnings.append(f"{unresolved_count} unresolved tensions remain in this review packet.")
+
+        return {
+            "investigation_uid": investigation_uid,
+            "investigation_title": inv.title,
+            "generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "policy_compatibility": policy_compatibility,
+            "policy_rationale_summary": policy_rationale_summary,
+            "reviewer_decision_ledger": reviewer_decision_ledger,
+            "chain_of_custody_reports": chain_of_custody_reports,
+            "latest_chain_of_custody_report": chain_of_custody_reports[0]
+            if chain_of_custody_reports
+            else None,
+            "reasoning_briefs": reasoning_briefs,
+            "audit_export_bundle": audit_export_bundle,
+            "warnings": warnings,
+        }
 
     def get_defensibility_as_of(
         self,

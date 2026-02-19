@@ -58,6 +58,11 @@
           "type": "string",
           "enum": ["none", "open", "acknowledged", "resolved"]
         },
+        "link_assurance_level": {
+          "type": "string",
+          "enum": ["human_reviewed", "tool_generated", "mixed_human_tool", "unknown", "no_links"]
+        },
+        "link_assurance_caveat": { "type": "string" },
         "knowability": {
           "type": "object",
           "properties": {
@@ -90,4 +95,3 @@
     }
   }
 }
-

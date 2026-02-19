@@ -24,6 +24,8 @@ from chronicle.cli.command_handlers import (
     cmd_reasoning_brief,
     cmd_reasoning_trail,
     cmd_replay,
+    cmd_review_packet,
+    cmd_reviewer_decision_ledger,
     cmd_set_tier,
     cmd_similar_claims,
     cmd_snapshot_create,
@@ -99,6 +101,23 @@ def dispatch_command(args: argparse.Namespace, actor_id: str, actor_type: str) -
         return cmd_similar_claims(args.path, args.claim_uid, limit=args.limit)
     if args.command == "audit-trail":
         return cmd_audit_trail(args.investigation_uid, args.path, args.limit)
+    if args.command == "reviewer-decision-ledger":
+        return cmd_reviewer_decision_ledger(args.investigation_uid, args.path, args.limit)
+    if args.command == "review-packet":
+        return cmd_review_packet(
+            args.investigation_uid,
+            args.path,
+            output=args.output,
+            limit_claims=args.limit_claims,
+            decision_limit=args.decision_limit,
+            include_reasoning_briefs=not args.no_reasoning_briefs,
+            include_full_trail=getattr(args, "full_trail", False),
+            as_of_date=getattr(args, "as_of", None),
+            as_of_event_id=getattr(args, "as_of_event", None),
+            viewing_profile_id=getattr(args, "viewing_profile_id", None),
+            built_under_profile_id=getattr(args, "built_under_profile_id", None),
+            built_under_policy_version=getattr(args, "built_under_policy_version", None),
+        )
     if args.command == "audit-export":
         return cmd_audit_export(
             args.investigation_uid,

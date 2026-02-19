@@ -262,6 +262,100 @@ def build_parser(_path_arg: Callable[[str], Path]) -> argparse.ArgumentParser:
         help="Max events to return (default: 500)",
     )
 
+    reviewer_ledger_p = subparsers.add_parser(
+        "reviewer-decision-ledger",
+        help="TE-04: Export unified reviewer decision ledger (decisions + unresolved tensions)",
+    )
+    reviewer_ledger_p.add_argument("investigation_uid", help="Investigation UID")
+    reviewer_ledger_p.add_argument(
+        "--path",
+        "-p",
+        default=".",
+        type=_path_arg,
+        help="Project path (default: current directory)",
+    )
+    reviewer_ledger_p.add_argument(
+        "--limit",
+        "-n",
+        type=int,
+        default=500,
+        metavar="N",
+        help="Max decision events to include (default: 500)",
+    )
+
+    review_packet_p = subparsers.add_parser(
+        "review-packet",
+        help="TE-05: Build one unified review packet (policy + decision ledger + reasoning + audit bundle)",
+    )
+    review_packet_p.add_argument("investigation_uid", help="Investigation UID")
+    review_packet_p.add_argument(
+        "--path",
+        "-p",
+        default=".",
+        type=_path_arg,
+        help="Project path (default: current directory)",
+    )
+    review_packet_p.add_argument(
+        "--output",
+        "-o",
+        default=None,
+        type=_path_arg,
+        help="Write JSON packet to file (default: stdout)",
+    )
+    review_packet_p.add_argument(
+        "--limit-claims",
+        type=int,
+        default=200,
+        metavar="N",
+        help="Max claims to include in packet reasoning/audit sections (default: 200)",
+    )
+    review_packet_p.add_argument(
+        "--decision-limit",
+        type=int,
+        default=500,
+        metavar="N",
+        help="Max decision events in reviewer ledger section (default: 500)",
+    )
+    review_packet_p.add_argument(
+        "--no-reasoning-briefs",
+        action="store_true",
+        help="Exclude per-claim reasoning briefs from packet",
+    )
+    review_packet_p.add_argument(
+        "--full-trail",
+        action="store_true",
+        help="Include full event history in audit bundle section",
+    )
+    review_packet_p.add_argument(
+        "--as-of",
+        type=str,
+        default=None,
+        metavar="ISO8601",
+        help="Defensibility snapshot/briefs as of this date",
+    )
+    review_packet_p.add_argument(
+        "--as-of-event",
+        type=str,
+        default=None,
+        metavar="EVENT_ID",
+        help="Defensibility snapshot/briefs as of this event ID",
+    )
+    review_packet_p.add_argument(
+        "--viewing-profile-id",
+        default=None,
+        help="Viewing policy profile id (default: active policy.json)",
+    )
+    review_packet_p.add_argument(
+        "--built-under-profile-id",
+        default=None,
+        help="Built-under profile id override (default: latest checkpoint metadata)",
+    )
+    review_packet_p.add_argument(
+        "--built-under-policy-version",
+        default=None,
+        help="Built-under policy version/hash override",
+    )
+
     audit_export_p = subparsers.add_parser(
         "audit-export",
         help="B.1: Export audit pack for an investigation (evidence, claims, links, defensibility, human decisions). One-shot for compliance.",
