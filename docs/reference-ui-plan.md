@@ -44,24 +44,24 @@ A full scan of ChronicleV1 compared to this repo identified the following. All a
 
 ### Docs to add or adapt
 
-| Item | V1 had | We have | Action |
+| Item | V1 had | We have | Status |
 |------|--------|---------|--------|
-| **Learn / Quickstart** | `learn/quickstart.md`: first investigation in ~30 min, **Try sample**, "see defensibility change in 5 min" (Reading highlight → link). | `getting-started.md`; no "Try sample" + Reading flow. | When Reference UI exists: add a **Quickstart** path (Try sample, highlight → link, defensibility update) and optional **Learn** steps. |
-| **Zero-to-submission** | One path: install → create inv → add evidence → claim + link → defensibility → **export submission package** in ~30 min. | Getting-started and verifier docs; no single "zero to submission" narrative. | Add or adapt **zero-to-submission** (or fold into getting-started) so human users have one clear path to "verifiable package I can send." |
-| **Reasoning brief as primary artifact** | `reasoning-brief.md`: shape, sections, "default shareable artifact for a claim," implementation options. | API and implementation exist; verifier.md mentions brief. | Add a short **Reasoning brief** doc: position as primary shareable artifact, shape, when to use vs .chronicle. |
-| **When to use Chronicle** | Clarifies Chronicle vs **data lineage**, **ML pipeline provenance**; when to add Chronicle vs extend other tools. | Not present. | Add **When to use Chronicle** to prevent scope creep and guide integrators (lineage/ML tools = different; Chronicle = claims + defensibility + verification). |
-| **Building with Chronicle** | One-page for **agent/RAG builders**: idempotency, actor, tool provenance, reading defensibility (endpoints). | `integrating-with-chronicle.md` (min integration, frameworks). | Add or merge **Building with Chronicle** (one-page: idempotency, actor, tool provenance, defensibility reads) for agent/RAG builders. |
-| **Propose–Confirm UX philosophy** | `human-in-the-loop.md`: Propose–Confirm, progressive disclosure, **design checklist**, vocabulary (task language, not schema). | `human-in-the-loop-and-attestation.md` (identity, attestation, curation workflow). | Extend or add: **Propose–Confirm and progressive disclosure** as UX philosophy for the Reference UI (design checklist, "user's job is is this right?"). |
-| **Dismissal as data** | Innovation doc: **human-over-machine** in audit trail; SuggestionDismissed recorded with optional rationale. | Backend has SuggestionDismissed, TensionSuggestionDismissed; not framed in docs. | Document **dismissal as data** (human-over-machine in audit trail) in human-in-the-loop or epistemology scope. |
-| **Learn guides (in-app)** | `api/static/learn/guides.json`: structured steps per vertical (journalism, legal, …) for the Learn page. | Not present. | Reference UI: optional **Learn guides** (e.g. guides.json or API-served) per vertical for step-by-step in-app guidance. |
+| **Learn / Quickstart** | Try sample, highlight → link, defensibility update. | [quickstart-reference-ui.md](quickstart-reference-ui.md); [getting-started.md](getting-started.md). | Done. |
+| **Zero-to-submission** | One path to verifiable submission package in ~30 min. | [zero-to-submission.md](zero-to-submission.md); [getting-started.md](getting-started.md). | Done. |
+| **Reasoning brief as primary artifact** | Position, shape, when to use vs .chronicle. | [reasoning-brief.md](reasoning-brief.md). | Done. |
+| **When to use Chronicle** | Scope vs data lineage / ML provenance. | [when-to-use-chronicle.md](when-to-use-chronicle.md). | Done. |
+| **Building with Chronicle** | Idempotency, actor, tool provenance, defensibility reads. | [integrating-with-chronicle.md](integrating-with-chronicle.md) "Building with Chronicle" section. | Done. |
+| **Propose–Confirm UX philosophy** | Design checklist, vocabulary (task language, not schema). | [human-in-the-loop-and-attestation.md](human-in-the-loop-and-attestation.md) Propose–Confirm and design checklist. | Done. |
+| **Dismissal as data** | Human-over-machine in audit trail; SuggestionDismissed with rationale. | [human-in-the-loop-and-attestation.md](human-in-the-loop-and-attestation.md) "Dismissal as data". | Done. |
+| **Learn guides (in-app)** | guides.json per vertical for Learn page. | [frontend/public/guides.json](../frontend/public/guides.json). | Done. |
 
 ### API surface (for Reference UI and vendors)
 
-| Item | V1 had | We have | Action |
+| Item | V1 had | We have | Status |
 |------|--------|---------|--------|
-| **Tier: set + history** | `POST /investigations/{id}/tier`, `GET .../tier-history`. | Backend: `set_tier`, `list_tier_history`. API returns `current_tier` on investigation; **no set tier or tier history endpoints**. | **Expose** set investigation tier and tier history in the API so the Reference UI can drive the friction-tier flow. |
-| **Tension suggestions** | List, confirm (→ declare tension), dismiss. | Backend: `list_tension_suggestions`, `dismiss_tension_suggestion`, `emit_tension_suggestions`. **Not exposed in API**. | **Expose** tension suggestions (list, confirm, dismiss) in the API for Propose–Confirm in the Reference UI. |
-| **Submission package** | "Export submission package" (ZIP: reasoning_briefs/, citations, etc.). | Export .chronicle; reasoning brief per claim via API/CLI. **No single "submission package" ZIP** in API. | Consider **submission package** endpoint (ZIP with reasoning briefs, citations, optional chain-of-custody) for human handoff; document in verifier if we add it. |
+| **Tier: set + history** | `POST /investigations/{id}/tier`, `GET .../tier-history`. | API: `POST /investigations/{id}/tier`, `GET /investigations/{id}/tier-history`. Backend: `set_tier`, `list_tier_history`. | Done. |
+| **Tension suggestions** | List, confirm (→ declare tension), dismiss. | API: `GET /investigations/{id}/tension-suggestions`, `POST .../tension-suggestions/{suggestion_uid}/dismiss`. Confirm by declaring tension (POST /tensions). | Done. |
+| **Submission package** | "Export submission package" (ZIP: reasoning_briefs/, citations, etc.). | API: `POST /investigations/{id}/submission-package` returns ZIP with .chronicle, reasoning_briefs/, manifest.json. | Done. |
 
 ### Policy and examples
 

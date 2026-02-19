@@ -26,6 +26,8 @@ Defensibility is **structural and policy-relative**: how well a claim holds up g
 
 Before relying on scores or verification in production or research, read the [Critical areas](../../critical_areas/README.md). They spell out all high-risk boundaries (evidence–claim linking, policy/thresholds, actor identity) so the system is not over-trusted.
 
+**Summary:** Chronicle gives you a defensibility score and a verifiable package; it does not certify truth, verify source independence, or validate that evidence actually supports the claim. Use it to *show* and *score* support; use your own review and policy for decisions.
+
 ---
 
 **← Previous:** [05 — Integration](05-integration.md) | **Index:** [Manual](README.md) | **End of manual**

@@ -38,6 +38,14 @@ The **identity module** (`chronicle.core.identity`) can bind the acting identity
 
 The Reference UI and API are designed so the **system (or optional AI) proposes** and the **user confirms or dismisses**. Examples: tension suggestions (list → confirm by declaring the tension, or dismiss), link suggestions, type/scope suggestions. The user’s job is “is this right?”—accept or dismiss with optional rationale. **Progressive disclosure** keeps the first tier (Spark) minimal (e.g. required fields only); structure (type, scope, tensions) can be added at Forge/Vault or at publish/checkpoint. See [Reference UI plan](reference-ui-plan.md) for friction tiers and Propose–Confirm in the UI.
 
+**Propose–Confirm design checklist (Reference UI):**
+
+- Use **task language** in the UI (e.g. "Does this evidence support this claim?") rather than schema terms (e.g. "link_type").
+- Every suggestion (tension, link, type) has a clear **confirm** and **dismiss** action; dismiss can ask for optional rationale.
+- **Progressive disclosure:** Spark = minimal required fields; Forge/Vault or checkpoint = add type, scope, tensions, publication readiness.
+- Show **blocked vs allowed** from policy (e.g. "Export blocked until tensions addressed") so the user knows why an action is disabled.
+- Record **who** confirmed or dismissed (actor_id, actor_type) and optional rationale so the audit trail is human-over-machine explicit.
+
 ### Dismissal as data (human-over-machine in the audit trail)
 
 When a human **dismisses** a suggestion (e.g. tension suggestion, link suggestion), that decision is recorded in the ledger: **SuggestionDismissed** or **TensionSuggestionDismissed** with optional rationale. So the audit trail shows “machine suggested X; human dismissed it (reason: …).” That supports accountability and epistemology: human-over-machine is explicit and queryable. The API exposes tension suggestions (list, confirm via `POST /tensions`, dismiss via `POST .../tension-suggestions/{id}/dismiss`). See [API](api.md) for endpoints.

@@ -19,7 +19,7 @@ From the repo root:
 pip install -e .
 ```
 
-This installs the `chronicle` and `chronicle-verify` commands. You can then run the [scorer](02-scorer.md) and [verifier](03-verifier.md).
+This installs the `chronicle` and `chronicle-verify` commands. You can then run the [scorer](02-scorer.md) and [verifier](03-verifier.md). Verify the install with `chronicle-verify --help` or a quick scorer run (see [Scorer](02-scorer.md)).
 
 ---
 

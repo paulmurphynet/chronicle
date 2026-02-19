@@ -21,6 +21,8 @@ For workflows that keep a project (investigations, evidence, claims, links): use
 - **HTTP API** — `pip install -e ".[api]"`; **POST /score** for scorer-as-a-service; full project API for write/read/export. See [API](../api.md).
 - **Adapters** — Example adapters in `scripts/adapters/` (RAG→scorer, fact-checker→Chronicle, provenance→Chronicle). Copy-paste templates.
 
+**Identity:** For API writes, set `X-Actor-Id` and `X-Actor-Type` (or use an IdP); see [Identity providers](../identity-providers.md) and [Human-in-the-loop](../human-in-the-loop-and-attestation.md).
+
 ---
 
 **← Previous:** [04 — .chronicle format](04-chronicle-format.md) | **Index:** [Manual](README.md) | **Next →:** [06 — Limits](06-limits.md)

@@ -112,5 +112,5 @@ omit = [
 ]
 
 [tool.coverage.report]
-fail_under = 50  # Raised after Phase 4; target 75%. See docs/coverage-core.md. CI uses same value.
+fail_under = 60  # Phase 5; target 75%. See docs/coverage-core.md. CI uses same value.
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", 'if __name__ == "__main__":']

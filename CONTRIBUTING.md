@@ -70,8 +70,8 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 ## Tests
 
 - Tests live under `tests/` (when present). Run with `pytest` from the repo root (e.g. `pytest tests/ -v`). Requires dev deps: `pip install -e ".[dev]"`.
-- **Coverage:** Scorer, session (ingest → claim → link → defensibility), verifier, identity, attestation, and core store are covered. The same coverage threshold and omit list are used locally and in CI: `fail_under = 50` for the `chronicle` package (see `pyproject.toml` and [docs/coverage-core.md](docs/coverage-core.md)). To enforce locally: `pytest tests/ --cov=chronicle --cov-report=term-missing --cov-fail-under=50`.
-- **CI:** Currently disabled (workflow runs only on manual trigger). When run, CI uses the same `--cov-fail-under=50` and uploads a coverage report artifact. See [.github/workflows/ci.yml](.github/workflows/ci.yml) and "Project notes" above.
+- **Coverage:** Scorer, session (ingest → claim → link → defensibility), verifier, identity, attestation, and core store are covered. The same coverage threshold and omit list are used locally and in CI: `fail_under = 60` for the `chronicle` package (see `pyproject.toml` and [docs/coverage-core.md](docs/coverage-core.md)). To enforce locally: `pytest tests/ --cov=chronicle --cov-report=term-missing --cov-fail-under=60`.
+- **CI:** Currently disabled (workflow runs only on manual trigger). When run, CI uses the same `--cov-fail-under=60`, uploads a coverage report artifact (htmlcov/, coverage.xml), and runs the doc link check (`scripts/check_doc_links.py`). See [.github/workflows/ci.yml](.github/workflows/ci.yml) and "Project notes" above.
 
 ## Documentation
 

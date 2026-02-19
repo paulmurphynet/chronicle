@@ -12,6 +12,8 @@ A **.chronicle** file is a **ZIP** containing:
 - **chronicle.db** — SQLite: event store (append-only events) and read model (investigation, claim, evidence_item, evidence_span, evidence_link, tension, etc.).
 - **evidence/** — One file per evidence item; paths from `evidence_item.uri`. Raw content only; structure lives in the DB.
 
+**Verifier:** Run `chronicle-verify path/to/file.chronicle` to check manifest, schema, and evidence hashes before sharing or archiving.
+
 ---
 
 ## Produce and consume

@@ -12,6 +12,8 @@ chronicle-verify path/to/file.chronicle
 
 Exit 0 = the package is structurally valid (manifest, schema, evidence hashes). Stdlib only; no Chronicle package needed for verification.
 
+**Where to get a .chronicle:** Export from the API or session (e.g. `session.export_investigation(...)`), or generate a sample with `PYTHONPATH=. python3 scripts/generate_sample_chronicle.py` (see [Getting started](../getting-started.md)).
+
 ---
 
 ## What the verifier checks

@@ -87,3 +87,44 @@ def test_export_investigation_output_suffix_normalized(tmp_path: Path) -> None:
     assert result.suffix == ".chronicle"
     assert result.name == "out.chronicle"
     assert result.is_file()
+
+
+def test_get_defensibility_score_with_policy_mes(tmp_path: Path) -> None:
+    """get_defensibility_score with policy that has MES rules returns scorecard; policy affects readiness."""
+    from chronicle.core.policy import PolicyProfile
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("MES", actor_id="t", actor_type="tool")
+        _, ev_uid = session.ingest_evidence(
+            inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+        )
+        _, claim_uid = session.propose_claim(inv_uid, "C.", initial_type="SEF", actor_id="t", actor_type="tool")
+        session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
+        read_model = session.store.get_read_model()
+        profile = PolicyProfile(profile_id="test", display_name="Test")
+        scorecard = get_defensibility_score(read_model, claim_uid, policy_profile=profile)
+    assert scorecard is not None
+    assert scorecard.claim_uid == claim_uid
+
+
+def test_import_investigation_merge_into_existing(tmp_path: Path) -> None:
+    """import_investigation into a project that already has chronicle.db merges (append) events."""
+    proj_a = tmp_path / "proj_a"
+    proj_b = tmp_path / "proj_b"
+    create_project(proj_a)
+    create_project(proj_b)
+    chronicle_file = tmp_path / "export.chronicle"
+    with ChronicleSession(proj_a) as session:
+        _, inv_uid = session.create_investigation("Export", actor_id="t", actor_type="tool")
+        session.ingest_evidence(inv_uid, b"Content", "text/plain", original_filename="c.txt", actor_id="t", actor_type="tool")
+        session.export_investigation(inv_uid, chronicle_file)
+    with ChronicleSession(proj_b) as session:
+        session.create_investigation("Existing", actor_id="t", actor_type="tool")
+    import_investigation(chronicle_file, proj_b)
+    with ChronicleSession(proj_b) as session:
+        invs = session.read_model.list_investigations(limit=10)
+    assert len(invs) >= 2
