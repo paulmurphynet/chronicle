@@ -40,7 +40,23 @@ To export claim–evidence–defensibility to a training-friendly format (e.g. J
 
 ---
 
-## 3. References
+## 3. Guardrails
+
+You can turn benchmark output into a regression gate with:
+
+```bash
+PYTHONPATH=. python3 scripts/benchmark_data/check_defensibility_guardrails.py \
+  --results benchmark_defensibility_results.json \
+  --min-success-rate 1.0 \
+  --min-average-support 1.0 \
+  --max-open-contradiction-rate 1.0
+```
+
+This prints a summary and exits non-zero when thresholds are not met.
+
+---
+
+## 4. References
 
 | Doc | Description |
 |-----|-------------|

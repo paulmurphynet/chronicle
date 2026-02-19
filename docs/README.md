@@ -40,6 +40,8 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [When to use Chronicle](when-to-use-chronicle.md) | Scope vs data lineage / ML provenance. |
 | [Policy profiles](policy-profiles/README.md) | Example JSON profiles (journalism, legal, compliance) for verticals. |
 | [Identity providers](identity-providers.md) | Configured IdP (none, traditional, gov_id, did, zk); how to implement custom IdP adapters. |
+| [Supply-chain automation](security-automation.md) | Manual dependency scan workflow (`pip-audit`, `npm audit`) and threshold gating guidance. |
+| [Architecture decisions (ADRs)](adr/README.md) | Durable architecture decisions and rationale (core/reference, SQLite-first posture, etc.). |
 | [North star](north-star.md) | Long-term direction: shared infrastructure, one model from early draft to auditable package, ecosystem; what stays in scope and what doesn't. |
 
 ---

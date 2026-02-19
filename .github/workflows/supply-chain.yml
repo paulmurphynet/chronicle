@@ -1,0 +1,68 @@
+name: Supply Chain (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_python_vulns:
+        description: "Maximum allowed Python vulnerabilities"
+        required: true
+        default: "0"
+        type: string
+      max_high:
+        description: "Maximum allowed npm high vulnerabilities"
+        required: true
+        default: "0"
+        type: string
+      max_critical:
+        description: "Maximum allowed npm critical vulnerabilities"
+        required: true
+        default: "0"
+        type: string
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies for scans
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install pip-audit
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run dependency scans
+        run: |
+          mkdir -p reports
+          pip-audit --format json --output reports/pip-audit.json || true
+          cd frontend
+          npm audit --json > ../reports/npm-audit.json || true
+
+      - name: Enforce vulnerability thresholds
+        run: |
+          python3 scripts/supply_chain_gate.py \
+            --pip-report reports/pip-audit.json \
+            --npm-report reports/npm-audit.json \
+            --max-python-vulns "${{ inputs.max_python_vulns }}" \
+            --max-high "${{ inputs.max_high }}" \
+            --max-critical "${{ inputs.max_critical }}"
+
+      - name: Upload scan reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-reports
+          path: reports/

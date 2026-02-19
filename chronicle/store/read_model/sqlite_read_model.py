@@ -17,6 +17,7 @@ from chronicle.store.read_model.models import (
     EvidenceSupersession,
     EvidenceTrustAssessment,
     Investigation,
+    InvestigationGraphLink,
     LinkWithInherited,
     Source,
     Tension,
@@ -122,6 +123,53 @@ class SqliteReadModel:
         if limit is not None:
             sql += " LIMIT ?"
             params.append(min(limit, MAX_LIST_LIMIT))
+        cur = self._conn.execute(sql, params)
+        return [
+            Investigation(
+                investigation_uid=r[0],
+                title=r[1],
+                description=r[2],
+                created_at=r[3],
+                created_by_actor_id=r[4],
+                tags_json=r[5],
+                is_archived=r[6],
+                updated_at=r[7],
+                current_tier=r[8],
+                tier_changed_at=r[9],
+            )
+            for r in cur.fetchall()
+        ]
+
+    def list_investigations_page(
+        self,
+        *,
+        limit: int,
+        after_created_at: str | None = None,
+        after_investigation_uid: str | None = None,
+        is_archived: bool | None = None,
+        created_since: str | None = None,
+        created_before: str | None = None,
+    ) -> list[Investigation]:
+        """Cursor-based investigations page (created_at/investigation_uid ascending)."""
+        sql = """SELECT investigation_uid, title, description, created_at, created_by_actor_id,
+               tags_json, is_archived, updated_at, current_tier, tier_changed_at
+               FROM investigation WHERE 1=1"""
+        params: list = []
+        if is_archived is not None:
+            sql += " AND is_archived = ?"
+            params.append(1 if is_archived else 0)
+        if created_since is not None:
+            sql += " AND created_at >= ?"
+            params.append(created_since)
+        if created_before is not None:
+            sql += " AND created_at <= ?"
+            params.append(created_before)
+        if after_created_at is not None:
+            cursor_uid = after_investigation_uid or ""
+            sql += " AND (created_at > ? OR (created_at = ? AND investigation_uid > ?))"
+            params.extend([after_created_at, after_created_at, cursor_uid])
+        sql += " ORDER BY created_at ASC, investigation_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
         cur = self._conn.execute(sql, params)
         return [
             Investigation(
@@ -253,6 +301,68 @@ class SqliteReadModel:
             for r in cur.fetchall()
         ]
 
+    def list_evidence_by_investigation_page(
+        self,
+        investigation_uid: str,
+        *,
+        limit: int,
+        after_created_at: str | None = None,
+        after_evidence_uid: str | None = None,
+        created_since: str | None = None,
+        created_before: str | None = None,
+        ingested_by_actor_id: str | None = None,
+    ) -> list[EvidenceItem]:
+        """Cursor-based evidence page (created_at/evidence_uid ascending)."""
+        sql = """SELECT evidence_uid, investigation_uid, created_at, ingested_by_actor_id,
+               content_hash, file_size_bytes, original_filename, uri, media_type,
+               extraction_version, file_metadata_json, metadata_json,
+               integrity_status, last_verified_at, updated_at,
+               redaction_reason, redaction_at, reviewed_at, reviewed_by_actor_id,
+               provenance_type
+               FROM evidence_item WHERE investigation_uid = ?"""
+        params: list = [investigation_uid]
+        if created_since is not None:
+            sql += " AND created_at >= ?"
+            params.append(created_since)
+        if created_before is not None:
+            sql += " AND created_at <= ?"
+            params.append(created_before)
+        if ingested_by_actor_id is not None:
+            sql += " AND ingested_by_actor_id = ?"
+            params.append(ingested_by_actor_id)
+        if after_created_at is not None:
+            cursor_uid = after_evidence_uid or ""
+            sql += " AND (created_at > ? OR (created_at = ? AND evidence_uid > ?))"
+            params.extend([after_created_at, after_created_at, cursor_uid])
+        sql += " ORDER BY created_at ASC, evidence_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
+        cur = self._conn.execute(sql, params)
+        return [
+            EvidenceItem(
+                evidence_uid=r[0],
+                investigation_uid=r[1],
+                created_at=r[2],
+                ingested_by_actor_id=r[3],
+                content_hash=r[4],
+                file_size_bytes=r[5],
+                original_filename=r[6],
+                uri=r[7],
+                media_type=r[8],
+                extraction_version=r[9],
+                file_metadata_json=r[10],
+                metadata_json=r[11],
+                integrity_status=r[12],
+                last_verified_at=r[13],
+                updated_at=r[14],
+                redaction_reason=r[15] if len(r) > 15 else None,
+                redaction_at=r[16] if len(r) > 16 else None,
+                reviewed_at=r[17] if len(r) > 17 else None,
+                reviewed_by_actor_id=r[18] if len(r) > 18 else None,
+                provenance_type=r[19] if len(r) > 19 else None,
+            )
+            for r in cur.fetchall()
+        ]
+
     def list_claims_by_type(
         self,
         claim_type: str | None = None,
@@ -291,6 +401,52 @@ class SqliteReadModel:
         if effective_limit is not None:
             sql += " LIMIT ?"
             params.append(effective_limit)
+        cur = self._conn.execute(sql, params)
+        return [
+            Claim(
+                claim_uid=r[0],
+                investigation_uid=r[1],
+                created_at=r[2],
+                created_by_actor_id=r[3],
+                claim_text=r[4],
+                claim_type=r[5],
+                scope_json=r[6],
+                temporal_json=r[7],
+                current_status=r[8],
+                language=r[9],
+                tags_json=r[10],
+                notes=r[11],
+                parent_claim_uid=r[12],
+                decomposition_status=r[13],
+                epistemic_stance=r[14] if len(r) > 14 else None,
+                updated_at=r[15] if len(r) > 15 else r[14],
+            )
+            for r in cur.fetchall()
+        ]
+
+    def list_claims_page(
+        self,
+        investigation_uid: str,
+        *,
+        limit: int,
+        include_withdrawn: bool = True,
+        before_updated_at: str | None = None,
+        before_claim_uid: str | None = None,
+    ) -> list[Claim]:
+        """Cursor-based claims page (updated_at DESC / claim_uid ASC)."""
+        sql = """SELECT claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text,
+               claim_type, scope_json, temporal_json, current_status, language, tags_json, notes,
+               parent_claim_uid, decomposition_status, epistemic_stance, updated_at
+               FROM claim WHERE investigation_uid = ?"""
+        params: list = [investigation_uid]
+        if not include_withdrawn:
+            sql += " AND current_status = 'ACTIVE'"
+        if before_updated_at is not None:
+            cursor_uid = before_claim_uid or ""
+            sql += " AND (updated_at < ? OR (updated_at = ? AND claim_uid > ?))"
+            params.extend([before_updated_at, before_updated_at, cursor_uid])
+        sql += " ORDER BY updated_at DESC, claim_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
         cur = self._conn.execute(sql, params)
         return [
             Claim(
@@ -951,6 +1107,40 @@ class SqliteReadModel:
             for r in cur.fetchall()
         ]
 
+    def list_graph_links(
+        self,
+        investigation_uid: str,
+        *,
+        limit: int,
+        after_created_at: str | None = None,
+        after_link_uid: str | None = None,
+    ) -> list[InvestigationGraphLink]:
+        """Return active graph links for an investigation in created_at/link_uid ascending order."""
+        sql = """SELECT el.link_uid, el.claim_uid, es.evidence_uid, el.link_type, el.created_at
+               FROM evidence_link el
+               JOIN claim c ON c.claim_uid = el.claim_uid
+               JOIN evidence_span es ON es.span_uid = el.span_uid
+               LEFT JOIN evidence_link_retraction r ON el.link_uid = r.link_uid
+               WHERE c.investigation_uid = ? AND r.link_uid IS NULL"""
+        params: list = [investigation_uid]
+        if after_created_at is not None:
+            cursor_uid = after_link_uid or ""
+            sql += " AND (el.created_at > ? OR (el.created_at = ? AND el.link_uid > ?))"
+            params.extend([after_created_at, after_created_at, cursor_uid])
+        sql += " ORDER BY el.created_at ASC, el.link_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
+        cur = self._conn.execute(sql, params)
+        return [
+            InvestigationGraphLink(
+                link_uid=r[0],
+                claim_uid=r[1],
+                evidence_uid=r[2],
+                link_type=r[3],
+                created_at=r[4],
+            )
+            for r in cur.fetchall()
+        ]
+
     def get_tension(self, tension_uid: str) -> Tension | None:
         """Return tension by uid or None. Phase 11: includes exception_workflow fields when present."""
         row = self._conn.execute(
@@ -1013,25 +1203,73 @@ class SqliteReadModel:
         investigation_uid: str,
         *,
         status: str | None = "pending",
+        created_since: str | None = None,
+        created_before: str | None = None,
         limit: int = 500,
     ) -> list[TensionSuggestionRow]:
         """Return tension suggestions for an investigation. Phase 7. Default status=pending."""
-        if status is None:
-            cur = self._conn.execute(
-                """SELECT suggestion_uid, investigation_uid, claim_a_uid, claim_b_uid,
-                   suggested_tension_kind, confidence, rationale, status, tool_module_id,
-                   created_at, source_event_id, updated_at, confirmed_tension_uid, dismissed_at
-                   FROM tension_suggestion WHERE investigation_uid = ? ORDER BY created_at ASC LIMIT ?""",
-                (investigation_uid, limit),
+        sql = """SELECT suggestion_uid, investigation_uid, claim_a_uid, claim_b_uid,
+               suggested_tension_kind, confidence, rationale, status, tool_module_id,
+               created_at, source_event_id, updated_at, confirmed_tension_uid, dismissed_at
+               FROM tension_suggestion WHERE investigation_uid = ?"""
+        params: list = [investigation_uid]
+        if status is not None:
+            sql += " AND status = ?"
+            params.append(status)
+        if created_since is not None:
+            sql += " AND created_at >= ?"
+            params.append(created_since)
+        if created_before is not None:
+            sql += " AND created_at <= ?"
+            params.append(created_before)
+        sql += " ORDER BY created_at ASC, suggestion_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
+        cur = self._conn.execute(sql, params)
+        return [
+            TensionSuggestionRow(
+                suggestion_uid=r[0],
+                investigation_uid=r[1],
+                claim_a_uid=r[2],
+                claim_b_uid=r[3],
+                suggested_tension_kind=r[4],
+                confidence=r[5],
+                rationale=r[6],
+                status=r[7],
+                tool_module_id=r[8],
+                created_at=r[9],
+                source_event_id=r[10],
+                updated_at=r[11],
+                confirmed_tension_uid=r[12],
+                dismissed_at=r[13],
             )
-        else:
-            cur = self._conn.execute(
-                """SELECT suggestion_uid, investigation_uid, claim_a_uid, claim_b_uid,
-                   suggested_tension_kind, confidence, rationale, status, tool_module_id,
-                   created_at, source_event_id, updated_at, confirmed_tension_uid, dismissed_at
-                   FROM tension_suggestion WHERE investigation_uid = ? AND status = ? ORDER BY created_at ASC LIMIT ?""",
-                (investigation_uid, status, limit),
-            )
+            for r in cur.fetchall()
+        ]
+
+    def list_tension_suggestions_page(
+        self,
+        investigation_uid: str,
+        *,
+        status: str | None = "pending",
+        limit: int,
+        after_created_at: str | None = None,
+        after_suggestion_uid: str | None = None,
+    ) -> list[TensionSuggestionRow]:
+        """Cursor-based tension-suggestion page (created_at/suggestion_uid ascending)."""
+        sql = """SELECT suggestion_uid, investigation_uid, claim_a_uid, claim_b_uid,
+               suggested_tension_kind, confidence, rationale, status, tool_module_id,
+               created_at, source_event_id, updated_at, confirmed_tension_uid, dismissed_at
+               FROM tension_suggestion WHERE investigation_uid = ?"""
+        params: list = [investigation_uid]
+        if status is not None:
+            sql += " AND status = ?"
+            params.append(status)
+        if after_created_at is not None:
+            cursor_uid = after_suggestion_uid or ""
+            sql += " AND (created_at > ? OR (created_at = ? AND suggestion_uid > ?))"
+            params.extend([after_created_at, after_created_at, cursor_uid])
+        sql += " ORDER BY created_at ASC, suggestion_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
+        cur = self._conn.execute(sql, params)
         return [
             TensionSuggestionRow(
                 suggestion_uid=r[0],
@@ -1057,23 +1295,72 @@ class SqliteReadModel:
         investigation_uid: str,
         *,
         status: str | None = None,
+        created_since: str | None = None,
+        created_before: str | None = None,
         limit: int = 500,
     ) -> list[Tension]:
         """Return tensions for an investigation; optional status filter. Phase 5. Phase 11: includes exception_workflow fields."""
         sel = """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, defeater_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
                          assigned_to, due_date, remediation_type
-                   FROM tension"""
+                   FROM tension WHERE investigation_uid = ?"""
+        params: list = [investigation_uid]
         if status is not None:
-            cur = self._conn.execute(
-                sel
-                + " WHERE investigation_uid = ? AND status = ? ORDER BY created_at DESC LIMIT ?",
-                (investigation_uid, status, limit),
+            sel += " AND status = ?"
+            params.append(status)
+        if created_since is not None:
+            sel += " AND created_at >= ?"
+            params.append(created_since)
+        if created_before is not None:
+            sel += " AND created_at <= ?"
+            params.append(created_before)
+        sel += " ORDER BY created_at DESC, tension_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
+        cur = self._conn.execute(sel, params)
+        return [
+            Tension(
+                tension_uid=r[0],
+                investigation_uid=r[1],
+                claim_a_uid=r[2],
+                claim_b_uid=r[3],
+                tension_kind=r[4],
+                status=r[6],
+                notes=r[7],
+                created_at=r[8],
+                created_by_actor_id=r[9],
+                source_event_id=r[10],
+                updated_at=r[11],
+                assigned_to=r[12],
+                due_date=r[13],
+                remediation_type=r[14],
+                defeater_kind=r[5] if len(r) > 5 else None,
             )
-        else:
-            cur = self._conn.execute(
-                sel + " WHERE investigation_uid = ? ORDER BY created_at DESC LIMIT ?",
-                (investigation_uid, limit),
-            )
+            for r in cur.fetchall()
+        ]
+
+    def list_tensions_page(
+        self,
+        investigation_uid: str,
+        *,
+        status: str | None = None,
+        limit: int,
+        before_created_at: str | None = None,
+        before_tension_uid: str | None = None,
+    ) -> list[Tension]:
+        """Cursor-based tensions page (created_at DESC / tension_uid ASC)."""
+        sel = """SELECT tension_uid, investigation_uid, claim_a_uid, claim_b_uid, tension_kind, defeater_kind, status, notes, created_at, created_by_actor_id, source_event_id, updated_at,
+                         assigned_to, due_date, remediation_type
+                   FROM tension WHERE investigation_uid = ?"""
+        params: list = [investigation_uid]
+        if status is not None:
+            sel += " AND status = ?"
+            params.append(status)
+        if before_created_at is not None:
+            cursor_uid = before_tension_uid or ""
+            sel += " AND (created_at < ? OR (created_at = ? AND tension_uid > ?))"
+            params.extend([before_created_at, before_created_at, cursor_uid])
+        sel += " ORDER BY created_at DESC, tension_uid ASC LIMIT ?"
+        params.append(min(max(1, limit), MAX_LIST_LIMIT))
+        cur = self._conn.execute(sel, params)
         return [
             Tension(
                 tension_uid=r[0],

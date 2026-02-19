@@ -41,6 +41,17 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 - You can supply your own `X-Request-Id` header; otherwise the server generates one.
 - Error responses include `request_id` in the JSON body so logs and client-side errors can be correlated quickly.
 
+## Cursor pagination
+
+High-volume list endpoints support cursor paging:
+
+- Request with `limit` and optional `cursor`.
+- Responses include a `page` object: `{ "limit", "has_more", "next_cursor" }`.
+- Continue with `?cursor=<next_cursor>` until `next_cursor` is null.
+- Limits are clamped to `CHRONICLE_MAX_LIST_LIMIT` (default 1000).
+
+For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_page`.
+
 ---
 
 ## Endpoints
@@ -68,16 +79,16 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/investigations` | List investigations (uid, title, current_tier, etc.). Query: `limit?`, `is_archived?`, `created_since?`, `created_before?`. |
+| GET | `/investigations` | List investigations (uid, title, current_tier, etc.). Query: `limit?`, `cursor?`, `is_archived?`, `created_since?`, `created_before?`. Returns `page` metadata. |
 | GET | `/investigations/{id}` | Get single investigation (includes current_tier, tier_changed_at, created_at, updated_at). |
 | GET | `/investigations/{id}/tier-history` | List tier transitions, newest first. Query: `limit?` (default 100). |
-| GET | `/investigations/{id}/tension-suggestions` | List tension suggestions. Query: `status?` (pending \| confirmed \| dismissed; default pending), `limit?` (default 500). |
-| GET | `/investigations/{id}/evidence` | List evidence items for the investigation. Query: `limit?` (default 2000). |
-| GET | `/investigations/{id}/claims` | List claims for the investigation (each includes **notes**, **tags_json**). Query: `include_withdrawn?` (default true), `limit?` (default 2000). |
-| GET | `/investigations/{id}/tensions` | List tensions for the investigation. Query: `status?`, `limit?` (default 500). |
+| GET | `/investigations/{id}/tension-suggestions` | List tension suggestions. Query: `status?` (pending \| confirmed \| dismissed; default pending), `limit?` (default 500), `cursor?`. Returns `page` metadata. |
+| GET | `/investigations/{id}/evidence` | List evidence items for the investigation. Query: `limit?` (default 2000), `cursor?`. Returns `page` metadata. |
+| GET | `/investigations/{id}/claims` | List claims for the investigation (each includes **notes**, **tags_json**). Query: `include_withdrawn?` (default true), `limit?` (default 2000), `cursor?`. Returns `page` metadata. |
+| GET | `/investigations/{id}/tensions` | List tensions for the investigation. Query: `status?`, `limit?` (default 500), `cursor?`. Returns `page` metadata. |
 | GET | `/evidence/{evidence_uid}/spans` | List spans for an evidence item (for linking support/challenge in UI). Query: `limit?` (default 500). |
 | GET | `/evidence/{evidence_uid}/content` | Return evidence file content (text/plain for text/*; binary otherwise). For Reading UI. |
-| GET | `/investigations/{id}/graph` | Nodes (claims, evidence) and edges (support/challenge) for graph visualization. |
+| GET | `/investigations/{id}/graph` | Nodes (claims, evidence) plus paged edges (support/challenge). Query: `node_limit?`, `edge_limit?`, `edge_cursor?`. Returns `edges_page` metadata. |
 | POST | `/investigations/{id}/spans` | Create a text_offset span (e.g. from selection). Body: `{ "evidence_uid", "start_char", "end_char", "quote?" }`. Returns `event_id`, `span_uid`. |
 | GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output). Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
 | GET | `/claims/{claim_uid}` | Get claim (includes **notes**, **tags_json**, and optional **epistemic_stance** when set). |

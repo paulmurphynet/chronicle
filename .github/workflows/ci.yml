@@ -47,3 +47,43 @@ jobs:
 
       - name: Check doc links
         run: python3 scripts/check_doc_links.py .
+
+  frontend-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install API deps for route parity check
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[api]"
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm install
+
+      - name: Frontend API route parity
+        working-directory: frontend
+        run: npm run check:api-routes
+
+      - name: Frontend lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Frontend tests
+        working-directory: frontend
+        run: npm run test
+
+      - name: Frontend build
+        working-directory: frontend
+        run: npm run build

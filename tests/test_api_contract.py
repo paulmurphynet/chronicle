@@ -13,6 +13,7 @@ pytest.importorskip("httpx")
 from chronicle.api.app import app
 from chronicle.core import validation
 from chronicle.store.project import CHRONICLE_DB
+from chronicle.store.read_model.sqlite_read_model import SqliteReadModel
 from fastapi.testclient import TestClient
 
 
@@ -162,3 +163,111 @@ def test_api_error_mapping_and_request_id(tmp_path: Path, monkeypatch: pytest.Mo
         assert "Idempotency key capacity reached" in cap.json()["detail"]
         assert cap.headers.get("X-Request-Id") == "req-cap"
         assert cap.json()["request_id"] == "req-cap"
+
+
+def test_api_cursor_pagination_for_claims_and_graph(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Claims and graph endpoints should support cursor pagination."""
+    project_path = tmp_path / "api-pagination"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+
+        created_claims: list[str] = []
+        for i in range(3):
+            evidence = client.post(
+                f"/investigations/{inv_uid}/evidence",
+                json={
+                    "content": f"Evidence paragraph {i}.",
+                    "media_type": "text/plain",
+                    "original_filename": f"ev_{i}.txt",
+                },
+                headers={"X-Actor-Id": "api_tester", "X-Actor-Type": "tool"},
+            )
+            assert evidence.status_code == 200, evidence.text
+            span_uid = evidence.json()["span_uid"]
+
+            claim = client.post(
+                f"/investigations/{inv_uid}/claims",
+                json={"text": f"Claim {i}"},
+                headers={"X-Actor-Id": "api_tester", "X-Actor-Type": "tool"},
+            )
+            assert claim.status_code == 200, claim.text
+            claim_uid = claim.json()["claim_uid"]
+            created_claims.append(claim_uid)
+
+            linked = client.post(
+                f"/investigations/{inv_uid}/links/support",
+                json={"span_uid": span_uid, "claim_uid": claim_uid},
+                headers={"X-Actor-Id": "api_tester", "X-Actor-Type": "tool"},
+            )
+            assert linked.status_code == 200, linked.text
+
+        page_1 = client.get(
+            f"/investigations/{inv_uid}/claims",
+            params={"limit": 2},
+        )
+        assert page_1.status_code == 200, page_1.text
+        body_1 = page_1.json()
+        assert len(body_1["claims"]) == 2
+        assert body_1["page"]["has_more"] is True
+        cursor = body_1["page"]["next_cursor"]
+        assert isinstance(cursor, str) and cursor
+
+        page_2 = client.get(
+            f"/investigations/{inv_uid}/claims",
+            params={"limit": 2, "cursor": cursor},
+        )
+        assert page_2.status_code == 200, page_2.text
+        body_2 = page_2.json()
+        assert len(body_2["claims"]) == 1
+        assert body_2["page"]["has_more"] is False
+
+        paged_claim_uids = [c["claim_uid"] for c in body_1["claims"] + body_2["claims"]]
+        assert set(paged_claim_uids) == set(created_claims)
+
+        graph_1 = client.get(
+            f"/investigations/{inv_uid}/graph",
+            params={"edge_limit": 2},
+        )
+        assert graph_1.status_code == 200, graph_1.text
+        g1 = graph_1.json()
+        assert len(g1["edges"]) == 2
+        assert g1["edges_page"]["has_more"] is True
+        edge_cursor = g1["edges_page"]["next_cursor"]
+        assert isinstance(edge_cursor, str) and edge_cursor
+
+        graph_2 = client.get(
+            f"/investigations/{inv_uid}/graph",
+            params={"edge_limit": 2, "edge_cursor": edge_cursor},
+        )
+        assert graph_2.status_code == 200, graph_2.text
+        g2 = graph_2.json()
+        assert len(g2["edges"]) == 1
+        assert g2["edges_page"]["has_more"] is False
+
+
+def test_graph_endpoint_avoids_per_claim_link_queries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Graph endpoint should not call per-claim link/span lookups (N+1 regression guard)."""
+    project_path = tmp_path / "api-graph-batch"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+        _seed_claim_flow(client, inv_uid)
+
+        def _fail(*_: object, **__: object) -> list[object]:
+            raise AssertionError("N+1 method should not be called by /graph")
+
+        monkeypatch.setattr(SqliteReadModel, "get_support_for_claim", _fail)
+        monkeypatch.setattr(SqliteReadModel, "get_challenges_for_claim", _fail)
+        monkeypatch.setattr(SqliteReadModel, "get_evidence_span", _fail)
+
+        graph = client.get(f"/investigations/{inv_uid}/graph")
+        assert graph.status_code == 200, graph.text
+        payload = graph.json()
+        assert len(payload["edges"]) >= 1

@@ -115,6 +115,17 @@ class EvidenceLink:
 
 
 @dataclass
+class InvestigationGraphLink:
+    """Flattened active link row for graph rendering and pagination."""
+
+    link_uid: str
+    claim_uid: str
+    evidence_uid: str
+    link_type: str  # SUPPORTS|CHALLENGES
+    created_at: str
+
+
+@dataclass
 class ClaimAssertion:
     """One row from the claim_assertion read model. Spec Section 14.4.2."""
 

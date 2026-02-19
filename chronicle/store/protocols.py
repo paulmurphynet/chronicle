@@ -18,6 +18,7 @@ from chronicle.store.read_model import (
     EvidenceSupersession,
     EvidenceTrustAssessment,
     Investigation,
+    InvestigationGraphLink,
     LinkWithInherited,
     Source,
     Tension,
@@ -82,6 +83,19 @@ class ReadModel(Protocol):
         """Return investigations in created_at order. Optional filters: limit, is_archived, created_since, created_before (ISO8601). E.1 dashboard."""
         ...
 
+    def list_investigations_page(
+        self,
+        *,
+        limit: int,
+        after_created_at: str | None = None,
+        after_investigation_uid: str | None = None,
+        is_archived: bool | None = None,
+        created_since: str | None = None,
+        created_before: str | None = None,
+    ) -> list[Investigation]:
+        """Cursor-based investigation page in created_at/investigation_uid ascending order."""
+        ...
+
     def list_tier_history(self, investigation_uid: str, limit: int = 100) -> list[TierHistoryEntry]:
         """List tier transitions for an investigation, newest first. Phase 1."""
         ...
@@ -100,6 +114,20 @@ class ReadModel(Protocol):
         limit: int | None = None,
     ) -> list[EvidenceItem]:
         """Return evidence items for an investigation in created_at order. Optional filters: created_since/created_before (ISO8601), ingested_by_actor_id, limit."""
+        ...
+
+    def list_evidence_by_investigation_page(
+        self,
+        investigation_uid: str,
+        *,
+        limit: int,
+        after_created_at: str | None = None,
+        after_evidence_uid: str | None = None,
+        created_since: str | None = None,
+        created_before: str | None = None,
+        ingested_by_actor_id: str | None = None,
+    ) -> list[EvidenceItem]:
+        """Cursor-based evidence page in created_at/evidence_uid ascending order."""
         ...
 
     def get_claim(self, uid: str) -> Claim | None:
@@ -140,6 +168,18 @@ class ReadModel(Protocol):
         """List claims optionally filtered by type, investigation, time range, or actor. When include_withdrawn is False, only ACTIVE claims are returned (defensibility/UI default)."""
         ...
 
+    def list_claims_page(
+        self,
+        investigation_uid: str,
+        *,
+        limit: int,
+        include_withdrawn: bool = True,
+        before_updated_at: str | None = None,
+        before_claim_uid: str | None = None,
+    ) -> list[Claim]:
+        """Cursor-based claims page in updated_at DESC / claim_uid ASC order."""
+        ...
+
     def search_claims(
         self,
         investigation_uid: str,
@@ -176,9 +216,23 @@ class ReadModel(Protocol):
         investigation_uid: str,
         *,
         status: str | None = None,
+        created_since: str | None = None,
+        created_before: str | None = None,
         limit: int = 500,
     ) -> list[Tension]:
         """Return tensions for an investigation; optional status filter. Phase 5."""
+        ...
+
+    def list_tensions_page(
+        self,
+        investigation_uid: str,
+        *,
+        status: str | None = None,
+        limit: int,
+        before_created_at: str | None = None,
+        before_tension_uid: str | None = None,
+    ) -> list[Tension]:
+        """Cursor-based tensions page in created_at DESC / tension_uid ASC order."""
         ...
 
     def list_tensions_overdue(self, investigation_uid: str, limit: int = 500) -> list[Tension]:
@@ -194,9 +248,34 @@ class ReadModel(Protocol):
         investigation_uid: str,
         *,
         status: str | None = "pending",
+        created_since: str | None = None,
+        created_before: str | None = None,
         limit: int = 500,
     ) -> list[TensionSuggestionRow]:
         """Return tension suggestions for an investigation. Phase 7."""
+        ...
+
+    def list_tension_suggestions_page(
+        self,
+        investigation_uid: str,
+        *,
+        status: str | None = "pending",
+        limit: int,
+        after_created_at: str | None = None,
+        after_suggestion_uid: str | None = None,
+    ) -> list[TensionSuggestionRow]:
+        """Cursor-based tension-suggestion page in created_at/suggestion_uid ascending order."""
+        ...
+
+    def list_graph_links(
+        self,
+        investigation_uid: str,
+        *,
+        limit: int,
+        after_created_at: str | None = None,
+        after_link_uid: str | None = None,
+    ) -> list[InvestigationGraphLink]:
+        """Return active links for graph rendering in created_at/link_uid ascending order."""
         ...
 
     def list_assertions_for_claim(self, claim_uid: str) -> list[ClaimAssertion]:

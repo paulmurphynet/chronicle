@@ -36,6 +36,7 @@ from chronicle.core.errors import (
     ChronicleUserError,
 )
 from chronicle.core.identity import get_effective_actor_from_request
+from chronicle.core.validation import MAX_LIST_LIMIT
 from chronicle.scorer_contract import run_scorer_contract
 from chronicle.store.commands.reasoning_brief import reasoning_brief_to_html
 from chronicle.store.project import create_project, project_exists
@@ -132,6 +133,41 @@ def _request_id_for(request: Request) -> str:
 
 def _error_content(request: Request, detail: Any) -> dict[str, Any]:
     return {"detail": detail, "request_id": _request_id_for(request)}
+
+
+def _clamp_limit(limit: int | None, default: int) -> int:
+    if limit is None:
+        return min(default, MAX_LIST_LIMIT)
+    return max(1, min(limit, MAX_LIST_LIMIT))
+
+
+def _encode_cursor(created_at: str, uid: str) -> str:
+    raw = json.dumps({"created_at": created_at, "uid": uid}, separators=(",", ":")).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def _decode_cursor(cursor: str | None) -> tuple[str, str] | None:
+    if cursor is None:
+        return None
+    token = cursor.strip()
+    if not token:
+        return None
+    padding = "=" * ((4 - len(token) % 4) % 4)
+    try:
+        payload = json.loads(base64.urlsafe_b64decode((token + padding).encode("ascii")))
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail="Invalid cursor") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="Invalid cursor payload")
+    created_at = payload.get("created_at")
+    uid = payload.get("uid")
+    if not isinstance(created_at, str) or not isinstance(uid, str) or not created_at or not uid:
+        raise HTTPException(status_code=400, detail="Invalid cursor payload")
+    return (created_at, uid)
+
+
+def _page_meta(*, limit: int, has_more: bool, next_cursor: str | None) -> dict[str, Any]:
+    return {"limit": limit, "has_more": has_more, "next_cursor": next_cursor}
 
 
 @app.middleware("http")
@@ -263,18 +299,30 @@ def create_investigation(request: Request, body: CreateInvestigationBody) -> dic
 @app.get("/investigations")
 def list_investigations(
     limit: int | None = None,
+    cursor: str | None = None,
     is_archived: bool | None = None,
     created_since: str | None = None,
     created_before: str | None = None,
 ) -> dict[str, Any]:
     """List investigations (uid, title, etc.)."""
+    effective_limit = _clamp_limit(limit, default=MAX_LIST_LIMIT)
+    decoded_cursor = _decode_cursor(cursor)
     path = _get_project_path()
     with ChronicleSession(path) as session:
-        invs = session.read_model.list_investigations(
-            limit=limit,
+        invs = session.read_model.list_investigations_page(
+            limit=effective_limit + 1,
+            after_created_at=decoded_cursor[0] if decoded_cursor else None,
+            after_investigation_uid=decoded_cursor[1] if decoded_cursor else None,
             is_archived=is_archived,
             created_since=created_since,
             created_before=created_before,
+        )
+        has_more = len(invs) > effective_limit
+        page_items = invs[:effective_limit]
+        next_cursor = (
+            _encode_cursor(page_items[-1].created_at, page_items[-1].investigation_uid)
+            if has_more and page_items
+            else None
         )
         return {
             "investigations": [
@@ -285,8 +333,13 @@ def list_investigations(
                     "is_archived": bool(i.is_archived),
                     "current_tier": i.current_tier,
                 }
-                for i in invs
-            ]
+                for i in page_items
+            ],
+            "page": _page_meta(
+                limit=effective_limit,
+                has_more=has_more,
+                next_cursor=next_cursor,
+            ),
         }
 
 
@@ -365,14 +418,28 @@ def list_tension_suggestions(
     investigation_uid: str,
     status: str | None = "pending",  # pending | confirmed | dismissed | None for all
     limit: int = 500,
+    cursor: str | None = None,
 ) -> dict[str, Any]:
     """List tension suggestions for an investigation. Default status=pending for Propose–Confirm UI."""
+    effective_limit = _clamp_limit(limit, default=500)
+    decoded_cursor = _decode_cursor(cursor)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
             raise HTTPException(status_code=404, detail="Investigation not found")
-        suggestions = session.read_model.list_tension_suggestions(
-            investigation_uid, status=status, limit=limit
+        suggestions = session.read_model.list_tension_suggestions_page(
+            investigation_uid,
+            status=status,
+            limit=effective_limit + 1,
+            after_created_at=decoded_cursor[0] if decoded_cursor else None,
+            after_suggestion_uid=decoded_cursor[1] if decoded_cursor else None,
+        )
+        has_more = len(suggestions) > effective_limit
+        page_items = suggestions[:effective_limit]
+        next_cursor = (
+            _encode_cursor(page_items[-1].created_at, page_items[-1].suggestion_uid)
+            if has_more and page_items
+            else None
         )
         return {
             "tension_suggestions": [
@@ -392,8 +459,13 @@ def list_tension_suggestions(
                     "confirmed_tension_uid": s.confirmed_tension_uid,
                     "dismissed_at": s.dismissed_at,
                 }
-                for s in suggestions
-            ]
+                for s in page_items
+            ],
+            "page": _page_meta(
+                limit=effective_limit,
+                has_more=has_more,
+                next_cursor=next_cursor,
+            ),
         }
 
 
@@ -419,14 +491,28 @@ def dismiss_tension_suggestion(
 
 
 @app.get("/investigations/{investigation_uid}/evidence")
-def list_investigation_evidence(investigation_uid: str, limit: int = 2000) -> dict[str, Any]:
+def list_investigation_evidence(
+    investigation_uid: str, limit: int = 2000, cursor: str | None = None
+) -> dict[str, Any]:
     """List evidence items for an investigation. For Reference UI and vendors."""
+    effective_limit = _clamp_limit(limit, default=2000)
+    decoded_cursor = _decode_cursor(cursor)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
             raise HTTPException(status_code=404, detail="Investigation not found")
-        items = session.read_model.list_evidence_by_investigation(
-            investigation_uid, limit=limit
+        items = session.read_model.list_evidence_by_investigation_page(
+            investigation_uid,
+            limit=effective_limit + 1,
+            after_created_at=decoded_cursor[0] if decoded_cursor else None,
+            after_evidence_uid=decoded_cursor[1] if decoded_cursor else None,
+        )
+        has_more = len(items) > effective_limit
+        page_items = items[:effective_limit]
+        next_cursor = (
+            _encode_cursor(page_items[-1].created_at, page_items[-1].evidence_uid)
+            if has_more and page_items
+            else None
         )
         return {
             "evidence": [
@@ -440,24 +526,43 @@ def list_investigation_evidence(investigation_uid: str, limit: int = 2000) -> di
                     "file_size_bytes": e.file_size_bytes,
                     "content_hash": e.content_hash,
                 }
-                for e in items
-            ]
+                for e in page_items
+            ],
+            "page": _page_meta(
+                limit=effective_limit,
+                has_more=has_more,
+                next_cursor=next_cursor,
+            ),
         }
 
 
 @app.get("/investigations/{investigation_uid}/claims")
 def list_investigation_claims(
-    investigation_uid: str, include_withdrawn: bool = True, limit: int = 2000
+    investigation_uid: str,
+    include_withdrawn: bool = True,
+    limit: int = 2000,
+    cursor: str | None = None,
 ) -> dict[str, Any]:
     """List claims for an investigation. For Reference UI and vendors."""
+    effective_limit = _clamp_limit(limit, default=2000)
+    decoded_cursor = _decode_cursor(cursor)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
             raise HTTPException(status_code=404, detail="Investigation not found")
-        claims = session.read_model.list_claims_by_type(
-            investigation_uid=investigation_uid,
+        claims = session.read_model.list_claims_page(
+            investigation_uid,
             include_withdrawn=include_withdrawn,
-            limit=limit,
+            limit=effective_limit + 1,
+            before_updated_at=decoded_cursor[0] if decoded_cursor else None,
+            before_claim_uid=decoded_cursor[1] if decoded_cursor else None,
+        )
+        has_more = len(claims) > effective_limit
+        page_items = claims[:effective_limit]
+        next_cursor = (
+            _encode_cursor(page_items[-1].updated_at, page_items[-1].claim_uid)
+            if has_more and page_items
+            else None
         )
         return {
             "claims": [
@@ -473,22 +578,43 @@ def list_investigation_claims(
                     "tags_json": getattr(c, "tags_json", None),
                     "epistemic_stance": getattr(c, "epistemic_stance", None),
                 }
-                for c in claims
-            ]
+                for c in page_items
+            ],
+            "page": _page_meta(
+                limit=effective_limit,
+                has_more=has_more,
+                next_cursor=next_cursor,
+            ),
         }
 
 
 @app.get("/investigations/{investigation_uid}/tensions")
 def list_investigation_tensions(
-    investigation_uid: str, status: str | None = None, limit: int = 500
+    investigation_uid: str,
+    status: str | None = None,
+    limit: int = 500,
+    cursor: str | None = None,
 ) -> dict[str, Any]:
     """List tensions for an investigation. For Reference UI and vendors."""
+    effective_limit = _clamp_limit(limit, default=500)
+    decoded_cursor = _decode_cursor(cursor)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
             raise HTTPException(status_code=404, detail="Investigation not found")
-        tensions = session.read_model.list_tensions(
-            investigation_uid, status=status, limit=limit
+        tensions = session.read_model.list_tensions_page(
+            investigation_uid,
+            status=status,
+            limit=effective_limit + 1,
+            before_created_at=decoded_cursor[0] if decoded_cursor else None,
+            before_tension_uid=decoded_cursor[1] if decoded_cursor else None,
+        )
+        has_more = len(tensions) > effective_limit
+        page_items = tensions[:effective_limit]
+        next_cursor = (
+            _encode_cursor(page_items[-1].created_at, page_items[-1].tension_uid)
+            if has_more and page_items
+            else None
         )
         return {
             "tensions": [
@@ -503,23 +629,51 @@ def list_investigation_tensions(
                     "created_at": t.created_at,
                     "defeater_kind": getattr(t, "defeater_kind", None),
                 }
-                for t in tensions
-            ]
+                for t in page_items
+            ],
+            "page": _page_meta(
+                limit=effective_limit,
+                has_more=has_more,
+                next_cursor=next_cursor,
+            ),
         }
 
 
 @app.get("/investigations/{investigation_uid}/graph")
-def get_investigation_graph(investigation_uid: str) -> dict[str, Any]:
-    """Return nodes (claims, evidence) and edges (support/challenge) for graph visualization."""
+def get_investigation_graph(
+    investigation_uid: str,
+    node_limit: int = 2000,
+    edge_limit: int = 2000,
+    edge_cursor: str | None = None,
+) -> dict[str, Any]:
+    """Return graph nodes and a paged edge list for visualization."""
+    effective_node_limit = _clamp_limit(node_limit, default=2000)
+    effective_edge_limit = _clamp_limit(edge_limit, default=2000)
+    decoded_cursor = _decode_cursor(edge_cursor)
     path = _get_project_path()
     with ChronicleSession(path) as session:
         if session.read_model.get_investigation(investigation_uid) is None:
             raise HTTPException(status_code=404, detail="Investigation not found")
         claims = session.read_model.list_claims_by_type(
-            investigation_uid=investigation_uid, limit=2000
+            investigation_uid=investigation_uid,
+            limit=effective_node_limit,
         )
         evidence_items = session.read_model.list_evidence_by_investigation(
-            investigation_uid, limit=2000
+            investigation_uid,
+            limit=effective_node_limit,
+        )
+        links = session.read_model.list_graph_links(
+            investigation_uid,
+            limit=effective_edge_limit + 1,
+            after_created_at=decoded_cursor[0] if decoded_cursor else None,
+            after_link_uid=decoded_cursor[1] if decoded_cursor else None,
+        )
+        has_more_edges = len(links) > effective_edge_limit
+        page_links = links[:effective_edge_limit]
+        next_edge_cursor = (
+            _encode_cursor(page_links[-1].created_at, page_links[-1].link_uid)
+            if has_more_edges and page_links
+            else None
         )
         nodes: list[dict[str, Any]] = []
         for c in claims:
@@ -535,30 +689,24 @@ def get_investigation_graph(investigation_uid: str) -> dict[str, Any]:
                 }
             )
         edges: list[dict[str, Any]] = []
-        for c in claims:
-            for link in session.read_model.get_support_for_claim(c.claim_uid):
-                span = session.read_model.get_evidence_span(link.span_uid)
-                if span:
-                    edges.append(
-                        {
-                            "from": span.evidence_uid,
-                            "to": c.claim_uid,
-                            "link_type": "support",
-                            "link_uid": link.link_uid,
-                        }
-                    )
-            for link in session.read_model.get_challenges_for_claim(c.claim_uid):
-                span = session.read_model.get_evidence_span(link.span_uid)
-                if span:
-                    edges.append(
-                        {
-                            "from": span.evidence_uid,
-                            "to": c.claim_uid,
-                            "link_type": "challenge",
-                            "link_uid": link.link_uid,
-                        }
-                    )
-        return {"nodes": nodes, "edges": edges}
+        for link in page_links:
+            edges.append(
+                {
+                    "from": link.evidence_uid,
+                    "to": link.claim_uid,
+                    "link_type": "support" if link.link_type == "SUPPORTS" else "challenge",
+                    "link_uid": link.link_uid,
+                }
+            )
+        return {
+            "nodes": nodes,
+            "edges": edges,
+            "edges_page": _page_meta(
+                limit=effective_edge_limit,
+                has_more=has_more_edges,
+                next_cursor=next_edge_cursor,
+            ),
+        }
 
 
 @app.get("/evidence/{evidence_uid}/spans")

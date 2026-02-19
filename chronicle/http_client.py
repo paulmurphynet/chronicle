@@ -94,6 +94,39 @@ class ChronicleClient:
             return json.loads(raw.decode("utf-8"))
         return raw
 
+    def _collect_paginated(
+        self,
+        *,
+        path: str,
+        items_key: str,
+        params: dict[str, str | int | bool | None] | None = None,
+        cursor_param: str = "cursor",
+        page_key: str = "page",
+        max_pages: int = 50,
+    ) -> list[dict[str, Any]]:
+        """Collect all pages for a cursor-paginated endpoint."""
+        collected: list[dict[str, Any]] = []
+        cursor: str | None = None
+        base_params = dict(params or {})
+        for _ in range(max_pages):
+            page_params = dict(base_params)
+            if cursor:
+                page_params[cursor_param] = cursor
+            out = self._request("GET", path, params=page_params or None)
+            if not isinstance(out, dict):
+                break
+            batch = out.get(items_key)
+            if isinstance(batch, list):
+                collected.extend(item for item in batch if isinstance(item, dict))
+            page_meta = out.get(page_key)
+            if not isinstance(page_meta, dict):
+                break
+            next_cursor = page_meta.get("next_cursor")
+            if not isinstance(next_cursor, str) or not next_cursor:
+                break
+            cursor = next_cursor
+        return collected
+
     def init_project(self) -> None:
         """Ensure project path is configured and reachable.
 
@@ -120,12 +153,14 @@ class ChronicleClient:
             params["created_since"] = created_since
         if created_before is not None:
             params["created_before"] = created_before
-        out = self._request("GET", "/investigations", params=params or None)
-        if isinstance(out, dict):
-            invs = out.get("investigations")
-            if isinstance(invs, list):
-                return cast(list[dict[str, Any]], invs)
-        return []
+        if limit is not None:
+            out = self._request("GET", "/investigations", params=params or None)
+            if isinstance(out, dict):
+                invs = out.get("investigations")
+                if isinstance(invs, list):
+                    return cast(list[dict[str, Any]], invs)
+            return []
+        return self._collect_paginated(path="/investigations", items_key="investigations", params=params)
 
     def get_investigation(self, investigation_uid: str) -> dict[str, Any]:
         """GET /investigations/{uid} — one investigation (title, description, etc.). E.5."""
@@ -149,28 +184,22 @@ class ChronicleClient:
         }
         if limit is not None:
             params["limit"] = limit
-        out = self._request(
-            "GET",
-            f"/investigations/{self._quote(investigation_uid)}/claims",
-            params=params,
-        )
-        if isinstance(out, dict):
-            claims = out.get("claims")
-            if isinstance(claims, list):
-                return cast(list[dict[str, Any]], claims)
-        return []
+        path = f"/investigations/{self._quote(investigation_uid)}/claims"
+        if limit is not None:
+            out = self._request("GET", path, params=params)
+            if isinstance(out, dict):
+                claims = out.get("claims")
+                if isinstance(claims, list):
+                    return cast(list[dict[str, Any]], claims)
+            return []
+        return self._collect_paginated(path=path, items_key="claims", params=params)
 
     def list_evidence(self, investigation_uid: str) -> list[dict[str, Any]]:
         """GET /investigations/{uid}/evidence — list evidence items. E.5."""
-        out = self._request(
-            "GET",
-            f"/investigations/{self._quote(investigation_uid)}/evidence",
+        return self._collect_paginated(
+            path=f"/investigations/{self._quote(investigation_uid)}/evidence",
+            items_key="evidence",
         )
-        if isinstance(out, dict):
-            evidence = out.get("evidence")
-            if isinstance(evidence, list):
-                return cast(list[dict[str, Any]], evidence)
-        return []
 
     def get_investigation_defensibility(
         self,
@@ -206,13 +235,32 @@ class ChronicleClient:
 
     def get_investigation_graph(self, investigation_uid: str) -> dict[str, Any]:
         """GET /investigations/{uid}/graph — nodes (claims, evidence) and edges (support, challenge). E.5."""
-        out = self._request(
-            "GET",
-            f"/investigations/{self._quote(investigation_uid)}/graph",
-        )
-        if not isinstance(out, dict):
-            return {"nodes": [], "edges": []}
-        return cast(dict[str, Any], {"nodes": out.get("nodes", []), "edges": out.get("edges", [])})
+        path = f"/investigations/{self._quote(investigation_uid)}/graph"
+        nodes: list[dict[str, Any]] = []
+        edges: list[dict[str, Any]] = []
+        cursor: str | None = None
+        for i in range(50):
+            params: dict[str, str | int | bool | None] | None = None
+            if cursor:
+                params = {"edge_cursor": cursor}
+            out = self._request("GET", path, params=params)
+            if not isinstance(out, dict):
+                break
+            if i == 0:
+                raw_nodes = out.get("nodes")
+                if isinstance(raw_nodes, list):
+                    nodes = [item for item in raw_nodes if isinstance(item, dict)]
+            batch = out.get("edges")
+            if isinstance(batch, list):
+                edges.extend(item for item in batch if isinstance(item, dict))
+            page_meta = out.get("edges_page")
+            if not isinstance(page_meta, dict):
+                break
+            next_cursor = page_meta.get("next_cursor")
+            if not isinstance(next_cursor, str) or not next_cursor:
+                break
+            cursor = next_cursor
+        return cast(dict[str, Any], {"nodes": nodes, "edges": edges})
 
     def create_investigation(
         self,

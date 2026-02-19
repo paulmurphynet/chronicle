@@ -6,6 +6,14 @@ This directory is the home for the **Chronicle Reference UI**: the official huma
 
 **Run the UI:** From this directory: `npm install` then `npm run dev`. Open http://localhost:5173. Configure the API base URL via env `VITE_API_BASE_URL` (default: use proxy `/api` → http://127.0.0.1:8000 when running dev).
 
+**Quality checks:**
+
+- `npm run lint` — ESLint checks
+- `npm run test` — Vitest unit/smoke tests (jsdom + Testing Library)
+- `npm run build` — TypeScript compile + production bundle check
+- `npm run check:api-routes` — verifies generated frontend route constants are in sync with API OpenAPI output
+- `npm run generate:api-routes` — regenerates `src/lib/generated/routes.ts` from API OpenAPI
+
 **Plan:** See [Reference UI plan](../docs/reference-ui-plan.md) for:
 
 - Why the frontend lives in this repo (no separate repo)
