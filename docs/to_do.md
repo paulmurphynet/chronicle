@@ -46,6 +46,7 @@ Chronicle should optimize for:
 - **Phase 2 kickoff completed (initial artifacts)**: added reproducible reference workflows and an integration acceptance checklist (`docs/reference-workflows.md`, `docs/integration-acceptance-checklist.md`).
 - **Phase 2 execution tooling completed**: added `scripts/run_reference_workflows.py` (consolidated runner with JSON report), plus session-mode fallback in benchmark and compliance workflow scripts to reduce external dependency friction.
 - **Quality gate integration completed**: reference workflow suite added to Makefile `check` target and manual CI workflow.
+- **Integration starter tooling completed**: added adapter starter/validator (`scripts/adapters/starter_batch_to_scorer.py`, `scripts/adapters/validate_adapter_outputs.py`) with tests and docs wiring for contributor onboarding.
 
 ## Release blockers
 

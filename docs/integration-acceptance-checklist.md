@@ -26,6 +26,7 @@ Use this checklist before publishing or merging a Chronicle integration (adapter
 2. Doc links pass (`python3 scripts/check_doc_links.py .`).
 3. If Neo4j behavior is affected, run `python3 scripts/check_neo4j_contract.py`.
 4. For end-to-end confidence, run `python3 scripts/run_reference_workflows.py`.
+5. If integration emits scored rows, validate contract shape with `python3 scripts/adapters/validate_adapter_outputs.py --input <file.jsonl>`.
 
 ## Documentation minimum
 

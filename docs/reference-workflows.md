@@ -98,3 +98,16 @@ chronicle neo4j-sync --path /path/to/project
 ```
 
 Use [Neo4j](neo4j.md) and [Aura graph pipeline](aura-graph-pipeline.md) for full setup.
+
+## Optional extension: Adapter onboarding
+
+For external connector development:
+
+```bash
+PYTHONPATH=. python3 scripts/adapters/starter_batch_to_scorer.py \
+  --input runs.jsonl --output scored.jsonl
+PYTHONPATH=. python3 scripts/adapters/validate_adapter_outputs.py \
+  --input scored.jsonl
+```
+
+Use this with [Integration acceptance checklist](integration-acceptance-checklist.md) before publishing adapters.
