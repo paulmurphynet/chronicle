@@ -14,7 +14,10 @@ WHERE row.link_type = 'SUPPORTS'
 MATCH (s:EvidenceSpan {uid: row.span_uid})
 MATCH (c:Claim {uid: row.claim_uid})
 MERGE (s)-[r:SUPPORTS]->(c)
-ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid;
+ON CREATE SET
+  r.source_event_id = row.source_event_id,
+  r.link_uid = row.link_uid,
+  r.rationale = NULLIF(row.rationale, '');
 
 // Challenge links (link_uid on relationship for retraction step 04)
 LOAD CSV WITH HEADERS FROM 'file:///links.csv' AS row
@@ -22,7 +25,10 @@ WHERE row.link_type = 'CHALLENGES'
 MATCH (s:EvidenceSpan {uid: row.span_uid})
 MATCH (c:Claim {uid: row.claim_uid})
 MERGE (s)-[r:CHALLENGES]->(c)
-ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid;
+ON CREATE SET
+  r.source_event_id = row.source_event_id,
+  r.link_uid = row.link_uid,
+  r.rationale = NULLIF(row.rationale, '');
 
 // Assertions (Actor ASSERTS Claim)
 LOAD CSV WITH HEADERS FROM 'file:///asserts.csv' AS row

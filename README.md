@@ -117,7 +117,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
 | [Errors](docs/errors.md) | Error types (ChronicleUserError, etc.); when to use which; how CLI/API map to exit codes and HTTP status. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |
-| [Neo4j](docs/neo4j.md) | Optional graph projection for multi-run analysis and visualization. |
+| [Neo4j](docs/neo4j.md) | Optional graph projection for multi-run analysis and visualization, with a parity check across sync/export/rebuild/docs. |
 | [Neo4j schema](docs/neo4j-schema.md) | Node labels, relationship types, and example Cypher for the sync output. |
 | [Aura graph pipeline](docs/aura-graph-pipeline.md) | Run an ever-growing Chronicle graph on Neo4j Aura (verify → import → sync). |
 | [Chronicle file format](docs/chronicle-file-format.md) | What's inside a .chronicle (ZIP): manifest, DB, evidence; where claims and tensions live. |
@@ -137,6 +137,8 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee; runtime invariants and audit. |
 | [Implementer checklist](docs/implementer-checklist.md) | Produce or consume a .chronicle: checklist and pointers. |
 | [Integration quick reference](docs/integration-quick-reference.md) | One page: score one run, verify .chronicle, add to harness, optional API/adapters. |
+| [Reference workflows](docs/reference-workflows.md) | Reproducible, end-to-end workflow set for journalism, compliance-style audit, and benchmark trust tracking. |
+| [Integration acceptance checklist](docs/integration-acceptance-checklist.md) | Release checklist for adapters and connectors (contract, trust posture, reproducibility). |
 | [User manual](docs/manual/README.md) | Short how-to manual (install, scorer, verifier, format, integration, limits). |
 | [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
 | [Human-in-the-loop and attestation](docs/human-in-the-loop-and-attestation.md) | Human-curated data, actor identity (CLI env, API headers), attestation and verification level; curation workflow. |

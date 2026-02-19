@@ -13,6 +13,19 @@ Neo4j is **optional**. The scorer and verifier do not use it. Use it when you wa
 
 ## How to use it
 
+Before loading or syncing, run the built-in contract check to confirm sync code, CSV export, rebuild scripts, and schema docs are aligned:
+
+```bash
+PYTHONPATH=. python3 scripts/check_neo4j_contract.py
+```
+
+It exits non-zero if there is drift between:
+
+- `chronicle/store/neo4j_sync.py`
+- `chronicle/store/neo4j_export.py`
+- `neo4j/rebuild/01_schema.cyp` to `04_retractions.cyp`
+- `docs/neo4j-schema.md`
+
 ### Option 1: Export to CSV, then load in Neo4j
 
 1. **Export** the read model to CSV (no Neo4j server required):

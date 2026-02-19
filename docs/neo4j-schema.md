@@ -21,16 +21,18 @@ All nodes have at least `uid` and typically `display_name` and `created_at` (whe
 | Relationship | From → To | Meaning |
 |--------------|-----------|---------|
 | **CONTAINS** | Investigation → Claim | Investigation contains this claim. |
+| **CONTAINS_CLAIM** | Investigation → Claim | Dedupe sync mode lineage edge; relationship stores original `claim_uid`. |
+| **CONTAINS_EVIDENCE** | Investigation → EvidenceItem | Dedupe sync mode lineage edge; relationship stores original `evidence_uid`. |
 | **IN** | EvidenceSpan → EvidenceItem | Span is a segment within this evidence item. |
-| **SUPPORTS** | EvidenceSpan → Claim | This span supports the claim (optional: retracted_at on rel). |
-| **CHALLENGES** | EvidenceSpan → Claim | This span challenges the claim (optional: retracted_at on rel). |
+| **SUPPORTS** | EvidenceSpan → Claim | This span supports the claim (`link_uid`, optional `rationale`, optional `retracted_at` on rel). |
+| **CHALLENGES** | EvidenceSpan → Claim | This span challenges the claim (`link_uid`, optional `rationale`, optional `retracted_at` on rel). |
 | **ASSERTS** | Actor → Claim | Actor asserted this claim (asserted_at, mode, confidence on rel). |
 | **BETWEEN** | Tension → Claim | Tension is between two claims (one Tension has two BETWEEN edges). |
 | **SUPERSEDES** | EvidenceItem → EvidenceItem | New evidence supersedes prior (type, reason on rel). |
 | **DECOMPOSES_TO** | Claim → Claim | Parent claim decomposes to child claim. |
 | **PROVIDED_BY** | EvidenceItem → Source | Evidence was provided by this source. |
 
-Relationships usually carry `source_event_id` for traceability; SUPPORTS/CHALLENGES also have `link_uid` for retraction handling.
+Relationships usually carry `source_event_id` for traceability; `SUPPORTS`/`CHALLENGES` also have `link_uid` for retraction handling. In dedupe sync mode, lineage relationships (`CONTAINS_CLAIM`, `CONTAINS_EVIDENCE`) are keyed by original UIDs and do not currently carry `source_event_id`.
 
 ## Example Cypher queries
 

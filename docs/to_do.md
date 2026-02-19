@@ -42,6 +42,8 @@ Chronicle should optimize for:
 - **L-04 completed**: benchmark guardrail script added for defensibility regression checks.
 - **L-05 completed**: ADR scaffolding and initial accepted ADRs added under `docs/adr/`.
 - **Strategy execution completed (Phase 1 kickoff)**: 30/60/90 roadmap added with dated execution milestones, and trust KPI workflow documented/implemented (`docs/trust-metrics.md`, `scripts/benchmark_data/trust_progress_report.py`, tests).
+- **Neo4j hardening completed**: added cross-surface parity check (`scripts/check_neo4j_contract.py`) validating sync/export/rebuild/docs alignment, fixed relationship rationale parity in rebuild Cypher, and aligned schema docs to include dedupe-mode lineage relationships.
+- **Phase 2 kickoff completed (initial artifacts)**: added reproducible reference workflows and an integration acceptance checklist (`docs/reference-workflows.md`, `docs/integration-acceptance-checklist.md`).
 
 ## Release blockers
 

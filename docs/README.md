@@ -39,8 +39,11 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Zero to submission](zero-to-submission.md) | One path to a verifiable submission package in ~30 min. |
 | [Reasoning brief](reasoning-brief.md) | Primary shareable artifact per claim; when to use vs .chronicle. |
 | [When to use Chronicle](when-to-use-chronicle.md) | Scope vs data lineage / ML provenance. |
+| [Reference workflows](reference-workflows.md) | Reproducible end-to-end workflow set (journalism, compliance, benchmark trust tracking). |
+| [Integration acceptance checklist](integration-acceptance-checklist.md) | Release gate for adapters/connectors: contract, safety, reproducibility, and docs minimum. |
 | [Policy profiles](policy-profiles/README.md) | Example JSON profiles (journalism, legal, compliance) for verticals. |
 | [Identity providers](identity-providers.md) | Configured IdP (none, traditional, gov_id, did, zk); how to implement custom IdP adapters. |
+| [Neo4j](neo4j.md) | Optional graph projection and contract check command for sync/export/rebuild parity. |
 | [Supply-chain automation](security-automation.md) | Manual dependency scan workflow (`pip-audit`, `npm audit`) and threshold gating guidance. |
 | [Trust metrics](trust-metrics.md) | KPI definitions and scripts for tracking unsupported-claim reduction over time. |
 | [Architecture decisions (ADRs)](adr/README.md) | Durable architecture decisions and rationale (core/reference, SQLite-first posture, etc.). |

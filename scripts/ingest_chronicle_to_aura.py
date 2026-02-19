@@ -9,16 +9,19 @@ CHRONICLE_GRAPH_PROJECT). Install: pip install -e ".[neo4j]". Optional: python-d
 Usage (from repo root):
 
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py path/to/file.chronicle
-  CHRONICLE_GRAPH_PROJECT=/path/to/project PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle
+  PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --project /path/to/project
+  PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --dedupe-evidence-by-content-hash
 
 See docs/aura-graph-pipeline.md for full runbook and Aura setup.
 """
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 from pathlib import Path
+
 
 # Optional: load .env from repo root so NEO4J_* and CHRONICLE_GRAPH_PROJECT are set
 def _load_dotenv() -> None:
@@ -31,17 +34,39 @@ def _load_dotenv() -> None:
         pass
 
 
-def main() -> int:
-    _load_dotenv()
-
-    if len(sys.argv) < 2:
-        print(
-            "Usage: python scripts/ingest_chronicle_to_aura.py <path/to/file.chronicle> [--project PATH]",
-            file=sys.stderr,
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Verify a .chronicle file, import it into a shared Chronicle graph project, "
+            "and sync to Neo4j."
         )
-        return 1
+    )
+    parser.add_argument("chronicle_file", type=Path, help="Path to .chronicle file")
+    parser.add_argument(
+        "--project",
+        type=Path,
+        default=None,
+        help=(
+            "Graph project directory (default: CHRONICLE_GRAPH_PROJECT env var, "
+            "or ./chronicle_graph_project)"
+        ),
+    )
+    parser.add_argument(
+        "--dedupe-evidence-by-content-hash",
+        action="store_true",
+        help=(
+            "Enable Neo4j sync dedupe mode (one EvidenceItem per content_hash and "
+            "one Claim per hash(claim_text))."
+        ),
+    )
+    return parser.parse_args(argv)
 
-    chronicle_path = Path(sys.argv[1])
+
+def main(argv: list[str] | None = None) -> int:
+    _load_dotenv()
+    args = _parse_args(argv)
+
+    chronicle_path = args.chronicle_file
     if not chronicle_path.is_file():
         print(f"Error: not a file: {chronicle_path}", file=sys.stderr)
         return 1
@@ -49,7 +74,10 @@ def main() -> int:
         print(f"Error: expected .chronicle file, got: {chronicle_path}", file=sys.stderr)
         return 1
 
-    project_dir = os.environ.get("CHRONICLE_GRAPH_PROJECT")
+    if args.project is not None:
+        project_dir = str(args.project)
+    else:
+        project_dir = os.environ.get("CHRONICLE_GRAPH_PROJECT")
     if project_dir is None or project_dir == "":
         repo_root = Path(__file__).resolve().parent.parent
         project_dir = str(repo_root / "chronicle_graph_project")
@@ -63,7 +91,7 @@ def main() -> int:
     failed = [r for r in results if not r[1]]
     if failed:
         print("Verification failed:", file=sys.stderr)
-        for name, passed, detail in failed:
+        for name, _passed, detail in failed:
             print(f"  {name}: {detail}", file=sys.stderr)
         return 1
     print(f"Verified: {chronicle_path.name}")
@@ -100,10 +128,16 @@ def main() -> int:
         )
         raise SystemExit(1) from e
 
-    sync_project_to_neo4j(project_path, uri, user, password)
+    sync_project_to_neo4j(
+        project_path,
+        uri,
+        user,
+        password,
+        dedupe_evidence_by_content_hash=args.dedupe_evidence_by_content_hash,
+    )
     print("Synced to Neo4j.")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

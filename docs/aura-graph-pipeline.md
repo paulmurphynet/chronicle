@@ -73,7 +73,11 @@ Use a **`.env`** file in the repo root (never commit it; it’s in `.gitignore`)
    pip install -e ".[neo4j]"
    pip install python-dotenv   # optional: so scripts load .env automatically
    ```
-4. Create the graph project directory (if it doesn’t exist, the ingest script can create it on first import):
+4. Validate Neo4j contract parity before first sync:
+   ```bash
+   PYTHONPATH=. python3 scripts/check_neo4j_contract.py
+   ```
+5. Create the graph project directory (if it doesn’t exist, the ingest script can create it on first import):
    ```bash
    mkdir -p chronicle_graph_project
    ```
@@ -118,7 +122,7 @@ Or set `NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1` in `.env`.
 
 - Use **Neo4j Browser** (Aura console) or **cypher-shell** with the same URI/user/password.
 - Example queries and GDS examples: see `neo4j/rebuild/queries.cyp.example` and `neo4j/rebuild/gds_examples.cyp` (run after the first sync so the graph has data).
-- For graph RAG: design retrieval so it returns subgraphs that include `(Claim)-[:SUPPORTS|CHALLENGES]-(EvidenceSpan)-[:FROM]-(EvidenceItem)` and optionally `(Claim)-[:IN_TENSION]-(Claim)`, so the model sees justification and tensions, not just claim text.
+- For graph RAG: design retrieval so it returns subgraphs that include `(EvidenceSpan)-[:SUPPORTS|CHALLENGES]->(Claim)` and `(EvidenceSpan)-[:IN]->(EvidenceItem)`, plus optional tension context via `(Tension)-[:BETWEEN]->(Claim)`, so the model sees justification and conflict structure, not just claim text.
 
 ---
 

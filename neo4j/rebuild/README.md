@@ -9,6 +9,14 @@ Optional graph projection for lineage and contradiction networks. See [docs/neo4
 
 ## Runbook
 
+### 0. Run contract check
+
+From repo root, verify sync/export/docs/rebuild parity before loading:
+
+```bash
+PYTHONPATH=. python3 scripts/check_neo4j_contract.py
+```
+
 ### 1. Export read model to CSV
 
 From the project root (or any directory with a Chronicle project):
