@@ -128,7 +128,6 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Epistemology scope](docs/epistemology-scope.md) | What the project covers (and does not) regarding epistemology. |
 | [AI to populate epistemology](docs/ai-to-populate-epistemology.md) | How much AI is needed to fully populate claims, support/challenge, tensions. |
 | [Using Ollama locally](docs/using-ollama-locally.md) | Use local Ollama (no API key) for tension suggestion, decomposition, type inference. |
-| [Migration from V1](docs/migration-from-v1.md) | What we brought from the old project, what we didn't, and why. |
 | [State and plan](docs/state-and-plan.md) | What we have so far and the plan going forward. |
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
 | [Core vs reference architecture](docs/architecture-core-reference.md) | How trust-critical core differs from API/CLI/UI reference surfaces and why that boundary matters. |

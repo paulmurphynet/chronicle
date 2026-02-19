@@ -31,7 +31,6 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Glossary](glossary.md) | Terms: defensibility, claim, evidence, .chronicle, etc. |
 | [Troubleshooting](troubleshooting.md) | Common issues and fixes. |
 | [To-do](to_do.md) | Implementation to-do list (single source of truth for pending work). |
-| [Project review](PROJECT_REVIEW.md) | Full project review: strengths, weaknesses, and recommended new or improved features. |
 | [Reference UI plan](reference-ui-plan.md) | Same-repo strategy for the human-in-the-loop frontend; what to bring from V1 (tiers, Propose–Confirm, Reading-lite). |
 | [Core vs reference architecture](architecture-core-reference.md) | How the project is modularized into trust-critical core and adapter/reference layers. |
 | [Quickstart](quickstart.md) | First investigation in ~15 min (API or CLI). |
