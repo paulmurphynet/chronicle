@@ -24,3 +24,16 @@ PYTHONPATH=. python3 scripts/adapters/starter_batch_to_scorer.py \
 PYTHONPATH=. python3 scripts/adapters/validate_adapter_outputs.py \
   --input scored.jsonl
 ```
+
+### Included examples
+
+Checked-in examples live under `scripts/adapters/examples/`:
+
+- `harness_runs_valid.jsonl` (input rows for starter adapter)
+- `scored_runs_example.jsonl` (example output rows with success and contract-valid error payload)
+
+Validate examples and starter flow end-to-end:
+
+```bash
+PYTHONPATH=. python3 scripts/adapters/check_examples.py
+```

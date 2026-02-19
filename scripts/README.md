@@ -55,6 +55,7 @@ Scripts for repo and doc maintenance. Not needed for normal eval or integration 
 | **update_doc_links_after_rename.py** | Update internal doc links after renaming files. |
 | **check_doc_links.py** | Check that linked docs and anchors exist. |
 | **check_neo4j_contract.py** | Check Neo4j schema/integration parity across sync, export, rebuild Cypher, and docs. |
+| **adapters/check_examples.py** | Validate checked-in adapter examples and starter-to-validator flow. |
 | **generate_agent_tools.py** | Regenerate `docs/agent-tools.json` (API operations in function-calling format for agents). |
 
 ---

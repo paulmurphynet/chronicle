@@ -51,6 +51,9 @@ jobs:
       - name: Check Neo4j contract parity
         run: python3 scripts/check_neo4j_contract.py
 
+      - name: Check adapter examples and contract flow
+        run: python3 scripts/adapters/check_examples.py
+
       - name: Run reference workflows
         run: python3 scripts/run_reference_workflows.py --output-dir /tmp/chronicle_reference_workflows_ci
 

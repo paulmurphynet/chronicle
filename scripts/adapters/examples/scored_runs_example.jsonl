@@ -1,0 +1,2 @@
+{"row_index":0,"run_id":"run-001","chronicle":{"contract_version":"1.0","claim_uid":"claim_example_001","provenance_quality":"medium","corroboration":{"support_count":2,"challenge_count":0,"independent_sources_count":1},"contradiction_status":"none"},"ok":true}
+{"row_index":1,"run_id":"run-002","input_error":"missing_evidence_key:evidence","chronicle":{"contract_version":"1.0","error":"invalid_input","message":"missing_evidence_key:evidence"},"ok":false}
