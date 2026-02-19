@@ -81,6 +81,7 @@ For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_pa
 |--------|------|-------------|
 | GET | `/investigations` | List investigations (uid, title, current_tier, etc.). Query: `limit?`, `cursor?`, `is_archived?`, `created_since?`, `created_before?`. Returns `page` metadata. |
 | GET | `/investigations/{id}` | Get single investigation (includes current_tier, tier_changed_at, created_at, updated_at). |
+| GET | `/investigations/{id}/policy-compatibility` | Policy compatibility preflight (built-under vs viewing-under). Query: `viewing_profile_id?`, `built_under_profile_id?`, `built_under_policy_version?`. Returns rule-level `deltas` plus `message` when no comparison basis is available. |
 | GET | `/investigations/{id}/tier-history` | List tier transitions, newest first. Query: `limit?` (default 100). |
 | GET | `/investigations/{id}/tension-suggestions` | List tension suggestions. Query: `status?` (pending \| confirmed \| dismissed; default pending), `limit?` (default 500), `cursor?`. Returns `page` metadata. |
 | GET | `/investigations/{id}/evidence` | List evidence items for the investigation. Query: `limit?` (default 2000), `cursor?`. Returns `page` metadata. |

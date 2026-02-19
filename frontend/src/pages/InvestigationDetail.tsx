@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, useLocation } from 'react-router-dom'
 import { api, downloadBlob } from '../lib/api'
-import type { Investigation, EvidenceItem, Claim, Tension, TensionSuggestion } from '../types'
+import type {
+  Claim,
+  EvidenceItem,
+  Investigation,
+  PolicyCompatibilityResult,
+  Tension,
+  TensionSuggestion,
+} from '../types'
 
 type Tab = 'overview' | 'evidence' | 'claims' | 'links' | 'defensibility' | 'tensions' | 'suggestions' | 'export' | 'writing' | 'reading' | 'publication' | 'policy' | 'graph'
 
@@ -78,6 +85,10 @@ export function InvestigationDetail() {
   const [readingLinkClaim, setReadingLinkClaim] = useState('')
   const [readingLinkKind, setReadingLinkKind] = useState<'support' | 'challenge'>('support')
   const [graphData, setGraphData] = useState<{ nodes: Array<{ id: string; type: string; label: string }>; edges: Array<{ from: string; to: string; link_type: string }> } | null>(null)
+  const [policyViewingId, setPolicyViewingId] = useState('policy_legal')
+  const [policyBuiltUnderOverride, setPolicyBuiltUnderOverride] = useState('')
+  const [policyCompat, setPolicyCompat] = useState<PolicyCompatibilityResult | null>(null)
+  const [policyCompatLoading, setPolicyCompatLoading] = useState(false)
 
   const doSetTier = (tier: string) => {
     setActionLoading(true)
@@ -143,6 +154,18 @@ export function InvestigationDetail() {
 
   const doExportSubmission = () => {
     api.exportSubmissionPackage(invId).then((blob) => downloadBlob(blob as Blob, `${invId}-submission.zip`)).catch((e) => setActionError(e instanceof Error ? e.message : String(e)))
+  }
+
+  const doPolicyPreflight = () => {
+    setPolicyCompatLoading(true)
+    setActionError(null)
+    api.getPolicyCompatibility(invId, {
+      viewing_profile_id: policyViewingId || undefined,
+      built_under_profile_id: policyBuiltUnderOverride.trim() || undefined,
+    })
+      .then((result) => setPolicyCompat(result))
+      .catch((e) => setActionError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setPolicyCompatLoading(false))
   }
 
   const doAddWritingAsEvidence = () => {
@@ -431,6 +454,37 @@ export function InvestigationDetail() {
             <li><strong>Legal</strong> — Stricter MES, chain of custody, tension resolution for checkpoints.</li>
             <li><strong>Compliance</strong> — Evidence admissibility, exception workflow, all tensions addressed.</li>
           </ul>
+          <h3>Compatibility preflight</h3>
+          <p className="muted">Compare built-under policy to a viewing policy before checkpoint/export/submission.</p>
+          <label>Viewing profile: <select value={policyViewingId} onChange={(e) => setPolicyViewingId(e.target.value)}>
+            <option value="policy_legal">policy_legal</option>
+            <option value="policy_compliance">policy_compliance</option>
+            <option value="policy_investigative_journalism">policy_investigative_journalism</option>
+          </select></label>
+          <label>Built-under override (optional): <input type="text" placeholder="policy_investigative_journalism" value={policyBuiltUnderOverride} onChange={(e) => setPolicyBuiltUnderOverride(e.target.value)} /></label>
+          <button type="button" onClick={doPolicyPreflight} disabled={policyCompatLoading}>
+            {policyCompatLoading ? 'Running preflight…' : 'Run compatibility preflight'}
+          </button>
+          {policyCompat && (
+            <>
+              <p className="meta">
+                Built-under: <strong>{policyCompat.built_under || '(none)'}</strong> · Viewing: <strong>{policyCompat.viewing_under || '(none)'}</strong>
+              </p>
+              {policyCompat.message && <p className="muted">{policyCompat.message}</p>}
+              {policyCompat.deltas.length === 0 ? (
+                <p className="muted">No rule deltas.</p>
+              ) : (
+                <ul className="list">
+                  {policyCompat.deltas.map((d, idx) => (
+                    <li key={`${d.rule}-${idx}`}>
+                      <strong>{d.rule}</strong> · built-under={JSON.stringify(d.built_under_value)} · viewing={JSON.stringify(d.viewing_under_value)}
+                      {d.note ? ` · ${d.note}` : ''}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
         </section>
       )}
 

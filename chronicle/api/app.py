@@ -363,6 +363,29 @@ def get_investigation(investigation_uid: str) -> dict[str, Any]:
         }
 
 
+@app.get("/investigations/{investigation_uid}/policy-compatibility")
+def get_policy_compatibility_preflight(
+    investigation_uid: str,
+    viewing_profile_id: str | None = None,
+    built_under_profile_id: str | None = None,
+    built_under_policy_version: str | None = None,
+) -> dict[str, Any]:
+    """Compare built-under policy vs viewing policy for an investigation."""
+    path = _get_project_path()
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                raise HTTPException(status_code=404, detail="Investigation not found")
+            return session.get_policy_compatibility_preflight(
+                investigation_uid,
+                viewing_profile_id=viewing_profile_id,
+                built_under_profile_id=built_under_profile_id,
+                built_under_policy_version=built_under_policy_version,
+            )
+    except ChronicleUserError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
 @app.post("/investigations/{investigation_uid}/tier")
 def set_investigation_tier(
     request: Request, investigation_uid: str, body: SetTierBody

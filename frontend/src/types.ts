@@ -58,3 +58,26 @@ export interface Span {
   anchor_type: string;
   created_at: string;
 }
+
+export interface PolicyCompatibilityDelta {
+  rule: string;
+  built_under_value: unknown;
+  viewing_under_value: unknown;
+  note?: string;
+}
+
+export interface PolicyCompatibilityResult {
+  investigation_uid: string;
+  built_under: string;
+  viewing_under: string;
+  built_under_policy_id?: string | null;
+  built_under_policy_version?: string | null;
+  viewing_policy_id?: string | null;
+  viewing_policy_display_name?: string | null;
+  message?: string;
+  deltas: PolicyCompatibilityDelta[];
+  resolution?: {
+    built_under: string;
+    viewing: string;
+  };
+}

@@ -13,7 +13,9 @@ from chronicle.core.errors import ChronicleUserError
 from chronicle.core.policy import (
     POLICY_FILENAME,
     load_policy_profile,
+    load_policy_profile_by_id,
 )
+from chronicle.core.policy_compat import get_policy_compatibility as compute_policy_compatibility
 from chronicle.core.validation import MAX_LIST_LIMIT
 from chronicle.store.claim_embedding_store import ClaimEmbeddingStore
 from chronicle.store.commands import (
@@ -323,6 +325,70 @@ class ChronicleSessionQueryMixin:
         if not checkpoints:
             return (None, None)
         return self.get_checkpoint_built_under_policy(checkpoints[0].checkpoint_uid)
+
+    def get_policy_compatibility_preflight(
+        self,
+        investigation_uid: str,
+        *,
+        viewing_profile_id: str | None = None,
+        built_under_profile_id: str | None = None,
+        built_under_policy_version: str | None = None,
+    ) -> dict[str, Any]:
+        """Return policy compatibility preflight for an investigation.
+
+        Compares built-under policy to viewing policy. If built-under is not provided,
+        uses the latest checkpoint's built-under policy metadata when available.
+        """
+        if self.read_model.get_investigation(investigation_uid) is None:
+            raise ChronicleUserError("Investigation not found")
+
+        active_profile = load_policy_profile(self._path / POLICY_FILENAME)
+
+        def _load_profile_for_compat(profile_id: str) -> Any:
+            loaded = load_policy_profile_by_id(self._path, profile_id)
+            if loaded is not None:
+                return loaded
+            if active_profile.profile_id == profile_id:
+                return active_profile
+            return None
+
+        if viewing_profile_id and viewing_profile_id.strip():
+            viewing_profile = _load_profile_for_compat(viewing_profile_id.strip())
+            if viewing_profile is None:
+                raise ChronicleUserError(f"Viewing policy profile not found: {viewing_profile_id}")
+            viewing_resolution = "profile_id"
+        else:
+            viewing_profile = active_profile
+            viewing_resolution = "active_policy"
+
+        resolved_built_under = built_under_profile_id.strip() if built_under_profile_id else None
+        resolved_built_version = built_under_policy_version.strip() if built_under_policy_version else None
+        built_under_resolution = "provided"
+        if not resolved_built_under:
+            resolved_built_under, checkpoint_version = self.get_investigation_built_under_policy(
+                investigation_uid
+            )
+            if not resolved_built_version:
+                resolved_built_version = checkpoint_version
+            built_under_resolution = "latest_checkpoint"
+
+        result = compute_policy_compatibility(
+            resolved_built_under,
+            resolved_built_version,
+            viewing_profile,
+            load_built_under_profile=_load_profile_for_compat,
+        )
+        out = result.to_dict()
+        out["investigation_uid"] = investigation_uid
+        out["built_under_policy_id"] = resolved_built_under
+        out["built_under_policy_version"] = resolved_built_version
+        out["viewing_policy_id"] = viewing_profile.profile_id
+        out["viewing_policy_display_name"] = viewing_profile.display_name
+        out["resolution"] = {
+            "built_under": built_under_resolution,
+            "viewing": viewing_resolution,
+        }
+        return out
 
     def get_defensibility_as_of(
         self,

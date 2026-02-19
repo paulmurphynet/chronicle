@@ -160,6 +160,58 @@ def cmd_policy_import(path: Path, file_path: Path, activate: bool) -> int:
     return 0
 
 
+def cmd_policy_compat(
+    path: Path,
+    investigation_uid: str,
+    *,
+    viewing_profile_id: str | None = None,
+    built_under_profile_id: str | None = None,
+    built_under_policy_version: str | None = None,
+    as_json: bool = False,
+) -> int:
+    """Compare built-under vs viewing policy for an investigation."""
+    if not project_exists(path):
+        print(f"Not a Chronicle project. Run: chronicle init {path}", file=sys.stderr)
+        return 1
+    with ChronicleSession(path) as session:
+        if session.read_model.get_investigation(investigation_uid) is None:
+            print(f"Investigation not found: {investigation_uid}", file=sys.stderr)
+            return 1
+        result = session.get_policy_compatibility_preflight(
+            investigation_uid,
+            viewing_profile_id=viewing_profile_id,
+            built_under_profile_id=built_under_profile_id,
+            built_under_policy_version=built_under_policy_version,
+        )
+
+    if as_json:
+        print(json.dumps(result, indent=2))
+        return 0
+
+    print("Policy compatibility preflight")
+    print(f"  Investigation: {result.get('investigation_uid')}")
+    print(f"  Built-under: {result.get('built_under') or '(none)'}")
+    print(f"  Viewing-under: {result.get('viewing_under') or '(none)'}")
+    message = result.get("message")
+    if message:
+        print(f"  Message: {message}")
+    deltas = result.get("deltas") or []
+    if not deltas:
+        print("  Deltas: none")
+        return 0
+    print("  Deltas:")
+    for d in deltas:
+        note = d.get("note")
+        line = (
+            f"    - {d.get('rule')}: built_under={d.get('built_under_value')!r}, "
+            f"viewing_under={d.get('viewing_under_value')!r}"
+        )
+        if note:
+            line += f" ({note})"
+        print(line)
+    return 0
+
+
 def cmd_verify_chronicle(chronicle_file: Path, no_invariants: bool) -> int:
     """Verify a .chronicle file (ZIP) without Chronicle runtime. Phase 8."""
     from tools.verify_chronicle.verify_chronicle import verify_chronicle_file

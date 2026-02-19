@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import os
+import json
 import sys
 from pathlib import Path
 
 import pytest
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
 from chronicle.cli.main import _actor_from_args, main
+from chronicle.core.policy import PolicyProfile, default_policy_profile, import_policy_to_project
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
 
@@ -81,3 +77,49 @@ def test_cli_create_investigation_records_actor_id(tmp_path: Path) -> None:
     assert created is not None
     assert created.actor_id == "cli_curator"
     assert created.actor_type == "human"
+
+
+def test_cli_policy_compat_json_output(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """policy compat subcommand returns machine-readable JSON when --json is set."""
+    create_project(tmp_path)
+    base = default_policy_profile().to_dict()
+    base["profile_id"] = "policy_strict_test"
+    base["display_name"] = "Strict test profile"
+    base["mes_rules"][0]["min_independent_sources"] = 3
+    strict_profile = PolicyProfile.from_dict(base)
+    import_policy_to_project(tmp_path, strict_profile, activate=False)
+
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Policy compat test",
+            actor_id="cli_tester",
+            actor_type="tool",
+        )
+
+    old_argv = sys.argv
+    try:
+        sys.argv = [
+            "chronicle",
+            "policy",
+            "compat",
+            "--path",
+            str(tmp_path),
+            "--investigation",
+            inv_uid,
+            "--built-under-profile-id",
+            "policy_investigative_journalism",
+            "--viewing-profile-id",
+            "policy_strict_test",
+            "--json",
+        ]
+        exit_code = main()
+        assert exit_code == 0
+    finally:
+        sys.argv = old_argv
+
+    out = capsys.readouterr().out
+    payload = json.loads(out)
+    assert payload["investigation_uid"] == inv_uid
+    assert payload["built_under"] == "policy_investigative_journalism"
+    assert payload["viewing_under"] == "policy_strict_test"
+    assert isinstance(payload.get("deltas"), list)

@@ -16,6 +16,7 @@ from chronicle.cli.command_handlers import (
     cmd_init,
     cmd_neo4j_export,
     cmd_neo4j_sync,
+    cmd_policy_compat,
     cmd_policy_export,
     cmd_policy_import,
     cmd_policy_list,
@@ -137,4 +138,13 @@ def dispatch_command(args: argparse.Namespace, actor_id: str, actor_type: str) -
             return cmd_policy_export(args.path, args.profile_id, args.output)
         if args.policy_command == "import":
             return cmd_policy_import(args.path, args.file, args.activate)
+        if args.policy_command == "compat":
+            return cmd_policy_compat(
+                args.path,
+                args.investigation,
+                viewing_profile_id=args.viewing_profile_id,
+                built_under_profile_id=args.built_under_profile_id,
+                built_under_policy_version=args.built_under_policy_version,
+                as_json=args.json,
+            )
     return 0

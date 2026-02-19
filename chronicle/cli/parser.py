@@ -439,5 +439,36 @@ def build_parser(_path_arg: Callable[[str], Path]) -> argparse.ArgumentParser:
     policy_import_p.add_argument(
         "--activate", action="store_true", help="Set as active policy (policy.json)"
     )
+    policy_compat_p = policy_sub.add_parser(
+        "compat",
+        help="Compare built-under policy vs viewing policy for an investigation",
+    )
+    policy_compat_p.add_argument("--path", "-p", default=".", type=_path_arg, help="Project path")
+    policy_compat_p.add_argument(
+        "--investigation",
+        "-i",
+        required=True,
+        help="Investigation UID",
+    )
+    policy_compat_p.add_argument(
+        "--viewing-profile-id",
+        default=None,
+        help="Viewing profile id (default: active policy.json)",
+    )
+    policy_compat_p.add_argument(
+        "--built-under-profile-id",
+        default=None,
+        help="Built-under profile id override (default: latest checkpoint metadata)",
+    )
+    policy_compat_p.add_argument(
+        "--built-under-policy-version",
+        default=None,
+        help="Built-under policy version/hash override",
+    )
+    policy_compat_p.add_argument(
+        "--json",
+        action="store_true",
+        help="Output compatibility result as JSON",
+    )
 
     return parser

@@ -1,4 +1,5 @@
 import { ROUTES } from './generated/routes'
+import type { PolicyCompatibilityResult } from '../types'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '') || '/api';
 
@@ -252,6 +253,25 @@ export const api = {
     request<Record<string, unknown>>(fillRoute(ROUTES.get_defensibility_claims__claim_uid__defensibility_get, { claim_uid: claimUid })),
   getClaim: (claimUid: string) =>
     request<{ claim_uid: string; claim_text: string; claim_type?: string; current_status: string; epistemic_stance?: string }>(fillRoute(ROUTES.get_claim_claims__claim_uid__get, { claim_uid: claimUid })),
+  getPolicyCompatibility: (
+    invId: string,
+    params: {
+      viewing_profile_id?: string;
+      built_under_profile_id?: string;
+      built_under_policy_version?: string;
+    } = {}
+  ) =>
+    request<PolicyCompatibilityResult>(
+      withQuery(
+        fillRoute(
+          ROUTES.get_policy_compatibility_preflight_investigations__investigation_uid__policy_compatibility_get,
+          {
+          investigation_uid: invId,
+          }
+        ),
+        params
+      )
+    ),
   exportChronicle: (invId: string): Promise<Blob> =>
     request<Blob>(fillRoute(ROUTES.export_investigation_investigations__investigation_uid__export_post, { investigation_uid: invId }), { method: 'POST' }),
   exportSubmissionPackage: (invId: string): Promise<Blob> =>

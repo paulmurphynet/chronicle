@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pytest
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
+from chronicle.core.policy import PolicyProfile, default_policy_profile, import_policy_to_project
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
 
@@ -199,3 +194,32 @@ def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
     assert ref["link_type"] == "SUPPORT"
     assert "defensibility" in claim
     assert claim["defensibility"].get("provenance_quality") in ("strong", "medium", "weak", "challenged")
+
+
+def test_session_policy_compatibility_preflight(tmp_path: Path) -> None:
+    """Session can compare built-under and viewing policy profiles for one investigation."""
+    create_project(tmp_path)
+    base = default_policy_profile().to_dict()
+    base["profile_id"] = "policy_strict_test"
+    base["display_name"] = "Strict test profile"
+    base["mes_rules"][0]["min_independent_sources"] = 3
+    strict_profile = PolicyProfile.from_dict(base)
+    import_policy_to_project(tmp_path, strict_profile, activate=False)
+
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Policy preflight session test",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        result = session.get_policy_compatibility_preflight(
+            inv_uid,
+            viewing_profile_id="policy_strict_test",
+            built_under_profile_id="policy_investigative_journalism",
+        )
+
+    assert result["investigation_uid"] == inv_uid
+    assert result["built_under"] == "policy_investigative_journalism"
+    assert result["viewing_under"] == "policy_strict_test"
+    assert isinstance(result.get("deltas"), list)
+    assert any("min_independent_sources" in d.get("rule", "") for d in result["deltas"])

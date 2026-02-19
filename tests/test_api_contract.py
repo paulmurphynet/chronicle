@@ -12,6 +12,7 @@ pytest.importorskip("multipart")
 pytest.importorskip("httpx")
 from chronicle.api.app import app
 from chronicle.core import validation
+from chronicle.core.policy import PolicyProfile, default_policy_profile, import_policy_to_project
 from chronicle.store.project import CHRONICLE_DB
 from chronicle.store.read_model.sqlite_read_model import SqliteReadModel
 from fastapi.testclient import TestClient
@@ -271,3 +272,35 @@ def test_graph_endpoint_avoids_per_claim_link_queries(
         assert graph.status_code == 200, graph.text
         payload = graph.json()
         assert len(payload["edges"]) >= 1
+
+
+def test_api_policy_compatibility_preflight(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Policy compatibility endpoint returns deltas for built-under vs viewing profile."""
+    project_path = tmp_path / "api-policy-compat"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+
+    base = default_policy_profile().to_dict()
+    base["profile_id"] = "policy_strict_test"
+    base["display_name"] = "Strict test profile"
+    base["mes_rules"][0]["min_independent_sources"] = 3
+    strict_profile = PolicyProfile.from_dict(base)
+    import_policy_to_project(project_path, strict_profile, activate=False)
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+        response = client.get(
+            f"/investigations/{inv_uid}/policy-compatibility",
+            params={
+                "viewing_profile_id": "policy_strict_test",
+                "built_under_profile_id": "policy_investigative_journalism",
+            },
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["investigation_uid"] == inv_uid
+        assert body["built_under"] == "policy_investigative_journalism"
+        assert body["viewing_under"] == "policy_strict_test"
+        assert isinstance(body.get("deltas"), list)
+        assert any("min_independent_sources" in d.get("rule", "") for d in body["deltas"])
