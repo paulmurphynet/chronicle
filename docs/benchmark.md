@@ -54,6 +54,17 @@ PYTHONPATH=. python3 scripts/benchmark_data/check_defensibility_guardrails.py \
 
 This prints a summary and exits non-zero when thresholds are not met.
 
+You can also compute trust-oriented KPI summaries and baseline deltas:
+
+```bash
+PYTHONPATH=. python3 scripts/benchmark_data/trust_progress_report.py \
+  --results benchmark_defensibility_results.json \
+  --baseline benchmark_baseline.json \
+  --min-effective-unsupported-reduction 0.10
+```
+
+See [Trust metrics](trust-metrics.md) for KPI definitions and gating options.
+
 ---
 
 ## 4. References
@@ -63,3 +74,4 @@ This prints a summary and exits non-zero when thresholds are not met.
 | [Technical report](technical-report.md) | Defensibility definition, schema, use for evaluation. |
 | [Eval and benchmarking](eval-and-benchmarking.md) | How to run pipelines, extract metrics, and report. |
 | [Defensibility metrics schema](defensibility-metrics-schema.md) | Stable metrics fields for eval harnesses. |
+| [Trust metrics](trust-metrics.md) | Operational trust KPIs and baseline comparison workflow. |

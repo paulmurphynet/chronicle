@@ -61,7 +61,9 @@ See [Critical areas](../critical_areas/README.md) and [Epistemology scope](epist
 ## How we use this
 
 - **Roadmap and to-do** — Features and docs that move us toward this north star get priority; work that doesn’t serve it is deprioritized or declined.
+- **Execution rhythm** — Near-term delivery runs through the [30/60/90 roadmap](roadmap-30-60-90.md) with explicit trust KPI tracking.
 - **Scope** — When we’re unsure if something belongs, we ask: does it strengthen the epistemic layer, the format, the verifier, or the ecosystem? If not, it stays out.
+- **Metrics** — We track trust progress with benchmark-derived KPIs (especially effective unsupported rate); see [Trust metrics](trust-metrics.md).
 - **Messaging** — We describe Chronicle in terms of defensibility, verification, and “show your work,” not truth or guarantees we don’t provide.
 
 **← [Docs index](README.md)** | **[Story](../story/README.md)** | **[Critical areas](../critical_areas/README.md)**

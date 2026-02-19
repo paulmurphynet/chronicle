@@ -41,6 +41,7 @@ Chronicle should optimize for:
 - **L-03 completed**: manual supply-chain scan workflow and threshold gate script added (`pip-audit`, `npm audit`).
 - **L-04 completed**: benchmark guardrail script added for defensibility regression checks.
 - **L-05 completed**: ADR scaffolding and initial accepted ADRs added under `docs/adr/`.
+- **Strategy execution completed (Phase 1 kickoff)**: 30/60/90 roadmap added with dated execution milestones, and trust KPI workflow documented/implemented (`docs/trust-metrics.md`, `scripts/benchmark_data/trust_progress_report.py`, tests).
 
 ## Release blockers
 

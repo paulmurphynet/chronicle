@@ -2,7 +2,7 @@
 
 > **Purpose:** Explain how to use Chronicle as the **provenance backend** for RAG evaluation: run your pipeline with a Chronicle handler or writer, extract defensibility metrics for each answer, and compare runs or configs. No full benchmark required; this doc focuses on the pattern and interfaces.
 
-**Companion:** [Eval contract (input/output)](eval_contract.md), [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Integrating with Chronicle](integrating-with-chronicle.md).
+**Companion:** [Eval contract (input/output)](eval_contract.md), [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Trust metrics](trust-metrics.md), [Integrating with Chronicle](integrating-with-chronicle.md).
 
 ---
 

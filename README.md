@@ -11,7 +11,7 @@ Chronicle answers: *How well is this answer supported by evidence?* It’s for R
 **Two paths:**
 
 - **I want to understand the project** — Read the [Story](story/README.md) (mission, vision, problem, approach, limits), then the [Lessons](lessons/README.md) (codebase walkthrough). Before relying on scores or verification, read [Critical areas](critical_areas/README.md) (what defensibility and “verified” do *not* guarantee).
-- **I want to see where we're headed** — Read the [North star](docs/north-star.md) (long-term direction: shared infrastructure, one model from early draft to auditable package, ecosystem).
+- **I want to see where we're headed** — Read the [North star](docs/north-star.md) (long-term direction) and the [30/60/90 roadmap](docs/roadmap-30-60-90.md) (concrete near-term execution).
 - **I want to run the scorer or verifier** — Use the [Quick start](#quick-start) below, or the full [Getting started](docs/getting-started.md) page. For common issues (e.g. `chronicle: command not found`), see [Troubleshooting](docs/troubleshooting.md).
 
 **Concepts:** [Glossary](docs/glossary.md) defines defensibility, claim, evidence, .chronicle, and related terms.
@@ -111,6 +111,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Eval contract schema](docs/eval_contract_schema.json) | JSON Schema for contract input/output (machine-readable validation). |
 | [Defensibility metrics schema](docs/defensibility-metrics-schema.md) | Field semantics for the scorer output. |
 | [Eval and benchmarking](docs/eval-and-benchmarking.md) | How to run pipelines and report Chronicle defensibility. |
+| [Trust metrics](docs/trust-metrics.md) | North-star KPI definitions and baseline comparison workflow for benchmark outputs. |
 | [HTTP API](docs/api.md) | Optional minimal API: `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run uvicorn. Write/read/export/import. |
 | [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness as a defensibility metric. |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
@@ -129,6 +130,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [AI to populate epistemology](docs/ai-to-populate-epistemology.md) | How much AI is needed to fully populate claims, support/challenge, tensions. |
 | [Using Ollama locally](docs/using-ollama-locally.md) | Use local Ollama (no API key) for tension suggestion, decomposition, type inference. |
 | [State and plan](docs/state-and-plan.md) | What we have so far and the plan going forward. |
+| [30/60/90 roadmap](docs/roadmap-30-60-90.md) | Time-bound execution plan from trust baseline to design-partner readiness. |
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
 | [Core vs reference architecture](docs/architecture-core-reference.md) | How trust-critical core differs from API/CLI/UI reference surfaces and why that boundary matters. |
 | [Testing with Ollama](docs/testing-with-ollama.md) | Use local Ollama for real LLM-backed testing (decomposer, contradiction, type inference, etc.). |

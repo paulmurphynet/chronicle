@@ -9,6 +9,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | Resource | Purpose |
 |----------|---------|
 | [**North star**](north-star.md) | **Where we're headed:** Chronicle's long-term direction—shared infrastructure, one model from early draft to auditable package, ecosystem. Use it to guide roadmap and scope. |
+| [**30/60/90 roadmap**](roadmap-30-60-90.md) | Concrete near-term execution plan tied to trust outcomes and release readiness. |
 | [**Core vs reference architecture**](architecture-core-reference.md) | Boundary between trust-critical core and replaceable reference surfaces (API/CLI/UI/integrations). |
 | [**Story**](../story/README.md) | The Chronicle story: mission, vision, the problem, why it exists, how we're solving it, challenges, how you can help. Read in order (01 → 06). |
 | [**Lessons**](../lessons/README.md) | Step-by-step codebase walkthrough for developers. Numbered 00–12; each lesson has **← Previous \| Index \| Next →** (or End of lessons) at the bottom. Lesson 12 fully covers the .chronicle file format and data schema. |
@@ -41,6 +42,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Policy profiles](policy-profiles/README.md) | Example JSON profiles (journalism, legal, compliance) for verticals. |
 | [Identity providers](identity-providers.md) | Configured IdP (none, traditional, gov_id, did, zk); how to implement custom IdP adapters. |
 | [Supply-chain automation](security-automation.md) | Manual dependency scan workflow (`pip-audit`, `npm audit`) and threshold gating guidance. |
+| [Trust metrics](trust-metrics.md) | KPI definitions and scripts for tracking unsupported-claim reduction over time. |
 | [Architecture decisions (ADRs)](adr/README.md) | Durable architecture decisions and rationale (core/reference, SQLite-first posture, etc.). |
 | [North star](north-star.md) | Long-term direction: shared infrastructure, one model from early draft to auditable package, ecosystem; what stays in scope and what doesn't. |
 
