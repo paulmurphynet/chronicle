@@ -144,3 +144,34 @@ def test_list_evidence_by_investigation(tmp_path: Path) -> None:
         read_model = session.store.get_read_model()
         items = read_model.list_evidence_by_investigation(inv_uid)
     assert len(items) >= 2
+
+
+def test_link_challenge_rejects_invalid_defeater_kind(tmp_path: Path) -> None:
+    """link_challenge with defeater_kind not in (rebutting, undercutting) raises ChronicleUserError."""
+    from chronicle.core.errors import ChronicleUserError
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("Def", actor_id="t", actor_type="tool")
+        _, ev_uid = session.ingest_evidence(inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool")
+        _, span_uid = session.anchor_span(inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool")
+        _, claim_uid = session.propose_claim(inv_uid, "Claim.", actor_id="t", actor_type="tool")
+        with pytest.raises(ChronicleUserError, match="defeater_kind must be one of"):
+            session.link_challenge(inv_uid, span_uid, claim_uid, defeater_kind="invalid", actor_id="t", actor_type="tool")
+        # Valid defeater_kind is accepted
+        session.link_challenge(inv_uid, span_uid, claim_uid, defeater_kind="rebutting", actor_id="t", actor_type="tool")
+
+
+def test_declare_tension_rejects_invalid_defeater_kind(tmp_path: Path) -> None:
+    """declare_tension with defeater_kind not in (rebutting, undercutting) raises ChronicleUserError."""
+    from chronicle.core.errors import ChronicleUserError
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("Ten", actor_id="t", actor_type="tool")
+        _, c1 = session.propose_claim(inv_uid, "A", actor_id="t", actor_type="tool")
+        _, c2 = session.propose_claim(inv_uid, "B", actor_id="t", actor_type="tool")
+        session.set_tier(inv_uid, "forge", actor_id="t", actor_type="tool")
+        with pytest.raises(ChronicleUserError, match="defeater_kind must be one of"):
+            session.declare_tension(inv_uid, c1, c2, defeater_kind="invalid", actor_id="t", actor_type="tool")
+        session.declare_tension(inv_uid, c1, c2, defeater_kind="undercutting", actor_id="t", actor_type="tool")

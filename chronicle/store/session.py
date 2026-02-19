@@ -1070,7 +1070,7 @@ class ChronicleSession:
         actor_type: str = "human",
         workspace: str = "spark",
     ) -> str:
-        """Stub: analyze claim atomicity and emit ClaimDecompositionAnalyzed; returns event_id."""
+        """Record a decomposition analysis (supplied or from heuristic/LLM). For AI/heuristic-driven analysis use analyze_claim_atomicity_with_heuristic instead. Returns event_id."""
         return analyze_claim_atomicity(
             self._store,
             self.read_model,

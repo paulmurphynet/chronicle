@@ -3,6 +3,8 @@
 import logging
 import os
 
+from chronicle.core.errors import ChronicleUserError
+
 log = logging.getLogger(__name__)
 
 
@@ -46,6 +48,21 @@ MAX_SEARCH_QUERY_LENGTH = _env_int("CHRONICLE_MAX_SEARCH_QUERY_LENGTH", 500)
 # unbounded growth from clients sending many unique Idempotency-Key headers. When at cap, append raises
 # ChronicleIdempotencyCapacityError (API returns 429).
 MAX_IDEMPOTENCY_KEY_EVENTS = _env_int("CHRONICLE_MAX_IDEMPOTENCY_KEY_EVENTS", 0)
+
+
+# Allowed values for optional defeater_kind (rebutting | undercutting). We record, we don't verify semantics.
+DEFEATER_KIND_VALID = frozenset({"rebutting", "undercutting"})
+
+
+def validate_defeater_kind(defeater_kind: str | None) -> None:
+    """Raise ChronicleUserError if defeater_kind is non-empty and not one of rebutting | undercutting."""
+    if not defeater_kind or not str(defeater_kind).strip():
+        return
+    val = str(defeater_kind).strip().lower()
+    if val not in DEFEATER_KIND_VALID:
+        raise ChronicleUserError(
+            f"defeater_kind must be one of {sorted(DEFEATER_KIND_VALID)}; got {defeater_kind!r}"
+        )
 
 
 def sanitize_fts_query(query: str) -> str:

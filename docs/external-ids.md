@@ -46,7 +46,7 @@ session.propose_claim(
 )
 ```
 
-- **Single external ID:** Use `notes="key: value"` or `tags=["external:fc-12345"]`. The read model exposes `claim.notes` and `claim.tags_json`; exports and dashboards can join on these.
+- **Single external ID:** Use `notes="key: value"` or `tags=["external:fc-12345"]`. The read model and **API** expose `claim.notes` and `claim.tags_json`: **GET /claims/{claim_uid}** and **GET /investigations/{id}/claims** include `notes` and `tags_json` so external systems can join on them.
 - **Multiple external keys per claim:** Not in current scope. Use one note or one tag, or keep a mapping by `claim_uid`. For roadmap and planned features, see [To-do](to_do.md).
 
 ## Summary

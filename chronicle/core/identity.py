@@ -75,6 +75,14 @@ class NoneIdP:
         )
 
 
+class _StubIdPOnHold:
+    """Placeholder for gov_id, did, zk IdPs. On hold by design; resolves like NoneIdP (no binding).
+    Real implementations would integrate with government ID, decentralized identity, or zero-knowledge providers."""
+
+    def resolve(self, request: Any) -> PrincipalInfo:
+        return NoneIdP().resolve(request)
+
+
 class TraditionalIdP:
     """
     Traditional account: read principal from request.state (set by auth middleware).
@@ -119,8 +127,8 @@ def get_identity_provider() -> IdentityProvider:
     if name == "traditional":
         return TraditionalIdP()
     if name in ("gov_id", "did", "zk"):
-        # Stub: not implemented; fall back to none. Document in spec; implement in later PRs.
-        return NoneIdP()
+        # Stub on hold by design; resolves like NoneIdP. See docs/to_do.md.
+        return _StubIdPOnHold()
     return NoneIdP()
 
 

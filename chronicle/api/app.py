@@ -357,6 +357,8 @@ def list_investigation_claims(
                     "current_status": c.current_status,
                     "created_at": c.created_at,
                     "updated_at": c.updated_at,
+                    "notes": getattr(c, "notes", None),
+                    "tags_json": getattr(c, "tags_json", None),
                     "epistemic_stance": getattr(c, "epistemic_stance", None),
                 }
                 for c in claims
@@ -707,6 +709,8 @@ def get_claim(claim_uid: str) -> dict[str, Any]:
             "current_status": claim.current_status,
             "created_at": claim.created_at,
             "updated_at": claim.updated_at,
+            "notes": getattr(claim, "notes", None),
+            "tags_json": getattr(claim, "tags_json", None),
         }
         if getattr(claim, "epistemic_stance", None) is not None:
             out["epistemic_stance"] = claim.epistemic_stance

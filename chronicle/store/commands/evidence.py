@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from chronicle.core.errors import ChronicleUserError
+from chronicle.core.validation import validate_defeater_kind
 from chronicle.core.events import (
     EVENT_CHAIN_OF_CUSTODY_REPORT_GENERATED,
     EVENT_CHALLENGE_LINKED,
@@ -280,6 +281,7 @@ def link_support(
         raise ChronicleUserError(f"span_uid must reference an existing span: {span_uid}")
     if read_model.get_claim(claim_uid) is None:
         raise ChronicleUserError(f"claim_uid must reference an existing claim: {claim_uid}")
+    validate_defeater_kind(defeater_kind)
     link_uid = generate_link_uid()
     event_id = generate_event_id()
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -336,6 +338,7 @@ def link_challenge(
         raise ChronicleUserError(f"span_uid must reference an existing span: {span_uid}")
     if read_model.get_claim(claim_uid) is None:
         raise ChronicleUserError(f"claim_uid must reference an existing claim: {claim_uid}")
+    validate_defeater_kind(defeater_kind)
     link_uid = generate_link_uid()
     event_id = generate_event_id()
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

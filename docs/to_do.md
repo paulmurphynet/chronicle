@@ -4,7 +4,17 @@
 
 **Doc updates** (story, lessons, quizzes, critical areas) are done at the end after implementing new features, so docs stay in sync with the product.
 
-**Review-driven improvements:** All items from [PROJECT_REVIEW](PROJECT_REVIEW.md) were implemented (CI aligned to 50%, coverage artifact, doc link check, integration quick reference, user manual skeleton, benchmark one-liner, release checklist, optional API/Neo4j in README). CI triggers are **not** enabled; to turn CI on later, uncomment push/PR in [.github/workflows/ci.yml](../.github/workflows/ci.yml). See PROJECT_REVIEW "Completion status" table.
+**Review-driven improvements:** All items from [PROJECT_REVIEW](PROJECT_REVIEW.md) were implemented (CI aligned to 50%, coverage artifact, doc link check, integration quick reference, user manual skeleton, benchmark one-liner, release checklist, optional API/Neo4j in README). See PROJECT_REVIEW "Completion status" table.
+
+---
+
+## On hold by design
+
+The following are **intentionally** not implemented or not enabled; no action required unless the project decides otherwise.
+
+- **CI triggers** — Push/PR triggers in [.github/workflows/ci.yml](../.github/workflows/ci.yml) are disabled. CI can be run manually via "Run workflow." To enable on push/PR, uncomment the `push` and `pull_request` triggers.
+- **PostgreSQL read model** — The optional Postgres event store exists; the **read model** for Postgres is not implemented. Use SQLite for the read model. See [POSTGRES](POSTGRES.md). Migration to a full Postgres backend is on hold by design.
+- **Identity providers (gov_id, did, zk)** — Configurable IdP names exist but resolve via a stub (same behavior as none). Real integrations with government ID, decentralized identity, or zero-knowledge providers are on hold by design.
 
 ---
 
@@ -20,7 +30,7 @@
 
 5. **Test coverage — phase 5 (toward 75%; raise fail_under stepwise)** — Add tests for remaining hot paths (e.g. export_import edge cases, CLI subcommands that use session, policy application in get_defensibility_score). Raise `fail_under` to 60% when coverage allows, then to 75%. See [coverage-core](coverage-core.md). Phase 5 tests added in `tests/test_phase5_coverage.py`; raise fail_under when suite is green.
 
-6. **Future release** — When cutting a release: update [CHANGELOG](../../CHANGELOG.md), tag (e.g. `git tag vX.Y.Z`), push tag, optionally publish to PyPI. See [CONTRIBUTING](../../CONTRIBUTING.md#changelog-and-releases) (release checklist).
+6. **Future release** — When cutting a release: update [CHANGELOG](../../CHANGELOG.md), tag (e.g. `git tag vX.Y.Z`), push tag, optionally publish to PyPI. See [CONTRIBUTING](../../CONTRIBUTING.md#changelog-and-releases) (release checklist). When a preprint (e.g. arXiv) or publication exists, add its ID and citation to [technical-report](technical-report.md).
 
 ---
 

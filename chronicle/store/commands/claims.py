@@ -546,7 +546,7 @@ def analyze_claim_atomicity(
     actor_type: str = "human",
     workspace: str = "spark",
 ) -> str:
-    """AnalyzeClaimAtomicity stub. Emits ClaimDecompositionAnalyzed. Returns event_id. Spec 1.5.1. No AI."""
+    """AnalyzeClaimAtomicity: record a decomposition result (supplied or from tools). Emits ClaimDecompositionAnalyzed. For AI/heuristic analysis use session.analyze_claim_atomicity_with_heuristic. Returns event_id. Spec 1.5.1."""
     if read_model.get_claim(claim_uid) is None:
         raise ChronicleUserError(f"claim_uid must reference an existing claim: {claim_uid}")
     claim = read_model.get_claim(claim_uid)

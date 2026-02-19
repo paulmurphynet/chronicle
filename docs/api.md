@@ -67,14 +67,14 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 | GET | `/investigations/{id}/tier-history` | List tier transitions, newest first. Query: `limit?` (default 100). |
 | GET | `/investigations/{id}/tension-suggestions` | List tension suggestions. Query: `status?` (pending \| confirmed \| dismissed; default pending), `limit?` (default 500). |
 | GET | `/investigations/{id}/evidence` | List evidence items for the investigation. Query: `limit?` (default 2000). |
-| GET | `/investigations/{id}/claims` | List claims for the investigation. Query: `include_withdrawn?` (default true), `limit?` (default 2000). |
+| GET | `/investigations/{id}/claims` | List claims for the investigation (each includes **notes**, **tags_json**). Query: `include_withdrawn?` (default true), `limit?` (default 2000). |
 | GET | `/investigations/{id}/tensions` | List tensions for the investigation. Query: `status?`, `limit?` (default 500). |
 | GET | `/evidence/{evidence_uid}/spans` | List spans for an evidence item (for linking support/challenge in UI). Query: `limit?` (default 500). |
 | GET | `/evidence/{evidence_uid}/content` | Return evidence file content (text/plain for text/*; binary otherwise). For Reading UI. |
 | GET | `/investigations/{id}/graph` | Nodes (claims, evidence) and edges (support/challenge) for graph visualization. |
 | POST | `/investigations/{id}/spans` | Create a text_offset span (e.g. from selection). Body: `{ "evidence_uid", "start_char", "end_char", "quote?" }`. Returns `event_id`, `span_uid`. |
 | GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output). Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
-| GET | `/claims/{claim_uid}` | Get claim (includes optional **epistemic_stance** when set). |
+| GET | `/claims/{claim_uid}` | Get claim (includes **notes**, **tags_json**, and optional **epistemic_stance** when set). |
 | GET | `/claims/{claim_uid}/reasoning-brief` | Reasoning brief (claim, defensibility, support/challenge, tensions, trail). Query: `limit?`. |
 
 ### Export / import

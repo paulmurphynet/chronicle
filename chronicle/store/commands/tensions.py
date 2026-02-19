@@ -21,6 +21,7 @@ from chronicle.core.payloads import (
 )
 from chronicle.core.policy import require_workspace_for_command
 from chronicle.core.uid import generate_event_id, generate_suggestion_uid, generate_tension_uid
+from chronicle.core.validation import validate_defeater_kind
 from chronicle.store.commands.attestation import apply_attestation_to_payload
 from chronicle.store.protocols import EventStore, ReadModel
 
@@ -86,6 +87,7 @@ def declare_tension(
             raise ChronicleUserError(
                 "a tension between these two claims already exists in OPEN status"
             )
+    validate_defeater_kind(defeater_kind)
     tension_uid = generate_tension_uid()
     event_id = generate_event_id()
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

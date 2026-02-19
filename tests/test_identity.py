@@ -140,13 +140,15 @@ def test_get_identity_provider_returns_traditional_idp() -> None:
 
 
 def test_get_identity_provider_stub_for_gov_id_did_zk() -> None:
-    """get_identity_provider returns NoneIdP stub for gov_id, did, zk (not implemented)."""
+    """get_identity_provider returns a stub IdP for gov_id, did, zk (on hold by design; resolves like NoneIdP)."""
     prev = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)
     try:
         for name in ("gov_id", "did", "zk"):
             os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = name
             idp = get_identity_provider()
-            assert isinstance(idp, NoneIdP)
+            # Stub resolves like NoneIdP (e.g. reads headers or returns empty)
+            info = idp.resolve(_make_request({"X-Actor-Id": "test_actor"}))
+            assert info.principal_id == "test_actor" and info.verification_level == "claimed"
     finally:
         if prev is not None:
             os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = prev

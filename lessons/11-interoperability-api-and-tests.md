@@ -42,7 +42,7 @@ Export formats and adapters use Chronicle’s names; your adapter can map to loc
 **External IDs (docs/external-ids.md):** When you need to correlate Chronicle entities with external systems (e.g. “this Chronicle claim = that fact-check verdict”):
 
 - **Evidence:** Use the **metadata** dict at ingest. Store `fact_check_id`, `c2pa_assertion_id`, or similar. It’s persisted as `metadata_json` in the read model and in exports.
-- **Claims:** The claim table has `notes` and `tags_json`; the API may expose them in a later release. Until then, keep a mapping (claim_uid → external_id) in your system or use a single note/tag convention.
+- **Claims:** The claim table has `notes` and `tags_json`; the API exposes them in **GET /claims/{claim_uid}** and **GET /investigations/{id}/claims** so you can correlate claim_uid with external IDs (e.g. fact_check_id) without a separate mapping.
 
 **Provenance recording (docs/provenance-recording.md):** We can **store** source and evidence–source links. We **do not verify** C2PA, CR, or that evidence “really” came from a source. Provenance-aware pipelines can feed us assertions (e.g. “this blob from this source/model”); the **provenance adapter** (scripts/adapters/provenance_to_chronicle.py) is a template for that. Same idea for fact-checker output → Chronicle (scripts/adapters/fact_checker_to_chronicle.py).
 
