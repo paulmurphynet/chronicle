@@ -448,17 +448,24 @@ export function InvestigationDetail() {
       {tab === 'policy' && (
         <section>
           <h3>Policy profiles</h3>
-          <p className="muted">Example policy profiles for verticals. See <a href="https://github.com/chronicle-app/chronicle/blob/main/docs/policy-profiles/README.md" target="_blank" rel="noreferrer">docs/policy-profiles</a>.</p>
+          <p className="muted">
+            Example policy profiles for verticals. See{' '}
+            <a href="https://github.com/chronicle-app/chronicle/blob/main/docs/policy-profiles/README.md" target="_blank" rel="noreferrer">docs/policy-profiles</a>
+            {' '}and{' '}
+            <a href="https://github.com/chronicle-app/chronicle/blob/main/docs/role-based-review-checklists.md" target="_blank" rel="noreferrer">role-based review checklists</a>.
+          </p>
           <ul className="list">
             <li><strong>Journalism</strong> — Two-source rule, named sources, tensions block publication.</li>
             <li><strong>Legal</strong> — Stricter MES, chain of custody, tension resolution for checkpoints.</li>
             <li><strong>Compliance</strong> — Evidence admissibility, exception workflow, all tensions addressed.</li>
+            <li><strong>History/Research</strong> — Source-context-heavy review with explicit uncertainty handling.</li>
           </ul>
           <h3>Compatibility preflight</h3>
           <p className="muted">Compare built-under policy to a viewing policy before checkpoint/export/submission.</p>
           <label>Viewing profile: <select value={policyViewingId} onChange={(e) => setPolicyViewingId(e.target.value)}>
             <option value="policy_legal">policy_legal</option>
             <option value="policy_compliance">policy_compliance</option>
+            <option value="policy_history_research">policy_history_research</option>
             <option value="policy_investigative_journalism">policy_investigative_journalism</option>
           </select></label>
           <label>Built-under override (optional): <input type="text" placeholder="policy_investigative_journalism" value={policyBuiltUnderOverride} onChange={(e) => setPolicyBuiltUnderOverride(e.target.value)} /></label>

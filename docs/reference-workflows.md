@@ -10,7 +10,7 @@ Each workflow is designed to be:
 
 ## One-command runner
 
-Run the full reference set (journalism, benchmark trust tracking, compliance report, Neo4j contract check):
+Run the full reference set (journalism, legal, history/research, compliance report, benchmark trust tracking, Neo4j contract check):
 
 ```bash
 PYTHONPATH=. python3 scripts/run_reference_workflows.py
@@ -35,7 +35,41 @@ Expected outcome:
 2. Verifier passes on structure/hash checks.
 3. The investigation contains claim conflict captured as a tension.
 
-## Workflow 2: Compliance-style RAG audit output
+## Workflow 2: Legal conflict review
+
+Goal: build a legal-style investigation with conflicting contractual claims and verify the artifact.
+
+Run from repo root:
+
+```bash
+PYTHONPATH=. python3 scripts/verticals/legal/generate_sample.py
+chronicle-verify frontend/public/sample_legal.chronicle
+```
+
+Expected outcome:
+
+1. A deterministic legal `.chronicle` sample is generated.
+2. Verifier passes on structure/hash checks.
+3. The investigation includes a legal contradiction tension for review.
+
+## Workflow 3: History/research conflict review
+
+Goal: generate a history/research investigation with competing interpretations and explicit tension tracking.
+
+Run from repo root:
+
+```bash
+PYTHONPATH=. python3 scripts/verticals/history/generate_sample.py
+chronicle-verify frontend/public/sample_history.chronicle
+```
+
+Expected outcome:
+
+1. A deterministic history/research `.chronicle` sample is generated.
+2. Verifier passes on structure/hash checks.
+3. The investigation preserves uncertainty via explicit competing claims and tension.
+
+## Workflow 4: Compliance-style RAG audit output
 
 Goal: run one RAG flow and produce an auditable report bundle.
 
@@ -65,7 +99,14 @@ Or via API:
 curl "http://127.0.0.1:8000/investigations/<investigation_uid>/review-packet"
 ```
 
-## Workflow 3: Benchmark trust tracking
+Role-specific review template:
+
+```bash
+# Use this after generating review packet/ledger outputs
+cat docs/role-based-review-checklists.md
+```
+
+## Workflow 5: Benchmark trust tracking
 
 Goal: track trust KPI trends over time with benchmark outputs.
 

@@ -7,17 +7,16 @@ Each vertical has its own **sample generator** that produces a deterministic `.c
 | Vertical   | Script                                      | Output (frontend/public)     |
 |-----------|---------------------------------------------|------------------------------|
 | Journalism| [journalism/generate_sample.py](journalism/generate_sample.py) | `sample.chronicle` (default) |
-| Legal     | *(to be added)*                            | `sample_legal.chronicle` *(to be added)* |
-| Academic  | *(to be added)*                            | `sample_academic.chronicle` *(to be added)* |
+| Legal     | [legal/generate_sample.py](legal/generate_sample.py) | `sample_legal.chronicle` |
+| History/Research | [history/generate_sample.py](history/generate_sample.py) | `sample_history.chronicle` |
 | Compliance| *(to be added)*                           | `sample_compliance.chronicle` *(to be added)* |
 
 ## Run from repo root
 
 ```bash
 PYTHONPATH=. python3 scripts/verticals/journalism/generate_sample.py
-# When added:
-# PYTHONPATH=. python3 scripts/verticals/legal/generate_sample.py
-# ...
+PYTHONPATH=. python3 scripts/verticals/legal/generate_sample.py
+PYTHONPATH=. python3 scripts/verticals/history/generate_sample.py
 ```
 
 ## Requirements

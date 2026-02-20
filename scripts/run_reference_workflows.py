@@ -80,6 +80,82 @@ def _workflow_journalism(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     return result
 
 
+def _workflow_legal(repo_root: Path, run_dir: Path) -> dict[str, Any]:
+    from tools.verify_chronicle.verify_chronicle import verify_chronicle_file
+
+    sample_path = run_dir / "legal" / "sample_legal.chronicle"
+    sample_path.parent.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        sys.executable,
+        str(repo_root / "scripts/verticals/legal/generate_sample.py"),
+        "--output",
+        str(sample_path),
+    ]
+    command = _run_cmd(cmd, cwd=repo_root)
+    result: dict[str, Any] = {
+        "name": "legal",
+        "status": "failed",
+        "commands": [command],
+        "artifacts": {"sample_chronicle": str(sample_path)},
+    }
+    if command["returncode"] != 0:
+        result["error"] = "generator_failed"
+        return result
+    if not sample_path.is_file():
+        result["error"] = f"missing_sample_file:{sample_path}"
+        return result
+
+    checks = verify_chronicle_file(sample_path, run_invariants=True)
+    failed = [name for name, passed, _detail in checks if not passed]
+    result["verification_checks"] = [
+        {"name": name, "passed": passed, "detail": detail} for name, passed, detail in checks
+    ]
+    if failed:
+        result["error"] = f"verification_failed:{failed}"
+        return result
+
+    result["status"] = "passed"
+    return result
+
+
+def _workflow_history(repo_root: Path, run_dir: Path) -> dict[str, Any]:
+    from tools.verify_chronicle.verify_chronicle import verify_chronicle_file
+
+    sample_path = run_dir / "history" / "sample_history.chronicle"
+    sample_path.parent.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        sys.executable,
+        str(repo_root / "scripts/verticals/history/generate_sample.py"),
+        "--output",
+        str(sample_path),
+    ]
+    command = _run_cmd(cmd, cwd=repo_root)
+    result: dict[str, Any] = {
+        "name": "history",
+        "status": "failed",
+        "commands": [command],
+        "artifacts": {"sample_chronicle": str(sample_path)},
+    }
+    if command["returncode"] != 0:
+        result["error"] = "generator_failed"
+        return result
+    if not sample_path.is_file():
+        result["error"] = f"missing_sample_file:{sample_path}"
+        return result
+
+    checks = verify_chronicle_file(sample_path, run_invariants=True)
+    failed = [name for name, passed, _detail in checks if not passed]
+    result["verification_checks"] = [
+        {"name": name, "passed": passed, "detail": detail} for name, passed, detail in checks
+    ]
+    if failed:
+        result["error"] = f"verification_failed:{failed}"
+        return result
+
+    result["status"] = "passed"
+    return result
+
+
 def _workflow_benchmark(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     work = run_dir / "benchmark"
     work.mkdir(parents=True, exist_ok=True)
@@ -190,6 +266,8 @@ def _workflow_neo4j(repo_root: Path, run_dir: Path) -> dict[str, Any]:
 
 WORKFLOW_RUNNERS: dict[str, Callable[[Path, Path], dict[str, Any]]] = {
     "journalism": _workflow_journalism,
+    "legal": _workflow_legal,
+    "history": _workflow_history,
     "benchmark": _workflow_benchmark,
     "compliance": _workflow_compliance,
     "neo4j": _workflow_neo4j,

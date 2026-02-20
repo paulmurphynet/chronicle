@@ -55,6 +55,8 @@ Chronicle should optimize for:
 - **TE-02 completed**: added `link_assurance_level` and `link_assurance_caveat` to defensibility metrics surfaced by scorer/session/API/export (including eval contract docs/schema updates and regression tests) so auto-linked vs human-reviewed link posture is explicit.
 - **TE-04 completed**: shipped a unified reviewer decision ledger/report across session/API/CLI (`get_reviewer_decision_ledger`, `GET /investigations/{id}/reviewer-decision-ledger`, `chronicle reviewer-decision-ledger`) consolidating confirmations, overrides, dismissals, tier transitions, actor/time context, and unresolved tensions in one artifact.
 - **TE-05 completed**: shipped a unified review packet generator across session/API/CLI (`get_review_packet`, `GET /investigations/{id}/review-packet`, `chronicle review-packet`) combining policy compatibility, policy rationale summary, decision ledger snapshot, chain-of-custody report metadata, reasoning briefs, and audit export bundle in one action.
+- **TE-06 completed**: added role-based review checklist templates (`docs/role-based-review-checklists.md`) and linked them from policy profile docs, reference workflows, and Reference UI policy guidance.
+- **TE-03 completed**: expanded multi-vertical workflow parity with new legal/history deterministic sample generators and reference workflow runner coverage (`scripts/verticals/legal/generate_sample.py`, `scripts/verticals/history/generate_sample.py`, `scripts/run_reference_workflows.py`), plus a new history/research policy example profile (`docs/policy-profiles/history_research.json`).
 
 ## Release blockers
 
@@ -66,14 +68,7 @@ No active release blockers at this time. Keep validating changes against:
 
 ## Post-release high-value work
 
-Active implementation batch from `thought_experiments/decision-register.md` (2026-02-19), prioritized:
-
-1. **TE-06 (P2): Role-based review checklists by policy profile.**
-   Add policy-linked checklist templates for journalism/legal/compliance workflows in docs/UI guidance.
-   Done when templates are available and linked from reference workflow docs and policy profile docs.
-2. **TE-03 (P2): Multi-vertical workflow parity expansion.**
-   Add research/history profile example and expand reproducible workflows for legal/compliance/history use cases.
-   Done when `scripts/run_reference_workflows.py` includes these scenarios with deterministic report output and docs are updated.
+No active TE batch items remain from `thought_experiments/decision-register.md` (2026-02-19).
 
 ## Later / research backlog
 

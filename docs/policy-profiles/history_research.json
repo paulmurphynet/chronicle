@@ -1,0 +1,93 @@
+{
+  "format_version": 1,
+  "profile_id": "policy_history_research",
+  "display_name": "History / Research",
+  "description": "Archival and interpretation-focused profile with explicit uncertainty and source-context expectations",
+  "policy_rationale": "Historical and research workflows often preserve competing interpretations; prioritize source context, transparency, and explicit caveats over forced consensus.",
+  "mes_rules": [
+    {
+      "target_claim_type": "SEF",
+      "min_independent_sources": 2,
+      "required_evidence_types": [
+        "primary_document"
+      ],
+      "preferred_evidence_types": [
+        "official_record",
+        "expert_analysis",
+        "witness_statement"
+      ],
+      "disallowed_evidence_types": [
+        "anonymous_tip_alone",
+        "social_media_unverified"
+      ],
+      "min_confidence": 0.65,
+      "min_sources_with_independence_notes": 1,
+      "notes": "Corroborate key historical claims with at least two independent sources, with provenance context recorded for at least one."
+    }
+  ],
+  "evidence_admissibility": {
+    "admissible_types": [
+      "primary_document",
+      "official_record",
+      "expert_analysis",
+      "witness_statement",
+      "physical_evidence"
+    ],
+    "inadmissible_for_sef": [
+      "anonymous_tip_alone",
+      "social_media_unverified"
+    ],
+    "no_sef_from_ai_only": true,
+    "notes": "Interpretive summaries can assist analysis but cannot independently establish SEF."
+  },
+  "tension_rules": {
+    "blocks_vault_publication": [
+      "OPEN",
+      "DISPUTED"
+    ],
+    "blocks_forge_export": [],
+    "allows_publication": [
+      "ACK",
+      "RESOLVED",
+      "DEFERRED",
+      "SUPERSEDED"
+    ],
+    "requires_justification": [
+      "INTRACTABLE",
+      "DEFERRED",
+      "ESCALATED",
+      "ACK"
+    ],
+    "notes": "Competing interpretations may remain acknowledged or deferred when rationale is explicit."
+  },
+  "checkpoint_rules": {
+    "requires_all_claims_typed": true,
+    "requires_all_tensions_addressed": false,
+    "requires_tension_resolution_rationale": true,
+    "requires_at_least_one_sef": false,
+    "requires_chain_of_custody": false,
+    "warn_if_one_sided": true,
+    "block_checkpoint_if_one_sided": false,
+    "notes": "Allow unresolved tensions when documented, but require rationale for acknowledged/deferred outcomes."
+  },
+  "tier_overrides": {
+    "spark": {
+      "allow_untyped_claims": true,
+      "allow_unanchored_evidence": true
+    },
+    "forge": {
+      "allow_untyped_claims": false,
+      "allow_unanchored_evidence": false,
+      "require_source_registration": true
+    },
+    "vault": {
+      "allow_untyped_claims": false,
+      "allow_unanchored_evidence": false,
+      "require_source_registration": true
+    }
+  },
+  "vocabulary": {
+    "defensibility": "Research confidence",
+    "claim": "Interpretive claim"
+  }
+}

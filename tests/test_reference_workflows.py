@@ -56,3 +56,16 @@ def test_reference_workflow_runner_with_stubbed_workflows(
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["summary"]["total"] == 2
     assert report["summary"]["failed"] == 1
+
+
+def test_reference_workflow_runner_legal_and_history(tmp_path: Path) -> None:
+    out_dir = tmp_path / "runs"
+    rc = runner_module.main(["--output-dir", str(out_dir), "--only", "legal", "history"])
+    assert rc == 0
+    report_path = out_dir / "reference_workflow_report.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["summary"]["total"] == 2
+    assert report["summary"]["failed"] == 0
+    names = {wf["name"] for wf in report["workflows"]}
+    assert names == {"legal", "history"}
