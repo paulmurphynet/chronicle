@@ -61,6 +61,12 @@ See `.env.postgres.example`:
 - `CHRONICLE_POSTGRES_USER`
 - `CHRONICLE_POSTGRES_PASSWORD`
 
+Backend wiring behavior (current):
+
+- `ChronicleSession` now resolves event-store backend from `CHRONICLE_EVENT_STORE` (or explicit constructor args).
+- `sqlite` is the default and remains the only full session/API/CLI path.
+- `postgres` selection is parsed and validated, but session entry points intentionally fail fast with a clear user error until Postgres read-model parity is implemented.
+
 ## Important limitation (current)
 
 Postgres read model is not yet parity-complete. Queries and projections for claims/defensibility/tensions remain SQLite-first in the current runtime path.
