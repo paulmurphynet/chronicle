@@ -66,6 +66,24 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - [x] Postgres onboarding from zero to first successful smoke run in <= 10 minutes.
 - [x] Docs and troubleshooting validated by docs link/currency checks.
 
+## Public launch readiness (v0.9.0 preflight 2026-02-20)
+
+### Release-critical blockers
+
+- [ ] Fix core type-check failure in Postgres event store (`chronicle/store/postgres_event_store.py`, mypy tuple unpack on `fetchone()`).
+- [ ] Make core format gate pass (`ruff format --check chronicle tools`).
+- [ ] Harden `scripts/supply_chain_gate.py` to accept current `pip-audit` JSON entries that include `skip_reason` without `vulns`.
+- [ ] Add deterministic frontend dependency lockfile and switch CI/release frontend install steps from `npm install` to `npm ci`.
+- [ ] Resolve deterministic check invocation mismatch across local/CI/release (`scripts/check_deterministic_defensibility.py` import path expectations vs `python3 scripts/...` calls).
+- [ ] Align project release metadata for the intended launch version (`pyproject.toml`, `frontend/package.json`, `CHANGELOG.md`, release-tag usage).
+- [ ] Re-run live branch-protection rollout verification after repo is public and record `status=passed`.
+
+### Quality and launch-polish follow-ups
+
+- [ ] Document frontend local prerequisites for `npm run check:api-routes` (Python environment with Chronicle API deps available).
+- [ ] Decide and document lint scope policy (core-only vs include `scripts/` + `tests/`) and enforce consistently in local+CI commands.
+- [ ] Add contributor guidance for local dependency audit prerequisites (frontend lockfile + npm audit behavior).
+
 ## Standards and whitepaper program (approved 2026-02-20)
 
 Goal: make Chronicle standards-compatible without destabilizing core contracts, and produce a publication-ready standards whitepaper.
