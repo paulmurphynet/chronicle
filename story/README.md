@@ -33,7 +33,7 @@ By the end you’ll understand:
 
 - **Why defensibility matters** — What goes wrong when answers aren’t backed by visible evidence, and what we mean (and don’t mean) by “defensibility.”
 - **Why the problem is here to stay** — The forces (scale, AI/RAG, trust, evals) that made “show your work” both essential and under-served.
-- **How Chronicle addresses it** — Evidence and claims, a defensibility score, a portable .chronicle format, a verifier (with clear [verification guarantees](../docs/verification-guarantees.md)), and how we fit into your ecosystem: one-command RAG path, standalone scorer, POST /score (scorer-as-a-service), optional API and adapters, optional link rationale, defeater type, source reliability notes, epistemic stance, policy rationale, and Neo4j deduplication, and provenance recording.
+- **How Chronicle addresses it** — Evidence and claims, a defensibility score, a portable .chronicle format, a verifier (with clear [verification guarantees](../docs/verification-guarantees.md)), and how we fit into your ecosystem: one-command RAG path, standalone scorer, POST /score (scorer-as-a-service), optional API and adapters, starter packs, hardened integration export contracts, optional link rationale, defeater type, source reliability notes, epistemic stance, policy rationale, Neo4j deduplication, provenance recording, and standards-profile interoperability layers (JSON-LD/PROV, ClaimReview, RO-Crate, C2PA/VC compatibility).
 - **What’s hard and what we don’t do** — Honest limits so you don’t over-trust the score or the verifier. The [critical areas](../critical_areas/README.md) spell these out.
 - **How you can help** — Concrete ways to contribute code, docs, feedback, or simply spread the story.
 

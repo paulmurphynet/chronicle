@@ -40,7 +40,7 @@ Answer these after reading the lesson and looking at the repo layout. Try not to
 
 5. **`chronicle/integrations/`** — e.g. LangChain, LlamaIndex, Haystack.
 
-6. **`tests/`** — e.g. test_standalone_scorer.py, test_session.py, test_verifier.py. **CI** (`.github/workflows/ci.yml`) runs **ruff** (check + format) on chronicle and tools, and **pytest tests/** on Python 3.11 and 3.12 when the workflow is run (currently manual `workflow_dispatch`).
+6. **`tests/`** — e.g. test_standalone_scorer.py, test_session.py, test_verifier.py. **CI** (`.github/workflows/ci.yml`) runs on push/PR/manual and includes core lint+tests plus frontend and Postgres convergence jobs.
 
 7. **`chronicle/api/app.py`** (FastAPI app). Install with **`pip install -e ".[api]"`**; then set `CHRONICLE_PROJECT_PATH` and run `uvicorn chronicle.api.app:app`. See docs/api.md.
 

@@ -1,6 +1,6 @@
 # Lesson 07: Integrations and scripts
 
-**Objectives:** You’ll know where RAG and framework integrations live, what the main scripts do (benchmark, eval harness adapter, RAG demos, transcript ingest), and how they plug into the Chronicle session.
+**Objectives:** You’ll know where RAG and framework integrations live, what the main scripts do (benchmark, eval harness adapter, starter packs, API ingestion pipeline, integration contract harnesses), and how they plug into the Chronicle session.
 
 **Key files:**
 
@@ -9,9 +9,15 @@
 - [scripts/adapters/](../scripts/adapters/) — RAG→scorer example, fact-checker→Chronicle, provenance→Chronicle
 - [chronicle/api/app.py](../chronicle/api/app.py) — optional HTTP API (install `.[api]`)
 - [scripts/standalone_defensibility_scorer.py](../scripts/standalone_defensibility_scorer.py) — already covered in Lesson 02
+- [scripts/starter_packs/bootstrap.py](../scripts/starter_packs/bootstrap.py) — opinionated vertical starter packs (journalism, legal, audit)
+- [scripts/api_ingestion_pipeline_example.py](../scripts/api_ingestion_pipeline_example.py) — batch input → API writes → defensibility + export artifacts
+- [scripts/check_integration_export_contracts.py](../scripts/check_integration_export_contracts.py) — JSON/CSV/Markdown/signed-bundle end-to-end contract harness
 - [docs/eval-and-benchmarking.md](../docs/eval-and-benchmarking.md) — how to run pipelines and report defensibility
 - [docs/api.md](../docs/api.md) — HTTP API config and endpoints
 - [docs/rag-evals-defensibility-metric.md](../docs/rag-evals-defensibility-metric.md) — RAG evals: contract and scorer in your harness
+- [docs/starter-packs.md](../docs/starter-packs.md) — vertical onboarding packs and expected artifacts
+- [docs/api-ingestion-pipeline-example.md](../docs/api-ingestion-pipeline-example.md) — deterministic API pipeline walkthrough
+- [docs/integration-export-hardening.md](../docs/integration-export-hardening.md) — hardened interoperability contract for export/import surfaces
 - [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) — professional framing for the transcript benchmark dataset
 
 ---
@@ -35,6 +41,9 @@ Open **scripts/README.md** and find the **“First-class scripts”** table. The
 - **benchmark_data/run_defensibility_benchmark.py** — Fixed queries, defensibility per answer (`--mode session` recommended for reproducible local runs).
 - **eval_harness_adapter.py** — Adapt a RAG run to the eval contract and record defensibility.
 - **run_reference_workflows.py** — One-command execution of journalism + benchmark + compliance + Neo4j checks with a consolidated report.
+- **starter_packs/bootstrap.py** — Create a clean workspace from opinionated vertical defaults (journalism/legal/audit), including deterministic fixture import and report/export artifacts.
+- **api_ingestion_pipeline_example.py** — Run an end-to-end API write/read/export flow from one batch input.
+- **check_integration_export_contracts.py** — Validate adapter/API-facing import/export contracts for JSON, CSV ZIP, Markdown reasoning brief, `.chronicle`, and signed bundle flows.
 - **export_for_ml.py** — Export investigation data for ML/training.
 - **rag_path_demo.py** — Minimal RAG path (session: ingest, claim, link).
 - **\*_rag_chronicle.py** — LangChain, LlamaIndex, Haystack, cross-framework demos.
@@ -102,13 +111,15 @@ So scripts are **thin orchestration**; the engine is the store and commands.
 2. List the contents of **scripts/** and **scripts/adapters/**. Match the first-class scripts in **scripts/README.md** to their paths.
 3. Open **scripts/adapters/example_rag_to_scorer.py** and see how it reads JSON and calls the scorer logic. Run it with a one-line JSON input (query, answer, evidence) from stdin.
 4. Run `PYTHONPATH=. python3 scripts/adapters/check_examples.py` and verify adapter examples + validation flow pass.
-5. (Optional) Install **`.[api]`**, set **CHRONICLE_PROJECT_PATH**, run **uvicorn chronicle.api.app:app**, and open **http://127.0.0.1:8000/docs** to try the API.
-6. Open **scripts/ingest_transcript_csv.py** and find where it calls **session.ingest_evidence**, **session.propose_claim**, and **session.link_support**. Confirm it follows the same pattern as the scorer (without the temp project).
-7. Read [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) and note the two non-goals: no sensational framing and no claim to establish legal truth.
+5. Run `PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_lesson7_contract_project --output-dir /tmp/chronicle_lesson7_contract_out` and inspect the generated contract report/artifacts.
+6. (Optional) Install **`.[api]`**, set **CHRONICLE_PROJECT_PATH**, run **uvicorn chronicle.api.app:app**, and open **http://127.0.0.1:8000/docs** to try the API.
+7. Open **scripts/ingest_transcript_csv.py** and find where it calls **session.ingest_evidence**, **session.propose_claim**, and **session.link_support**. Confirm it follows the same pattern as the scorer (without the temp project).
+8. Read [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) and note the two non-goals: no sensational framing and no claim to establish legal truth.
 
 ## Summary
 
 - **First-class scripts and CLI** (scripts/README.md, CLI): **chronicle quickstart-rag** for a one-command RAG flow; scorer, verifier, benchmark, eval harness adapter, export_for_ml, RAG demos. Use them to plug Chronicle into pipelines.
+- **Onboarding and contract harnesses**: starter packs reduce first-project ambiguity; API ingestion and integration export contract scripts provide deterministic interoperability baselines.
 - **Adapters** (scripts/adapters/): RAG→scorer example, fact-checker→Chronicle, provenance→Chronicle. Copy-paste templates for interop.
 - **Optional HTTP API** (chronicle/api/, install `.[api]`): write/read/export over HTTP; same shapes as eval contract and defensibility schema.
 - **Integrations** (chronicle/integrations/) wire RAG frameworks to ChronicleSession so that runs record evidence and claims.

@@ -32,7 +32,7 @@ We’re explicit about what we **don’t** do (see [critical areas](../critical_
 
 ## Ecosystem and extensions
 
-Longer term, the ecosystem could grow: hosted scorer APIs, UIs that consume .chronicle, vertical-specific policies, and tighter integration with popular eval frameworks. Each of those is a chunk of work and a design choice. The challenge is to grow in a way that keeps the **core** (contract, format, verifier) stable and understandable, so the ecosystem doesn’t fragment.
+Longer term, the ecosystem could grow: hosted scorer APIs, UIs that consume .chronicle, vertical-specific policies, and tighter integration with popular eval frameworks. We’ve already added standards-profile mappings and publication artifacts, but the challenge now is adoption and governance outside the repo (standards-body feedback loops, external interoperability validation). The challenge is to grow in a way that keeps the **core** (contract, format, verifier) stable and understandable, so the ecosystem doesn’t fragment.
 
 ---
 

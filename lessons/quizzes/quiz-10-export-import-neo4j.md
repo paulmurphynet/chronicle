@@ -20,6 +20,8 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 
 6. What command should you run to check Neo4j export/sync/docs/rebuild parity before syncing?
 
+7. What helper functions support signed `.chronicle` bundle wrapping and verification before import?
+
 ---
 
 ## Answer key
@@ -35,6 +37,8 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 5. **scripts/ingest_chronicle_to_aura.py** — it verifies the .chronicle, imports it into the graph project (default or CHRONICLE_GRAPH_PROJECT), then runs sync to Neo4j (using NEO4J_URI, etc.).
 
 6. `PYTHONPATH=. python3 scripts/check_neo4j_contract.py`
+
+7. `export_signed_investigation_bundle(...)`, `verify_signed_investigation_bundle(...)`, and `import_signed_investigation_bundle(...)` in `chronicle/store/export_import.py`.
 
 ---
 
