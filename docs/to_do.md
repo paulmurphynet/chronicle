@@ -142,11 +142,12 @@ Goal: raise Neo4j from "contract-correct optional projection" to a production-gr
 
 ### Neo4j best-in-class done criteria
 
-- [ ] Large-project sync/export can run with bounded memory and deterministic results.
-  - Export-path benchmark evidence is captured (`docs/benchmarks/neo4j_projection_baseline_v0.9.0.json`).
-  - Large-run sync-path evidence still requires a live Neo4j environment (local or CI service container).
+- [x] Large-project sync/export can run with bounded memory and deterministic results.
+  - Export baseline: `docs/benchmarks/neo4j_projection_baseline_v0.9.0.json`.
+  - Live sync baseline: `docs/benchmarks/neo4j_projection_sync_baseline_v0.9.0.json` (real `neo4j:5` run).
 - [ ] Live Neo4j integration tests pass in CI and are part of release gating.
   - CI/release service-container jobs are wired; awaiting first public CI evidence run.
+  - Local live Neo4j run is green (`tests/test_neo4j_live_integration.py`: 2 passed against local `neo4j:5`).
 - [x] Performance baseline + regression thresholds are captured in release artifacts.
   - Baseline artifact: `docs/benchmarks/neo4j_projection_baseline_v0.9.0.json` (+ summary in `.md`).
 - [x] Ops runbook + query pack are published and validated by docs checks.
@@ -204,6 +205,8 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 ## Recently completed
 
 - **Neo4j best-in-class batch (non-CI-dependent) completed**: added projection benchmark harness and tests (`scripts/benchmark_data/run_neo4j_projection_benchmark.py`, `tests/test_neo4j_projection_benchmark.py`), cross-mode parity tests (`tests/test_neo4j_projection_parity.py`), failure-mode tests and missing-driver diagnostics (`tests/test_neo4j_sync_failures.py`, `chronicle/store/neo4j_sync.py`), and published operations/query docs (`docs/neo4j-operations-runbook.md`, `docs/neo4j-query-pack.md`) with support-policy compatibility details.
+- **Neo4j live large-run evidence completed**: executed live Neo4j integration tests (`tests/test_neo4j_live_integration.py`, 2 passed) and captured thresholded sync benchmark evidence (`docs/benchmarks/neo4j_projection_sync_baseline_v0.9.0.json` + `.md`) against local `neo4j:5`.
+- **Post-public closure playbook completed**: added `docs/post-public-finalization-checklist.md` to execute the remaining public/CI/external tasks in one pass.
 - Merge-import correctness fixed (duplicate skip per event + `rowid` replay order), with regression tests.
 - API/user-error mapping centralized for predictable 4xx/429 responses.
 - HTTP client routes and response parsing aligned with current API behavior.

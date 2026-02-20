@@ -1,0 +1,232 @@
+{
+  "kind": "neo4j_projection_benchmark",
+  "generated_at": "2026-02-20T23:09:43.234865+00:00",
+  "project_path": "/tmp/chronicle_neo4j_bench_project_nhgyr4v7",
+  "seeded_project": true,
+  "seed_config": {
+    "investigations": 20,
+    "claims_per_investigation": 200,
+    "evidence_per_investigation": 400,
+    "links_per_claim": 2
+  },
+  "row_counts": {
+    "investigations": 20,
+    "claims": 4000,
+    "evidence_items": 8000,
+    "spans": 8000,
+    "links": 8000,
+    "tensions": 0
+  },
+  "export": {
+    "status": "passed",
+    "csv_output_dir": "/tmp/chronicle_neo4j_bench_csv_xgqywrwt",
+    "report_path": "/tmp/chronicle_neo4j_bench_csv_xgqywrwt/neo4j_export_report.json",
+    "elapsed_ms": 226.814,
+    "peak_memory_bytes": 1596687,
+    "peak_memory_mib": 1.523,
+    "report": {
+      "kind": "neo4j_export_report",
+      "status": "passed",
+      "project_dir": "/tmp/chronicle_neo4j_bench_project_nhgyr4v7",
+      "output_dir": "/tmp/chronicle_neo4j_bench_csv_xgqywrwt",
+      "started_at": "2026-02-20T23:09:43.007494+00:00",
+      "completed_at": "2026-02-20T23:09:43.233859+00:00",
+      "elapsed_ms": 226.332,
+      "phase_stats": {
+        "investigations": {
+          "rows": 20,
+          "batches": 1,
+          "elapsed_ms": 0.251
+        },
+        "claims": {
+          "rows": 4000,
+          "batches": 4,
+          "elapsed_ms": 31.651
+        },
+        "evidence_items": {
+          "rows": 8000,
+          "batches": 8,
+          "elapsed_ms": 65.62
+        },
+        "spans": {
+          "rows": 8000,
+          "batches": 8,
+          "elapsed_ms": 57.472
+        },
+        "actors": {
+          "rows": 1,
+          "batches": 1,
+          "elapsed_ms": 0.122
+        },
+        "asserts": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.062
+        },
+        "links": {
+          "rows": 8000,
+          "batches": 8,
+          "elapsed_ms": 56.767
+        },
+        "link_retractions": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.1
+        },
+        "tensions": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.063
+        },
+        "supersession": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.054
+        },
+        "decomposition_edges": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.064
+        },
+        "sources": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.056
+        },
+        "evidence_source_links": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.055
+        }
+      }
+    }
+  },
+  "sync": {
+    "status": "passed",
+    "report_path": "/tmp/chronicle_neo4j_bench_csv_xgqywrwt/neo4j_sync_report.json",
+    "elapsed_ms": 7589.511,
+    "peak_memory_bytes": 31825418,
+    "peak_memory_mib": 30.351,
+    "report": {
+      "kind": "neo4j_sync_report",
+      "status": "passed",
+      "project_dir": "/tmp/chronicle_neo4j_bench_project_nhgyr4v7",
+      "uri": "bolt://127.0.0.1:7687",
+      "database": "default",
+      "dedupe_evidence_by_content_hash": false,
+      "started_at": "2026-02-20T23:09:43.235972+00:00",
+      "completed_at": "2026-02-20T23:09:50.824611+00:00",
+      "elapsed_ms": 7588.641,
+      "attempts_configured": 3,
+      "attempts_used": 1,
+      "phase_stats": {
+        "schema": {
+          "rows": 15,
+          "batches": 15,
+          "elapsed_ms": 52.02
+        },
+        "nodes": {
+          "investigations": {
+            "rows": 20,
+            "batches": 1,
+            "elapsed_ms": 70.825
+          },
+          "sources": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 0.105
+          },
+          "claims": {
+            "rows": 4000,
+            "batches": 8,
+            "elapsed_ms": 1352.63
+          },
+          "evidence_items": {
+            "rows": 8000,
+            "batches": 16,
+            "elapsed_ms": 1476.223
+          },
+          "spans": {
+            "rows": 8000,
+            "batches": 16,
+            "elapsed_ms": 1207.973
+          },
+          "actors": {
+            "rows": 1,
+            "batches": 1,
+            "elapsed_ms": 47.355
+          },
+          "tensions": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 0.102
+          }
+        },
+        "relationships": {
+          "in": {
+            "rows": 8000,
+            "batches": 16,
+            "elapsed_ms": 1026.06
+          },
+          "supports": {
+            "rows": 4000,
+            "batches": 8,
+            "elapsed_ms": 730.855
+          },
+          "challenges": {
+            "rows": 4000,
+            "batches": 8,
+            "elapsed_ms": 719.782
+          },
+          "asserts": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 0.134
+          },
+          "between": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 0.055
+          },
+          "supersedes": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 0.044
+          },
+          "decomposes_to": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 6.261
+          },
+          "contains_claim": {
+            "rows": 4000,
+            "batches": 8,
+            "elapsed_ms": 406.607
+          },
+          "provided_by": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 0.144
+          }
+        },
+        "retractions": {
+          "links": {
+            "rows": 0,
+            "batches": 0,
+            "elapsed_ms": 0.099
+          }
+        }
+      }
+    },
+    "dedupe_evidence_by_content_hash": false,
+    "database": "default"
+  },
+  "thresholds": {
+    "max_export_elapsed_ms": 1000.0,
+    "max_export_peak_mib": 64.0,
+    "max_sync_elapsed_ms": 60000.0,
+    "max_sync_peak_mib": 256.0
+  },
+  "threshold_failures": [],
+  "status": "passed"
+}

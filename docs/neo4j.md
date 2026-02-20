@@ -119,6 +119,7 @@ Use `--run-sync` with Neo4j credentials for direct-sync benchmark measurements.
 Release baseline artifact:
 
 - [Neo4j projection baseline v0.9.0](benchmarks/neo4j_projection_baseline_v0.9.0.md)
+- [Neo4j projection sync baseline v0.9.0](benchmarks/neo4j_projection_sync_baseline_v0.9.0.md)
 
 ## Summary
 

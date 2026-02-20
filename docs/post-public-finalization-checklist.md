@@ -1,0 +1,55 @@
+# Post-Public Finalization Checklist
+
+Use this checklist immediately after the repository is public and CI is enabled.
+
+## 1. CI required checks green on push/PR
+
+1. Open a no-op PR (or docs-only PR) against `main`.
+2. Verify required workflows/jobs pass:
+   - `.github/workflows/ci.yml`
+   - `.github/workflows/release.yml` (manual gate)
+   - `.github/workflows/supply-chain.yml` (manual gate)
+3. Confirm branch protection enforces required status checks.
+
+## 2. Branch protection rollout verification report
+
+Run:
+
+```bash
+PYTHONPATH=. ./.venv/bin/python scripts/check_branch_protection_rollout.py \
+  --repo "$GITHUB_REPOSITORY" \
+  --branch "${CHRONICLE_PROTECTED_BRANCH:-main}" \
+  --output reports/branch_protection_rollout_report.json \
+  --stdout-json
+```
+
+Done condition:
+
+- `reports/branch_protection_rollout_report.json` has `status = "passed"`.
+
+## 3. CI evidence for live Neo4j integration gate
+
+1. Trigger CI on public repo.
+2. Confirm live Neo4j job passes in CI/release workflows:
+   - `tests/test_neo4j_live_integration.py`
+3. Archive CI links in release notes/evidence pack.
+
+## 4. External standards review cycle dispatch (W-07)
+
+Prepared bundles are already in:
+
+- `reports/standards_submissions/v0.3/`
+
+Actions:
+
+1. Dispatch to target reviewers/venues listed in:
+   - `docs/external-standards-review-cycle.md`
+   - `docs/standards-submission-package.md`
+2. Record each submission and response in the tracker.
+3. Log accepted/rejected deltas and follow-up actions.
+
+## 5. Close remaining TODO checkboxes
+
+After items 1-4 are complete, update:
+
+- `docs/to_do.md` remaining unchecked items.

@@ -123,11 +123,13 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Neo4j operations runbook](docs/neo4j-operations-runbook.md) | Backup/restore, sync cadence, drift handling, and capacity/cost guardrails for Neo4j projection operations. |
 | [Neo4j query pack](docs/neo4j-query-pack.md) | Operational Cypher query set (tension triage, support/challenge balance, source concentration, lineage) and indexing guidance. |
 | [Neo4j projection baseline v0.9.0](docs/benchmarks/neo4j_projection_baseline_v0.9.0.md) | Thresholded benchmark evidence for export-path throughput and memory at launch scale. |
+| [Neo4j projection sync baseline v0.9.0](docs/benchmarks/neo4j_projection_sync_baseline_v0.9.0.md) | Thresholded large-run sync benchmark evidence against a live Neo4j instance. |
 | [PostgreSQL backend](docs/POSTGRES.md) | Postgres convergence track: local bootstrap (`make postgres-up`), doctor/smoke checks, and current scope. |
 | [Support policy](docs/support-policy.md) | Support tiers (Lite/Team/Managed), GA/Beta/Experimental status, compatibility guarantees, and deprecation timeline policy. |
 | [Production readiness checklist](docs/production-readiness-checklist.md) | Objective go/no-go criteria for trust gates, backend checks, CI branch protection, security, and docs. |
 | [CI branch protection checklist](docs/ci-branch-protection.md) | Exact required CI checks to enforce before merge on protected branches. |
 | [Branch protection rollout verification](docs/branch-protection-rollout-verification.md) | API-driven verification workflow and evidence artifact for final CI/branch-protection release gating. |
+| [Post-public finalization checklist](docs/post-public-finalization-checklist.md) | One pass to close post-public CI/branch-protection/Neo4j-live/standards-dispatch gating items. |
 | [Neo4j schema](docs/neo4j-schema.md) | Node labels, relationship types, and example Cypher for the sync output. |
 | [Aura graph pipeline](docs/aura-graph-pipeline.md) | Run an ever-growing Chronicle graph on Neo4j Aura (verify → import → sync). |
 | [Chronicle file format](docs/chronicle-file-format.md) | What's inside a .chronicle (ZIP): manifest, DB, evidence; where claims and tensions live. |
