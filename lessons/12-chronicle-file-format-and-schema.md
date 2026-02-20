@@ -123,6 +123,6 @@ So the **.chronicle format** is exactly what export produces and import consumes
 
 ---
 
-**← Previous:** [Lesson 11: Interoperability, API, and tests](11-interoperability-api-and-tests.md) | **Index:** [Lessons](README.md) | **End of lessons**
+**← Previous:** [Lesson 11: Interoperability, API, and tests](11-interoperability-api-and-tests.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 13: Release readiness, security gates, and standards operations](13-release-readiness-security-and-standards.md)
 
 **Quiz:** [quizzes/quiz-12-chronicle-file-format-and-schema.md](quizzes/quiz-12-chronicle-file-format-and-schema.md)

@@ -28,8 +28,9 @@ Step-by-step annotated lessons that walk through **every important area of the C
 | [10](10-export-import-neo4j.md) | Export, import, and Neo4j | `chronicle/store/export_import.py`, `neo4j_sync.py` |
 | [11](11-interoperability-api-and-tests.md) | Interoperability, API, and tests | Terminology, external IDs, provenance, HTTP API, tests, CI |
 | [12](12-chronicle-file-format-and-schema.md) | The .chronicle file format and data schema | ZIP layout, manifest, chronicle.db (events + read model), evidence/; full schema reference |
+| [13](13-release-readiness-security-and-standards.md) | Release readiness, security gates, and standards operations | `Makefile`, CI/release workflows, security gates, branch protection rollout, standards review cycle |
 
-The full path from 00 to 12 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, interop/API/tests, and the **complete .chronicle file format and data schema** (manifest, DB tables, evidence layout).
+The full path from 00 to 13 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, interop/API/tests, the **complete .chronicle file format and data schema** (manifest, DB tables, evidence layout), and release readiness (security/CI/standards operations).
 
 ## Lesson format
 
@@ -41,6 +42,14 @@ Each lesson includes:
 - **Try it** — Commands or small experiments to run.
 - **Summary** — Short recap.
 - **Quiz** — Link to the quiz in `lessons/quizzes/`.
+
+## Recommended study tracks
+
+- **Fast onboarding (2-3 hours):** 01, 02, 03, 05, 11, 12
+- **Integrator path (API + adapters):** 01, 02, 05, 07, 10, 11, 13
+- **Trust and release path (maintainers):** 03, 06, 10, 11, 12, 13
+
+If you are new to Chronicle, still start with 00 and 01 before choosing a track.
 
 ## Glossary
 

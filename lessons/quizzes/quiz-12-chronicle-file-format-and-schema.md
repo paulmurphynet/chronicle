@@ -38,4 +38,4 @@ Answer these after reading the lesson and the chronicle-file-format doc and sche
 
 ---
 
-**← Previous:** [quiz-11-interoperability-api-and-tests](quiz-11-interoperability-api-and-tests.md) | **Index:** [Quizzes](README.md) | **End of quizzes**
+**← Previous:** [quiz-11-interoperability-api-and-tests](quiz-11-interoperability-api-and-tests.md) | **Index:** [Quizzes](README.md) | **Next →:** [quiz-13-release-readiness-security-and-standards](quiz-13-release-readiness-security-and-standards.md)

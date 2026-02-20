@@ -25,6 +25,7 @@ Chronicle is a codebase with a clear purpose: **defensibility scoring for RAG an
 - **Open the code.** When a lesson says “see `chronicle/store/session.py`,” open that file and look at the relevant section.
 - **Run commands.** When a lesson says “run the scorer” or “run the verifier,” do it. Use the same inputs as in the examples.
 - **Take the quiz.** If you get something wrong, re-read that part of the lesson and the code it references.
+- **Use checkpoints.** After every 2-3 lessons, run `make check` so your understanding is tied to the current working system.
 
 ## Where the quizzes live
 
@@ -43,6 +44,8 @@ We don’t mean every single line. We mean every **important area**: the scorer,
 ## Next step
 
 Go to **[Lesson 01: Codebase map](01-codebase-map.md)**. It gives you a map of the whole repo so you know where everything lives.
+
+After Lesson 01, you can follow track recommendations in [lessons/README.md](README.md) (fast onboarding, integrator path, or trust/release path).
 
 ---
 
