@@ -11,6 +11,7 @@ Run: uvicorn chronicle.api.app:app --reload
 from __future__ import annotations
 
 import base64
+import binascii
 import io
 import json
 import logging
@@ -36,7 +37,7 @@ from chronicle.core.errors import (
     ChronicleUserError,
 )
 from chronicle.core.identity import get_effective_actor_from_request
-from chronicle.core.validation import MAX_LIST_LIMIT
+from chronicle.core.validation import MAX_EVIDENCE_BYTES, MAX_IMPORT_BYTES, MAX_LIST_LIMIT
 from chronicle.scorer_contract import run_scorer_contract
 from chronicle.store.commands.reasoning_brief import reasoning_brief_to_html
 from chronicle.store.project import create_project, project_exists
@@ -139,6 +140,35 @@ def _clamp_limit(limit: int | None, default: int) -> int:
     if limit is None:
         return min(default, MAX_LIST_LIMIT)
     return max(1, min(limit, MAX_LIST_LIMIT))
+
+
+def _content_length_exceeds(request: Request, max_bytes: int) -> bool:
+    """Best-effort early reject when Content-Length exceeds configured limit."""
+    raw = (request.headers.get("content-length") or "").strip()
+    if not raw:
+        return False
+    try:
+        return int(raw) > max_bytes
+    except ValueError:
+        return False
+
+
+def _max_json_payload_bytes(max_blob_bytes: int) -> int:
+    """Allow base64+JSON overhead while still bounding in-memory body size."""
+    return int(max_blob_bytes * 4 / 3) + 16 * 1024
+
+
+async def _read_upload_file_limited(file: UploadFile, max_bytes: int) -> bytes:
+    """Read UploadFile in chunks and abort if payload exceeds max_bytes."""
+    buf = bytearray()
+    while True:
+        chunk = await file.read(1024 * 1024)
+        if not chunk:
+            break
+        buf.extend(chunk)
+        if len(buf) > max_bytes:
+            raise HTTPException(status_code=413, detail=f"File exceeds max size ({max_bytes} bytes)")
+    return bytes(buf)
 
 
 def _encode_cursor(created_at: str, uid: str) -> str:
@@ -881,27 +911,56 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
     media_type = "text/plain"
     content_type = request.headers.get("content-type", "")
     if "application/json" in content_type:
+        max_json_bytes = _max_json_payload_bytes(MAX_EVIDENCE_BYTES)
+        if _content_length_exceeds(request, max_json_bytes):
+            raise HTTPException(
+                status_code=413,
+                detail=f"Request body exceeds max size ({max_json_bytes} bytes)",
+            )
         try:
-            body = await request.json()
-        except Exception:
+            raw = await request.body()
+            if len(raw) > max_json_bytes:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Request body exceeds max size ({max_json_bytes} bytes)",
+                )
+            body = json.loads(raw)
+            if not isinstance(body, dict):
+                body = {}
+        except json.JSONDecodeError:
+            body = {}
+        except UnicodeDecodeError:
             body = {}
         if body.get("content_base64"):
-            blob = base64.b64decode(body["content_base64"])
+            try:
+                blob = base64.b64decode(body["content_base64"], validate=True)
+            except (ValueError, binascii.Error) as exc:
+                raise HTTPException(status_code=400, detail="Invalid content_base64 payload") from exc
         elif body.get("content") is not None:
             blob = (body["content"] or "").encode("utf-8")
         original_filename = body.get("original_filename") or "evidence"
         media_type = body.get("media_type") or "text/plain"
     elif "multipart/form-data" in content_type:
+        if _content_length_exceeds(request, MAX_EVIDENCE_BYTES + (1024 * 1024)):
+            raise HTTPException(
+                status_code=413,
+                detail=f"File exceeds max size ({MAX_EVIDENCE_BYTES} bytes)",
+            )
         form = await request.form()
         file = form.get("file")
         if file and isinstance(file, UploadFile) and file.filename:
-            blob = await file.read()
+            blob = await _read_upload_file_limited(file, MAX_EVIDENCE_BYTES)
             original_filename = file.filename
             media_type = file.content_type or "application/octet-stream"
     if blob is None:
         raise HTTPException(
             status_code=400,
             detail="Provide JSON body with content or content_base64, or multipart file",
+        )
+    if len(blob) > MAX_EVIDENCE_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File exceeds max size ({MAX_EVIDENCE_BYTES} bytes)",
         )
     actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
@@ -1199,18 +1258,26 @@ def export_submission_package(investigation_uid: str) -> Response:
 
 
 @app.post("/import")
-async def import_chronicle(file: Annotated[UploadFile, File()]) -> dict[str, Any]:
+async def import_chronicle(request: Request, file: Annotated[UploadFile, File()]) -> dict[str, Any]:
     """Import a .chronicle file into the project. Accepts multipart file upload."""
     if not file.filename or not file.filename.endswith(".chronicle"):
         raise HTTPException(status_code=400, detail="File must have .chronicle extension")
+    if _content_length_exceeds(request, MAX_IMPORT_BYTES + (1024 * 1024)):
+        raise HTTPException(
+            status_code=413,
+            detail=f"File exceeds max size ({MAX_IMPORT_BYTES} bytes)",
+        )
     path = _get_project_path()
-    content = await file.read()
+    content = await _read_upload_file_limited(file, MAX_IMPORT_BYTES)
     with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:
         f.write(content)
         chronicle_path = Path(f.name)
     try:
-        with ChronicleSession(path) as session:
-            session.import_investigation(chronicle_path)
+        try:
+            with ChronicleSession(path) as session:
+                session.import_investigation(chronicle_path)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         return {"status": "ok", "message": "Import completed"}
     finally:
         chronicle_path.unlink(missing_ok=True)

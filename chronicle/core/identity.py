@@ -97,6 +97,7 @@ class TraditionalIdP:
         )
         principal_id = ""
         actor_type = "human"
+        principal_from_state = False
         if hasattr(request, "state"):
             state = getattr(request, "state", None)
             if state and override:
@@ -104,6 +105,7 @@ class TraditionalIdP:
                 at = (getattr(state, "actor_type", None) or "human").strip()
                 if at in ("human", "tool", "system"):
                     actor_type = at
+                principal_from_state = bool(principal_id)
         if not principal_id and hasattr(request, "headers"):
             h = getattr(request, "headers", None)
             if h and hasattr(h, "get"):
@@ -113,7 +115,13 @@ class TraditionalIdP:
                     actor_type = (h.get("x-actor-type") or h.get("X-Actor-Type") or "human").strip()
                     if actor_type not in ("human", "tool", "system"):
                         actor_type = "human"
-        level = VERIFICATION_ACCOUNT if principal_id else VERIFICATION_NONE
+        # Header fallback is a self-claim, not an authenticated account binding.
+        if principal_id and principal_from_state:
+            level = VERIFICATION_ACCOUNT
+        elif principal_id:
+            level = VERIFICATION_CLAIMED
+        else:
+            level = VERIFICATION_NONE
         return PrincipalInfo(
             principal_id=principal_id,
             actor_type=actor_type,

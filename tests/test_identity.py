@@ -184,7 +184,7 @@ def test_traditional_idp_with_state_override() -> None:
 
 
 def test_traditional_idp_fallback_to_headers_when_no_state() -> None:
-    """TraditionalIdP with no state uses X-Actor-Id header and returns VERIFICATION_ACCOUNT when present."""
+    """TraditionalIdP with no auth-bound state treats X-Actor-Id as claimed identity."""
     req = _make_request({"X-Actor-Id": "header_actor", "X-Actor-Type": "tool"})
     req.state = None
     prev = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)
@@ -193,7 +193,7 @@ def test_traditional_idp_fallback_to_headers_when_no_state() -> None:
         info = TraditionalIdP().resolve(req)
         assert info.principal_id == "header_actor"
         assert info.actor_type == "tool"
-        assert info.verification_level == VERIFICATION_ACCOUNT
+        assert info.verification_level == VERIFICATION_CLAIMED
     finally:
         if prev is not None:
             os.environ[CHRONICLE_IDENTITY_PROVIDER_ENV] = prev

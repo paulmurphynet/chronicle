@@ -1,5 +1,6 @@
 """Export/import .chronicle (ZIP + manifest). Spec evidence.md 4.1.1."""
 
+import hashlib
 import json
 import shutil
 import sqlite3
@@ -28,6 +29,54 @@ from chronicle.store.schema import (
 
 CHRONICLE_FORMAT_VERSION = 1
 CHRONICLE_EXT = ".chronicle"
+
+
+def _sha256_file(path: Path) -> str:
+    """Return SHA-256 digest for a file."""
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        while True:
+            chunk = f.read(1024 * 1024)
+            if not chunk:
+                break
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _verify_importable_archive(chronicle_path: Path) -> None:
+    """Block import when archive integrity checks fail."""
+    from tools.verify_chronicle.verify_chronicle import verify_chronicle_file
+
+    results = verify_chronicle_file(chronicle_path, run_invariants=False)
+    failures = [f"{name}: {detail}" for name, passed, detail in results if not passed]
+    if failures:
+        msg = "; ".join(failures[:3])
+        if len(failures) > 3:
+            msg = f"{msg}; ..."
+        raise ValueError(f"Import blocked: .chronicle verification failed ({msg})")
+
+
+def _merge_copy_evidence_files(src_evidence: Path, target_evidence: Path) -> None:
+    """Copy evidence files without overwriting existing different bytes."""
+    src_root = src_evidence.resolve()
+    target_root = target_evidence.resolve()
+    for f in src_evidence.rglob("*"):
+        if not f.is_file():
+            continue
+        rel = f.resolve().relative_to(src_root)
+        dest = (target_evidence / rel).resolve()
+        try:
+            dest.relative_to(target_root)
+        except ValueError as exc:
+            raise ValueError(f"Import blocked: evidence path escapes target: {rel}") from exc
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.exists():
+            if _sha256_file(dest) != _sha256_file(f):
+                raise ValueError(
+                    f"Import blocked: evidence file conflict for {rel}; target file differs from archive"
+                )
+            continue
+        shutil.copy2(f, dest)
 
 
 def _row_to_event(row: tuple) -> Event:
@@ -453,6 +502,7 @@ def import_investigation(chronicle_path: Path, target_dir: Path) -> None:
 
     if not chronicle_path.is_file() or chronicle_path.suffix != CHRONICLE_EXT:
         raise FileNotFoundError(f"Not a .chronicle file: {chronicle_path}")
+    _verify_importable_archive(chronicle_path)
 
     with zipfile.ZipFile(chronicle_path, "r") as zf:
         names = zf.namelist()
@@ -550,10 +600,8 @@ def import_investigation(chronicle_path: Path, target_dir: Path) -> None:
                     len(events),
                 )
 
-            # Copy evidence files from temp to target (overwrite by path)
+            # Copy evidence files from temp to target without overwriting conflicts.
             src_evidence = tmp_path / EVIDENCE_DIR
             if src_evidence.is_dir():
                 target_evidence.mkdir(parents=True, exist_ok=True)
-                for f in src_evidence.iterdir():
-                    if f.is_file():
-                        shutil.copy2(f, target_evidence / f.name)
+                _merge_copy_evidence_files(src_evidence, target_evidence)

@@ -45,14 +45,14 @@ def test_import_investigation_fresh_target(tmp_path: Path) -> None:
 
 
 def test_import_investigation_invalid_manifest_missing_uid(tmp_path: Path) -> None:
-    """import_investigation raises when manifest lacks investigation_uid."""
+    """import_investigation blocks archive when manifest is invalid."""
     bad_chronicle = tmp_path / "bad.chronicle"
     with zipfile.ZipFile(bad_chronicle, "w") as zf:
         zf.writestr("manifest.json", json.dumps({"format_version": 1}))
     target = tmp_path / "target"
     target.mkdir()
     create_project(target)
-    with pytest.raises(ValueError, match="missing investigation_uid"):
+    with pytest.raises(ValueError, match="verification failed"):
         import_investigation(bad_chronicle, target)
 
 
@@ -165,3 +165,65 @@ def test_import_investigation_merge_skips_duplicates_and_keeps_new_events(tmp_pa
     with ChronicleSession(proj_b) as session:
         evidence = session.read_model.list_evidence_by_investigation(inv_uid, limit=20)
     assert len(evidence) == 2
+
+
+def test_import_investigation_rejects_tampered_archive(tmp_path: Path) -> None:
+    """Import blocks when evidence bytes in archive no longer match recorded content hash."""
+    proj = tmp_path / "proj"
+    create_project(proj)
+    exported = tmp_path / "export.chronicle"
+    tampered = tmp_path / "tampered.chronicle"
+    with ChronicleSession(proj) as session:
+        _, inv_uid = session.create_investigation("Tamper", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Original bytes",
+            "text/plain",
+            original_filename="original.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, exported)
+
+    with zipfile.ZipFile(exported, "r") as zin:
+        names = zin.namelist()
+        blobs = {name: zin.read(name) for name in names}
+    for name in list(blobs):
+        if name.startswith("evidence/"):
+            blobs[name] = b"TAMPERED bytes"
+    with zipfile.ZipFile(tampered, "w", zipfile.ZIP_DEFLATED) as zout:
+        for name in names:
+            zout.writestr(name, blobs[name])
+
+    target = tmp_path / "target"
+    target.mkdir(parents=True)
+    with pytest.raises(ValueError, match="verification failed"):
+        import_investigation(tampered, target)
+
+
+def test_import_investigation_blocks_merge_when_existing_evidence_differs(tmp_path: Path) -> None:
+    """Merge import blocks if target already has same evidence path with different bytes."""
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    exported = tmp_path / "export.chronicle"
+    create_project(source)
+    create_project(target)
+    with ChronicleSession(source) as session:
+        _, inv_uid = session.create_investigation("Conflict", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Canonical bytes",
+            "text/plain",
+            original_filename="canonical.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, exported)
+
+    import_investigation(exported, target)
+    evidence_files = list((target / "evidence").glob("*"))
+    assert evidence_files
+    evidence_files[0].write_bytes(b"Locally modified bytes")
+
+    with pytest.raises(ValueError, match="evidence file conflict"):
+        import_investigation(exported, target)

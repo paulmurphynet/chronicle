@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,7 @@ import pytest
 pytest.importorskip("fastapi")
 pytest.importorskip("multipart")
 pytest.importorskip("httpx")
+import chronicle.api.app as api_app
 from chronicle.api.app import app
 from chronicle.core import validation
 from chronicle.core.policy import PolicyProfile, default_policy_profile, import_policy_to_project
@@ -131,6 +133,75 @@ def test_api_export_import_roundtrip(tmp_path: Path, monkeypatch: pytest.MonkeyP
         listed = client.get("/investigations")
         assert listed.status_code == 200, listed.text
         assert len(listed.json()["investigations"]) >= 1
+
+
+def test_api_import_rejects_oversized_upload(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Import endpoint returns 413 when upload exceeds MAX_IMPORT_BYTES."""
+    project_path = tmp_path / "api-import-size"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+    monkeypatch.setattr(api_app, "MAX_IMPORT_BYTES", 32)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/import",
+            files={"file": ("too-big.chronicle", b"x" * 128, "application/zip")},
+        )
+    assert response.status_code == 413
+
+
+def test_api_evidence_upload_rejects_oversized_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Evidence ingest endpoint returns 413 when upload exceeds MAX_EVIDENCE_BYTES."""
+    project_path = tmp_path / "api-evidence-size"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+    monkeypatch.setattr(api_app, "MAX_EVIDENCE_BYTES", 16)
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+        response = client.post(
+            f"/investigations/{inv_uid}/evidence",
+            files={"file": ("too-big.txt", b"x" * 64, "text/plain")},
+            headers={"X-Actor-Id": "api_tester", "X-Actor-Type": "tool"},
+        )
+    assert response.status_code == 413
+
+
+def test_api_import_returns_400_for_tampered_archive(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Tampered archive is rejected with a client error instead of 500."""
+    source_project = tmp_path / "source-project"
+    target_project = tmp_path / "target-project"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(source_project))
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+        _seed_claim_flow(client, inv_uid)
+        export_res = client.post(f"/investigations/{inv_uid}/export")
+        assert export_res.status_code == 200, export_res.text
+        archive = export_res.content
+
+        tampered_path = tmp_path / "tampered.chronicle"
+        source_path = tmp_path / "source.chronicle"
+        source_path.write_bytes(archive)
+        with zipfile.ZipFile(source_path, "r") as zin:
+            names = zin.namelist()
+            blobs = {name: zin.read(name) for name in names}
+        for name in list(blobs):
+            if name.startswith("evidence/"):
+                blobs[name] = b"tampered"
+        with zipfile.ZipFile(tampered_path, "w", zipfile.ZIP_DEFLATED) as zout:
+            for name in names:
+                zout.writestr(name, blobs[name])
+
+        monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(target_project))
+        imported = client.post(
+            "/import",
+            files={"file": ("import.chronicle", tampered_path.read_bytes(), "application/zip")},
+        )
+    assert imported.status_code == 400
+    assert "verification failed" in imported.json()["detail"]
 
 
 def test_api_error_mapping_and_request_id(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
