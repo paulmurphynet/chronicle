@@ -125,10 +125,9 @@ def cmd_export(investigation_uid: str, output: Path, path: Path) -> int:
             file=sys.stderr,
         )
         return 1
-    with ChronicleSession(path) as session:
-        out = session.export_investigation(investigation_uid, output)
-        print(f"Exported to {out}")
-        return 0
+    out = export_import_mod.export_investigation(path, investigation_uid, output)
+    print(f"Exported to {out}")
+    return 0
 
 
 def cmd_export_minimal(investigation_uid: str, claim_uid: str, output: Path, path: Path) -> int:
@@ -139,10 +138,9 @@ def cmd_export_minimal(investigation_uid: str, claim_uid: str, output: Path, pat
             file=sys.stderr,
         )
         return 1
-    with ChronicleSession(path) as session:
-        out = session.export_minimal_for_claim(investigation_uid, claim_uid, output)
-        print(f"Exported minimal .chronicle to {out}")
-        return 0
+    out = export_import_mod.export_minimal_for_claim(path, investigation_uid, claim_uid, output)
+    print(f"Exported minimal .chronicle to {out}")
+    return 0
 
 
 def cmd_import(chronicle_file: Path, path: Path) -> int:

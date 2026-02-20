@@ -15,8 +15,9 @@ import chronicle.api.app as api_app
 from chronicle.api.app import app
 from chronicle.core import validation
 from chronicle.core.policy import PolicyProfile, default_policy_profile, import_policy_to_project
-from chronicle.store.project import CHRONICLE_DB
+from chronicle.store.project import CHRONICLE_DB, create_project
 from chronicle.store.read_model.sqlite_read_model import SqliteReadModel
+from chronicle.store.session import ChronicleSession
 from fastapi.testclient import TestClient
 
 
@@ -202,6 +203,75 @@ def test_api_import_returns_400_for_tampered_archive(
         )
     assert imported.status_code == 400
     assert "verification failed" in imported.json()["detail"]
+
+
+def _seed_project_for_archive(project_path: Path) -> tuple[str, bytes]:
+    with ChronicleSession(project_path, event_store_backend="sqlite") as session:
+        _, inv_uid = session.create_investigation("Archive-ready", actor_id="t", actor_type="tool")
+        _, evidence_uid = session.ingest_evidence(
+            inv_uid,
+            b"Archive evidence",
+            "text/plain",
+            original_filename="archive.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid,
+            evidence_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 7},
+            quote="Archive",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(inv_uid, "Archive claim.", actor_id="t", actor_type="tool")
+        session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
+        out = project_path / "archive.chronicle"
+        session.export_investigation(inv_uid, out)
+    return inv_uid, out.read_bytes()
+
+
+def test_api_export_works_when_postgres_backend_selected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Export endpoint should stay available even when CHRONICLE_EVENT_STORE=postgres."""
+    project_path = tmp_path / "api-export-postgres-mode"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+    create_project(project_path)
+    inv_uid, _ = _seed_project_for_archive(project_path)
+    monkeypatch.setenv("CHRONICLE_EVENT_STORE", "postgres")
+    monkeypatch.setenv("CHRONICLE_POSTGRES_URL", "postgresql://u:p@127.0.0.1:5432/chronicle")
+
+    with TestClient(app) as client:
+        response = client.post(f"/investigations/{inv_uid}/export")
+
+    assert response.status_code == 200, response.text
+    assert response.content[:2] == b"PK"
+
+
+def test_api_import_works_when_postgres_backend_selected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Import endpoint should stay available even when CHRONICLE_EVENT_STORE=postgres."""
+    source_project = tmp_path / "api-import-source"
+    target_project = tmp_path / "api-import-target"
+    create_project(source_project)
+    _inv_uid, archive = _seed_project_for_archive(source_project)
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(target_project))
+    monkeypatch.setenv("CHRONICLE_EVENT_STORE", "postgres")
+    monkeypatch.setenv("CHRONICLE_POSTGRES_URL", "postgresql://u:p@127.0.0.1:5432/chronicle")
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/import",
+            files={"file": ("import.chronicle", archive, "application/zip")},
+        )
+
+    assert response.status_code == 200, response.text
+    with ChronicleSession(target_project, event_store_backend="sqlite") as session:
+        listed = session.read_model.list_investigations(limit=10)
+    assert listed
 
 
 def test_api_error_mapping_and_request_id(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

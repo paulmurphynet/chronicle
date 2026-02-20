@@ -85,6 +85,8 @@ Postgres snapshots currently use a JSON read-model snapshot format for restore +
 
 `chronicle verify --path /path/to/project` also supports Postgres mode in this configuration and runs invariant checks directly against the configured Postgres database URL.
 
+Archive import/export behavior is backend-independent: `.chronicle` CLI/API archive operations continue to use the canonical archive pipeline and do not require `ChronicleSession` query-surface parity.
+
 The active implementation plan and release criteria live in [to_do](to_do.md#active-convergence-program-public--ci--postgres).
 
 Operational references:

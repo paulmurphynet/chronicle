@@ -33,7 +33,7 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - [x] Introduce explicit backend factory/config wiring for event store selection (env + session entry points).
 - [x] Implement Postgres read model schema + projector parity with SQLite.
 - [x] Implement replay/snapshot parity for Postgres-backed paths.
-- [ ] Ensure `.chronicle` export/import semantics stay backend-independent.
+- [x] Ensure `.chronicle` export/import semantics stay backend-independent.
 - [x] Add invariants verification parity for Postgres projects.
 - [x] Publish and enforce migration/versioning policy for both backends.
 
@@ -64,7 +64,7 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - [ ] Backend parity: same scenario outputs equivalent defensibility results on SQLite and Postgres.
 - [ ] CI green for required jobs on push/PR with branch protection active.
 - [ ] Postgres onboarding from zero to first successful smoke run in <= 10 minutes.
-- [ ] Docs and troubleshooting validated by docs link/currency checks.
+- [x] Docs and troubleshooting validated by docs link/currency checks.
 
 ## On hold by design
 
@@ -124,9 +124,11 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - **B1 completed (backend wiring)**: added explicit backend config/factory wiring (`chronicle/store/backend_config.py`) and session entrypoint integration (`chronicle/store/session.py`) so `CHRONICLE_EVENT_STORE` is parsed/validated consistently, with fail-fast user guidance for current Postgres read-model limitation.
 - **B2 completed (schema + projector parity)**: added Postgres read-model schema initializer and SQLite-to-Postgres projection SQL compatibility layer (`chronicle/store/postgres_projection.py`), then wired `PostgresEventStore` append flow to project events into Postgres read-model tables.
 - **B3 completed (replay/snapshot parity)**: added Postgres replay and snapshot helpers (`replay_postgres_read_model_from_url`, `create_postgres_read_model_snapshot_from_url`, `restore_postgres_read_model_snapshot_from_url`) and routed CLI `replay`/`snapshot` commands through Postgres mode when configured.
+- **B4 completed (backend-independent archive semantics)**: decoupled `.chronicle` import/export paths from session backend selection so CLI/API archive operations remain available under `CHRONICLE_EVENT_STORE=postgres`, with routing regression tests.
 - **B5 completed (verify parity)**: added Postgres invariant verification entrypoint (`verify_postgres_url`) and wired CLI `chronicle verify` to use Postgres checks under `CHRONICLE_EVENT_STORE=postgres`.
 - **B6 completed (migration/versioning policy)**: added backend migration and versioning policy doc (`docs/backend-migration-versioning-policy.md`) and linked it in README/docs index for release/process enforcement.
 - **Security release criteria expanded**: added Trivy-based container vulnerability gating (`scripts/container_security_gate.py`) and wired supply-chain/release workflows to enforce container HIGH/CRITICAL thresholds alongside dependency scans.
+- **Docs release-criteria check completed**: reran docs link and docs currency gates (`scripts/check_doc_links.py`, `scripts/check_docs_currency.py`) and confirmed pass.
 
 ## Release blockers
 

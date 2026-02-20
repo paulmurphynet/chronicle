@@ -39,6 +39,7 @@ from chronicle.core.errors import (
 from chronicle.core.identity import get_effective_actor_from_request
 from chronicle.core.validation import MAX_EVIDENCE_BYTES, MAX_IMPORT_BYTES, MAX_LIST_LIMIT
 from chronicle.scorer_contract import run_scorer_contract
+from chronicle.store import export_import as export_import_mod
 from chronicle.store.commands.reasoning_brief import reasoning_brief_to_html
 from chronicle.store.project import create_project, project_exists
 from chronicle.store.session import ChronicleSession
@@ -1184,23 +1185,25 @@ def get_reasoning_brief(
 def export_investigation(investigation_uid: str) -> Response:
     """Export investigation as .chronicle (ZIP). Returns binary attachment."""
     path = _get_project_path()
-    with ChronicleSession(path) as session:
-        if session.read_model.get_investigation(investigation_uid) is None:
-            raise HTTPException(status_code=404, detail="Investigation not found")
-        with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:
-            out_path = Path(f.name)
+    with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:
+        out_path = Path(f.name)
+    try:
         try:
-            session.export_investigation(investigation_uid, out_path)
-            body = out_path.read_bytes()
-            return Response(
-                content=body,
-                media_type="application/zip",
-                headers={
-                    "Content-Disposition": f'attachment; filename="{investigation_uid}.chronicle"'
-                },
-            )
-        finally:
-            out_path.unlink(missing_ok=True)
+            export_import_mod.export_investigation(path, investigation_uid, out_path)
+        except ValueError as exc:
+            if "No events found for investigation" in str(exc):
+                raise HTTPException(status_code=404, detail="Investigation not found") from exc
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        body = out_path.read_bytes()
+        return Response(
+            content=body,
+            media_type="application/zip",
+            headers={
+                "Content-Disposition": f'attachment; filename="{investigation_uid}.chronicle"'
+            },
+        )
+    finally:
+        out_path.unlink(missing_ok=True)
 
 
 @app.post("/investigations/{investigation_uid}/submission-package")
@@ -1274,8 +1277,7 @@ async def import_chronicle(request: Request, file: Annotated[UploadFile, File()]
         chronicle_path = Path(f.name)
     try:
         try:
-            with ChronicleSession(path) as session:
-                session.import_investigation(chronicle_path)
+            export_import_mod.import_investigation(chronicle_path, path)
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         return {"status": "ok", "message": "Import completed"}
