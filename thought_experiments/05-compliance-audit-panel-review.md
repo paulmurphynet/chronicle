@@ -125,3 +125,53 @@ Reason: this creates procedural cleanliness without epistemic resolution and und
 | C-3 | Multi-vertical workflow parity expansion | Adopt |
 | C-4 | Compliance role-based checklist templates | Adopt |
 | C-X1 | Auto-close tensions after timeout | Reject |
+
+---
+
+## Round 2 rerun (2026-02-20): compliance/audit reassessment after implementation
+
+### What changed since Round 1
+
+- Unified decision ledger and review packet are now available for compliance review.
+- Compatibility preflight is now available across surfaces.
+- Multi-vertical workflow parity is improved, including richer compliance sample data.
+- Role-based checklist templates are now present and linked in workflow guidance.
+
+### Panelist reassessment
+
+**Priya Nanda**
+
+- Accountability and exception visibility are materially improved through ledger/packet outputs.
+- Remaining concern: audit teams still need portfolio-level aggregation across many investigations for quarterly control review.
+
+**Owen Carr**
+
+- Compatibility deltas now reduce blind handoff risk between draft and stricter compliance profiles.
+- Remaining concern: stronger automation hooks are needed to enforce checklist completion before checkpoint/export.
+
+**Talia Grant**
+
+- Risk posture readability improved with explicit unresolved tension and decision artifacts.
+- Remaining concern: concentration risk across repeated override patterns is still difficult to inspect without cross-investigation summaries.
+
+**Ben Ortiz**
+
+- New workflow parity and realistic sample quality checks improve automation confidence.
+- Remaining concern: there is no single built-in "compliance readiness gate" command that combines all relevant checks.
+
+### Round 1 recommendation status delta
+
+| ID | Round 1 decision | Round 2 status | Notes |
+|---|---|---|---|
+| C-1 | Adopt | Completed | Unified decision ledger shipped. |
+| C-2 | Adopt | Completed | Compatibility preflight shipped. |
+| C-3 | Adopt | Completed | Multi-vertical workflow parity expanded. |
+| C-4 | Adopt | Completed | Role-based checklist templates added. |
+| C-X1 | Reject | Reaffirm reject | No timeout auto-closure of tensions. |
+
+### New rerun recommendations
+
+| ID | Recommendation | Decision | Why |
+|---|---|---|---|
+| C-R2-1 | Add compliance readiness gate command/report combining ledger, packet completeness, and unresolved-risk checks. | Defer | Strong operational value; can compose existing artifacts and invariants. |
+| C-R2-2 | Add cross-investigation exception analytics (override/tension concentrations) for periodic audit cycles. | Defer | Important at scale; best implemented as reference analytics layer. |

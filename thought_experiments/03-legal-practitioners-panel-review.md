@@ -129,3 +129,54 @@ The panel explicitly rejects expanding verifier scope to legal conclusions.
 | L-4 | Policy rationale summary in review packet | Adopt |
 | L-X1 | Verifier asserts legal admissibility conclusions | Reject |
 | L-X2 | Auto-resolve tensions for filing readiness | Reject |
+
+---
+
+## Round 2 rerun (2026-02-20): legal reassessment after implementation
+
+### What changed since Round 1
+
+- Unified reviewer decision ledger and review packet are now available.
+- Policy compatibility preflight is now available across major surfaces.
+- Role-based review checklist templates now exist and are linked from policy/workflow docs.
+- Cross-vertical workflow examples are improved, including stronger legal/history/compliance parity.
+
+### Panelist reassessment
+
+**Aria Bennett**
+
+- Legal handoff quality improved because compatibility deltas and packet outputs are now one-step accessible.
+- Remaining concern: firms still need stronger matter-stage templates (intake, discovery, pre-filing, post-filing) as reusable packet presets.
+
+**Marcus Hale**
+
+- Chain-of-custody and decision summary now feel operationally coherent in one review path.
+- Remaining concern: high-volume matters need batch-oriented artifact generation and portfolio summaries.
+
+**Ruth Delgado**
+
+- Policy rationale and decision chronology are now more inspectable than in Round 1.
+- Remaining concern: reviewers need easier comparative display of built-under vs viewing-under policy consequences in packet outputs.
+
+**Kian Brooks**
+
+- Machine-readable outputs are now much better for legal ops automation.
+- Remaining concern: governance automation still needs guardrail checks that fail pipelines when required review artifacts are missing.
+
+### Round 1 recommendation status delta
+
+| ID | Round 1 decision | Round 2 status | Notes |
+|---|---|---|---|
+| L-1 | Adopt | Completed | Role-based review checklist templates shipped. |
+| L-2 | Adopt | Completed | Decision ledger shipped. |
+| L-3 | Adopt | Completed | Policy compatibility preflight shipped. |
+| L-4 | Adopt | Completed | Policy rationale included in review packet surfaces. |
+| L-X1 | Reject | Reaffirm reject | Verifier scope remains structural/integrity only. |
+| L-X2 | Reject | Reaffirm reject | No auto-resolution of legal tensions. |
+
+### New rerun recommendations
+
+| ID | Recommendation | Decision | Why |
+|---|---|---|---|
+| L-R2-1 | Add packet presets by legal stage (e.g., discovery, pre-filing) with required sections and thresholds. | Defer | Improves legal workflow consistency; should remain a reference-layer capability. |
+| L-R2-2 | Add CI-style "legal readiness" check that validates required review artifacts exist before export. | Defer | Valuable for operational rigor; can build on existing packet/ledger/preflight primitives. |

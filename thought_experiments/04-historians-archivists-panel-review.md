@@ -126,3 +126,52 @@ Rejected direction: institution-based automatic authority scoring.
 | H-2 | Research/history workflow parity | Adopt |
 | H-3 | Temporal uncertainty reporting expansion | Defer |
 | H-X1 | Auto-rank source authority by institution | Reject |
+
+---
+
+## Round 2 rerun (2026-02-20): history/archives reassessment after implementation
+
+### What changed since Round 1
+
+- History/research policy profile example is now in place.
+- Deterministic history workflow parity has been added to reference workflow tooling.
+- Temporal uncertainty extension is now implemented with `known_range_start`, `known_range_end`, and `temporal_confidence`.
+- Sample datasets now include richer provenance, challenge links, and uncertainty-supporting rationale text.
+
+### Panelist reassessment
+
+**Dr. Lila Morant**
+
+- Temporal range/confidence support is a meaningful upgrade for historical claims with approximate chronology.
+- Remaining concern: uncertainty is captured, but cross-claim chronology comparison is still mostly manual.
+
+**Evan Price**
+
+- Research profile and workflow parity materially improve onboarding for archival users.
+- Remaining concern: large archival collections still need "messy corpus" examples with redactions, supersession, and partial metadata.
+
+**Dr. Sora Whitman**
+
+- Competing testimony modeling remains strong and now has better uncertainty representation.
+- Remaining concern: oral-history caveat language quality varies by operator; stronger authoring guidance would help consistency.
+
+**Nadia Cole**
+
+- Machine-readable uncertainty fields improve downstream computational analysis.
+- Remaining concern: profile-sensitivity studies across the same historical dataset are still not a first-class workflow artifact.
+
+### Round 1 recommendation status delta
+
+| ID | Round 1 decision | Round 2 status | Notes |
+|---|---|---|---|
+| H-1 | Adopt | Completed | Research/history policy profile added. |
+| H-2 | Adopt | Completed | Workflow parity and runner coverage added. |
+| H-3 | Defer | Completed | Temporal uncertainty extension shipped migration-safe. |
+| H-X1 | Reject | Reaffirm reject | No institution-based authority auto-ranking. |
+
+### New rerun recommendations
+
+| ID | Recommendation | Decision | Why |
+|---|---|---|---|
+| H-R2-1 | Add history-focused "messy archive" sample set (partial dates, redactions, supersessions, conflicting editions). | Defer | High realism value for scholarly practice; should be staged as reference data work. |
+| H-R2-2 | Add chronology comparison artifact (claim timelines + uncertainty windows) for review packets. | Defer | Strong fit for historians; additive reference/report surface. |

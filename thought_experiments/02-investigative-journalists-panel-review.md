@@ -131,3 +131,54 @@ The panel agrees that Chronicle should optimize for **reviewability** rather tha
 | J-4 | Unified reviewer decision ledger | Adopt |
 | J-X1 | Global source credibility score | Reject |
 | J-X2 | Hide unresolved tensions in summaries | Reject |
+
+---
+
+## Round 2 rerun (2026-02-20): newsroom reassessment after implementation
+
+### What changed since Round 1
+
+- Unified review packet and reviewer decision ledger are now available.
+- Policy compatibility preflight is available across session/API/CLI/reference flows.
+- Link assurance metadata/caveats are visible in defensibility outputs.
+- Journalism sample workflow now includes richer source linkage, supports/challenges, typed claims, and explicit tension.
+
+### Panelist reassessment
+
+**Mara Torres**
+
+- "One packet" review operations are materially better for editorial/legal handoff.
+- Remaining concern: deadline workflows still need stronger "fast triage" defaults to highlight unresolved publication risks first.
+
+**Devon Pike**
+
+- Link assurance caveats now reduce false confidence from raw support counts.
+- Remaining concern: teams still need recurring QA checks that ensure caveat text is not lost in downstream dashboards.
+
+**Elena Rowe**
+
+- Accountability traceability improved with the decision ledger and review packet.
+- Remaining concern: newsroom adoption depends on explicit role checklists being tied to release gates, not just documentation.
+
+**Noah Singh**
+
+- Machine-readable compatibility and decision outputs now support better CI/editorial bots.
+- Remaining concern: cross-investigation portfolio review remains manual when many investigations are active simultaneously.
+
+### Round 1 recommendation status delta
+
+| ID | Round 1 decision | Round 2 status | Notes |
+|---|---|---|---|
+| J-1 | Adopt | Completed | Unified review packet shipped. |
+| J-2 | Adopt | Completed | Compatibility preflight shipped. |
+| J-3 | Adopt | Completed | Link-assurance visibility shipped. |
+| J-4 | Adopt | Completed | Decision ledger shipped. |
+| J-X1 | Reject | Reaffirm reject | No global source credibility oracle added. |
+| J-X2 | Reject | Reaffirm reject | Unresolved tensions remain visible. |
+
+### New rerun recommendations
+
+| ID | Recommendation | Decision | Why |
+|---|---|---|---|
+| J-R2-1 | Add "editor deadline mode" packet view that sorts by unresolved tensions/challenges first while preserving full transparency. | Defer | Improves speed under deadline pressure without hiding risk. |
+| J-R2-2 | Add portfolio-level newsroom summary across investigations (open tensions, overrides, weak-link concentration). | Defer | Needed for desk-wide triage at scale; can be built from existing outputs. |

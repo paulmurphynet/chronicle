@@ -132,3 +132,56 @@ The panel agrees Chronicle should become more expressive in review operations wh
 | EP-X1 | Truth probability scoring | Reject |
 | EP-X2 | Auto-accept links by support count threshold | Reject |
 | EP-X3 | Hide unresolved tensions in summaries | Reject |
+
+---
+
+## Round 2 rerun (2026-02-20): post-implementation reassessment
+
+### What changed since Round 1
+
+- Policy compatibility preflight is now available across session/API/CLI/reference surfaces.
+- Link assurance fields and caveats are now included in defensibility/eval outputs.
+- Reviewer decision ledger and unified review packet surfaces are implemented.
+- Temporal uncertainty extension (`known_range_start`, `known_range_end`, `temporal_confidence`) is implemented.
+- Multi-vertical sample/workflow parity and sample quality checks are materially improved.
+
+### Panelist reassessment
+
+**Dr. Rowan Reed**
+
+- Chronicle now better protects against testimonial over-reading by exposing link-assurance posture directly in outputs.
+- Remaining concern: users may still operationally over-trust "counts first, caveats second" if dashboards hide caveat text.
+
+**Dr. Imani Vega**
+
+- Policy preflight and decision-ledger outputs significantly improve defeasibility traceability in operational review.
+- Remaining concern: no routine "same investigation under multiple policy views" summary artifact for quick comparative analysis.
+
+**Dr. June Kim**
+
+- Accountability discoverability improved substantially through unified decision ledger and review packet flows.
+- Remaining concern: role-based review discipline exists in docs, but adoption consistency depends on workflow enforcement.
+
+**Dr. Patrick O'Brien**
+
+- Chronicle is now more coherent as an applied epistemic system: compatibility deltas, decision posture, and caveats are inspectable.
+- Remaining concern: real-world robustness now hinges on stress-testing messy, incomplete, and conflicting artifact bundles.
+
+### Round 1 recommendation status delta
+
+| ID | Round 1 decision | Round 2 status | Notes |
+|---|---|---|---|
+| EP-1 | Adopt | Completed | Policy compatibility preflight shipped across major surfaces. |
+| EP-2 | Adopt | Completed | Link assurance metadata/caveats added to output contracts and docs. |
+| EP-3 | Adopt | Completed | Unified reviewer decision ledger shipped. |
+| EP-4 | Adopt | Completed | Unified review packet generation shipped. |
+| EP-X1 | Reject | Reaffirm reject | Boundary preserved: no truth-probability scoring. |
+| EP-X2 | Reject | Reaffirm reject | Boundary preserved: no support-count auto-accept. |
+| EP-X3 | Reject | Reaffirm reject | Boundary preserved: unresolved tensions remain visible. |
+
+### New rerun recommendations
+
+| ID | Recommendation | Decision | Why |
+|---|---|---|---|
+| EP-R2-1 | Add a "policy sensitivity comparison" report for same investigation across 2-3 selected profiles. | Defer | Valuable for epistemic legibility; can be layered on existing compatibility primitives. |
+| EP-R2-2 | Add stress-test corpus with intentionally messy/ambiguous provenance to evaluate reviewer behavior and caveat visibility. | Defer | High value for practical trust calibration; should be staged after current workflow hardening. |

@@ -13,11 +13,24 @@ Cross-panel decision log for this batch. Use this as the source of truth for wha
 | TE-05 | Add unified review packet generator (reasoning brief + chain-of-custody + policy compatibility + policy rationale summary + decision summary). | Reference reporting | Converts scattered artifacts into one review-ready bundle suitable for editor/legal/compliance review. | `docs/to_do.md` |
 | TE-06 | Add role-based review checklist templates per policy profile. | Docs + reference UI guidance | Improves consistency for multi-role review teams with minimal risk. | `docs/to_do.md` |
 
-## Defer
+## Adopt now status refresh (2026-02-20)
+
+All initial `TE-01` through `TE-06` recommendations are now implemented (see `docs/to_do.md` completed section).
+
+## Defer (historical)
 
 | ID | Recommendation | Reason for defer |
 |----|----------------|------------------|
-| TE-D01 | Temporal uncertainty extension (range/confidence fields beyond `known_as_of`). | Valuable for historical use cases, but needs careful schema design and migration plan; schedule after current adopted batch. |
+| TE-D01 | Temporal uncertainty extension (range/confidence fields beyond `known_as_of`). | **Completed on 2026-02-19** (migration-safe implementation). |
+
+## Defer (Round 2 rerun: 2026-02-20)
+
+| ID | Recommendation | Reason for defer |
+|----|----------------|------------------|
+| TE-R2-01 | Policy sensitivity comparison report across multiple selected profiles for same investigation. | High-value additive artifact; current compatibility primitives exist but report composition is not yet first-class. |
+| TE-R2-02 | Messy real-world stress corpus (partial metadata, supersession, redactions, conflicting/ambiguous chronology). | Valuable for operational trust calibration; should follow current sample-quality hardening rollout. |
+| TE-R2-03 | Portfolio-level cross-investigation summaries (unresolved tensions, override concentration, readiness posture). | Needed for larger-team operations; best staged as reference analytics layer. |
+| TE-R2-04 | One-shot readiness gate command/report composing compatibility, decision posture, and unresolved-risk thresholds. | Useful for CI/compliance gating; requires policy/default design work to avoid over-prescriptive behavior. |
 
 ## Reject
 

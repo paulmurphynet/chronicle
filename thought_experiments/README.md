@@ -49,6 +49,7 @@ Each panel file should follow a detailed structure (same depth standard):
 - Replaced the previous single-panel format with a multi-audience review cycle.
 - Added a decision register to document accepted and rejected ideas.
 - Linked adopted recommendations to concrete implementation planning in `docs/to_do.md`.
+- Added **Round 2 rerun sections** (dated 2026-02-20) in each panel file to reassess outcomes after implementation and record next-step deferred recommendations.
 
 ## Operating rule
 

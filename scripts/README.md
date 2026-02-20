@@ -32,7 +32,7 @@ Scripts and directories for scenario validation, per-vertical samples, benchmark
 | Path | Purpose |
 |------|---------|
 | **ai_validation/** | Scenario validation (rule-based driver). Uses current Chronicle API (ChronicleSession, create_project, propose_claim, etc.). Scenarios per vertical, scorer, run_all_verticals. See [ai_validation/README.md](ai_validation/README.md). |
-| **verticals/** | Per-vertical sample generators (e.g. Journalism `generate_sample.py`). Used by `generate_sample_chronicle.py` for the Try sample. See [verticals/README.md](verticals/README.md). |
+| **verticals/** | Per-vertical sample generators (journalism, legal, history/research, compliance) plus `check_sample_quality.py` quality gate. Used by `generate_sample_chronicle.py` for the Try sample. See [verticals/README.md](verticals/README.md). |
 | **benchmark_data/** | Benchmark sample generation: `generate_benchmark_samples.py`, `generate_vertical_corpora.py`, `synthetic_training_pipeline.py`, `evals_to_preference_pair.py`. First-class entry point: `run_defensibility_benchmark.py` (listed above). |
 | **adapters/** | Map external formats to Chronicle: [example_rag_to_scorer](adapters/example_rag_to_scorer.py), [starter_batch_to_scorer](adapters/starter_batch_to_scorer.py), [validate_adapter_outputs](adapters/validate_adapter_outputs.py), [fact_checker_to_chronicle](adapters/fact_checker_to_chronicle.py), [provenance_to_chronicle](adapters/provenance_to_chronicle.py). See [adapters/README.md](adapters/README.md). |
 | **synthetic_data/** | Generate realistic synthetic data: `generate_realistic_synthetic.py`. |
@@ -66,6 +66,9 @@ Scripts for repo and doc maintenance. Not needed for normal eval or integration 
 ```bash
 # Regenerate the Journalism sample (frontend/public/sample.chronicle)
 PYTHONPATH=. python3 scripts/generate_sample_chronicle.py
+
+# Validate vertical sample completeness/realism
+PYTHONPATH=. python3 scripts/verticals/check_sample_quality.py
 
 # Run all scenario validation scenarios (9 scenarios, 7 verticals)
 PYTHONPATH=. python3 scripts/ai_validation/run_all_verticals.py

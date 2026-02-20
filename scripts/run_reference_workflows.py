@@ -156,6 +156,39 @@ def _workflow_history(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     return result
 
 
+def _workflow_samples(repo_root: Path, run_dir: Path) -> dict[str, Any]:
+    work = run_dir / "samples"
+    work.mkdir(parents=True, exist_ok=True)
+    report_path = work / "sample_quality_report.json"
+    cmd = [
+        sys.executable,
+        str(repo_root / "scripts/verticals/check_sample_quality.py"),
+        "--output-report",
+        str(report_path),
+    ]
+    run = _run_cmd(cmd, cwd=repo_root)
+    result: dict[str, Any] = {
+        "name": "samples",
+        "status": "failed",
+        "commands": [run],
+        "artifacts": {"sample_quality_report": str(report_path)},
+    }
+    if run["returncode"] != 0:
+        result["error"] = "sample_quality_check_failed"
+        return result
+    if not report_path.is_file():
+        result["error"] = f"missing_sample_quality_report:{report_path}"
+        return result
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        result["error"] = f"sample_quality_report_parse_failed:{e}"
+        return result
+    result["summary"] = payload.get("summary")
+    result["status"] = "passed"
+    return result
+
+
 def _workflow_benchmark(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     work = run_dir / "benchmark"
     work.mkdir(parents=True, exist_ok=True)
@@ -268,6 +301,7 @@ WORKFLOW_RUNNERS: dict[str, Callable[[Path, Path], dict[str, Any]]] = {
     "journalism": _workflow_journalism,
     "legal": _workflow_legal,
     "history": _workflow_history,
+    "samples": _workflow_samples,
     "benchmark": _workflow_benchmark,
     "compliance": _workflow_compliance,
     "neo4j": _workflow_neo4j,

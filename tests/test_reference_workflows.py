@@ -12,6 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 benchmark_module = import_module("scripts.benchmark_data.run_defensibility_benchmark")
 compliance_module = import_module("scripts.compliance_report_from_rag")
 runner_module = import_module("scripts.run_reference_workflows")
+sample_quality_module = import_module("scripts.verticals.check_sample_quality")
 
 
 def test_benchmark_session_mode_writes_results(tmp_path: Path) -> None:
@@ -69,3 +70,25 @@ def test_reference_workflow_runner_legal_and_history(tmp_path: Path) -> None:
     assert report["summary"]["failed"] == 0
     names = {wf["name"] for wf in report["workflows"]}
     assert names == {"legal", "history"}
+
+
+def test_vertical_sample_quality_check_all(tmp_path: Path) -> None:
+    report_path = tmp_path / "sample_quality_report.json"
+    rc = sample_quality_module.main(["--output-report", str(report_path)])
+    assert rc == 0
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["summary"]["failed"] == 0
+    names = {row["sample"] for row in report["results"]}
+    assert names == {"journalism", "legal", "history", "compliance"}
+
+
+def test_reference_workflow_runner_samples(tmp_path: Path) -> None:
+    out_dir = tmp_path / "runs"
+    rc = runner_module.main(["--output-dir", str(out_dir), "--only", "samples"])
+    assert rc == 0
+    report_path = out_dir / "reference_workflow_report.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["summary"]["failed"] == 0
+    assert {wf["name"] for wf in report["workflows"]} == {"samples"}

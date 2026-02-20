@@ -127,3 +127,53 @@ The panel agrees that Chronicle should actively prevent common evaluation misint
 | R-3 | Machine-readable reviewer decision ledger | Adopt |
 | R-4 | Multi-vertical deterministic workflow parity | Adopt |
 | R-X1 | Single aggregate trust score replacing components | Reject |
+
+---
+
+## Round 2 rerun (2026-02-20): RAG/eval reassessment after implementation
+
+### What changed since Round 1
+
+- Link assurance level/caveat fields are now included in output schemas and surfaced across scorer/session/API/export paths.
+- Compatibility preflight and reviewer decision ledger are now machine-readable and available across surfaces.
+- Multi-vertical deterministic workflow coverage is significantly improved.
+- Sample-data quality hardening added richer, more realistic vertical artifacts and a quality-check script.
+
+### Panelist reassessment
+
+**Iris Cho**
+
+- Output observability improved; link assurance and caveats now support better evaluator interpretation.
+- Remaining concern: many teams still need guardrails in dashboards to prevent caveat fields from being dropped.
+
+**Daniel Kerr**
+
+- Machine-readable compatibility and decision posture are now usable for CI gating.
+- Remaining concern: pipeline adoption would improve with a prebuilt gate command that fails on missing required review artifacts.
+
+**Mina Patel**
+
+- Multi-component scorecards remain intact and diagnostic quality is preserved.
+- Remaining concern: cross-profile sensitivity analysis still takes multiple manual steps.
+
+**Leo Voss**
+
+- API/read-model/report surfaces are much more complete for integration handoffs.
+- Remaining concern: partner teams need stronger examples for large, noisy, and partially missing evidence contexts.
+
+### Round 1 recommendation status delta
+
+| ID | Round 1 decision | Round 2 status | Notes |
+|---|---|---|---|
+| R-1 | Adopt | Completed | Link assurance metadata/caveats shipped. |
+| R-2 | Adopt | Completed | Policy compatibility preflight shipped. |
+| R-3 | Adopt | Completed | Reviewer decision ledger shipped. |
+| R-4 | Adopt | Completed | Multi-vertical workflow parity expanded. |
+| R-X1 | Reject | Reaffirm reject | No single aggregate trust score collapse. |
+
+### New rerun recommendations
+
+| ID | Recommendation | Decision | Why |
+|---|---|---|---|
+| R-R2-1 | Add one command to evaluate "pipeline readiness" (compatibility, decision posture, unresolved-risk thresholds). | Defer | High practical value for MLOps gates; composes existing primitives. |
+| R-R2-2 | Add large/noisy benchmark sample pack for stress-testing caveat and uncertainty handling at scale. | Defer | Needed for production confidence, but should be staged after current quality gates mature. |

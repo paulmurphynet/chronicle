@@ -9,7 +9,7 @@ Each vertical has its own **sample generator** that produces a deterministic `.c
 | Journalism| [journalism/generate_sample.py](journalism/generate_sample.py) | `sample.chronicle` (default) |
 | Legal     | [legal/generate_sample.py](legal/generate_sample.py) | `sample_legal.chronicle` |
 | History/Research | [history/generate_sample.py](history/generate_sample.py) | `sample_history.chronicle` |
-| Compliance| *(to be added)*                           | `sample_compliance.chronicle` *(to be added)* |
+| Compliance| [compliance/generate_sample.py](compliance/generate_sample.py) | `sample_compliance.chronicle` |
 
 ## Run from repo root
 
@@ -17,12 +17,21 @@ Each vertical has its own **sample generator** that produces a deterministic `.c
 PYTHONPATH=. python3 scripts/verticals/journalism/generate_sample.py
 PYTHONPATH=. python3 scripts/verticals/legal/generate_sample.py
 PYTHONPATH=. python3 scripts/verticals/history/generate_sample.py
+PYTHONPATH=. python3 scripts/verticals/compliance/generate_sample.py
+```
+
+## Quality gate
+
+Run a deterministic quality/completeness check across all vertical samples:
+
+```bash
+PYTHONPATH=. python3 scripts/verticals/check_sample_quality.py
 ```
 
 ## Requirements
 
 - **Deterministic:** Same script run twice should produce the same (or equivalent) output so CI can regenerate and verify.
-- **Self-contained:** One investigation, a few evidence items, claims, spans, links, at least one tension. Optionally copy the vertical's policy profile to the temp project before export so the manifest records `built_under_policy_id`.
+- **Self-contained:** One investigation with evidence, claims, supports/challenges, sources + source links, and at least one tension. Copy the vertical policy profile to temp project so the manifest records `built_under_policy_id`.
 - **Valid:** Output must pass `chronicle-verify path/to/sample.chronicle`.
 
 ## Examples as tests

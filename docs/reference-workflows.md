@@ -10,7 +10,7 @@ Each workflow is designed to be:
 
 ## One-command runner
 
-Run the full reference set (journalism, legal, history/research, compliance report, benchmark trust tracking, Neo4j contract check):
+Run the full reference set (journalism, legal, history/research, sample quality gate, compliance report, benchmark trust tracking, Neo4j contract check):
 
 ```bash
 PYTHONPATH=. python3 scripts/run_reference_workflows.py
@@ -68,6 +68,22 @@ Expected outcome:
 1. A deterministic history/research `.chronicle` sample is generated.
 2. Verifier passes on structure/hash checks.
 3. The investigation preserves uncertainty via explicit competing claims and tension.
+
+## Workflow 3b: Vertical sample quality gate
+
+Goal: ensure sample artifacts remain realistic and complete for real-world onboarding (policy manifest, provenance, source links, supports/challenges, tensions).
+
+Run from repo root:
+
+```bash
+PYTHONPATH=. python3 scripts/verticals/check_sample_quality.py
+```
+
+Expected outcome:
+
+1. Every vertical generator produces a valid `.chronicle`.
+2. Manifest policy IDs match the intended vertical profile.
+3. Minimum quality thresholds pass (claims/evidence/sources/supports/challenges/tensions and rationale coverage).
 
 ## Workflow 4: Compliance-style RAG audit output
 

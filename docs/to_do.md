@@ -58,6 +58,7 @@ Chronicle should optimize for:
 - **TE-06 completed**: added role-based review checklist templates (`docs/role-based-review-checklists.md`) and linked them from policy profile docs, reference workflows, and Reference UI policy guidance.
 - **TE-03 completed**: expanded multi-vertical workflow parity with new legal/history deterministic sample generators and reference workflow runner coverage (`scripts/verticals/legal/generate_sample.py`, `scripts/verticals/history/generate_sample.py`, `scripts/run_reference_workflows.py`), plus a new history/research policy example profile (`docs/policy-profiles/history_research.json`).
 - **TE-D01 completed (migration-safe)**: temporal uncertainty extension shipped without schema migration by standardizing extended `temporal_json` keys (`known_range_start`, `known_range_end`, `temporal_confidence`) in temporalization command validation, exposing them in defensibility/eval knowability outputs, and updating docs/schema/tests.
+- **Sample data quality hardening completed**: expanded vertical generators (journalism/legal/history + new compliance) with richer provenance/challenge/tension realism, fixed journalism policy-profile pathing, added vertical sample quality gate (`scripts/verticals/check_sample_quality.py`), and integrated sample-quality workflow coverage/tests.
 
 ## Release blockers
 
