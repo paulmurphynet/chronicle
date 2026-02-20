@@ -62,6 +62,7 @@ Scripts for repo and doc maintenance. Not needed for normal eval or integration 
 | **generate_agent_tools.py** | Regenerate `docs/agent-tools.json` (API operations in function-calling format for agents). |
 | **postgres_doctor.py** | Check Postgres dependency + connectivity and table readiness for convergence work. |
 | **postgres_smoke.py** | Minimal Postgres event-store smoke test (append/read/idempotency-key). |
+| **container_security_gate.py** | Enforce HIGH/CRITICAL thresholds from one or more Trivy JSON reports. |
 
 ---
 

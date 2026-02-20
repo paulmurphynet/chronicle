@@ -32,10 +32,10 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 
 - [x] Introduce explicit backend factory/config wiring for event store selection (env + session entry points).
 - [x] Implement Postgres read model schema + projector parity with SQLite.
-- [ ] Implement replay/snapshot parity for Postgres-backed paths.
+- [x] Implement replay/snapshot parity for Postgres-backed paths.
 - [ ] Ensure `.chronicle` export/import semantics stay backend-independent.
-- [ ] Add invariants verification parity for Postgres projects.
-- [ ] Publish and enforce migration/versioning policy for both backends.
+- [x] Add invariants verification parity for Postgres projects.
+- [x] Publish and enforce migration/versioning policy for both backends.
 
 ### C. CI and public repo readiness
 
@@ -49,7 +49,7 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 
 - [x] Keep import verification and evidence conflict protections release-critical.
 - [x] Add structured operational runbook for DB backup/restore and disaster recovery.
-- [ ] Add dependency and container vulnerability checks to release criteria.
+- [x] Add dependency and container vulnerability checks to release criteria.
 - [x] Add environment hardening guide for managed Postgres (TLS, least privilege, rotation).
 
 ### E. Support policy and communication
@@ -123,6 +123,10 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - **Release-gate hardening completed**: expanded manual release workflow to include docs/parity gates, verifier+conformance checks, Postgres doctor/smoke checks, and dependency vulnerability threshold enforcement.
 - **B1 completed (backend wiring)**: added explicit backend config/factory wiring (`chronicle/store/backend_config.py`) and session entrypoint integration (`chronicle/store/session.py`) so `CHRONICLE_EVENT_STORE` is parsed/validated consistently, with fail-fast user guidance for current Postgres read-model limitation.
 - **B2 completed (schema + projector parity)**: added Postgres read-model schema initializer and SQLite-to-Postgres projection SQL compatibility layer (`chronicle/store/postgres_projection.py`), then wired `PostgresEventStore` append flow to project events into Postgres read-model tables.
+- **B3 completed (replay/snapshot parity)**: added Postgres replay and snapshot helpers (`replay_postgres_read_model_from_url`, `create_postgres_read_model_snapshot_from_url`, `restore_postgres_read_model_snapshot_from_url`) and routed CLI `replay`/`snapshot` commands through Postgres mode when configured.
+- **B5 completed (verify parity)**: added Postgres invariant verification entrypoint (`verify_postgres_url`) and wired CLI `chronicle verify` to use Postgres checks under `CHRONICLE_EVENT_STORE=postgres`.
+- **B6 completed (migration/versioning policy)**: added backend migration and versioning policy doc (`docs/backend-migration-versioning-policy.md`) and linked it in README/docs index for release/process enforcement.
+- **Security release criteria expanded**: added Trivy-based container vulnerability gating (`scripts/container_security_gate.py`) and wired supply-chain/release workflows to enforce container HIGH/CRITICAL thresholds alongside dependency scans.
 
 ## Release blockers
 

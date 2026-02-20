@@ -51,6 +51,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [CI branch protection checklist](ci-branch-protection.md) | Exact required checks to configure in branch protection rules. |
 | [Postgres operations runbook](postgres-operations-runbook.md) | Backup, restore, and disaster-recovery runbook for Postgres-backed Chronicle deployments. |
 | [Managed Postgres hardening](postgres-hardening.md) | TLS, least privilege, credential rotation, and network hardening for managed Postgres. |
+| [Backend migration/versioning policy](backend-migration-versioning-policy.md) | Versioning/migration policy for event and read-model schemas across SQLite and Postgres. |
 | [Supply-chain automation](security-automation.md) | Manual dependency scan workflow (`pip-audit`, `npm audit`) and threshold gating guidance. |
 | [Trust metrics](trust-metrics.md) | KPI definitions and scripts for tracking unsupported-claim reduction over time. |
 | [Lizzie Borden case study](case-study-lizzie-borden.md) | Why we use the inquest transcript as a trust benchmark and how to evaluate responsibly without sensational framing. |

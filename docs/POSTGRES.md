@@ -73,6 +73,18 @@ Backend wiring behavior (current):
 
 Postgres read model is not yet parity-complete. Query surfaces for claims/defensibility/tensions remain SQLite-first in the current runtime path even though Postgres read-model projection tables are now written.
 
+## Replay and snapshot (Postgres mode)
+
+When `CHRONICLE_EVENT_STORE=postgres` is set, CLI replay/snapshot commands route to Postgres backend helpers:
+
+- `chronicle replay --path /path/to/project`
+- `chronicle snapshot create --path /path/to/project --at-event <event_id> --output postgres_snapshot.json`
+- `chronicle snapshot restore --path /path/to/project --snapshot postgres_snapshot.json`
+
+Postgres snapshots currently use a JSON read-model snapshot format for restore + tail replay workflows.
+
+`chronicle verify --path /path/to/project` also supports Postgres mode in this configuration and runs invariant checks directly against the configured Postgres database URL.
+
 The active implementation plan and release criteria live in [to_do](to_do.md#active-convergence-program-public--ci--postgres).
 
 Operational references:

@@ -36,6 +36,7 @@ Reference: `docs/ci-branch-protection.md`.
 ## 4) Security and operational gates (required)
 
 - [ ] Dependency scan gate passes (`pip-audit` + `npm audit` thresholds).
+- [ ] Container scan gate passes (Trivy filesystem + base image thresholds).
 - [ ] Managed Postgres hardening checklist reviewed and signed off.
 - [ ] Backup/restore and disaster-recovery drill steps are current and runnable.
 

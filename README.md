@@ -146,6 +146,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Integration acceptance checklist](docs/integration-acceptance-checklist.md) | Release checklist for adapters and connectors (contract, trust posture, reproducibility). |
 | [Postgres operations runbook](docs/postgres-operations-runbook.md) | Backup, restore, and disaster-recovery procedure for Chronicle deployments using Postgres. |
 | [Managed Postgres hardening](docs/postgres-hardening.md) | TLS, least-privilege, credential rotation, and network/monitoring hardening guidance. |
+| [Backend migration/versioning policy](docs/backend-migration-versioning-policy.md) | Versioning and migration expectations for event/read-model schemas across SQLite and Postgres. |
 | [User manual](docs/manual/README.md) | Short how-to manual (install, scorer, verifier, format, integration, limits). |
 | [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
 | [Human-in-the-loop and attestation](docs/human-in-the-loop-and-attestation.md) | Human-curated data, actor identity (CLI env, API headers), attestation and verification level; curation workflow. |

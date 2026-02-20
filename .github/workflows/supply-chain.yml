@@ -18,6 +18,16 @@ on:
         required: true
         default: "0"
         type: string
+      max_container_high:
+        description: "Maximum allowed container/image high vulnerabilities"
+        required: true
+        default: "0"
+        type: string
+      max_container_critical:
+        description: "Maximum allowed container/image critical vulnerabilities"
+        required: true
+        default: "0"
+        type: string
 
 jobs:
   audit:
@@ -52,6 +62,26 @@ jobs:
           cd frontend
           npm audit --json > ../reports/npm-audit.json || true
 
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          format: json
+          output: reports/trivy-fs.json
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          scan-ref: .
+
+      - name: Run Trivy base image scan (postgres:16)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: image
+          image-ref: postgres:16
+          format: json
+          output: reports/trivy-postgres16.json
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+
       - name: Enforce vulnerability thresholds
         run: |
           python3 scripts/supply_chain_gate.py \
@@ -60,6 +90,11 @@ jobs:
             --max-python-vulns "${{ inputs.max_python_vulns }}" \
             --max-high "${{ inputs.max_high }}" \
             --max-critical "${{ inputs.max_critical }}"
+          python3 scripts/container_security_gate.py \
+            --report reports/trivy-fs.json \
+            --report reports/trivy-postgres16.json \
+            --max-high "${{ inputs.max_container_high }}" \
+            --max-critical "${{ inputs.max_container_critical }}"
 
       - name: Upload scan reports
         uses: actions/upload-artifact@v4

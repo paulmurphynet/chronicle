@@ -305,6 +305,33 @@ def cmd_replay(
     up_to_time: str | None,
 ) -> int:
     """Rebuild read model from event log (optionally up to an event or time). Use for recovery or state-at-point verification."""
+    from chronicle.store.backend_config import BACKEND_POSTGRES, resolve_event_store_config
+
+    cfg = resolve_event_store_config()
+    if cfg.backend == BACKEND_POSTGRES:
+        from chronicle.store.postgres_projection import replay_postgres_read_model_from_url
+
+        try:
+            applied = replay_postgres_read_model_from_url(
+                cfg.postgres_url or "",
+                up_to_event_id=up_to_event,
+                up_to_recorded_at=up_to_time,
+            )
+        except (ImportError, ValueError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+        if up_to_event:
+            print(
+                f"Replayed {applied} events into Postgres read model (up to and including event_id={up_to_event!r})."
+            )
+        elif up_to_time:
+            print(
+                f"Replayed {applied} events into Postgres read model (up to recorded_at<={up_to_time!r})."
+            )
+        else:
+            print(f"Replayed {applied} events into Postgres read model (full rebuild).")
+        return 0
+
     if not project_exists(path):
         print(f"Not a Chronicle project: {path}", file=sys.stderr)
         return 1
@@ -336,6 +363,26 @@ def cmd_replay(
 
 def cmd_snapshot_create(path: Path, at_event: str, output: Path) -> int:
     """Create read-model snapshot at event N (for scale: restore + tail replay later)."""
+    from chronicle.store.backend_config import BACKEND_POSTGRES, resolve_event_store_config
+
+    cfg = resolve_event_store_config()
+    if cfg.backend == BACKEND_POSTGRES:
+        from chronicle.store.postgres_projection import create_postgres_read_model_snapshot_from_url
+
+        try:
+            applied = create_postgres_read_model_snapshot_from_url(
+                cfg.postgres_url or "",
+                at_event,
+                output,
+            )
+            print(
+                f"Created Postgres snapshot at {output} (replayed {applied} events up to {at_event!r})."
+            )
+            return 0
+        except (FileNotFoundError, ValueError, ImportError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+
     if not project_exists(path):
         print(f"Not a Chronicle project: {path}", file=sys.stderr)
         return 1
@@ -352,6 +399,27 @@ def cmd_snapshot_create(path: Path, at_event: str, output: Path) -> int:
 
 def cmd_snapshot_restore(path: Path, snapshot: Path) -> int:
     """Restore read model from snapshot file, then replay tail events."""
+    from chronicle.store.backend_config import BACKEND_POSTGRES, resolve_event_store_config
+
+    cfg = resolve_event_store_config()
+    if cfg.backend == BACKEND_POSTGRES:
+        from chronicle.store.postgres_projection import (
+            restore_postgres_read_model_snapshot_from_url,
+        )
+
+        try:
+            tail_count = restore_postgres_read_model_snapshot_from_url(
+                cfg.postgres_url or "",
+                snapshot,
+            )
+            print(
+                f"Restored Postgres read model from {snapshot} and replayed {tail_count} tail events."
+            )
+            return 0
+        except (FileNotFoundError, ValueError, ImportError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+
     if not project_exists(path):
         print(f"Not a Chronicle project: {path}", file=sys.stderr)
         return 1
@@ -368,9 +436,14 @@ def cmd_snapshot_restore(path: Path, snapshot: Path) -> int:
 
 def cmd_verify(path: Path, skip_evidence: bool) -> int:
     """Run invariant suite (Spec 12.7.5) and print pass/fail report."""
-    from chronicle.verify import verify_project
+    from chronicle.store.backend_config import BACKEND_POSTGRES, resolve_event_store_config
+    from chronicle.verify import verify_postgres_url, verify_project
 
-    report = verify_project(path, check_evidence_files=not skip_evidence)
+    cfg = resolve_event_store_config()
+    if cfg.backend == BACKEND_POSTGRES:
+        report = verify_postgres_url(cfg.postgres_url or "", check_evidence_files=not skip_evidence)
+    else:
+        report = verify_project(path, check_evidence_files=not skip_evidence)
     for r in report.results:
         status = "PASS" if r.passed else "FAIL"
         print(f"  [{status}] {r.name}" + (f" — {r.detail}" if r.detail else ""))
