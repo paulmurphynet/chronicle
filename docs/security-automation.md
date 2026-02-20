@@ -29,7 +29,7 @@ From repo root:
 python3 -m pip install --upgrade pip
 pip install -e ".[dev]"
 pip install pip-audit
-cd frontend && npm install && cd ..
+cd frontend && npm ci && cd ..
 mkdir -p reports
 pip-audit --format json --output reports/pip-audit.json || true
 cd frontend && npm audit --json > ../reports/npm-audit.json || true && cd ..
@@ -52,8 +52,8 @@ python3 scripts/container_security_gate.py \
 
 Important frontend prerequisite:
 
-- `npm audit` requires `frontend/package-lock.json`. If missing, generate and commit it first (for example: `cd frontend && npm install --package-lock-only`).
-- Once lockfile is committed, prefer `npm ci` over `npm install` in CI/release/local scan runs for deterministic dependency resolution.
+- `npm audit` requires `frontend/package-lock.json` (committed in repo).
+- Use `npm ci` in CI/release/local scan runs for deterministic dependency resolution.
 
 ## Triage guidance
 

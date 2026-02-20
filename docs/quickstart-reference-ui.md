@@ -7,7 +7,7 @@ This path is for users who run the **Reference UI** (frontend) and want to see d
 ## Prerequisites
 
 - Chronicle API running (e.g. `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run `uvicorn chronicle.api.app:app`).
-- Reference UI running from `frontend/` (e.g. `npm install` then `npm run dev`; open http://localhost:5173).
+- Reference UI running from `frontend/` (e.g. `npm ci` then `npm run dev`; open http://localhost:5173).
 
 ---
 

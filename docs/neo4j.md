@@ -25,6 +25,8 @@ It exits non-zero if there is drift between:
 - `chronicle/store/neo4j_export.py`
 - `neo4j/rebuild/01_schema.cyp` to `04_retractions.cyp`
 - `docs/neo4j-schema.md`
+- `docs/neo4j-operations-runbook.md`
+- `docs/neo4j-query-pack.md`
 
 ### Option 1: Export to CSV, then load in Neo4j
 
@@ -95,8 +97,33 @@ CHRONICLE_EVENT_STORE=sqlite pytest tests/test_neo4j_live_integration.py -q
 If `CHRONICLE_RUN_NEO4J_LIVE_TESTS` is unset, the suite skips by default.
 You can also run `make neo4j-live-test` after setting `NEO4J_URI`, `NEO4J_USER`, and `NEO4J_PASSWORD`.
 
+## Projection benchmark harness
+
+Chronicle includes a projection benchmark harness for export/sync throughput and memory baselines:
+
+```bash
+PYTHONPATH=. python3 scripts/benchmark_data/run_neo4j_projection_benchmark.py --output reports/neo4j_projection_benchmark.json
+```
+
+You can add threshold gates, for example:
+
+```bash
+PYTHONPATH=. python3 scripts/benchmark_data/run_neo4j_projection_benchmark.py \
+  --output reports/neo4j_projection_benchmark.json \
+  --max-export-elapsed-ms 45000 \
+  --max-export-peak-mib 512
+```
+
+Use `--run-sync` with Neo4j credentials for direct-sync benchmark measurements.
+
+Release baseline artifact:
+
+- [Neo4j projection baseline v0.9.0](benchmarks/neo4j_projection_baseline_v0.9.0.md)
+
 ## Summary
 
 Neo4j is a **projection** of the same read model. It does not replace the scorer or the verifier. Use it for multi-run analysis, lineage traversal, and visualization when your workflow benefits from a graph.
 
 **Schema reference:** For node labels, relationship types, and example Cypher queries, see [Neo4j schema](neo4j-schema.md).
+**Operations runbook:** [Neo4j operations runbook](neo4j-operations-runbook.md).
+**Query pack:** [Neo4j query pack](neo4j-query-pack.md).

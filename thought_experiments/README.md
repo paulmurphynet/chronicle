@@ -42,6 +42,7 @@ Each panel file should follow a detailed structure (same depth standard):
 | [04](04-historians-archivists-panel-review.md) | Historians and archivists | Temporal reasoning, source provenance, uncertainty reporting |
 | [05](05-compliance-audit-panel-review.md) | Compliance and audit leads | Controls, exceptions, review accountability |
 | [06](06-rag-evaluation-engineers-panel-review.md) | RAG/eval engineers | Contract clarity, metric reliability, pipeline adoption |
+| [07](07-pre-publication-launch-readiness-panel-review.md) | Pre-publication launch board | Public launch readiness, evidence gating, and maturity claims discipline |
 | [Decision register](decision-register.md) | Cross-panel decisions | Adopt/defer/reject log with reasons and TODO linkage |
 
 ## What changed in this batch
@@ -50,6 +51,7 @@ Each panel file should follow a detailed structure (same depth standard):
 - Added a decision register to document accepted and rejected ideas.
 - Linked adopted recommendations to concrete implementation planning in `docs/to_do.md`.
 - Added **Round 2 rerun sections** (dated 2026-02-20) in each panel file to reassess outcomes after implementation and record next-step deferred recommendations.
+- Added **Round 3 pre-publication rerun** (`07`) to reassess launch readiness and reclassify deferred Round 2 items against current implementation state.
 
 ## Operating rule
 

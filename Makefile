@@ -4,7 +4,7 @@ MYPY ?= ./.venv/bin/mypy
 PYTEST ?= ./.venv/bin/pytest
 POSTGRES_ENV_FILE ?= .env.postgres.local
 
-.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
+.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test neo4j-benchmark adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
 
 help:
 	@echo "Targets:"
@@ -18,6 +18,7 @@ help:
 	@echo "  docs-currency - Check key docs/lessons/quizzes for current workflow references"
 	@echo "  neo4j-check  - Neo4j export/sync/docs/rebuild contract parity checks"
 	@echo "  neo4j-live-test - Run live Neo4j integration tests (requires CHRONICLE_RUN_NEO4J_LIVE_TESTS=1 and NEO4J_* env vars)"
+	@echo "  neo4j-benchmark - Run Neo4j projection benchmark harness and write report under /tmp"
 	@echo "  adapter-check - Validate adapter examples and contract validation flow"
 	@echo "  integration-export-contract-check - Validate JSON/CSV/Markdown/signed-bundle integration export/import contracts"
 	@echo "  branch-protection-rollout-check - Query GitHub API for branch protection + required CI green evidence (requires token)"
@@ -65,6 +66,9 @@ neo4j-check:
 
 neo4j-live-test:
 	CHRONICLE_EVENT_STORE=sqlite CHRONICLE_RUN_NEO4J_LIVE_TESTS=1 $(PYTEST) tests/test_neo4j_live_integration.py -q
+
+neo4j-benchmark:
+	PYTHONPATH=. $(PYTHON) scripts/benchmark_data/run_neo4j_projection_benchmark.py --output /tmp/chronicle_neo4j_projection_benchmark.json
 
 adapter-check:
 	$(PYTHON) scripts/adapters/check_examples.py

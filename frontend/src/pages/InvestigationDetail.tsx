@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useLocation } from 'react-router-dom'
 import { api, downloadBlob } from '../lib/api'
 import type {
@@ -30,7 +30,7 @@ export function InvestigationDetail() {
 
   const invId = id!
 
-  const load = () => {
+  const load = useCallback(() => {
     if (!invId) return
     setLoading(true)
     setError(null)
@@ -59,9 +59,9 @@ export function InvestigationDetail() {
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoading(false))
-  }
+  }, [invId])
 
-  useEffect(() => { load() }, [invId])
+  useEffect(() => { load() }, [load])
 
   useEffect(() => {
     if (tab !== 'defensibility' || claims.length === 0) return
@@ -70,7 +70,6 @@ export function InvestigationDetail() {
     })
   }, [tab, claims])
 
-  const [newTitle, setNewTitle] = useState('')
   const [newEvidence, setNewEvidence] = useState('')
   const [newClaim, setNewClaim] = useState('')
   const [tierReason, setTierReason] = useState('')

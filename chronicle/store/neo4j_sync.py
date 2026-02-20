@@ -279,6 +279,7 @@ def _sync_nodes(
 
         # Claims (when dedupe: one node per claim_content_hash; else one per claim_uid)
         if dedupe_evidence_by_content_hash:
+
             def _mutate_claims(batch: list[dict[str, Any]]) -> None:
                 for row in batch:
                     row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
@@ -524,6 +525,7 @@ def _sync_relationships(
 
         # SUPPORTS
         if dedupe_evidence_by_content_hash:
+
             def _mutate_supports_claim_hash(batch: list[dict[str, Any]]) -> None:
                 for row in batch:
                     row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
@@ -561,6 +563,7 @@ def _sync_relationships(
 
         # CHALLENGES
         if dedupe_evidence_by_content_hash:
+
             def _mutate_challenges_claim_hash(batch: list[dict[str, Any]]) -> None:
                 for row in batch:
                     row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
@@ -598,6 +601,7 @@ def _sync_relationships(
 
         # ASSERTS
         if dedupe_evidence_by_content_hash:
+
             def _mutate_asserts_claim_hash(batch: list[dict[str, Any]]) -> None:
                 for row in batch:
                     row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
@@ -649,6 +653,7 @@ def _sync_relationships(
 
         # Tension BETWEEN (two edges per row)
         if dedupe_evidence_by_content_hash:
+
             def _mutate_between_claim_hash(batch: list[dict[str, Any]]) -> None:
                 for row in batch:
                     row["claim_a_content_hash"] = _claim_content_hash(row.get("claim_a_text"))
@@ -743,6 +748,7 @@ def _sync_relationships(
 
         # DECOMPOSES_TO (when dedupe: match Claim by content_hash)
         if dedupe_evidence_by_content_hash:
+
             def _mutate_decomposes_claim_hash(batch: list[dict[str, Any]]) -> None:
                 for row in batch:
                     row["parent_content_hash"] = (
@@ -797,6 +803,7 @@ def _sync_relationships(
 
         # CONTAINS (Investigation -> Claim). When dedupe: CONTAINS_CLAIM with claim_uid on rel
         if dedupe_evidence_by_content_hash:
+
             def _mutate_contains_claim_hash(batch: list[dict[str, Any]]) -> None:
                 for row in batch:
                     row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
@@ -988,14 +995,19 @@ def sync_project_to_neo4j(
             }
         )
 
-    from neo4j import GraphDatabase  # type: ignore[attr-defined]
-    from neo4j.exceptions import (
-        AuthError,
-        ConfigurationError,
-        ServiceUnavailable,
-        SessionExpired,
-        TransientError,
-    )  # type: ignore[attr-defined]
+    try:
+        from neo4j import GraphDatabase  # type: ignore[attr-defined]
+        from neo4j.exceptions import (
+            AuthError,
+            ConfigurationError,
+            ServiceUnavailable,
+            SessionExpired,
+            TransientError,
+        )  # type: ignore[attr-defined]
+    except ImportError as e:  # pragma: no cover - exercised via dedicated failure-mode tests
+        raise RuntimeError(
+            'Neo4j driver not installed. Install with: pip install -e ".[neo4j]"'
+        ) from e
 
     attempts = max(1, max_retries)
     last_error: Exception | None = None
@@ -1084,9 +1096,7 @@ def sync_project_to_neo4j(
             )
             return
         except AuthError as e:
-            error = ConnectionError(
-                f"Neo4j authentication failed for {uri} as user '{user}': {e}"
-            )
+            error = ConnectionError(f"Neo4j authentication failed for {uri} as user '{user}': {e}")
             _emit_report(
                 status="failed",
                 attempt_used=attempt,

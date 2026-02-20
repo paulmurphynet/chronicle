@@ -32,6 +32,38 @@ All initial `TE-01` through `TE-06` recommendations are now implemented (see `do
 | TE-R2-03 | Portfolio-level cross-investigation summaries (unresolved tensions, override concentration, readiness posture). | **Completed** (`scripts/portfolio_risk_summary.py`) with deterministic ranking + aggregate concentration/readiness analytics. |
 | TE-R2-02 | Messy real-world stress corpus (partial metadata, supersession, redactions, conflicting/ambiguous chronology). | **Completed** (`scripts/verticals/messy/generate_sample.py`) with sample-quality and reference-workflow integration. |
 
+## Round 3 pre-public rerun status refresh (2026-02-20)
+
+Panel source: `07-pre-publication-launch-readiness-panel-review.md`.
+
+### Deferred Round 2 recommendations: current status
+
+| ID | Previous status | Current status | Notes |
+|----|-----------------|----------------|-------|
+| EP-R2-1 | Defer | **Completed** | Policy sensitivity comparison shipped (`R2-01`). |
+| EP-R2-2 | Defer | **Completed** | Messy/noisy corpus shipped (`R2-03`). |
+| J-R2-2 | Defer | **Completed** | Portfolio-level analytics shipped (`R2-02`). |
+| C-R2-1 | Defer | **Completed** | Readiness gate shipped (`R2-04`). |
+| C-R2-2 | Defer | **Completed** | Cross-investigation exception analytics shipped (`R2-02`). |
+| L-R2-2 | Defer | **Completed** | General readiness gate now covers required artifact posture checks (`R2-04`). |
+| H-R2-1 | Defer | **Completed** | History-relevant messy archive corpus shipped (`R2-03`). |
+| R-R2-1 | Defer | **Completed** | Pipeline readiness command/report shipped (`R2-04`). |
+| R-R2-2 | Defer | **Completed** | Large/noisy stress sample capability shipped via messy corpus (`R2-03`). |
+| J-R2-1 | Defer | **Still deferred** | Editorial deadline-priority packet view. |
+| L-R2-1 | Defer | **Still deferred** | Legal-stage packet presets. |
+| H-R2-2 | Defer | **Still deferred** | Chronology comparison artifact for review packets. |
+
+### New Round 3 recommendations
+
+| ID | Recommendation | Layer | Decision | To-do linkage |
+|----|----------------|-------|----------|---------------|
+| P-1 | Complete frontend lockfile + `npm ci` migration in CI/release workflows. | CI/release ops | Adopt | `docs/to_do.md` public launch blockers (`frontend/package-lock.json`, `npm ci`) |
+| P-2 | Execute first public CI + branch-protection rollout verification and archive evidence report. | CI/governance evidence | Adopt | `docs/to_do.md` branch-protection/public CI blockers |
+| P-3 | Keep Neo4j support level explicit as Beta until N-07..N-12 are complete and evidenced. | Support policy/docs | Adopt | `docs/support-policy.md`; `docs/to_do.md` N-07..N-12 |
+| P-4 | Complete Neo4j N-07/N-08/N-09 (performance, parity, failure-mode testing). | Neo4j engineering | Defer | `docs/to_do.md` N-07..N-09 |
+| P-5 | Complete Neo4j N-10/N-11/N-12 (ops runbook, query pack, compatibility policy details). | Neo4j docs/operations | Defer | `docs/to_do.md` N-10..N-12 |
+| P-X1 | Block public launch until all Neo4j best-in-class items are complete. | Strategy | Reject | Rejected in Round 3 as over-constraining vs trust-critical launch gates |
+
 ## Reject
 
 | ID | Recommendation | Reason rejected |

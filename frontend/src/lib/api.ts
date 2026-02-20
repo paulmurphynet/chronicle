@@ -9,6 +9,78 @@ type PageMeta = {
   next_cursor: string | null;
 };
 
+type InvestigationListResponse = {
+  investigations: Array<{
+    investigation_uid: string;
+    title: string;
+    description?: string;
+    is_archived: boolean;
+    current_tier: string;
+  }>;
+  page?: PageMeta;
+};
+
+type EvidenceListResponse = {
+  evidence: Array<{
+    evidence_uid: string;
+    investigation_uid: string;
+    created_at: string;
+    original_filename: string;
+    media_type: string;
+    file_size_bytes: number;
+  }>;
+  page?: PageMeta;
+};
+
+type ClaimListResponse = {
+  claims: Array<{
+    claim_uid: string;
+    investigation_uid: string;
+    claim_text: string;
+    claim_type?: string;
+    current_status: string;
+    created_at: string;
+    updated_at: string;
+    epistemic_stance?: string;
+  }>;
+  page?: PageMeta;
+};
+
+type TensionListResponse = {
+  tensions: Array<{
+    tension_uid: string;
+    claim_a_uid: string;
+    claim_b_uid: string;
+    tension_kind?: string;
+    status: string;
+    notes?: string;
+    created_at: string;
+    defeater_kind?: string;
+  }>;
+  page?: PageMeta;
+};
+
+type TensionSuggestionListResponse = {
+  tension_suggestions: Array<{
+    suggestion_uid: string;
+    claim_a_uid: string;
+    claim_b_uid: string;
+    suggested_tension_kind: string;
+    confidence: number;
+    rationale: string;
+    status: string;
+    created_at: string;
+    confirmed_tension_uid?: string;
+  }>;
+  page?: PageMeta;
+};
+
+type GraphResponse = {
+  nodes: Array<{ id: string; type: string; label: string }>;
+  edges: Array<{ from: string; to: string; link_type: string; link_uid: string }>;
+  edges_page?: PageMeta;
+};
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -44,7 +116,7 @@ function withQuery(path: string, params: Record<string, string | number | boolea
 
 function fillRoute(template: string, params: Record<string, string>): string {
   return Object.entries(params).reduce(
-    (out, [key, value]) => out.replaceAll(`{${key}}`, encodeURIComponent(value)),
+    (out, [key, value]) => out.replace(new RegExp(`\\{${key}\\}`, 'g'), encodeURIComponent(value)),
     template
   );
 }
@@ -61,16 +133,9 @@ export const api = {
     }> = [];
     let cursor: string | null = null;
     for (let i = 0; i < 50; i += 1) {
-      const resp = await request<{
-        investigations: Array<{
-          investigation_uid: string;
-          title: string;
-          description?: string;
-          is_archived: boolean;
-          current_tier: string;
-        }>;
-        page?: PageMeta;
-      }>(withQuery(ROUTES.list_investigations_investigations_get, { cursor }));
+      const resp: InvestigationListResponse = await request<InvestigationListResponse>(
+        withQuery(ROUTES.list_investigations_investigations_get, { cursor })
+      );
       investigations.push(...resp.investigations);
       cursor = resp.page?.next_cursor ?? null;
       if (!cursor) break;
@@ -105,17 +170,14 @@ export const api = {
     }> = [];
     let cursor: string | null = null;
     for (let i = 0; i < 50; i += 1) {
-      const resp = await request<{
-        evidence: Array<{
-          evidence_uid: string;
-          investigation_uid: string;
-          created_at: string;
-          original_filename: string;
-          media_type: string;
-          file_size_bytes: number;
-        }>;
-        page?: PageMeta;
-      }>(withQuery(fillRoute(ROUTES.list_investigation_evidence_investigations__investigation_uid__evidence_get, { investigation_uid: invId }), { cursor }));
+      const resp: EvidenceListResponse = await request<EvidenceListResponse>(
+        withQuery(
+          fillRoute(ROUTES.list_investigation_evidence_investigations__investigation_uid__evidence_get, {
+            investigation_uid: invId,
+          }),
+          { cursor }
+        )
+      );
       evidence.push(...resp.evidence);
       cursor = resp.page?.next_cursor ?? null;
       if (!cursor) break;
@@ -135,19 +197,14 @@ export const api = {
     }> = [];
     let cursor: string | null = null;
     for (let i = 0; i < 50; i += 1) {
-      const resp = await request<{
-        claims: Array<{
-          claim_uid: string;
-          investigation_uid: string;
-          claim_text: string;
-          claim_type?: string;
-          current_status: string;
-          created_at: string;
-          updated_at: string;
-          epistemic_stance?: string;
-        }>;
-        page?: PageMeta;
-      }>(withQuery(fillRoute(ROUTES.list_investigation_claims_investigations__investigation_uid__claims_get, { investigation_uid: invId }), { include_withdrawn: includeWithdrawn, cursor }));
+      const resp: ClaimListResponse = await request<ClaimListResponse>(
+        withQuery(
+          fillRoute(ROUTES.list_investigation_claims_investigations__investigation_uid__claims_get, {
+            investigation_uid: invId,
+          }),
+          { include_withdrawn: includeWithdrawn, cursor }
+        )
+      );
       claims.push(...resp.claims);
       cursor = resp.page?.next_cursor ?? null;
       if (!cursor) break;
@@ -167,19 +224,14 @@ export const api = {
     }> = [];
     let cursor: string | null = null;
     for (let i = 0; i < 50; i += 1) {
-      const resp = await request<{
-        tensions: Array<{
-          tension_uid: string;
-          claim_a_uid: string;
-          claim_b_uid: string;
-          tension_kind?: string;
-          status: string;
-          notes?: string;
-          created_at: string;
-          defeater_kind?: string;
-        }>;
-        page?: PageMeta;
-      }>(withQuery(fillRoute(ROUTES.list_investigation_tensions_investigations__investigation_uid__tensions_get, { investigation_uid: invId }), { status, cursor }));
+      const resp: TensionListResponse = await request<TensionListResponse>(
+        withQuery(
+          fillRoute(ROUTES.list_investigation_tensions_investigations__investigation_uid__tensions_get, {
+            investigation_uid: invId,
+          }),
+          { status, cursor }
+        )
+      );
       tensions.push(...resp.tensions);
       cursor = resp.page?.next_cursor ?? null;
       if (!cursor) break;
@@ -200,20 +252,15 @@ export const api = {
     }> = [];
     let cursor: string | null = null;
     for (let i = 0; i < 50; i += 1) {
-      const resp = await request<{
-        tension_suggestions: Array<{
-          suggestion_uid: string;
-          claim_a_uid: string;
-          claim_b_uid: string;
-          suggested_tension_kind: string;
-          confidence: number;
-          rationale: string;
-          status: string;
-          created_at: string;
-          confirmed_tension_uid?: string;
-        }>;
-        page?: PageMeta;
-      }>(withQuery(fillRoute(ROUTES.list_tension_suggestions_investigations__investigation_uid__tension_suggestions_get, { investigation_uid: invId }), { status, cursor }));
+      const resp: TensionSuggestionListResponse = await request<TensionSuggestionListResponse>(
+        withQuery(
+          fillRoute(
+            ROUTES.list_tension_suggestions_investigations__investigation_uid__tension_suggestions_get,
+            { investigation_uid: invId }
+          ),
+          { status, cursor }
+        )
+      );
       tension_suggestions.push(...resp.tension_suggestions);
       cursor = resp.page?.next_cursor ?? null;
       if (!cursor) break;
@@ -289,11 +336,14 @@ export const api = {
     let nodes: Array<{ id: string; type: string; label: string }> = [];
     const edges: Array<{ from: string; to: string; link_type: string; link_uid: string }> = [];
     for (let i = 0; i < 50; i += 1) {
-      const resp = await request<{
-        nodes: Array<{ id: string; type: string; label: string }>;
-        edges: Array<{ from: string; to: string; link_type: string; link_uid: string }>;
-        edges_page?: PageMeta;
-      }>(withQuery(fillRoute(ROUTES.get_investigation_graph_investigations__investigation_uid__graph_get, { investigation_uid: invId }), { edge_cursor: cursor }));
+      const resp: GraphResponse = await request<GraphResponse>(
+        withQuery(
+          fillRoute(ROUTES.get_investigation_graph_investigations__investigation_uid__graph_get, {
+            investigation_uid: invId,
+          }),
+          { edge_cursor: cursor }
+        )
+      );
       if (i === 0) {
         nodes = resp.nodes;
       }

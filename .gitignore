@@ -52,6 +52,7 @@ chronicle.db-shm
 
 # === Node / frontend ===
 node_modules/
+*.tsbuildinfo
 
 # === Benchmark output (reproducible via run_defensibility_benchmark.py) ===
 benchmark_defensibility_results.json

@@ -26,6 +26,8 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 
 9. What helper functions support signed `.chronicle` bundle wrapping and verification before import?
 
+10. Which script benchmarks Neo4j projection throughput/memory and can enforce threshold gates?
+
 ---
 
 ## Answer key
@@ -47,6 +49,8 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 8. Set `CHRONICLE_RUN_NEO4J_LIVE_TESTS=1` plus `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, then run `CHRONICLE_EVENT_STORE=sqlite pytest tests/test_neo4j_live_integration.py -q`.
 
 9. `export_signed_investigation_bundle(...)`, `verify_signed_investigation_bundle(...)`, and `import_signed_investigation_bundle(...)` in `chronicle/store/export_import.py`.
+
+10. `scripts/benchmark_data/run_neo4j_projection_benchmark.py`.
 
 ---
 

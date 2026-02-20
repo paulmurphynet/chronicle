@@ -1,0 +1,116 @@
+{
+  "kind": "neo4j_projection_benchmark",
+  "generated_at": "2026-02-20T23:00:35.199463+00:00",
+  "project_path": "/tmp/chronicle_neo4j_bench_project_qpdvvcct",
+  "seeded_project": true,
+  "seed_config": {
+    "investigations": 20,
+    "claims_per_investigation": 200,
+    "evidence_per_investigation": 400,
+    "links_per_claim": 2
+  },
+  "row_counts": {
+    "investigations": 20,
+    "claims": 4000,
+    "evidence_items": 8000,
+    "spans": 8000,
+    "links": 8000,
+    "tensions": 0
+  },
+  "export": {
+    "status": "passed",
+    "csv_output_dir": "/tmp/chronicle_neo4j_bench_csv_xg311oa4",
+    "report_path": "/tmp/chronicle_neo4j_bench_csv_xg311oa4/neo4j_export_report.json",
+    "elapsed_ms": 231.969,
+    "peak_memory_bytes": 1596691,
+    "peak_memory_mib": 1.523,
+    "report": {
+      "kind": "neo4j_export_report",
+      "status": "passed",
+      "project_dir": "/tmp/chronicle_neo4j_bench_project_qpdvvcct",
+      "output_dir": "/tmp/chronicle_neo4j_bench_csv_xg311oa4",
+      "started_at": "2026-02-20T23:00:34.966715+00:00",
+      "completed_at": "2026-02-20T23:00:35.198219+00:00",
+      "elapsed_ms": 231.47,
+      "phase_stats": {
+        "investigations": {
+          "rows": 20,
+          "batches": 1,
+          "elapsed_ms": 0.242
+        },
+        "claims": {
+          "rows": 4000,
+          "batches": 4,
+          "elapsed_ms": 33.841
+        },
+        "evidence_items": {
+          "rows": 8000,
+          "batches": 8,
+          "elapsed_ms": 66.049
+        },
+        "spans": {
+          "rows": 8000,
+          "batches": 8,
+          "elapsed_ms": 56.759
+        },
+        "actors": {
+          "rows": 1,
+          "batches": 1,
+          "elapsed_ms": 0.156
+        },
+        "asserts": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.072
+        },
+        "links": {
+          "rows": 8000,
+          "batches": 8,
+          "elapsed_ms": 59.995
+        },
+        "link_retractions": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.089
+        },
+        "tensions": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.063
+        },
+        "supersession": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.054
+        },
+        "decomposition_edges": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.073
+        },
+        "sources": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.056
+        },
+        "evidence_source_links": {
+          "rows": 0,
+          "batches": 0,
+          "elapsed_ms": 0.055
+        }
+      }
+    }
+  },
+  "sync": {
+    "status": "skipped",
+    "reason": "sync_not_requested"
+  },
+  "thresholds": {
+    "max_export_elapsed_ms": 1000.0,
+    "max_export_peak_mib": 64.0,
+    "max_sync_elapsed_ms": null,
+    "max_sync_peak_mib": null
+  },
+  "threshold_failures": [],
+  "status": "passed"
+}

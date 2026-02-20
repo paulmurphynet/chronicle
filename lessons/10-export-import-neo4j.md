@@ -14,6 +14,9 @@
 - [docs/neo4j-schema.md](../docs/neo4j-schema.md) — node labels, relationship types, and example Cypher for the sync output
 - [docs/neo4j.md](../docs/neo4j.md) — Neo4j usage guide, observability flags, and live test workflow
 - [docs/aura-graph-pipeline.md](../docs/aura-graph-pipeline.md) — verify → import → sync runbook
+- [docs/neo4j-operations-runbook.md](../docs/neo4j-operations-runbook.md) — production operations posture (backup/restore, drift handling, capacity/cost guardrails)
+- [docs/neo4j-query-pack.md](../docs/neo4j-query-pack.md) — operational Cypher query set + index guidance
+- [scripts/benchmark_data/run_neo4j_projection_benchmark.py](../scripts/benchmark_data/run_neo4j_projection_benchmark.py) — projection benchmark harness with threshold gates
 - [tests/test_neo4j_live_integration.py](../tests/test_neo4j_live_integration.py) — live Neo4j integration assertions (dedupe and non-dedupe)
 
 ---
@@ -80,6 +83,12 @@ PYTHONPATH=. python3 scripts/check_neo4j_contract.py
 
 This checks parity across sync code, CSV export, rebuild Cypher files, and schema docs so drift is caught early.
 
+For throughput/memory baselines and threshold gating, run:
+
+```bash
+PYTHONPATH=. python3 scripts/benchmark_data/run_neo4j_projection_benchmark.py --output reports/neo4j_projection_benchmark.json
+```
+
 For runtime validation against a **real** Neo4j instance, run the live integration suite:
 
 ```bash
@@ -112,6 +121,7 @@ For **full** coverage of the .chronicle format and data schema (manifest, all DB
 4. If you have Neo4j credentials, run:
    - `chronicle neo4j-export --path /path/to/project --output /tmp/neo4j_import --report /tmp/neo4j_export_report.json --progress`
    - `chronicle neo4j-sync --path /path/to/project --report /tmp/neo4j_sync_report.json --progress`
+   - `PYTHONPATH=. python3 scripts/benchmark_data/run_neo4j_projection_benchmark.py --run-sync --neo4j-uri "$NEO4J_URI" --neo4j-password "$NEO4J_PASSWORD" --output /tmp/neo4j_projection_benchmark.json`
    Then inspect the graph and report artifacts.
 
 ## Summary
@@ -120,6 +130,7 @@ For **full** coverage of the .chronicle format and data schema (manifest, all DB
 - Signed bundle helpers can wrap `.chronicle` exports in a digest-verified bundle for interoperability handoff while preserving the canonical verifier path.
 - **Neo4j export/sync** project the read model to Neo4j with chunked processing, idempotent semantics, observability outputs, and retry/timeout controls.
 - The **verifier** checks .chronicle files; the **Aura pipeline** (verify → import → sync) is the full runbook for getting Chronicle data into a shared graph.
+- The Neo4j operations runbook and query pack define production ops posture and recurring analytical checks.
 
 **← Previous:** [Lesson 09: Epistemic tools](09-epistemic-tools.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 11: Interoperability, API, and tests](11-interoperability-api-and-tests.md)
 

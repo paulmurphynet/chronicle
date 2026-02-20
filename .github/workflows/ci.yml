@@ -91,7 +91,7 @@ jobs:
 
       - name: Install frontend deps
         working-directory: frontend
-        run: npm install
+        run: npm ci
 
       - name: Frontend API route parity
         working-directory: frontend

@@ -71,7 +71,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install
+        run: npm ci
 
       - name: Validate release tag
         run: python3 scripts/validate_release_tag.py --tag "${{ inputs.tag }}"

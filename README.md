@@ -120,6 +120,9 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Errors](docs/errors.md) | Error types (ChronicleUserError, etc.); when to use which; how CLI/API map to exit codes and HTTP status. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |
 | [Neo4j](docs/neo4j.md) | Optional graph projection for multi-run analysis and visualization, with a parity check across sync/export/rebuild/docs. |
+| [Neo4j operations runbook](docs/neo4j-operations-runbook.md) | Backup/restore, sync cadence, drift handling, and capacity/cost guardrails for Neo4j projection operations. |
+| [Neo4j query pack](docs/neo4j-query-pack.md) | Operational Cypher query set (tension triage, support/challenge balance, source concentration, lineage) and indexing guidance. |
+| [Neo4j projection baseline v0.9.0](docs/benchmarks/neo4j_projection_baseline_v0.9.0.md) | Thresholded benchmark evidence for export-path throughput and memory at launch scale. |
 | [PostgreSQL backend](docs/POSTGRES.md) | Postgres convergence track: local bootstrap (`make postgres-up`), doctor/smoke checks, and current scope. |
 | [Support policy](docs/support-policy.md) | Support tiers (Lite/Team/Managed), GA/Beta/Experimental status, compatibility guarantees, and deprecation timeline policy. |
 | [Production readiness checklist](docs/production-readiness-checklist.md) | Objective go/no-go criteria for trust gates, backend checks, CI branch protection, security, and docs. |

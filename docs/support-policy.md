@@ -28,6 +28,22 @@ Current scope note:
 | API and Reference UI | Beta |
 | Neo4j sync/export projection | Beta |
 
+## Neo4j projection compatibility policy (Beta)
+
+Neo4j projection is a Beta surface with explicit boundaries:
+
+1. Scope:
+   - Neo4j is a projection of Chronicle read-model data for graph analysis/traversal.
+   - Canonical trust artifacts remain `.chronicle` + verifier.
+2. Compatibility guarantees:
+   - Existing node labels/relationship types used by documented query packs are stable within a minor release line.
+   - Additive properties/labels/relationships are allowed in minor releases.
+   - Removals, renames, or semantic changes of existing graph schema elements require a major release and release-note callout.
+   - Dedupe-mode lineage semantics (`CONTAINS_CLAIM`, `CONTAINS_EVIDENCE`) are contract-stable within a minor release line.
+3. Service expectations:
+   - No hosted uptime SLA is implied by this repository; operational reliability depends on your Neo4j deployment.
+   - Chronicle maintains best-effort issue resolution and release-note communication for Neo4j projection regressions.
+
 ## Backward compatibility policy
 
 Chronicle uses a contract-first posture:

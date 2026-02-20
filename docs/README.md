@@ -62,6 +62,9 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Role-based review checklists](role-based-review-checklists.md) | Role templates for journalism/legal/compliance/history review decisions using review packets and policy compatibility. |
 | [Identity providers](identity-providers.md) | Configured IdP (none, traditional, gov_id, did, zk); how to implement custom IdP adapters. |
 | [Neo4j](neo4j.md) | Optional graph projection and contract check command for sync/export/rebuild parity. |
+| [Neo4j operations runbook](neo4j-operations-runbook.md) | Backup/restore, sync cadence, drift response, and capacity/cost guardrails for Neo4j projection operations. |
+| [Neo4j query pack](neo4j-query-pack.md) | Production query set (tensions, support/challenge balance, lineage) plus indexing guidance. |
+| [Neo4j projection baseline v0.9.0](benchmarks/neo4j_projection_baseline_v0.9.0.md) | Reproducible benchmark artifact with thresholded export performance and memory results. |
 | [PostgreSQL backend](POSTGRES.md) | Convergence quickstart for local/managed Postgres, doctor/smoke checks, and current backend scope. |
 | [Support policy](support-policy.md) | Support tiers plus GA/Beta/Experimental status, compatibility policy, and deprecation timeline format. |
 | [Production readiness checklist](production-readiness-checklist.md) | Objective pass/fail release criteria across trust, backend, CI, security, and docs. |

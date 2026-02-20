@@ -13,7 +13,9 @@ export function Learn() {
       .then((r) => r.json())
       .then((g) => {
         setGuides(g)
-        if (g.verticals?.length && !selected) setSelected(g.verticals[0].id)
+        if (g.verticals?.length) {
+          setSelected((prev) => prev ?? g.verticals[0].id)
+        }
       })
       .catch(() => setGuides({ verticals: [] }))
   }, [])

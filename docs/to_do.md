@@ -73,10 +73,10 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - [x] Fix core type-check failure in Postgres event store (`chronicle/store/postgres_event_store.py`, mypy tuple unpack on `fetchone()`).
 - [x] Make core format gate pass (`ruff format --check chronicle tools`).
 - [x] Harden `scripts/supply_chain_gate.py` to accept current `pip-audit` JSON entries that include `skip_reason` without `vulns`.
-- [ ] Add deterministic frontend dependency lockfile and switch CI/release frontend install steps from `npm install` to `npm ci`.
-  - [ ] `frontend/package-lock.json` still missing (required for `npm ci` and deterministic `npm audit`).
-  - [ ] CI/release/supply-chain workflows should switch to `npm ci` once lockfile is committed.
-  - [ ] Local lockfile generation attempts (`npm install --package-lock-only`, including `--offline`) were blocked in this environment by restricted network/cache access.
+- [x] Add deterministic frontend dependency lockfile and switch CI/release frontend install steps from `npm install` to `npm ci`.
+  - [x] `frontend/package-lock.json` committed (required for `npm ci` and deterministic `npm audit`).
+  - [x] CI/release/supply-chain workflows switched to `npm ci`.
+  - [x] Lockfile generation confirmed with elevated network access: `npm install --package-lock-only --ignore-scripts --no-audit --no-fund` (`EXIT:0`).
 - [x] Resolve deterministic check invocation mismatch across local/CI/release (`scripts/check_deterministic_defensibility.py` import path expectations vs `python3 scripts/...` calls).
 - [x] Align project release metadata for the intended launch version (`pyproject.toml`, `frontend/package.json`, `CHANGELOG.md`, release-tag usage).
 - [ ] Re-run live branch-protection rollout verification after repo is public and record `status=passed`.
@@ -117,37 +117,40 @@ Goal: raise Neo4j from "contract-correct optional projection" to a production-gr
   - Include dedupe and non-dedupe mode assertions.
   - Added `tests/test_neo4j_live_integration.py` and wired CI/release service-container jobs.
   - First public CI run still required to record external `status=passed` evidence.
-- [ ] **N-07** Add performance benchmark harness for graph projection paths.
+- [x] **N-07** Add performance benchmark harness for graph projection paths.
   - Generate medium/large fixture datasets.
   - Track export/sync throughput and memory ceilings.
   - Add non-regression thresholds to release evidence.
-- [ ] **N-08** Add cross-mode parity tests for graph semantics.
+- [x] **N-08** Add cross-mode parity tests for graph semantics.
   - Validate expected equivalence/differences between rebuild CSV path and direct sync path.
   - Validate lineage semantics in dedupe mode (`CONTAINS_CLAIM`, `CONTAINS_EVIDENCE`).
-- [ ] **N-09** Expand failure-mode tests for Neo4j operations.
+- [x] **N-09** Expand failure-mode tests for Neo4j operations.
   - Network interruption, partial failure, rerun-idempotency behavior.
   - Misconfiguration cases (`NEO4J_URI`, credentials, db name, driver unavailable).
 
 ### N. Docs and operations upgrades
 
-- [ ] **N-10** Publish Neo4j production operations runbook.
+- [x] **N-10** Publish Neo4j production operations runbook.
   - Backup/restore guidance for graph data lifecycle.
   - Sync cadence strategy, drift handling, and re-sync procedures.
   - Capacity and cost guardrails for Aura/self-hosted Neo4j.
-- [ ] **N-11** Publish query-pack and indexing guidance for common Chronicle graph workflows.
+- [x] **N-11** Publish query-pack and indexing guidance for common Chronicle graph workflows.
   - "Top unresolved tension clusters", "support/challenge balance", "source concentration", lineage traversals.
   - Recommend index/constraint posture per query class.
-- [ ] **N-12** Add explicit support-level statement for Neo4j surface (GA/Beta/Experimental) in support policy.
+- [x] **N-12** Add explicit support-level statement for Neo4j surface (GA/Beta/Experimental) in support policy.
   - Define SLA expectations and compatibility guarantees for graph schema evolution.
 
 ### Neo4j best-in-class done criteria
 
 - [ ] Large-project sync/export can run with bounded memory and deterministic results.
+  - Export-path benchmark evidence is captured (`docs/benchmarks/neo4j_projection_baseline_v0.9.0.json`).
+  - Large-run sync-path evidence still requires a live Neo4j environment (local or CI service container).
 - [ ] Live Neo4j integration tests pass in CI and are part of release gating.
   - CI/release service-container jobs are wired; awaiting first public CI evidence run.
-- [ ] Performance baseline + regression thresholds are captured in release artifacts.
-- [ ] Ops runbook + query pack are published and validated by docs checks.
-- [ ] Neo4j support level and compatibility policy are explicit in docs.
+- [x] Performance baseline + regression thresholds are captured in release artifacts.
+  - Baseline artifact: `docs/benchmarks/neo4j_projection_baseline_v0.9.0.json` (+ summary in `.md`).
+- [x] Ops runbook + query pack are published and validated by docs checks.
+- [x] Neo4j support level and compatibility policy are explicit in docs.
 
 ## Standards and whitepaper program (approved 2026-02-20)
 
@@ -200,6 +203,7 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 
 ## Recently completed
 
+- **Neo4j best-in-class batch (non-CI-dependent) completed**: added projection benchmark harness and tests (`scripts/benchmark_data/run_neo4j_projection_benchmark.py`, `tests/test_neo4j_projection_benchmark.py`), cross-mode parity tests (`tests/test_neo4j_projection_parity.py`), failure-mode tests and missing-driver diagnostics (`tests/test_neo4j_sync_failures.py`, `chronicle/store/neo4j_sync.py`), and published operations/query docs (`docs/neo4j-operations-runbook.md`, `docs/neo4j-query-pack.md`) with support-policy compatibility details.
 - Merge-import correctness fixed (duplicate skip per event + `rowid` replay order), with regression tests.
 - API/user-error mapping centralized for predictable 4xx/429 responses.
 - HTTP client routes and response parsing aligned with current API behavior.
