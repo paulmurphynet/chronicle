@@ -66,6 +66,46 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - [x] Postgres onboarding from zero to first successful smoke run in <= 10 minutes.
 - [x] Docs and troubleshooting validated by docs link/currency checks.
 
+## Standards and whitepaper program (approved 2026-02-20)
+
+Goal: make Chronicle standards-compatible without destabilizing core contracts, and produce a publication-ready standards whitepaper.
+
+### S. Interoperability profile implementation
+
+- [x] **S-01** Define and publish Chronicle standards profile v0.1 (scope, compatibility tiers, non-goals).
+  - Track canonical stance in docs and ADRs.
+  - Keep `.chronicle` and verifier as canonical trust artifacts.
+- [ ] **S-02** Implement JSON-LD export profile for investigation-level data.
+  - Include claims, evidence, support/challenge links, tensions, sources.
+  - Add versioned JSON-LD context and fixture tests.
+- [ ] **S-03** Implement PROV-compatible mapping profile and validation fixtures.
+  - Provide deterministic mapping rules from Chronicle entities/events.
+  - Add regression tests for required PROV-aligned fields.
+- [ ] **S-04** Add ClaimReview export adapter/profile.
+  - Map Chronicle claim/review outputs to schema.org `ClaimReview`.
+  - Document caveats for fields that are optional or unavailable.
+- [ ] **S-05** Add RO-Crate export profile for package interoperability.
+  - Include metadata and pointers to Chronicle artifacts.
+  - Add sample crate fixtures and compatibility checks.
+- [ ] **S-06** Add C2PA compatibility path.
+  - Record/import C2PA assertion references in evidence metadata.
+  - Add optional verification integration path (feature-flagged/explicitly marked).
+- [ ] **S-07** Add VC/Data Integrity compatibility path.
+  - Define attestation envelope for claims/checkpoints/artifacts.
+  - Add verification-status fields and non-verified-state behavior.
+- [ ] **S-08** Publish adjacent standards guidance.
+  - Document integration boundaries for OpenLineage, in-toto, and SLSA.
+  - Explicitly state these are complementary layers, not Chronicle replacements.
+
+### W. Whitepaper and publication track
+
+- [x] **W-01** Publish working whitepaper draft and editorial workflow.
+- [ ] **W-02** Build a reproducible evidence pack for whitepaper claims.
+  - Mapping fixtures, benchmark commands, verifier outputs, profile examples.
+- [ ] **W-03** Add versioned citation and publication metadata for whitepaper revisions.
+- [ ] **W-04** Run internal technical review and capture accepted/rejected edits.
+- [ ] **W-05** Prepare standards-submission package and outreach notes for relevant communities.
+
 ## On hold by design
 
 - No active on-hold-by-design items for convergence work. Use this section only for explicit deferrals.
@@ -149,6 +189,12 @@ Continue validating changes against:
 
 Priority implementation items accepted on 2026-02-20 for immediate execution:
 
+- [ ] Start standards profile implementation with JSON-LD + PROV export MVP.
+  - Add a first `build_standards_jsonld_export(...)` path in export commands.
+  - Include fixture tests for one investigation containing support/challenge/tension/source cases.
+- [ ] Prepare whitepaper v0.2 from the working draft with concrete Chronicle examples.
+  - Add one end-to-end example appendix based on an existing deterministic sample.
+  - Add explicit guarantees/non-guarantees matrix tied to verifier and scorecard docs.
 - [ ] Ship opinionated starter packs (Journalism, Legal, Audit) to reduce first-project ambiguity and improve adoption.
   - Add template bootstrap commands/fixtures for each pack.
   - Include schema defaults, policy profile defaults, and report/export examples per pack.

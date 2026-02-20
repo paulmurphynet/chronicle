@@ -47,6 +47,7 @@ Deliverables:
 2. Add notebook-first examples for ingest -> claim -> support/challenge -> defensibility -> export.
 3. Add one production-oriented adapter package template for external pipelines.
 4. Define a stable "integration acceptance checklist" for community connectors.
+5. Ship a standards interoperability profile v0.1 (JSON-LD/PROV baseline plus staged C2PA/VC/RO-Crate/ClaimReview paths).
 
 Success criteria:
 
@@ -66,6 +67,7 @@ Deliverables:
 2. Publish reproducibility guidance for benchmark reporting and citations.
 3. Run a small design-partner loop (3-5 teams) and capture structured findings.
 4. Prioritize fixes based on measured trust deltas and integration pain points.
+5. Publish a standards-facing whitepaper revision with reproducible evidence pack and versioned citations.
 
 Success criteria:
 
@@ -84,4 +86,3 @@ This roadmap keeps Chronicle focused on its core role:
 3. Stable contracts for integrations and evaluation workflows.
 
 Out of scope remains unchanged: Chronicle does not define absolute truth and does not claim semantic entailment verification by default.
-

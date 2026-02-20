@@ -41,6 +41,9 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [When to use Chronicle](when-to-use-chronicle.md) | Scope vs data lineage / ML provenance. |
 | [Reference workflows](reference-workflows.md) | Reproducible end-to-end workflow set (journalism, legal, history/research, compliance, benchmark trust tracking). |
 | [Integration acceptance checklist](integration-acceptance-checklist.md) | Release gate for adapters/connectors: contract, safety, reproducibility, and docs minimum. |
+| [Standards profile](standards-profile.md) | Chronicle interoperability profile across JSON-LD/PROV, C2PA, VC/Data Integrity, RO-Crate, and ClaimReview. |
+| [Whitepaper plan](whitepaper-plan.md) | Process and quality gates for publication and standards-body engagement. |
+| [Whitepaper draft](whitepaper-draft.md) | Working standards-facing whitepaper draft for iterative review. |
 | [Policy profiles](policy-profiles/README.md) | Example JSON profiles (journalism, legal, compliance, history/research) for verticals. |
 | [Role-based review checklists](role-based-review-checklists.md) | Role templates for journalism/legal/compliance/history review decisions using review packets and policy compatibility. |
 | [Identity providers](identity-providers.md) | Configured IdP (none, traditional, gov_id, did, zk); how to implement custom IdP adapters. |

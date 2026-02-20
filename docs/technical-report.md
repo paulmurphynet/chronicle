@@ -1,6 +1,6 @@
 # Chronicle: Defensibility, Schema, and Use for Evaluation
 
-**Technical report (in-repo).** This document can be cited by researchers. It defines defensibility, the core schema (evidence, claim, support/challenge, tension), and how Chronicle is used for evaluation of RAG and reasoning systems. For publication or preprint plans, see the project [To-do](to_do.md).
+**Technical report (in-repo).** This document can be cited by researchers. It defines defensibility, the core schema (evidence, claim, support/challenge, tension), and how Chronicle is used for evaluation of RAG and reasoning systems. For publication and standards-engagement workflow, see [Whitepaper plan](whitepaper-plan.md) and [Whitepaper draft](whitepaper-draft.md).
 
 **Repository:** chronicle-standard (reference implementation). **Companion:** [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Verifier](verifier.md).
 
@@ -127,7 +127,7 @@ To cite this technical report or Chronicle in research:
 
   In prose: "Chronicle: Defensibility, Schema, and Use for Evaluation. Technical report. chronicle-standard repository. Available: [URL to this doc in the repo]."
 
-- **Preprint:** For preprint or publication plans (e.g. arXiv), see the project [To-do](to_do.md). Once a preprint exists, add it here with standard citation format (e.g. arXiv ID, author, title, year). Placeholder: *When a preprint is available, insert the reference in this section.*
+- **Preprint / standards paper:** For publication workflow (drafting, evidence pack, review, standards outreach), see [Whitepaper plan](whitepaper-plan.md) and current [Whitepaper draft](whitepaper-draft.md). Once a preprint exists, add it here with standard citation format (e.g. arXiv ID, author, title, year). Placeholder: *When a preprint is available, insert the reference in this section.*
 
 - **Reference implementation:** chronicle-standard (Chronicle reference implementation). https://github.com/chronicle-standard/chronicle-standard (or the canonical repo URL). For machine-readable citation, see the repository root [CITATION.cff](../CITATION.cff).
 
