@@ -25,6 +25,7 @@ class SampleSpec:
     name: str
     script_path: Path
     expected_policy_id: str
+    extra_min_counts: dict[str, int]
 
 
 SAMPLE_SPECS: dict[str, SampleSpec] = {
@@ -32,21 +33,35 @@ SAMPLE_SPECS: dict[str, SampleSpec] = {
         name="journalism",
         script_path=REPO_ROOT / "scripts/verticals/journalism/generate_sample.py",
         expected_policy_id="policy_investigative_journalism",
+        extra_min_counts={},
     ),
     "legal": SampleSpec(
         name="legal",
         script_path=REPO_ROOT / "scripts/verticals/legal/generate_sample.py",
         expected_policy_id="policy_legal",
+        extra_min_counts={},
     ),
     "history": SampleSpec(
         name="history",
         script_path=REPO_ROOT / "scripts/verticals/history/generate_sample.py",
         expected_policy_id="policy_history_research",
+        extra_min_counts={},
     ),
     "compliance": SampleSpec(
         name="compliance",
         script_path=REPO_ROOT / "scripts/verticals/compliance/generate_sample.py",
         expected_policy_id="policy_compliance",
+        extra_min_counts={},
+    ),
+    "messy": SampleSpec(
+        name="messy",
+        script_path=REPO_ROOT / "scripts/verticals/messy/generate_sample.py",
+        expected_policy_id="policy_compliance",
+        extra_min_counts={
+            "redaction_signal_count": 1,
+            "supersession_count": 1,
+            "temporalized_claim_count": 2,
+        },
     ),
 }
 
@@ -62,6 +77,10 @@ MIN_COUNTS: dict[str, int] = {
     "challenge_link_count": 1,
     "challenge_with_rationale_count": 1,
     "tension_count": 1,
+    "redacted_evidence_count": 0,
+    "redaction_signal_count": 0,
+    "supersession_count": 0,
+    "temporalized_claim_count": 0,
 }
 
 
@@ -136,6 +155,11 @@ def _metrics_for(path: Path) -> dict[str, int]:
                 for ev in evidence_items
                 for link in rm.list_evidence_source_links(ev.evidence_uid)
             ]
+            supersession_uids = {
+                s.supersession_uid
+                for ev in evidence_items
+                for s in rm.list_supersessions_for_evidence(ev.evidence_uid)
+            }
 
             return {
                 "claim_count": len(claims),
@@ -159,16 +183,33 @@ def _metrics_for(path: Path) -> dict[str, int]:
                     1 for link in challenge_links if link.rationale is not None and link.rationale.strip() != ""
                 ),
                 "tension_count": len(tensions),
+                "redacted_evidence_count": sum(
+                    1
+                    for ev in evidence_items
+                    if ev.redaction_reason is not None and ev.redaction_reason.strip() != ""
+                ),
+                "redaction_signal_count": sum(
+                    1 for c in claims if "redact" in (c.claim_text or "").lower()
+                ),
+                "supersession_count": len(supersession_uids),
+                "temporalized_claim_count": sum(
+                    1 for c in claims if c.temporal_json is not None and c.temporal_json.strip() != ""
+                ),
             }
 
 
-def _issues_for(metrics: dict[str, int], expected_policy_id: str, observed_policy_id: str | None) -> list[str]:
+def _issues_for(
+    metrics: dict[str, int],
+    expected_policy_id: str,
+    observed_policy_id: str | None,
+    min_counts: dict[str, int],
+) -> list[str]:
     issues: list[str] = []
     if observed_policy_id != expected_policy_id:
         issues.append(
             f"manifest built_under_policy_id mismatch: expected={expected_policy_id!r} got={observed_policy_id!r}"
         )
-    for key, min_value in MIN_COUNTS.items():
+    for key, min_value in min_counts.items():
         observed = metrics.get(key, 0)
         if observed < min_value:
             issues.append(f"{key} below minimum: expected>={min_value} got={observed}")
@@ -205,10 +246,13 @@ def _run_one(spec: SampleSpec, output_path: Path) -> dict[str, Any]:
         "built_under_policy_version": manifest.get("built_under_policy_version"),
     }
     result["metrics"] = metrics
+    min_counts = dict(MIN_COUNTS)
+    min_counts.update(spec.extra_min_counts)
     result["issues"] = _issues_for(
         metrics,
         spec.expected_policy_id,
         manifest.get("built_under_policy_id"),
+        min_counts,
     )
     if not result["issues"]:
         result["status"] = "passed"

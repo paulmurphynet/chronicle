@@ -10,6 +10,7 @@ Each vertical has its own **sample generator** that produces a deterministic `.c
 | Legal     | [legal/generate_sample.py](legal/generate_sample.py) | `sample_legal.chronicle` |
 | History/Research | [history/generate_sample.py](history/generate_sample.py) | `sample_history.chronicle` |
 | Compliance| [compliance/generate_sample.py](compliance/generate_sample.py) | `sample_compliance.chronicle` |
+| Messy stress pack | [messy/generate_sample.py](messy/generate_sample.py) | `sample_messy.chronicle` |
 
 ## Run from repo root
 
@@ -18,6 +19,7 @@ PYTHONPATH=. python3 scripts/verticals/journalism/generate_sample.py
 PYTHONPATH=. python3 scripts/verticals/legal/generate_sample.py
 PYTHONPATH=. python3 scripts/verticals/history/generate_sample.py
 PYTHONPATH=. python3 scripts/verticals/compliance/generate_sample.py
+PYTHONPATH=. python3 scripts/verticals/messy/generate_sample.py
 ```
 
 ## Quality gate

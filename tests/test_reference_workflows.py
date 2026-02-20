@@ -80,7 +80,7 @@ def test_vertical_sample_quality_check_all(tmp_path: Path) -> None:
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["summary"]["failed"] == 0
     names = {row["sample"] for row in report["results"]}
-    assert names == {"journalism", "legal", "history", "compliance"}
+    assert names == {"journalism", "legal", "history", "compliance", "messy"}
 
 
 def test_reference_workflow_runner_samples(tmp_path: Path) -> None:
@@ -103,3 +103,14 @@ def test_reference_workflow_runner_readiness(tmp_path: Path) -> None:
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["summary"]["failed"] == 0
     assert {wf["name"] for wf in report["workflows"]} == {"readiness"}
+
+
+def test_reference_workflow_runner_messy(tmp_path: Path) -> None:
+    out_dir = tmp_path / "runs"
+    rc = runner_module.main(["--output-dir", str(out_dir), "--only", "messy"])
+    assert rc == 0
+    report_path = out_dir / "reference_workflow_report.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["summary"]["failed"] == 0
+    assert {wf["name"] for wf in report["workflows"]} == {"messy"}

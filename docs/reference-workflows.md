@@ -10,7 +10,7 @@ Each workflow is designed to be:
 
 ## One-command runner
 
-Run the full reference set (journalism, legal, history/research, sample quality gate, readiness gate, compliance report, benchmark trust tracking, Neo4j contract check):
+Run the full reference set (journalism, legal, history/research, messy stress sample, sample quality gate, readiness gate, compliance report, benchmark trust tracking, Neo4j contract check):
 
 ```bash
 PYTHONPATH=. python3 scripts/run_reference_workflows.py
@@ -68,6 +68,23 @@ Expected outcome:
 1. A deterministic history/research `.chronicle` sample is generated.
 2. Verifier passes on structure/hash checks.
 3. The investigation preserves uncertainty via explicit competing claims and tension.
+
+## Workflow 3a: Messy corpus stress sample
+
+Goal: generate a deterministic stress sample with noisy/partial metadata, evidence supersession, redaction, and ambiguous chronology.
+
+Run from repo root:
+
+```bash
+PYTHONPATH=. python3 scripts/verticals/messy/generate_sample.py
+chronicle-verify frontend/public/sample_messy.chronicle
+```
+
+Expected outcome:
+
+1. A deterministic messy-corpus `.chronicle` sample is generated.
+2. Verifier passes on structure/hash checks.
+3. The sample includes supersession, redaction, and temporal ambiguity patterns for robustness testing.
 
 ## Workflow 3b: Vertical sample quality gate
 
@@ -227,3 +244,21 @@ Interpretation guidance:
 2. Treat `strong_to_weak_count` as a threshold-sensitivity signal that often needs explicit reviewer rationale.
 3. Treat blocked/non-blocked shifts as highest-severity handoff risk, especially before legal or compliance review.
 4. Use `practical_review_implications` as a triage hint, then inspect affected `claim_uid`s before final decisions.
+
+## Optional extension: Portfolio risk summary (R2-02)
+
+For newsroom/legal/compliance portfolio triage across all investigations in one project:
+
+```bash
+PYTHONPATH=. python3 scripts/portfolio_risk_summary.py \
+  --path /path/to/project \
+  --output portfolio_risk_summary.json \
+  --stdout-json
+```
+
+Interpretation guidance:
+
+1. Start with `aggregate.total_unresolved_tensions` and `aggregate.unresolved_tension_rate` for portfolio-level unresolved risk.
+2. Use `aggregate.override_concentration.top_investigation_share` and `aggregate.override_concentration.hhi` to detect override concentration risk.
+3. Prioritize `investigations[]` by `risk_rank` (deterministic ordering) for review scheduling.
+4. Use `aggregate.readiness_posture_counts` to separate ready work from blocked/review-required investigations.

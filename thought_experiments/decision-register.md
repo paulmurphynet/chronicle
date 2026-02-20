@@ -23,14 +23,14 @@ All initial `TE-01` through `TE-06` recommendations are now implemented (see `do
 |----|----------------|------------------|
 | TE-D01 | Temporal uncertainty extension (range/confidence fields beyond `known_as_of`). | **Completed on 2026-02-19** (migration-safe implementation). |
 
-## Defer (Round 2 rerun: 2026-02-20)
+## Round 2 status refresh (2026-02-20 rerun)
 
-| ID | Recommendation | Reason for defer |
+| ID | Recommendation | Status |
 |----|----------------|------------------|
-| TE-R2-02 | Messy real-world stress corpus (partial metadata, supersession, redactions, conflicting/ambiguous chronology). | Valuable for operational trust calibration; should follow current sample-quality hardening rollout. |
-| TE-R2-03 | Portfolio-level cross-investigation summaries (unresolved tensions, override concentration, readiness posture). | Needed for larger-team operations; best staged as reference analytics layer. |
 | TE-R2-04 | One-shot readiness gate command/report composing compatibility, decision posture, and unresolved-risk thresholds. | **Completed** (`scripts/review_readiness_gate.py` + reference workflow runner integration); profile-specific preset guidance remains optional enhancement. |
 | TE-R2-01 | Policy sensitivity comparison report across multiple selected profiles for same investigation. | **Completed** (`get_policy_sensitivity_report`, API `/policy-sensitivity`, CLI `policy sensitivity`) with pairwise deltas and practical implication summaries. |
+| TE-R2-03 | Portfolio-level cross-investigation summaries (unresolved tensions, override concentration, readiness posture). | **Completed** (`scripts/portfolio_risk_summary.py`) with deterministic ranking + aggregate concentration/readiness analytics. |
+| TE-R2-02 | Messy real-world stress corpus (partial metadata, supersession, redactions, conflicting/ambiguous chronology). | **Completed** (`scripts/verticals/messy/generate_sample.py`) with sample-quality and reference-workflow integration. |
 
 ## Reject
 

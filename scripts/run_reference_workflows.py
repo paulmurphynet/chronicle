@@ -156,6 +156,44 @@ def _workflow_history(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     return result
 
 
+def _workflow_messy(repo_root: Path, run_dir: Path) -> dict[str, Any]:
+    from tools.verify_chronicle.verify_chronicle import verify_chronicle_file
+
+    sample_path = run_dir / "messy" / "sample_messy.chronicle"
+    sample_path.parent.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        sys.executable,
+        str(repo_root / "scripts/verticals/messy/generate_sample.py"),
+        "--output",
+        str(sample_path),
+    ]
+    command = _run_cmd(cmd, cwd=repo_root)
+    result: dict[str, Any] = {
+        "name": "messy",
+        "status": "failed",
+        "commands": [command],
+        "artifacts": {"sample_chronicle": str(sample_path)},
+    }
+    if command["returncode"] != 0:
+        result["error"] = "generator_failed"
+        return result
+    if not sample_path.is_file():
+        result["error"] = f"missing_sample_file:{sample_path}"
+        return result
+
+    checks = verify_chronicle_file(sample_path, run_invariants=True)
+    failed = [name for name, passed, _detail in checks if not passed]
+    result["verification_checks"] = [
+        {"name": name, "passed": passed, "detail": detail} for name, passed, detail in checks
+    ]
+    if failed:
+        result["error"] = f"verification_failed:{failed}"
+        return result
+
+    result["status"] = "passed"
+    return result
+
+
 def _workflow_samples(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     work = run_dir / "samples"
     work.mkdir(parents=True, exist_ok=True)
@@ -416,6 +454,7 @@ WORKFLOW_RUNNERS: dict[str, Callable[[Path, Path], dict[str, Any]]] = {
     "journalism": _workflow_journalism,
     "legal": _workflow_legal,
     "history": _workflow_history,
+    "messy": _workflow_messy,
     "samples": _workflow_samples,
     "readiness": _workflow_readiness,
     "benchmark": _workflow_benchmark,

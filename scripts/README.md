@@ -18,6 +18,7 @@ These are the main entry points for integrating Chronicle into pipelines: scorin
 | **export_for_ml.py** | Export investigation data for ML/training. | `PYTHONPATH=. python3 scripts/export_for_ml.py` with `--path`, `--investigation`, etc. |
 | **run_reference_workflows.py** | Execute the reference workflow set and emit one consolidated JSON report. | `PYTHONPATH=. python3 scripts/run_reference_workflows.py` |
 | **review_readiness_gate.py** | One-shot readiness gate report for one investigation (policy compatibility + decision posture + unresolved tension thresholds). | `PYTHONPATH=. python3 scripts/review_readiness_gate.py --path /path/to/project --investigation-uid <uid>` |
+| **portfolio_risk_summary.py** | Project-level portfolio risk summary across investigations (unresolved tensions, override concentration, readiness posture), with deterministic ranking and JSON output. | `PYTHONPATH=. python3 scripts/portfolio_risk_summary.py --path /path/to/project --output portfolio_risk_summary.json` |
 | **rag_path_demo.py** | Minimal RAG/agent path (ChronicleSession: project, investigation, ingest, claim, link). | `PYTHONPATH=. python3 scripts/rag_path_demo.py` |
 | **haystack_rag_chronicle.py**, **langchain_rag_chronicle.py**, **llamaindex_rag_chronicle.py**, **cross_framework_rag_chronicle.py** | RAG + Chronicle demos (ingest, claim, link, score). | `PYTHONPATH=. python3 scripts/<script>.py` (see [integrating-with-chronicle](../docs/integrating-with-chronicle.md)). |
 | **generate_sample_chronicle.py** | Generate the default Try sample .chronicle; delegates to verticals/journalism. | `PYTHONPATH=. python3 scripts/generate_sample_chronicle.py` |
@@ -33,7 +34,7 @@ Scripts and directories for scenario validation, per-vertical samples, benchmark
 | Path | Purpose |
 |------|---------|
 | **ai_validation/** | Scenario validation (rule-based driver). Uses current Chronicle API (ChronicleSession, create_project, propose_claim, etc.). Scenarios per vertical, scorer, run_all_verticals. See [ai_validation/README.md](ai_validation/README.md). |
-| **verticals/** | Per-vertical sample generators (journalism, legal, history/research, compliance) plus `check_sample_quality.py` quality gate. Used by `generate_sample_chronicle.py` for the Try sample. See [verticals/README.md](verticals/README.md). |
+| **verticals/** | Per-vertical sample generators (journalism, legal, history/research, compliance, messy stress pack) plus `check_sample_quality.py` quality gate. Used by `generate_sample_chronicle.py` for the Try sample. See [verticals/README.md](verticals/README.md). |
 | **benchmark_data/** | Benchmark sample generation: `generate_benchmark_samples.py`, `generate_vertical_corpora.py`, `synthetic_training_pipeline.py`, `evals_to_preference_pair.py`. First-class entry point: `run_defensibility_benchmark.py` (listed above). |
 | **adapters/** | Map external formats to Chronicle: [example_rag_to_scorer](adapters/example_rag_to_scorer.py), [starter_batch_to_scorer](adapters/starter_batch_to_scorer.py), [validate_adapter_outputs](adapters/validate_adapter_outputs.py), [fact_checker_to_chronicle](adapters/fact_checker_to_chronicle.py), [provenance_to_chronicle](adapters/provenance_to_chronicle.py). See [adapters/README.md](adapters/README.md). |
 | **synthetic_data/** | Generate realistic synthetic data: `generate_realistic_synthetic.py`. |
