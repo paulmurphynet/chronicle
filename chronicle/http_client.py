@@ -11,6 +11,10 @@ import urllib.request
 from pathlib import Path
 from typing import Any, cast
 
+from chronicle.core.http_safety import ensure_safe_http_url
+
+_MAX_URL_EVIDENCE_BYTES = 20 * 1024 * 1024
+
 
 class ChronicleClientError(Exception):
     """Raised when the API returns an error status or invalid response."""
@@ -32,7 +36,12 @@ class ChronicleClient:
         actor_id: str = "default",
         actor_type: str = "human",
     ):
-        self.base_url = base_url.rstrip("/")
+        try:
+            self.base_url = ensure_safe_http_url(base_url.rstrip("/"), block_private_hosts=False).rstrip(
+                "/"
+            )
+        except ValueError as exc:
+            raise ChronicleClientError(f"Invalid API base URL: {exc}") from exc
         self.project_path = str(project_path).strip()
         self.actor_id = actor_id
         self.actor_type = actor_type
@@ -69,14 +78,17 @@ class ChronicleClient:
                 if v is not None
             )
             path = f"{path}?{q}" if q else path
-        url = f"{self.base_url}{path}"
+        try:
+            url = ensure_safe_http_url(f"{self.base_url}{path}", block_private_hosts=False)
+        except ValueError as exc:
+            raise ChronicleClientError(f"Invalid request URL: {exc}") from exc
         data = None
         headers = self._headers(idempotency_key)
         if body is not None:
             data = json.dumps(body).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:  # nosec B310
                 raw = resp.read()
         except urllib.error.HTTPError as e:
             try:
@@ -362,14 +374,33 @@ class ChronicleClient:
 
         The API intentionally does not provide a server-side from-url endpoint.
         """
-        req = urllib.request.Request(url[:4096], method="GET")
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                blob = resp.read()
+            safe_source_url = ensure_safe_http_url(url[:4096], block_private_hosts=True)
+        except ValueError as exc:
+            raise ChronicleClientError(f"URL fetch blocked: {exc}") from exc
+
+        class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+                ensure_safe_http_url(newurl, block_private_hosts=True)
+                return urllib.request.HTTPRedirectHandler.redirect_request(
+                    self, req, fp, code, msg, headers, newurl
+                )
+
+        req = urllib.request.Request(safe_source_url, method="GET")
+        opener = urllib.request.build_opener(_SafeRedirectHandler)
+        try:
+            with opener.open(req, timeout=60) as resp:  # nosec B310
+                blob = resp.read(_MAX_URL_EVIDENCE_BYTES + 1)
                 mt = resp.headers.get_content_type() or "application/octet-stream"
+                if len(blob) > _MAX_URL_EVIDENCE_BYTES:
+                    raise ChronicleClientError("URL fetch exceeded max size")
+        except ValueError as e:
+            raise ChronicleClientError(f"URL fetch blocked: {e}") from e
         except urllib.error.URLError as e:
             raise ChronicleClientError(f"URL fetch failed: {e}") from e
-        filename = (title or "").strip() or Path(urllib.parse.urlparse(url).path).name or "evidence"
+        filename = (
+            (title or "").strip() or Path(urllib.parse.urlparse(safe_source_url).path).name or "evidence"
+        )
         body: dict[str, Any] = {
             "content_base64": base64.b64encode(blob).decode("ascii"),
             "original_filename": filename[:500],

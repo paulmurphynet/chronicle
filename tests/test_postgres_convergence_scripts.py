@@ -4,6 +4,7 @@ import json
 import sys
 from importlib import import_module
 from pathlib import Path
+from types import SimpleNamespace
 
 from chronicle.store.read_model.models import DefensibilityScorecard
 
@@ -110,3 +111,42 @@ def test_onboarding_main_success_with_mocked_steps(tmp_path: Path, monkeypatch) 
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["ok"] is True
     assert len(payload["steps"]) == 2
+
+
+def test_onboarding_optional_command_uses_argv_without_shell(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_run(command: list[str], **kwargs: object) -> SimpleNamespace:
+        captured["command"] = command
+        captured["kwargs"] = kwargs
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(onboarding_module.subprocess, "run", _fake_run)
+    step = onboarding_module._run_optional_command_step(
+        label="bootstrap_1",
+        command='echo "hello world"',
+        timeout_seconds=30,
+        database_url="postgresql://chronicle:password@127.0.0.1:5432/chronicle",
+        redacted_database_url="postgresql://chronicle:***@127.0.0.1:5432/chronicle",
+    )
+    assert captured["command"] == ["echo", "hello world"]
+    kwargs = captured["kwargs"]
+    assert isinstance(kwargs, dict)
+    assert kwargs.get("shell") is None
+    assert step["return_code"] == 0
+    assert step["command"] == ["echo", "hello world"]
+
+
+def test_onboarding_optional_command_rejects_empty_command() -> None:
+    try:
+        onboarding_module._run_optional_command_step(
+            label="bootstrap_1",
+            command="   ",
+            timeout_seconds=30,
+            database_url="postgresql://chronicle:password@127.0.0.1:5432/chronicle",
+            redacted_database_url="postgresql://chronicle:***@127.0.0.1:5432/chronicle",
+        )
+        raised = False
+    except ValueError:
+        raised = True
+    assert raised is True

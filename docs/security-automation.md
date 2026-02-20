@@ -11,6 +11,7 @@ Chronicle includes a manual workflow for dependency scanning:
 1. `pip-audit` for Python dependencies (`reports/pip-audit.json`)
 2. `npm audit --json` for frontend dependencies (`reports/npm-audit.json`)
 3. `scripts/supply_chain_gate.py` to enforce thresholds
+   - Gate is fail-closed: malformed scan JSON, npm `error` payloads, or empty pip dependency audits fail the run.
 4. Trivy filesystem + base image scans (`reports/trivy-fs.json`, `reports/trivy-postgres16.json`)
 5. `scripts/container_security_gate.py` to enforce container high/critical thresholds
 

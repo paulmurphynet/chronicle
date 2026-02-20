@@ -13,6 +13,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from chronicle.core.http_safety import ensure_safe_http_url
+
 DEFAULT_REQUIRED_CHECKS = [
     "lint-and-test (3.11)",
     "lint-and-test (3.12)",
@@ -26,7 +28,10 @@ def _utc_now() -> str:
 
 
 def _github_get_json(api_base: str, route: str, token: str | None) -> dict[str, Any]:
-    url = f"{api_base.rstrip('/')}/{route.lstrip('/')}"
+    url = ensure_safe_http_url(
+        f"{api_base.rstrip('/')}/{route.lstrip('/')}",
+        block_private_hosts=False,
+    )
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "chronicle-branch-protection-check",
@@ -34,7 +39,7 @@ def _github_get_json(api_base: str, route: str, token: str | None) -> dict[str, 
     if token and token.strip():
         headers["Authorization"] = f"Bearer {token.strip()}"
     req = urllib.request.Request(url, headers=headers, method="GET")
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310
         raw = resp.read().decode("utf-8")
     payload = json.loads(raw) if raw else {}
     if not isinstance(payload, dict):

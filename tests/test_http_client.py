@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
 from chronicle.http_client import ChronicleClient, ChronicleClientError
 
 
@@ -104,3 +105,18 @@ def test_get_investigation_defensibility_fans_out_by_claim(monkeypatch: Any) -> 
     assert out["investigation_uid"] == "inv_1"
     assert out["defensibility_by_claim"] == {"c1": {"claim_uid": "c1", "score": 0.9}}
 
+
+def test_client_rejects_non_http_base_url() -> None:
+    with pytest.raises(ChronicleClientError):
+        ChronicleClient("file:///tmp/chronicle.sock", "/tmp/project")
+
+
+def test_ingest_evidence_from_url_blocks_private_host(monkeypatch: Any) -> None:
+    client = ChronicleClient("http://api", "/tmp/project")
+
+    def _should_not_call(*_: Any, **__: Any) -> Any:
+        raise AssertionError("network call should be blocked before urlopen")
+
+    monkeypatch.setattr("urllib.request.build_opener", _should_not_call)
+    with pytest.raises(ChronicleClientError):
+        client.ingest_evidence_from_url("inv_1", "http://127.0.0.1/private")

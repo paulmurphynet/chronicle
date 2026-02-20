@@ -16,6 +16,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from chronicle.core.http_safety import ensure_safe_http_url
 from chronicle.store.project import create_project, project_exists
 
 DEFAULT_BATCH = {
@@ -55,7 +56,7 @@ def _find_free_port() -> int:
 
 
 def _http_json(base_url: str, method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-    url = f"{base_url}{path}"
+    url = ensure_safe_http_url(f"{base_url}{path}", block_private_hosts=False)
     data = None
     headers = {}
     if payload is not None:
@@ -63,7 +64,7 @@ def _http_json(base_url: str, method: str, path: str, payload: dict[str, Any] | 
         headers["Content-Type"] = "application/json"
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310
             body = resp.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
@@ -72,10 +73,10 @@ def _http_json(base_url: str, method: str, path: str, payload: dict[str, Any] | 
 
 
 def _http_bytes(base_url: str, method: str, path: str) -> bytes:
-    url = f"{base_url}{path}"
+    url = ensure_safe_http_url(f"{base_url}{path}", block_private_hosts=False)
     req = urllib.request.Request(url, method=method)
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310
             return resp.read()
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")

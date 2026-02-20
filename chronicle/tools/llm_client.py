@@ -6,6 +6,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
+from chronicle.core.http_safety import ensure_safe_http_url
 from chronicle.tools.llm_config import (
     PROVIDER_OPENAI_COMPATIBLE,
     get_llm_api_key,
@@ -65,14 +66,15 @@ def _ollama_request(
     timeout: float,
 ) -> str:
     """POST to Ollama /api/chat; return message.content."""
+    safe_url = ensure_safe_http_url(url, block_private_hosts=False)
     data = json.dumps(body).encode("utf-8")
     req = urllib.request.Request(
-        url,
+        safe_url,
         data=data,
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
         if resp.status != 200:
             raise LlmClientError(f"LLM API returned status {resp.status}")
         out = json.loads(resp.read().decode("utf-8"))
@@ -92,12 +94,13 @@ def _openai_compatible_request(
     api_key: str | None,
 ) -> str:
     """POST to OpenAI-compatible /chat/completions; return choices[0].message.content."""
+    safe_url = ensure_safe_http_url(url, block_private_hosts=False)
     headers: dict[str, str] = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
     data = json.dumps(body).encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
+    req = urllib.request.Request(safe_url, data=data, headers=headers, method="POST")
+    with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
         if resp.status == 401:
             raise LlmClientError("LLM API key invalid or missing (401)")
         if resp.status != 200:
@@ -150,6 +153,8 @@ def generate(
             return _openai_compatible_request(url, body, timeout, effective_key)
         except urllib.error.URLError as e:
             raise LlmClientError(f"LLM request failed: {e}") from e
+        except ValueError as e:
+            raise LlmClientError(f"Invalid LLM URL: {e}") from e
         except json.JSONDecodeError as e:
             raise LlmClientError(f"LLM response not valid JSON: {e}") from e
     else:
@@ -159,5 +164,7 @@ def generate(
             return _ollama_request(url, body, timeout)
         except urllib.error.URLError as e:
             raise LlmClientError(f"LLM request failed: {e}") from e
+        except ValueError as e:
+            raise LlmClientError(f"Invalid LLM URL: {e}") from e
         except json.JSONDecodeError as e:
             raise LlmClientError(f"LLM response not valid JSON: {e}") from e

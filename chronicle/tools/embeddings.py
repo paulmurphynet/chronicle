@@ -5,6 +5,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
+from chronicle.core.http_safety import ensure_safe_http_url
 from chronicle.tools.embedding_config import (
     get_embedding_api_key,
     get_embedding_base_url,
@@ -32,12 +33,12 @@ def embed(text: str) -> list[float] | None:
 
 
 def _embed_ollama(base_url: str, model: str, text: str, timeout: float) -> list[float] | None:
-    url = f"{base_url.rstrip('/')}/api/embeddings"
-    body = json.dumps({"model": model, "input": text}).encode("utf-8")
-    req = urllib.request.Request(url, data=body, method="POST")
-    req.add_header("Content-Type", "application/json")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        url = ensure_safe_http_url(f"{base_url.rstrip('/')}/api/embeddings", block_private_hosts=False)
+        body = json.dumps({"model": model, "input": text}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, method="POST")
+        req.add_header("Content-Type", "application/json")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
             data: Any = json.loads(resp.read().decode())
         emb = data.get("embeddings")
         if isinstance(emb, list) and len(emb) > 0 and isinstance(emb[0], list):
@@ -52,13 +53,13 @@ def _embed_openai_compatible(
 ) -> list[float] | None:
     if not api_key:
         return None
-    url = f"{base_url.rstrip('/')}/embeddings"
-    body = json.dumps({"model": model, "input": text}).encode("utf-8")
-    req = urllib.request.Request(url, data=body, method="POST")
-    req.add_header("Content-Type", "application/json")
-    req.add_header("Authorization", f"Bearer {api_key}")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        url = ensure_safe_http_url(f"{base_url.rstrip('/')}/embeddings", block_private_hosts=False)
+        body = json.dumps({"model": model, "input": text}).encode("utf-8")
+        req = urllib.request.Request(url, data=body, method="POST")
+        req.add_header("Content-Type", "application/json")
+        req.add_header("Authorization", f"Bearer {api_key}")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
             data = json.loads(resp.read().decode())
         items = data.get("data")
         if isinstance(items, list) and len(items) > 0:

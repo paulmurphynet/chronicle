@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import subprocess
 import sys
 import time
@@ -97,7 +98,7 @@ def evaluate_report(report: dict[str, Any]) -> tuple[bool, list[str]]:
     return (len(reasons) == 0, reasons)
 
 
-def _run_optional_shell_step(
+def _run_optional_command_step(
     *,
     label: str,
     command: str,
@@ -105,10 +106,12 @@ def _run_optional_shell_step(
     database_url: str,
     redacted_database_url: str,
 ) -> dict[str, Any]:
+    argv = shlex.split(command, posix=True)
+    if not argv:
+        raise ValueError(f"empty optional command for {label}")
     started = time.monotonic()
     proc = subprocess.run(
-        command,
-        shell=True,
+        argv,
         capture_output=True,
         text=True,
         timeout=timeout_seconds,
@@ -117,7 +120,8 @@ def _run_optional_shell_step(
     duration = time.monotonic() - started
     return {
         "name": label,
-        "command": command,
+        "command": argv,
+        "raw_command": command,
         "return_code": proc.returncode,
         "duration_seconds": round(duration, 3),
         "stdout": _sanitize_output(proc.stdout, database_url, redacted_database_url),
@@ -166,13 +170,13 @@ def main(argv: list[str] | None = None) -> int:
         "--bootstrap-command",
         action="append",
         default=[],
-        help="Optional shell command to run before doctor/smoke (can be repeated).",
+        help="Optional command to run before doctor/smoke (repeatable; parsed with shlex).",
     )
     parser.add_argument(
         "--teardown-command",
         action="append",
         default=[],
-        help="Optional shell command to run at the end (can be repeated).",
+        help="Optional command to run at the end (repeatable; parsed with shlex).",
     )
     args = parser.parse_args(argv)
 
@@ -197,7 +201,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         for idx, command in enumerate(args.bootstrap_command, start=1):
-            step = _run_optional_shell_step(
+            step = _run_optional_command_step(
                 label=f"bootstrap_{idx}",
                 command=command,
                 timeout_seconds=max(args.max_duration_seconds, 60),
@@ -243,7 +247,7 @@ def main(argv: list[str] | None = None) -> int:
         report["error"] = str(exc)
     finally:
         for idx, command in enumerate(args.teardown_command, start=1):
-            step = _run_optional_shell_step(
+            step = _run_optional_command_step(
                 label=f"teardown_{idx}",
                 command=command,
                 timeout_seconds=max(args.max_duration_seconds, 60),
