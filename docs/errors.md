@@ -37,6 +37,7 @@ The optional HTTP API (`chronicle/api/app.py`) usually checks conditions before 
 - **ChronicleProjectNotFoundError** → map to **404** Not Found (e.g. “Project not found”).
 - **ChronicleUserError** (validation, “investigation not found”, “claim not found”, etc.) → map to **400** Bad Request with `detail=str(e)`, or **404** if the message indicates a missing resource.
 - **ChronicleIdempotencyCapacityError** → map to **429** Too Many Requests.
+- **Oversize request payloads** (evidence ingest or `.chronicle` import) → map to **413** Payload Too Large.
 
 API responses also include a request correlation id:
 

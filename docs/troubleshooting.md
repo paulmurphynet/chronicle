@@ -106,6 +106,31 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ---
 
+## API import fails with "verification failed"
+
+**Cause:** `POST /import` now verifies the `.chronicle` archive before merge. Invalid manifest/schema, missing DB, or evidence hash mismatches are rejected.
+
+**Fix:**
+
+- Re-run verifier locally first: `chronicle-verify path/to/file.chronicle`.
+- Re-export from the source project and retry the upload.
+- If the failure is a hash mismatch, treat the archive as tampered/corrupted and do not ingest.
+
+---
+
+## API returns 413 on evidence or import upload
+
+**Cause:** Upload exceeds configured size limits.
+
+**Fix:**
+
+- Increase limits as needed:
+  - `CHRONICLE_MAX_EVIDENCE_BYTES` for `POST /investigations/{id}/evidence`
+  - `CHRONICLE_MAX_IMPORT_BYTES` for `POST /import`
+- Or split/compress the payload before retrying.
+
+---
+
 ## `ModuleNotFoundError: No module named 'chronicle'` when running a script
 
 **Cause:** The script imports `chronicle` or `tools` but the repo root isn’t on `PYTHONPATH`.

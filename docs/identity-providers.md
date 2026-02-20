@@ -16,7 +16,9 @@ Set **`CHRONICLE_IDENTITY_PROVIDER`** to one of:
 | `did` | Reserved; currently resolves like `none`. Implement by adding a real adapter (see below). |
 | `zk` | Reserved; currently resolves like `none`. Implement by adding a real adapter (see below). |
 
-When `CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH` is set and the IdP returns a bound principal, the server uses that as `actor_id` and can store a verification level on each write event.
+When `CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH` is set and the IdP returns a bound principal from auth middleware (`request.state`), the server uses that as `actor_id` and stores account-level verification.
+
+If no auth-bound principal is present and headers are used (`X-Actor-Id`), identity is treated as **claimed** (self-asserted), not account-verified.
 
 ---
 

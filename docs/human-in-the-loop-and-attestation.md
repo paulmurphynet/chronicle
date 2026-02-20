@@ -88,7 +88,7 @@ with ChronicleSession(project_path) as session:
 
 ### HTTP API
 
-When using the optional HTTP API, set **X-Actor-Id** and **X-Actor-Type** on each request so the server records you as the actor. When the deployment uses an Identity Provider (IdP), the server can resolve the actor from auth and optionally store the verification level. See [API](api.md#request-identity-and-attestation).
+When using the optional HTTP API, set **X-Actor-Id** and **X-Actor-Type** on each request so the server records you as the actor. When the deployment uses an Identity Provider (IdP), the server can resolve the actor from auth and optionally store the verification level. Header-only identity is treated as **claimed** unless auth middleware binds a principal. See [API](api.md#request-identity-and-attestation).
 
 ---
 
@@ -130,5 +130,5 @@ A **minimal curation UI** is provided so a human can work with a dataset in the 
 | Why human-in-the-loop? | Many datasets need human judgment to map and curate; accountability requires knowing who did what. |
 | How is the actor recorded? | Every event has actor_id and actor_type; optional verification_level (and attestation ref) can be stored in the event payload. |
 | How do I run as a human today? | Set CHRONICLE_ACTOR_ID (and CHRONICLE_ACTOR_TYPE) when using the CLI or scripts; set X-Actor-Id / X-Actor-Type when using the API; pass actor_id/actor_type when using the session in code. |
-| Do we verify identity? | No. We record who you say you are (or who the IdP resolved). Proving identity is a deployment concern. |
+| Do we verify identity? | Header identity is recorded as **claimed**; auth-bound IdP identity can be recorded at stronger verification levels. Proving identity remains a deployment concern. |
 | Where is verification level stored? | In the event payload as `_verification_level` (and optionally `_attestation_ref`) when the API/CLI provides it. |

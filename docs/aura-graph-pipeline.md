@@ -41,7 +41,7 @@ This doc describes how to run an **ever-growing knowledge graph** of Chronicle-v
 
 - **Single “graph project”:** One directory (e.g. `chronicle_graph_project/`) with a single `chronicle.db`. Each new `.chronicle` is **imported** into this project (merge); then we run **one** sync to Neo4j. So the Aura graph grows as more investigations are added.
 - **What gets synced:** The sync pushes **every investigation in that project** to Neo4j. If the project has 10 investigations (e.g. synthetic + Lizzie), all 10 go to Aura. To have **only** certain data in Aura, use a project that contains only those investigations (e.g. a dedicated folder with one .chronicle imported), then sync that project. Clearing the Neo4j database does not change the Chronicle project—re-sync will re-push everything in the project.
-- **Idempotency:** Sync uses MERGE on UIDs, so re-syncing the same project is safe. Re-importing the same `.chronicle` (same investigation_uid) would replay the same events; the event store may dedupe by idempotency_key or event_id depending on implementation—in practice, avoid re-importing the same file unless you’ve cleared that investigation.
+- **Idempotency and safety:** Sync uses MERGE on UIDs, so re-syncing the same project is safe. Import runs verifier checks before merge; duplicate events are skipped by `event_id`; evidence file path conflicts with different bytes are blocked. In practice, still avoid re-importing the same file unless you intend to validate idempotency behavior.
 
 ---
 
@@ -131,7 +131,7 @@ Or set `NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1` in `.env`.
 | Topic | Choice / caveat |
 |-------|------------------|
 | **One project vs many** | One “graph project” that merges all imported investigations keeps a single sync target and a single Aura graph. Each investigation keeps its own `investigation_uid` in Neo4j, so attribution is preserved. |
-| **Re-import** | Re-importing the same `.chronicle` (same investigation_uid) can lead to duplicate events or conflicts depending on idempotency. Prefer importing each file once. |
+| **Re-import** | Re-import is safer than before: duplicate events are skipped, and conflicting evidence bytes at the same path fail fast. Prefer importing each file once, and treat conflict failures as a signal to investigate tampering or local drift. |
 | **Deduplication** | Optional full deduplication: set `NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1` or use `chronicle neo4j-sync --dedupe-evidence-by-content-hash`. When enabled: one **EvidenceItem** per content_hash and one **Claim** per hash(claim_text); lineage via `(Investigation)-[:CONTAINS_EVIDENCE {evidence_uid}]->(EvidenceItem)` and `(Investigation)-[:CONTAINS_CLAIM {claim_uid}]->(Claim)`. |
 | **Verification** | Only verified files should be ingested. The script runs the verifier first; do not bypass it for untrusted input. |
 | **What “verified” means** | See [Critical areas: What the verifier checks](../critical_areas/03-what-the-verifier-checks.md). Verified = structure and hashes, not truth or independence. |

@@ -25,6 +25,8 @@ Every **write** request (create investigation, ingest evidence, propose claim, l
 
 So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so the ledger attributes them to you. When you run behind auth and configure an IdP, the server can override with the authenticated principal.
 
+For `traditional` IdP: if auth middleware does **not** bind a principal in `request.state`, header identity is treated as a **claimed** identity (not account-verified).
+
 **Verification level:** When the IdP returns a verification level (e.g. `verified_credential`), the server persists it on each write event in the payload as `_verification_level` (and optionally `_attestation_ref`). This is payload-only; the event schema is unchanged. See [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md).
 
 ---
@@ -34,6 +36,9 @@ So: set **X-Actor-Id** (and optionally **X-Actor-Type**) on write requests so th
 | Env | Description |
 |-----|-------------|
 | `CHRONICLE_PROJECT_PATH` | **Required for project-based endpoints.** Path to the Chronicle project directory. If the directory does not exist it is created; if it exists but has no `chronicle.db`, the project is initialized. **Not required** for `POST /score`. |
+| `CHRONICLE_MAX_EVIDENCE_BYTES` | Max evidence payload size in bytes for ingest endpoints (default 100 MiB). Oversize requests return `413`. |
+| `CHRONICLE_MAX_IMPORT_BYTES` | Max `.chronicle` upload size in bytes for `POST /import` (default 500 MiB). Oversize requests return `413`. |
+| `CHRONICLE_MAX_LIST_LIMIT` | Max list pagination limit clamp for list endpoints (default 1000). |
 
 ## Request tracing
 
@@ -67,7 +72,7 @@ For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_pa
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/investigations` | Create investigation. Body: `{ "title", "description?", "investigation_key?" }`. Returns `event_id`, `investigation_uid`. |
-| POST | `/investigations/{id}/evidence` | Ingest evidence. JSON body: `{ "content"? \| "content_base64"?`, `media_type?`, `original_filename?` } **or** multipart form with field `file`. Returns `event_id`, `evidence_uid`, `span_uid`. |
+| POST | `/investigations/{id}/evidence` | Ingest evidence. JSON body: `{ "content"? \| "content_base64"?`, `media_type?`, `original_filename?` } **or** multipart form with field `file`. Returns `event_id`, `evidence_uid`, `span_uid`. Enforces `CHRONICLE_MAX_EVIDENCE_BYTES` and returns `413` for oversize payloads. |
 | POST | `/investigations/{id}/claims` | Propose claim. Body: `{ "text", "initial_type?", "epistemic_stance?" }`. Optional **epistemic_stance** (e.g. working_hypothesis, asserted_established). Returns `event_id`, `claim_uid`. |
 | POST | `/investigations/{id}/links/support` | Link span as support. Body: `{ "span_uid", "claim_uid", "rationale"? }`. Returns `event_id`, `link_uid`. |
 | POST | `/investigations/{id}/links/challenge` | Link span as challenge. Body: `{ "span_uid", "claim_uid", "rationale?", "defeater_kind?" }`. Optional **rationale** (warrant), **defeater_kind** (e.g. rebutting, undercutting). |
@@ -104,7 +109,7 @@ For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_pa
 |--------|------|-------------|
 | POST | `/investigations/{id}/export` | Export investigation as .chronicle (ZIP). Returns binary attachment. |
 | POST | `/investigations/{id}/submission-package` | Export submission package: ZIP with `{id}.chronicle`, `reasoning_briefs/{claim_uid}.html` per claim, and `manifest.json`. For human handoff and verification. |
-| POST | `/import` | Import .chronicle file (multipart `file`). Merges into project. |
+| POST | `/import` | Import .chronicle file (multipart `file`). Merges into project. Enforces `CHRONICLE_MAX_IMPORT_BYTES` (`413` on oversize). Import runs verifier checks first (manifest/schema/evidence hashes) and rejects invalid or tampered archives with `400`. |
 
 ### Health
 
