@@ -55,6 +55,7 @@ node_modules/
 
 # === Benchmark output (reproducible via run_defensibility_benchmark.py) ===
 benchmark_defensibility_results.json
+reports/
 
 # === Misc ===
 *.log

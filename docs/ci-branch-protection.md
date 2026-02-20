@@ -27,7 +27,7 @@ Recommended minimum settings:
 
 - `lint-and-test` covers Python quality gates, docs checks, and workflow parity checks.
 - `frontend-checks` keeps Reference UI route/contract parity and build health.
-- `postgres-event-store-smoke` ensures Postgres onboarding/event-store path is not regressed.
+- `postgres-event-store-smoke` now includes doctor, smoke, backend parity, and timed onboarding gates, so Postgres convergence regressions block merges.
 
 ## Verification step after setup
 

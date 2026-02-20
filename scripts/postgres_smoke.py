@@ -86,7 +86,12 @@ def main() -> int:
         actor_type="tool",
         actor_id="postgres-smoke",
         workspace="spark",
-        payload={"title": "Postgres smoke investigation"},
+        payload={
+            "investigation_uid": inv_uid,
+            "title": "Postgres smoke investigation",
+            "description": None,
+            "created_by": {"actor_type": "tool", "actor_id": "postgres-smoke"},
+        },
         idempotency_key=idempotency_key,
     )
 

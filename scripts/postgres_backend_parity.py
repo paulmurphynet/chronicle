@@ -87,6 +87,13 @@ def _build_sqlite_scenario(project_dir: Path) -> dict[str, Any]:
             actor_id="parity_human",
             actor_type="human",
         )
+        session.set_tier(
+            investigation_uid,
+            "forge",
+            reason="Enable source provenance workflow for backend parity scenario.",
+            actor_id="parity_human",
+            actor_type="human",
+        )
         _, source_a = session.register_source(
             investigation_uid,
             "Filing source A",
@@ -94,6 +101,7 @@ def _build_sqlite_scenario(project_dir: Path) -> dict[str, Any]:
             independence_notes="Independent corporate filing",
             actor_id="parity_human",
             actor_type="human",
+            workspace="forge",
         )
         _, source_b = session.register_source(
             investigation_uid,
@@ -102,6 +110,7 @@ def _build_sqlite_scenario(project_dir: Path) -> dict[str, Any]:
             independence_notes="Independent auditor memo",
             actor_id="parity_human",
             actor_type="human",
+            workspace="forge",
         )
 
         _, evidence_a = session.ingest_evidence(
@@ -134,6 +143,7 @@ def _build_sqlite_scenario(project_dir: Path) -> dict[str, Any]:
             relationship="provided_by",
             actor_id="parity_human",
             actor_type="human",
+            workspace="forge",
         )
         session.link_evidence_to_source(
             evidence_b,
@@ -141,6 +151,7 @@ def _build_sqlite_scenario(project_dir: Path) -> dict[str, Any]:
             relationship="provided_by",
             actor_id="parity_human",
             actor_type="human",
+            workspace="forge",
         )
         session.link_evidence_to_source(
             evidence_c,
@@ -148,6 +159,7 @@ def _build_sqlite_scenario(project_dir: Path) -> dict[str, Any]:
             relationship="provided_by",
             actor_id="parity_tool",
             actor_type="tool",
+            workspace="forge",
         )
 
         _, span_a = session.anchor_span(

@@ -61,9 +61,9 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 
 ### Program release criteria (must pass together)
 
-- [ ] Backend parity: same scenario outputs equivalent defensibility results on SQLite and Postgres.
+- [x] Backend parity: same scenario outputs equivalent defensibility results on SQLite and Postgres.
 - [ ] CI green for required jobs on push/PR with branch protection active.
-- [ ] Postgres onboarding from zero to first successful smoke run in <= 10 minutes.
+- [x] Postgres onboarding from zero to first successful smoke run in <= 10 minutes.
 - [x] Docs and troubleshooting validated by docs link/currency checks.
 
 ## On hold by design
@@ -128,12 +128,17 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - **B5 completed (verify parity)**: added Postgres invariant verification entrypoint (`verify_postgres_url`) and wired CLI `chronicle verify` to use Postgres checks under `CHRONICLE_EVENT_STORE=postgres`.
 - **B6 completed (migration/versioning policy)**: added backend migration and versioning policy doc (`docs/backend-migration-versioning-policy.md`) and linked it in README/docs index for release/process enforcement.
 - **Release-criteria automation expanded**: added deterministic backend parity gate (`scripts/postgres_backend_parity.py`) and timed onboarding gate (`scripts/postgres_onboarding_timed_check.py`), then wired both into CI/release Postgres jobs with JSON artifacts.
+- **Local Postgres convergence validation completed**: confirmed `make postgres-parity` and `make postgres-onboarding-check` pass against local Docker Postgres after smoke payload parity fix.
 - **Security release criteria expanded**: added Trivy-based container vulnerability gating (`scripts/container_security_gate.py`) and wired supply-chain/release workflows to enforce container HIGH/CRITICAL thresholds alongside dependency scans.
 - **Docs release-criteria check completed**: reran docs link and docs currency gates (`scripts/check_doc_links.py`, `scripts/check_docs_currency.py`) and confirmed pass.
 
 ## Release blockers
 
-No active release blockers at this time. Keep validating changes against:
+Active release blocker:
+
+- CI branch-protection rollout still pending verification (`CI green for required jobs on push/PR with branch protection active`).
+
+Continue validating changes against:
 
 - Core trust surfaces (`.chronicle`, verifier, event/read-model invariants)
 - Contract stability (scorer schema and API/client parity)

@@ -33,6 +33,7 @@ This checklist defines objective pass/fail criteria before Chronicle is treated 
   - `lint-and-test (3.12)`
   - `frontend-checks`
   - `postgres-event-store-smoke`
+  - Note: `postgres-event-store-smoke` includes doctor + smoke + backend parity + timed onboarding gates.
 - [ ] Branch protection requires these checks before merge.
 
 Reference: `docs/ci-branch-protection.md`.
