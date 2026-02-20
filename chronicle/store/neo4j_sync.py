@@ -33,7 +33,13 @@ _SCHEMA_STATEMENTS = [
     "CREATE CONSTRAINT actor_uid_unique IF NOT EXISTS FOR (a:Actor) REQUIRE a.uid IS UNIQUE",
     "CREATE CONSTRAINT tension_uid_unique IF NOT EXISTS FOR (t:Tension) REQUIRE t.uid IS UNIQUE",
     "CREATE INDEX claim_type_idx IF NOT EXISTS FOR (c:Claim) ON (c.claim_type)",
+    "CREATE INDEX claim_status_idx IF NOT EXISTS FOR (c:Claim) ON (c.current_status)",
     "CREATE INDEX tension_status_idx IF NOT EXISTS FOR (t:Tension) ON (t.status)",
+    "CREATE INDEX evidence_content_hash_idx IF NOT EXISTS FOR (e:EvidenceItem) ON (e.content_hash)",
+    "CREATE INDEX supports_link_uid_idx IF NOT EXISTS FOR ()-[r:SUPPORTS]-() ON (r.link_uid)",
+    "CREATE INDEX challenges_link_uid_idx IF NOT EXISTS FOR ()-[r:CHALLENGES]-() ON (r.link_uid)",
+    "CREATE INDEX contains_claim_uid_idx IF NOT EXISTS FOR ()-[r:CONTAINS_CLAIM]-() ON (r.claim_uid)",
+    "CREATE INDEX contains_evidence_uid_idx IF NOT EXISTS FOR ()-[r:CONTAINS_EVIDENCE]-() ON (r.evidence_uid)",
 ]
 
 
@@ -44,6 +50,19 @@ def _fetch_rows(conn: sqlite3.Connection, query: str) -> list[dict[str, Any]]:
         {c: (None if v is None else str(v)) for c, v in zip(columns, row, strict=True)}
         for row in cur.fetchall()
     ]
+
+
+def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
+    return {str(row[1]) for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+
+
+def _evidence_link_rationale_expr(conn: sqlite3.Connection) -> str:
+    columns = _table_columns(conn, "evidence_link")
+    if "rationale" in columns:
+        return "coalesce(rationale, '') AS rationale"
+    if "notes" in columns:
+        return "coalesce(notes, '') AS rationale"
+    return "'' AS rationale"
 
 
 def _batched(rows: list[dict[str, Any]], size: int):
@@ -145,18 +164,6 @@ def _sync_nodes(
                       c.decomposition_status = coalesce(CASE WHEN row.decomposition_status <> '' THEN row.decomposition_status END, c.decomposition_status),
                       c.parent_claim_uid = coalesce(CASE WHEN row.parent_claim_uid <> '' THEN row.parent_claim_uid END, c.parent_claim_uid),
                       c.updated_at = coalesce(datetime(row.updated_at), c.updated_at)
-                    """,
-                    rows=batch,
-                )
-            # Lineage: (Investigation)-[:CONTAINS_CLAIM {claim_uid}]->(Claim)
-            for batch in _batched(rows, BATCH_SIZE):
-                session.run(
-                    """
-                    UNWIND $rows AS row
-                    MATCH (i:Investigation {uid: row.investigation_uid})
-                    MATCH (c:Claim {uid: row.claim_content_hash})
-                    MERGE (i)-[r:CONTAINS_CLAIM]->(c)
-                    ON CREATE SET r.claim_uid = row.claim_uid
                     """,
                     rows=batch,
                 )
@@ -342,6 +349,8 @@ def _sync_relationships(
             claim_uid_to_content_hash[r["claim_uid"]] = _claim_content_hash(r.get("claim_text"))
 
     with driver.session() as session:
+        evidence_link_rationale_expr = _evidence_link_rationale_expr(conn)
+
         # Span IN EvidenceItem (when dedupe: match EvidenceItem by content_hash)
         if dedupe_evidence_by_content_hash:
             rows = _fetch_rows(
@@ -382,7 +391,8 @@ def _sync_relationships(
         # SUPPORTS
         rows = _fetch_rows(
             conn,
-            "SELECT span_uid, claim_uid, link_uid, source_event_id, rationale FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid",
+            f"SELECT span_uid, claim_uid, link_uid, source_event_id, {evidence_link_rationale_expr} "
+            "FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid",
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
@@ -414,7 +424,8 @@ def _sync_relationships(
         # CHALLENGES
         rows = _fetch_rows(
             conn,
-            "SELECT span_uid, claim_uid, link_uid, source_event_id, rationale FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid",
+            f"SELECT span_uid, claim_uid, link_uid, source_event_id, {evidence_link_rationale_expr} "
+            "FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid",
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
@@ -674,11 +685,9 @@ def _sync_relationships(
 def _sync_retractions(conn: sqlite3.Connection, driver: Any) -> None:
     rows = _fetch_rows(
         conn,
-        """SELECT r.link_uid, el.claim_uid, el.span_uid, el.link_type, r.retracted_at,
-                  coalesce(r.rationale, '') AS rationale
-           FROM evidence_link_retraction r
-           JOIN evidence_link el ON el.link_uid = r.link_uid
-           ORDER BY r.link_uid""",
+        """SELECT link_uid, retracted_at, coalesce(rationale, '') AS rationale
+           FROM evidence_link_retraction
+           ORDER BY link_uid""",
     )
     if not rows:
         return

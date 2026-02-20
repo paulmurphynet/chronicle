@@ -15,6 +15,19 @@ def _write_csv(path: Path, headers: list[str], rows: list[tuple]) -> None:
         w.writerows(rows)
 
 
+def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
+    return {str(row[1]) for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+
+
+def _evidence_link_rationale_expr(conn: sqlite3.Connection) -> str:
+    columns = _table_columns(conn, "evidence_link")
+    if "rationale" in columns:
+        return "coalesce(rationale, '') AS rationale"
+    if "notes" in columns:
+        return "coalesce(notes, '') AS rationale"
+    return "'' AS rationale"
+
+
 def export_read_model_to_csv(conn: sqlite3.Connection, output_dir: Path) -> None:
     """Export read model tables to CSV files for Neo4j LOAD CSV. Spec 16.8 (SQLite)."""
     output_dir = Path(output_dir)
@@ -99,8 +112,10 @@ def export_read_model_to_csv(conn: sqlite3.Connection, output_dir: Path) -> None
         cur.fetchall(),
     )
 
+    evidence_link_rationale_expr = _evidence_link_rationale_expr(conn)
     cur.execute(
-        "SELECT link_uid, claim_uid, span_uid, link_type, rationale, created_at, source_event_id FROM evidence_link ORDER BY link_uid"
+        f"SELECT link_uid, claim_uid, span_uid, link_type, {evidence_link_rationale_expr}, "
+        "created_at, source_event_id FROM evidence_link ORDER BY link_uid"
     )
     _write_csv(
         output_dir / "links.csv",
