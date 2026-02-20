@@ -46,9 +46,19 @@ It exits non-zero if there is drift between:
 
 1. **Install the extra:** `pip install -e ".[neo4j]"` (adds the `neo4j` driver).
 
-2. **Set env:** `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`.
+2. **Set env:** `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD` (optional: `NEO4J_DATABASE`).
 
 3. **Sync:** `chronicle neo4j-sync --path /path/to/project`.
+   - Optional hardening flags:
+     - `--database <name>`
+     - `--max-retries <n>`
+     - `--retry-backoff-seconds <seconds>`
+     - `--connection-timeout-seconds <seconds>`
+   - Equivalent env vars:
+     - `NEO4J_DATABASE`
+     - `NEO4J_SYNC_MAX_RETRIES`
+     - `NEO4J_SYNC_RETRY_BACKOFF_SECONDS`
+     - `NEO4J_CONNECTION_TIMEOUT_SECONDS`
 
    This MERGEs the read model into the running Neo4j instance (idempotent).
 

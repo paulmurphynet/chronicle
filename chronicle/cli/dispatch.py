@@ -150,6 +150,10 @@ def dispatch_command(args: argparse.Namespace, actor_id: str, actor_type: str) -
         return cmd_neo4j_sync(
             args.path,
             dedupe_evidence_by_content_hash=getattr(args, "dedupe_evidence_by_content_hash", False),
+            database=getattr(args, "database", None),
+            max_retries=getattr(args, "max_retries", None),
+            retry_backoff_seconds=getattr(args, "retry_backoff_seconds", None),
+            connection_timeout_seconds=getattr(args, "connection_timeout_seconds", None),
         )
     if args.command == "policy":
         if args.policy_command == "list":

@@ -87,6 +87,65 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - [x] Decide and document lint scope policy (release-gated: `chronicle` + `tools`; broader `scripts/` + `tests` sweep tracked separately) and enforce consistently in local+CI commands.
 - [x] Add contributor guidance for local dependency audit prerequisites (frontend lockfile + npm audit behavior).
 
+## Neo4j best-in-class program (approved 2026-02-20)
+
+Goal: raise Neo4j from "contract-correct optional projection" to a production-grade, scalable, and operable graph surface.
+
+### N. Core engineering upgrades
+
+- [x] **N-01** Replace full-table `fetchall()` paths with streaming/chunked export for `neo4j-export`.
+  - Move CSV export reads to cursor/`fetchmany()` loops.
+  - Keep deterministic row ordering per CSV.
+- [x] **N-02** Replace full-table in-memory row materialization in `neo4j-sync` with streaming/chunked sync.
+  - Bound memory for large investigations.
+  - Keep idempotent MERGE semantics unchanged.
+- [x] **N-03** Harden relationship identity semantics to avoid accidental edge coalescing for multi-link cases.
+  - Preserve distinct support/challenge links when same span/claim pair has multiple link_uids.
+  - Add explicit regression tests for repeated span-claim links.
+- [x] **N-04** Add Neo4j runtime hardening controls.
+  - CLI/config support for Neo4j database selection.
+  - Retry/backoff and timeout controls for transient failures.
+  - Clear user-facing diagnostics on connectivity/auth/db errors.
+- [ ] **N-05** Add sync/export observability outputs.
+  - Structured progress logs (table/phase, row counts, batch counts, elapsed time).
+  - Optional JSON report artifact for sync/export runs (for release evidence).
+
+### N. Quality and verification upgrades
+
+- [ ] **N-06** Add live Neo4j integration tests (service-container) beyond static contract parity checks.
+  - Validate end-to-end sync behavior against real Neo4j (not only fixture/text checks).
+  - Include dedupe and non-dedupe mode assertions.
+- [ ] **N-07** Add performance benchmark harness for graph projection paths.
+  - Generate medium/large fixture datasets.
+  - Track export/sync throughput and memory ceilings.
+  - Add non-regression thresholds to release evidence.
+- [ ] **N-08** Add cross-mode parity tests for graph semantics.
+  - Validate expected equivalence/differences between rebuild CSV path and direct sync path.
+  - Validate lineage semantics in dedupe mode (`CONTAINS_CLAIM`, `CONTAINS_EVIDENCE`).
+- [ ] **N-09** Expand failure-mode tests for Neo4j operations.
+  - Network interruption, partial failure, rerun-idempotency behavior.
+  - Misconfiguration cases (`NEO4J_URI`, credentials, db name, driver unavailable).
+
+### N. Docs and operations upgrades
+
+- [ ] **N-10** Publish Neo4j production operations runbook.
+  - Backup/restore guidance for graph data lifecycle.
+  - Sync cadence strategy, drift handling, and re-sync procedures.
+  - Capacity and cost guardrails for Aura/self-hosted Neo4j.
+- [ ] **N-11** Publish query-pack and indexing guidance for common Chronicle graph workflows.
+  - "Top unresolved tension clusters", "support/challenge balance", "source concentration", lineage traversals.
+  - Recommend index/constraint posture per query class.
+- [ ] **N-12** Add explicit support-level statement for Neo4j surface (GA/Beta/Experimental) in support policy.
+  - Define SLA expectations and compatibility guarantees for graph schema evolution.
+
+### Neo4j best-in-class done criteria
+
+- [ ] Large-project sync/export can run with bounded memory and deterministic results.
+- [ ] Live Neo4j integration tests pass in CI and are part of release gating.
+- [ ] Performance baseline + regression thresholds are captured in release artifacts.
+- [ ] Ops runbook + query pack are published and validated by docs checks.
+- [ ] Neo4j support level and compatibility policy are explicit in docs.
+
 ## Standards and whitepaper program (approved 2026-02-20)
 
 Goal: make Chronicle standards-compatible without destabilizing core contracts, and produce a publication-ready standards whitepaper.

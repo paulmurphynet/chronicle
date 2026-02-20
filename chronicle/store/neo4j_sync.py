@@ -10,6 +10,8 @@ from __future__ import annotations
 import hashlib
 import os
 import sqlite3
+import time
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -44,13 +46,19 @@ _SCHEMA_STATEMENTS = [
 ]
 
 
-def _fetch_rows(conn: sqlite3.Connection, query: str) -> list[dict[str, Any]]:
+def _iter_row_batches(
+    conn: sqlite3.Connection, query: str, *, batch_size: int = BATCH_SIZE
+) -> Iterator[list[dict[str, Any]]]:
     cur = conn.execute(query)
     columns = [d[0] for d in cur.description]
-    return [
-        {c: (None if v is None else str(v)) for c, v in zip(columns, row, strict=True)}
-        for row in cur.fetchall()
-    ]
+    while True:
+        rows = cur.fetchmany(batch_size)
+        if not rows:
+            break
+        yield [
+            {c: (None if v is None else str(v)) for c, v in zip(columns, row, strict=True)}
+            for row in rows
+        ]
 
 
 def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
@@ -96,6 +104,24 @@ def _evidence_link_select_sql(conn: sqlite3.Connection, *, link_type: str) -> st
     raise ValueError(f"Unsupported link_type: {link_type}")
 
 
+def _evidence_link_select_with_claim_sql(conn: sqlite3.Connection, *, link_type: str) -> str:
+    rationale_expr = _evidence_link_rationale_expr(conn)
+    if rationale_expr == "coalesce(rationale, '') AS rationale":
+        rationale_sql = "coalesce(el.rationale, '') AS rationale"
+    elif rationale_expr == "coalesce(notes, '') AS rationale":
+        rationale_sql = "coalesce(el.notes, '') AS rationale"
+    else:
+        rationale_sql = "'' AS rationale"
+    return (
+        "SELECT el.span_uid, el.claim_uid, el.link_uid, el.source_event_id, "
+        f"{rationale_sql}, c.claim_text "
+        "FROM evidence_link el "
+        "JOIN claim c ON c.claim_uid = el.claim_uid "
+        f"WHERE el.link_type = '{link_type}' "
+        "ORDER BY el.link_uid"
+    )
+
+
 def _evidence_link_rationale_expr(conn: sqlite3.Connection) -> str:
     """Backward-compatible helper used by tests and scripts."""
     columns = _table_columns(conn, "evidence_link")
@@ -106,13 +132,9 @@ def _evidence_link_rationale_expr(conn: sqlite3.Connection) -> str:
     return "'' AS rationale"
 
 
-def _batched(rows: list[dict[str, Any]], size: int):
-    for i in range(0, len(rows), size):
-        yield rows[i : i + size]
-
-
-def _run_schema(driver: Any) -> None:
-    with driver.session() as session:
+def _run_schema(driver: Any, *, database: str | None = None) -> None:
+    session_kwargs: dict[str, str] = {"database": database} if database else {}
+    with driver.session(**session_kwargs) as session:
         for stmt in _SCHEMA_STATEMENTS:
             session.run(stmt)
 
@@ -121,15 +143,16 @@ def _sync_nodes(
     conn: sqlite3.Connection,
     driver: Any,
     *,
+    database: str | None = None,
     dedupe_evidence_by_content_hash: bool = False,
 ) -> None:
-    with driver.session() as session:
+    session_kwargs: dict[str, str] = {"database": database} if database else {}
+    with driver.session(**session_kwargs) as session:
         # Investigations
-        rows = _fetch_rows(
+        for batch in _iter_row_batches(
             conn,
             "SELECT investigation_uid, title, description, is_archived, created_at, updated_at FROM investigation ORDER BY investigation_uid",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
+        ):
             session.run(
                 """
                 UNWIND $rows AS row
@@ -151,11 +174,10 @@ def _sync_nodes(
             )
 
         # Sources
-        rows = _fetch_rows(
+        for batch in _iter_row_batches(
             conn,
             "SELECT source_uid, investigation_uid, display_name, source_type, coalesce(alias,'') AS alias, created_at FROM source ORDER BY source_uid",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
+        ):
             session.run(
                 """
                 UNWIND $rows AS row
@@ -176,15 +198,14 @@ def _sync_nodes(
 
         # Claims (when dedupe: one node per claim_content_hash; else one per claim_uid)
         if dedupe_evidence_by_content_hash:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT claim_uid, investigation_uid, claim_text, claim_type, current_status,
                           decomposition_status, coalesce(parent_claim_uid,'') AS parent_claim_uid,
                           created_at, updated_at FROM claim ORDER BY claim_uid""",
-            )
-            for r in rows:
-                r["claim_content_hash"] = _claim_content_hash(r.get("claim_text"))
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
+                for row in batch:
+                    row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -209,13 +230,12 @@ def _sync_nodes(
                     rows=batch,
                 )
         else:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT claim_uid, investigation_uid, claim_text, claim_type, current_status,
                           decomposition_status, coalesce(parent_claim_uid,'') AS parent_claim_uid,
                           created_at, updated_at FROM claim ORDER BY claim_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -243,13 +263,12 @@ def _sync_nodes(
 
         # EvidenceItem (E2.3: provenance_type; optional dedupe by content_hash)
         if dedupe_evidence_by_content_hash:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT content_hash, evidence_uid, uri, media_type, created_at,
                           coalesce(provenance_type, '') AS provenance_type
                    FROM evidence_item ORDER BY content_hash, evidence_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -269,12 +288,11 @@ def _sync_nodes(
                     rows=batch,
                 )
             # Lineage: (Investigation)-[:CONTAINS_EVIDENCE {evidence_uid}]->(EvidenceItem)
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT investigation_uid, evidence_uid, content_hash
                    FROM evidence_item ORDER BY investigation_uid, evidence_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -286,13 +304,12 @@ def _sync_nodes(
                     rows=batch,
                 )
         else:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT evidence_uid, content_hash, uri, media_type, created_at,
                           coalesce(provenance_type, '') AS provenance_type
                    FROM evidence_item ORDER BY evidence_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -313,11 +330,10 @@ def _sync_nodes(
                 )
 
         # EvidenceSpan
-        rows = _fetch_rows(
+        for batch in _iter_row_batches(
             conn,
             "SELECT span_uid, evidence_uid, anchor_type, anchor_json, created_at, source_event_id FROM evidence_span ORDER BY span_uid",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
+        ):
             session.run(
                 """
                 UNWIND $rows AS row
@@ -335,11 +351,10 @@ def _sync_nodes(
             )
 
         # Actors
-        rows = _fetch_rows(
+        for batch in _iter_row_batches(
             conn,
             "SELECT DISTINCT actor_id AS actor_uid, actor_type, actor_id AS display_name FROM events ORDER BY actor_id",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
+        ):
             session.run(
                 """
                 UNWIND $rows AS row
@@ -354,12 +369,11 @@ def _sync_nodes(
             )
 
         # Tensions
-        rows = _fetch_rows(
+        for batch in _iter_row_batches(
             conn,
             """SELECT tension_uid, coalesce(tension_kind,'') AS tension_kind, status, created_at
                FROM tension ORDER BY tension_uid""",
-        )
-        for batch in _batched(rows, BATCH_SIZE):
+        ):
             session.run(
                 """
                 UNWIND $rows AS row
@@ -381,25 +395,20 @@ def _sync_relationships(
     conn: sqlite3.Connection,
     driver: Any,
     *,
+    database: str | None = None,
     dedupe_evidence_by_content_hash: bool = False,
 ) -> None:
-    # When dedupe: resolve claim_uid -> claim_content_hash for relationship MATCHes
-    claim_uid_to_content_hash: dict[str, str] = {}
-    if dedupe_evidence_by_content_hash:
-        for r in _fetch_rows(conn, "SELECT claim_uid, claim_text FROM claim"):
-            claim_uid_to_content_hash[r["claim_uid"]] = _claim_content_hash(r.get("claim_text"))
-
-    with driver.session() as session:
+    session_kwargs: dict[str, str] = {"database": database} if database else {}
+    with driver.session(**session_kwargs) as session:
         # Span IN EvidenceItem (when dedupe: match EvidenceItem by content_hash)
         if dedupe_evidence_by_content_hash:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT es.span_uid, ei.content_hash, es.source_event_id
                    FROM evidence_span es
                    JOIN evidence_item ei ON es.evidence_uid = ei.evidence_uid
                    ORDER BY es.span_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -411,11 +420,10 @@ def _sync_relationships(
                     rows=batch,
                 )
         else:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 "SELECT span_uid, evidence_uid, source_event_id FROM evidence_span ORDER BY span_uid",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -428,117 +436,135 @@ def _sync_relationships(
                 )
 
         # SUPPORTS
-        rows = _fetch_rows(
-            conn,
-            _evidence_link_select_sql(conn, link_type="SUPPORTS"),
-        )
         if dedupe_evidence_by_content_hash:
-            for r in rows:
-                r["claim_content_hash"] = claim_uid_to_content_hash.get(
-                    r["claim_uid"], r["claim_uid"]
-                )
-            for batch in _batched(rows, BATCH_SIZE):
+            for batch in _iter_row_batches(
+                conn,
+                _evidence_link_select_with_claim_sql(conn, link_type="SUPPORTS"),
+            ):
+                for row in batch:
+                    row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
                 session.run(
                     """
                     UNWIND $rows AS row
                     MATCH (s:EvidenceSpan {uid: row.span_uid})
                     MATCH (c:Claim {uid: row.claim_content_hash})
-                    MERGE (s)-[r:SUPPORTS]->(c)
+                    MERGE (s)-[r:SUPPORTS {link_uid: row.link_uid}]->(c)
                     ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
                     """,
                     rows=batch,
                 )
         else:
-            for batch in _batched(rows, BATCH_SIZE):
+            for batch in _iter_row_batches(
+                conn,
+                _evidence_link_select_sql(conn, link_type="SUPPORTS"),
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
                     MATCH (s:EvidenceSpan {uid: row.span_uid})
                     MATCH (c:Claim {uid: row.claim_uid})
-                    MERGE (s)-[r:SUPPORTS]->(c)
+                    MERGE (s)-[r:SUPPORTS {link_uid: row.link_uid}]->(c)
                     ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
                     """,
                     rows=batch,
                 )
 
         # CHALLENGES
-        rows = _fetch_rows(
-            conn,
-            _evidence_link_select_sql(conn, link_type="CHALLENGES"),
-        )
         if dedupe_evidence_by_content_hash:
-            for r in rows:
-                r["claim_content_hash"] = claim_uid_to_content_hash.get(
-                    r["claim_uid"], r["claim_uid"]
-                )
-            for batch in _batched(rows, BATCH_SIZE):
+            for batch in _iter_row_batches(
+                conn,
+                _evidence_link_select_with_claim_sql(conn, link_type="CHALLENGES"),
+            ):
+                for row in batch:
+                    row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
                 session.run(
                     """
                     UNWIND $rows AS row
                     MATCH (s:EvidenceSpan {uid: row.span_uid})
                     MATCH (c:Claim {uid: row.claim_content_hash})
-                    MERGE (s)-[r:CHALLENGES]->(c)
+                    MERGE (s)-[r:CHALLENGES {link_uid: row.link_uid}]->(c)
                     ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
                     """,
                     rows=batch,
                 )
         else:
-            for batch in _batched(rows, BATCH_SIZE):
+            for batch in _iter_row_batches(
+                conn,
+                _evidence_link_select_sql(conn, link_type="CHALLENGES"),
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
                     MATCH (s:EvidenceSpan {uid: row.span_uid})
                     MATCH (c:Claim {uid: row.claim_uid})
-                    MERGE (s)-[r:CHALLENGES]->(c)
+                    MERGE (s)-[r:CHALLENGES {link_uid: row.link_uid}]->(c)
                     ON CREATE SET r.source_event_id = row.source_event_id, r.link_uid = row.link_uid, r.rationale = row.rationale
                     """,
                     rows=batch,
                 )
 
         # ASSERTS
-        rows = _fetch_rows(
-            conn,
-            """SELECT assertion_uid, claim_uid, actor_id AS actor_uid, asserted_at,
-                      assertion_mode AS mode, confidence, source_event_id
-               FROM claim_assertion ORDER BY assertion_uid""",
-        )
         if dedupe_evidence_by_content_hash:
-            for r in rows:
-                r["claim_content_hash"] = claim_uid_to_content_hash.get(
-                    r["claim_uid"], r["claim_uid"]
+            for batch in _iter_row_batches(
+                conn,
+                """SELECT ca.assertion_uid, ca.claim_uid, ca.actor_id AS actor_uid, ca.asserted_at,
+                          ca.assertion_mode AS mode, ca.confidence, ca.source_event_id, c.claim_text
+                   FROM claim_assertion ca
+                   JOIN claim c ON c.claim_uid = ca.claim_uid
+                   ORDER BY ca.assertion_uid""",
+            ):
+                for row in batch:
+                    row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (a:Actor {uid: row.actor_uid})
+                    MATCH (c:Claim {uid: row.claim_content_hash})
+                    MERGE (a)-[r:ASSERTS]->(c)
+                    ON CREATE SET
+                      r.source_event_id = row.source_event_id,
+                      r.asserted_at = datetime(row.asserted_at),
+                      r.mode = row.mode,
+                      r.confidence = CASE WHEN row.confidence IS NOT NULL AND row.confidence <> '' THEN toFloat(row.confidence) END
+                    """,
+                    rows=batch,
                 )
-        for batch in _batched(rows, BATCH_SIZE):
-            claim_key = "claim_content_hash" if dedupe_evidence_by_content_hash else "claim_uid"
-            session.run(
-                f"""
-                UNWIND $rows AS row
-                MATCH (a:Actor {{uid: row.actor_uid}})
-                MATCH (c:Claim {{uid: row.{claim_key}}})
-                MERGE (a)-[r:ASSERTS]->(c)
-                ON CREATE SET
-                  r.source_event_id = row.source_event_id,
-                  r.asserted_at = datetime(row.asserted_at),
-                  r.mode = row.mode,
-                  r.confidence = CASE WHEN row.confidence IS NOT NULL AND row.confidence <> '' THEN toFloat(row.confidence) END
-                """,
-                rows=batch,
-            )
+        else:
+            for batch in _iter_row_batches(
+                conn,
+                """SELECT assertion_uid, claim_uid, actor_id AS actor_uid, asserted_at,
+                          assertion_mode AS mode, confidence, source_event_id
+                   FROM claim_assertion ORDER BY assertion_uid""",
+            ):
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (a:Actor {uid: row.actor_uid})
+                    MATCH (c:Claim {uid: row.claim_uid})
+                    MERGE (a)-[r:ASSERTS]->(c)
+                    ON CREATE SET
+                      r.source_event_id = row.source_event_id,
+                      r.asserted_at = datetime(row.asserted_at),
+                      r.mode = row.mode,
+                      r.confidence = CASE WHEN row.confidence IS NOT NULL AND row.confidence <> '' THEN toFloat(row.confidence) END
+                    """,
+                    rows=batch,
+                )
 
         # Tension BETWEEN (two edges per row)
-        rows = _fetch_rows(
-            conn,
-            "SELECT tension_uid, claim_a_uid, claim_b_uid, source_event_id FROM tension ORDER BY tension_uid",
-        )
         if dedupe_evidence_by_content_hash:
-            for r in rows:
-                r["claim_a_content_hash"] = claim_uid_to_content_hash.get(
-                    r["claim_a_uid"], r["claim_a_uid"]
-                )
-                r["claim_b_content_hash"] = claim_uid_to_content_hash.get(
-                    r["claim_b_uid"], r["claim_b_uid"]
-                )
-        for batch in _batched(rows, BATCH_SIZE):
-            if dedupe_evidence_by_content_hash:
+            for batch in _iter_row_batches(
+                conn,
+                """SELECT t.tension_uid, t.claim_a_uid, t.claim_b_uid, t.source_event_id,
+                          ca.claim_text AS claim_a_text, cb.claim_text AS claim_b_text
+                   FROM tension t
+                   JOIN claim ca ON ca.claim_uid = t.claim_a_uid
+                   JOIN claim cb ON cb.claim_uid = t.claim_b_uid
+                   ORDER BY t.tension_uid""",
+            ):
+                for row in batch:
+                    row["claim_a_content_hash"] = _claim_content_hash(row.get("claim_a_text"))
+                    row["claim_b_content_hash"] = _claim_content_hash(row.get("claim_b_text"))
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -552,7 +578,11 @@ def _sync_relationships(
                     """,
                     rows=batch,
                 )
-            else:
+        else:
+            for batch in _iter_row_batches(
+                conn,
+                "SELECT tension_uid, claim_a_uid, claim_b_uid, source_event_id FROM tension ORDER BY tension_uid",
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -569,7 +599,7 @@ def _sync_relationships(
 
         # SUPERSEDES (when dedupe: match EvidenceItem by content_hash)
         if dedupe_evidence_by_content_hash:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT es.new_evidence_uid, es.prior_evidence_uid, es.supersession_type,
                           coalesce(es.reason,'') AS reason, es.source_event_id,
@@ -578,8 +608,7 @@ def _sync_relationships(
                    JOIN evidence_item en ON es.new_evidence_uid = en.evidence_uid
                    JOIN evidence_item ep ON es.prior_evidence_uid = ep.evidence_uid
                    ORDER BY es.supersession_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -594,12 +623,11 @@ def _sync_relationships(
                     rows=batch,
                 )
         else:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT new_evidence_uid, prior_evidence_uid, supersession_type, coalesce(reason,'') AS reason, source_event_id
                    FROM evidence_supersession ORDER BY supersession_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -615,23 +643,27 @@ def _sync_relationships(
                 )
 
         # DECOMPOSES_TO (when dedupe: match Claim by content_hash)
-        rows = _fetch_rows(
-            conn,
-            """SELECT c.claim_uid AS child_uid, c.parent_claim_uid AS parent_uid, e.event_id AS source_event_id
-               FROM claim c
-               JOIN events e ON e.subject_uid = c.claim_uid AND e.event_type = 'ClaimProposed'
-               WHERE c.parent_claim_uid IS NOT NULL ORDER BY c.claim_uid""",
-        )
         if dedupe_evidence_by_content_hash:
-            for r in rows:
-                r["parent_content_hash"] = claim_uid_to_content_hash.get(
-                    r["parent_uid"], r["parent_uid"]
-                )
-                r["child_content_hash"] = claim_uid_to_content_hash.get(
-                    r["child_uid"], r["child_uid"]
-                )
-        for batch in _batched(rows, BATCH_SIZE):
-            if dedupe_evidence_by_content_hash:
+            for batch in _iter_row_batches(
+                conn,
+                """SELECT c.claim_uid AS child_uid, c.parent_claim_uid AS parent_uid, e.event_id AS source_event_id,
+                          c.claim_text AS child_claim_text, p.claim_text AS parent_claim_text
+                   FROM claim c
+                   LEFT JOIN claim p ON p.claim_uid = c.parent_claim_uid
+                   JOIN events e ON e.subject_uid = c.claim_uid AND e.event_type = 'ClaimProposed'
+                   WHERE c.parent_claim_uid IS NOT NULL ORDER BY c.claim_uid""",
+            ):
+                for row in batch:
+                    row["parent_content_hash"] = (
+                        _claim_content_hash(row.get("parent_claim_text"))
+                        if row.get("parent_claim_text") is not None
+                        else row["parent_uid"]
+                    )
+                    row["child_content_hash"] = (
+                        _claim_content_hash(row.get("child_claim_text"))
+                        if row.get("child_claim_text") is not None
+                        else row["child_uid"]
+                    )
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -642,7 +674,14 @@ def _sync_relationships(
                     """,
                     rows=batch,
                 )
-            else:
+        else:
+            for batch in _iter_row_batches(
+                conn,
+                """SELECT c.claim_uid AS child_uid, c.parent_claim_uid AS parent_uid, e.event_id AS source_event_id
+                   FROM claim c
+                   JOIN events e ON e.subject_uid = c.claim_uid AND e.event_type = 'ClaimProposed'
+                   WHERE c.parent_claim_uid IS NOT NULL ORDER BY c.claim_uid""",
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -656,13 +695,12 @@ def _sync_relationships(
 
         # CONTAINS (Investigation -> Claim). When dedupe: CONTAINS_CLAIM with claim_uid on rel
         if dedupe_evidence_by_content_hash:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 "SELECT investigation_uid, claim_uid, claim_text FROM claim ORDER BY claim_uid",
-            )
-            for r in rows:
-                r["claim_content_hash"] = _claim_content_hash(r.get("claim_text"))
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
+                for row in batch:
+                    row["claim_content_hash"] = _claim_content_hash(row.get("claim_text"))
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -674,11 +712,10 @@ def _sync_relationships(
                     rows=batch,
                 )
         else:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 "SELECT investigation_uid, claim_uid FROM claim ORDER BY claim_uid",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -692,15 +729,14 @@ def _sync_relationships(
 
         # PROVIDED_BY (when dedupe: match EvidenceItem by content_hash)
         if dedupe_evidence_by_content_hash:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 """SELECT esl.evidence_uid, esl.source_uid, coalesce(esl.relationship,'') AS relationship,
                           esl.source_event_id, ei.content_hash
                    FROM evidence_source_link esl
                    JOIN evidence_item ei ON esl.evidence_uid = ei.evidence_uid
                    ORDER BY esl.evidence_uid, esl.source_uid""",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -714,11 +750,10 @@ def _sync_relationships(
                     rows=batch,
                 )
         else:
-            rows = _fetch_rows(
+            for batch in _iter_row_batches(
                 conn,
                 "SELECT evidence_uid, source_uid, coalesce(relationship,'') AS relationship, source_event_id FROM evidence_source_link ORDER BY evidence_uid, source_uid",
-            )
-            for batch in _batched(rows, BATCH_SIZE):
+            ):
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -733,17 +768,17 @@ def _sync_relationships(
                 )
 
 
-def _sync_retractions(conn: sqlite3.Connection, driver: Any) -> None:
-    rows = _fetch_rows(
-        conn,
-        """SELECT link_uid, retracted_at, coalesce(rationale, '') AS rationale
-           FROM evidence_link_retraction
-           ORDER BY link_uid""",
-    )
-    if not rows:
-        return
-    with driver.session() as session:
-        for batch in _batched(rows, BATCH_SIZE):
+def _sync_retractions(
+    conn: sqlite3.Connection, driver: Any, *, database: str | None = None
+) -> None:
+    session_kwargs: dict[str, str] = {"database": database} if database else {}
+    with driver.session(**session_kwargs) as session:
+        for batch in _iter_row_batches(
+            conn,
+            """SELECT link_uid, retracted_at, coalesce(rationale, '') AS rationale
+               FROM evidence_link_retraction
+               ORDER BY link_uid""",
+        ):
             session.run(
                 """
                 UNWIND $rows AS row
@@ -763,6 +798,10 @@ def sync_project_to_neo4j(
     password: str,
     *,
     dedupe_evidence_by_content_hash: bool | None = None,
+    database: str | None = None,
+    max_retries: int | None = None,
+    retry_backoff_seconds: float | None = None,
+    connection_timeout_seconds: float | None = None,
 ) -> None:
     """Sync a Chronicle project read model to Neo4j. Idempotent (MERGE). Full rebuild; retractions applied.
 
@@ -781,27 +820,104 @@ def sync_project_to_neo4j(
             "NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH", ""
         ).strip().lower() in ("1", "true", "yes")
 
-    from neo4j import GraphDatabase  # type: ignore[attr-defined]
+    if database is None:
+        database = os.environ.get("NEO4J_DATABASE")
+    database = (database or "").strip() or None
 
-    driver = GraphDatabase.driver(uri, auth=(user, password))
-    try:
-        driver.verify_connectivity()
-    except Exception as e:
-        driver.close()
-        raise ConnectionError(f"Cannot connect to Neo4j at {uri}: {e}") from e
-
-    try:
-        conn = sqlite3.connect(str(db_path))
+    if max_retries is None:
+        retries_raw = os.environ.get("NEO4J_SYNC_MAX_RETRIES", "3").strip()
         try:
-            _run_schema(driver)
-            _sync_nodes(
-                conn, driver, dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash
-            )
-            _sync_relationships(
-                conn, driver, dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash
-            )
-            _sync_retractions(conn, driver)
+            max_retries = int(retries_raw)
+        except ValueError as e:
+            raise ValueError(
+                f"NEO4J_SYNC_MAX_RETRIES must be an integer, got: {retries_raw!r}"
+            ) from e
+    if max_retries < 1:
+        raise ValueError(f"max_retries must be >= 1, got: {max_retries}")
+
+    if retry_backoff_seconds is None:
+        backoff_raw = os.environ.get("NEO4J_SYNC_RETRY_BACKOFF_SECONDS", "1.0").strip()
+        try:
+            retry_backoff_seconds = float(backoff_raw)
+        except ValueError as e:
+            raise ValueError(
+                f"NEO4J_SYNC_RETRY_BACKOFF_SECONDS must be a number, got: {backoff_raw!r}"
+            ) from e
+    if retry_backoff_seconds < 0:
+        raise ValueError(f"retry_backoff_seconds must be >= 0, got: {retry_backoff_seconds}")
+
+    if connection_timeout_seconds is None:
+        timeout_raw = os.environ.get("NEO4J_CONNECTION_TIMEOUT_SECONDS", "15").strip()
+        try:
+            connection_timeout_seconds = float(timeout_raw)
+        except ValueError as e:
+            raise ValueError(
+                f"NEO4J_CONNECTION_TIMEOUT_SECONDS must be a number, got: {timeout_raw!r}"
+            ) from e
+    if connection_timeout_seconds <= 0:
+        raise ValueError(
+            f"connection_timeout_seconds must be > 0, got: {connection_timeout_seconds}"
+        )
+
+    from neo4j import GraphDatabase  # type: ignore[attr-defined]
+    from neo4j.exceptions import (
+        AuthError,
+        ConfigurationError,
+        ServiceUnavailable,
+        SessionExpired,
+        TransientError,
+    )  # type: ignore[attr-defined]
+
+    attempts = max(1, max_retries)
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        driver = GraphDatabase.driver(
+            uri,
+            auth=(user, password),
+            connection_timeout=connection_timeout_seconds,
+        )
+        try:
+            driver.verify_connectivity()
+            conn = sqlite3.connect(str(db_path))
+            try:
+                _run_schema(driver, database=database)
+                _sync_nodes(
+                    conn,
+                    driver,
+                    database=database,
+                    dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash,
+                )
+                _sync_relationships(
+                    conn,
+                    driver,
+                    database=database,
+                    dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash,
+                )
+                _sync_retractions(conn, driver, database=database)
+            finally:
+                conn.close()
+            return
+        except AuthError as e:
+            raise ConnectionError(
+                f"Neo4j authentication failed for {uri} as user '{user}': {e}"
+            ) from e
+        except ConfigurationError as e:
+            raise ConnectionError(
+                f"Neo4j configuration error for {uri} (database={database or 'default'}): {e}"
+            ) from e
+        except (ServiceUnavailable, SessionExpired, TransientError) as e:
+            last_error = e
+            if attempt >= attempts:
+                break
+            time.sleep(retry_backoff_seconds * attempt)
+        except Exception as e:
+            raise ConnectionError(
+                f"Neo4j sync failed for {uri} (database={database or 'default'}): {e}"
+            ) from e
         finally:
-            conn.close()
-    finally:
-        driver.close()
+            driver.close()
+
+    raise ConnectionError(
+        f"Neo4j sync failed after {attempts} attempts for {uri} "
+        f"(database={database or 'default'}). Last error: {last_error}"
+    ) from last_error

@@ -510,6 +510,29 @@ def build_parser(_path_arg: Callable[[str], Path]) -> argparse.ArgumentParser:
         action="store_true",
         help="Full deduplication: one EvidenceItem per content_hash, one Claim per hash(claim_text); lineage via CONTAINS_EVIDENCE and CONTAINS_CLAIM. Can also set NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1",
     )
+    neo4j_sync_p.add_argument(
+        "--database",
+        default=None,
+        help="Neo4j database name (default: NEO4J_DATABASE env or server default)",
+    )
+    neo4j_sync_p.add_argument(
+        "--max-retries",
+        type=int,
+        default=None,
+        help="Max retries for transient Neo4j sync errors (default: NEO4J_SYNC_MAX_RETRIES or 3)",
+    )
+    neo4j_sync_p.add_argument(
+        "--retry-backoff-seconds",
+        type=float,
+        default=None,
+        help="Base retry backoff in seconds (default: NEO4J_SYNC_RETRY_BACKOFF_SECONDS or 1.0)",
+    )
+    neo4j_sync_p.add_argument(
+        "--connection-timeout-seconds",
+        type=float,
+        default=None,
+        help="Neo4j connection timeout in seconds (default: NEO4J_CONNECTION_TIMEOUT_SECONDS or 15)",
+    )
 
     policy_p = subparsers.add_parser(
         "policy", help="List, export, or import policy profiles (Phase 10)"

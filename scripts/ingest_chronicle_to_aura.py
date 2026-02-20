@@ -11,6 +11,7 @@ Usage (from repo root):
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py path/to/file.chronicle
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --project /path/to/project
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --dedupe-evidence-by-content-hash
+  PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --database neo4j --max-retries 5
 
 See docs/aura-graph-pipeline.md for full runbook and Aura setup.
 """
@@ -28,6 +29,7 @@ def _load_dotenv() -> None:
     try:
         import dotenv  # noqa: F401
         from dotenv import load_dotenv
+
         repo_root = Path(__file__).resolve().parent.parent
         load_dotenv(repo_root / ".env")
     except ImportError:
@@ -58,6 +60,29 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "Enable Neo4j sync dedupe mode (one EvidenceItem per content_hash and "
             "one Claim per hash(claim_text))."
         ),
+    )
+    parser.add_argument(
+        "--database",
+        default=None,
+        help="Neo4j database name (default: NEO4J_DATABASE env or server default)",
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=None,
+        help="Max retries for transient sync errors (default: NEO4J_SYNC_MAX_RETRIES or 3)",
+    )
+    parser.add_argument(
+        "--retry-backoff-seconds",
+        type=float,
+        default=None,
+        help="Base retry backoff in seconds (default: NEO4J_SYNC_RETRY_BACKOFF_SECONDS or 1.0)",
+    )
+    parser.add_argument(
+        "--connection-timeout-seconds",
+        type=float,
+        default=None,
+        help="Neo4j connection timeout in seconds (default: NEO4J_CONNECTION_TIMEOUT_SECONDS or 15)",
     )
     return parser.parse_args(argv)
 
@@ -106,6 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     uri = os.environ.get("NEO4J_URI", "").strip()
     user = os.environ.get("NEO4J_USER", "neo4j").strip() or "neo4j"
     password = os.environ.get("NEO4J_PASSWORD")
+    database = (args.database or os.environ.get("NEO4J_DATABASE", "")).strip() or None
     if not uri:
         print(
             "Error: NEO4J_URI not set. Set NEO4J_URI (and NEO4J_PASSWORD) in .env or environment.",
@@ -123,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
         from chronicle.store.neo4j_sync import sync_project_to_neo4j
     except ImportError as e:
         print(
-            "Error: Neo4j driver not installed. Run: pip install -e \".[neo4j]\"",
+            'Error: Neo4j driver not installed. Run: pip install -e ".[neo4j]"',
             file=sys.stderr,
         )
         raise SystemExit(1) from e
@@ -134,6 +160,10 @@ def main(argv: list[str] | None = None) -> int:
         user,
         password,
         dedupe_evidence_by_content_hash=args.dedupe_evidence_by_content_hash,
+        database=database,
+        max_retries=args.max_retries,
+        retry_backoff_seconds=args.retry_backoff_seconds,
+        connection_timeout_seconds=args.connection_timeout_seconds,
     )
     print("Synced to Neo4j.")
     return 0

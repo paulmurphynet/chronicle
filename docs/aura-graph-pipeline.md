@@ -54,6 +54,7 @@ Use a **`.env`** file in the repo root (never commit it; it’s in `.gitignore`)
 | `NEO4J_URI` | Neo4j connection URI | `neo4j+s://xxxxxxxx.databases.neo4j.io` |
 | `NEO4J_USER` | Username (Aura usually `neo4j`) | `neo4j` |
 | `NEO4J_PASSWORD` | Password from Aura console | *(from Aura)* |
+| `NEO4J_DATABASE` | Optional Neo4j database name | `neo4j` |
 | `CHRONICLE_GRAPH_PROJECT` | Path to the Chronicle project that accumulates investigations (optional; script default below) | `./chronicle_graph_project` |
 
 - **Aura:** Create a free database at [Neo4j Aura](https://neo4j.com/cloud/aura/). Copy the URI (e.g. `neo4j+s://xxxx.databases.neo4j.io`), user (usually `neo4j`), and the initial password. Put them in `.env`.
@@ -108,7 +109,7 @@ If you’ve already imported and only want to push the current graph project to 
 chronicle neo4j-sync --path chronicle_graph_project
 ```
 
-Ensure `NEO4J_URI` and `NEO4J_PASSWORD` (and optionally `NEO4J_USER`) are set (e.g. from `.env` or exported in the shell).
+Ensure `NEO4J_URI` and `NEO4J_PASSWORD` (and optionally `NEO4J_USER`, `NEO4J_DATABASE`) are set (e.g. from `.env` or exported in the shell).
 
 To **deduplicate by content** (one EvidenceItem per content_hash, one Claim per hash(claim_text); lineage via CONTAINS_EVIDENCE and CONTAINS_CLAIM):
 
@@ -117,6 +118,12 @@ chronicle neo4j-sync --path chronicle_graph_project --dedupe-evidence-by-content
 ```
 
 Or set `NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH=1` in `.env`.
+
+For transient network hardening, you can tune sync retries/timeouts via env:
+
+- `NEO4J_SYNC_MAX_RETRIES` (default `3`)
+- `NEO4J_SYNC_RETRY_BACKOFF_SECONDS` (default `1.0`)
+- `NEO4J_CONNECTION_TIMEOUT_SECONDS` (default `15`)
 
 ### 4. Query and analytics in Neo4j
 

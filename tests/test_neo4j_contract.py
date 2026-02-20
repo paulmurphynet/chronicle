@@ -20,6 +20,10 @@ sync_rationale_expr = _sync_module._evidence_link_rationale_expr
 export_rationale_expr = _export_module._evidence_link_rationale_expr
 
 
+def _normalized_text(path: Path) -> str:
+    return " ".join(path.read_text(encoding="utf-8").split())
+
+
 def test_neo4j_contract_check_passes() -> None:
     errors = run_checks(REPO_ROOT)
     assert errors == []
@@ -37,6 +41,26 @@ def test_ingest_cli_parses_project_and_dedupe_flag() -> None:
     assert str(args.chronicle_file).endswith("example.chronicle")
     assert str(args.project).endswith("chronicle_graph_project")
     assert args.dedupe_evidence_by_content_hash is True
+
+
+def test_ingest_cli_parses_sync_hardening_options() -> None:
+    args = parse_ingest_args(
+        [
+            "example.chronicle",
+            "--database",
+            "neo4j",
+            "--max-retries",
+            "5",
+            "--retry-backoff-seconds",
+            "2.5",
+            "--connection-timeout-seconds",
+            "30",
+        ]
+    )
+    assert args.database == "neo4j"
+    assert args.max_retries == 5
+    assert args.retry_backoff_seconds == 2.5
+    assert args.connection_timeout_seconds == 30.0
 
 
 def test_neo4j_sync_uses_legacy_notes_column_for_rationale() -> None:
@@ -78,3 +102,12 @@ def test_neo4j_export_prefers_rationale_column_when_present() -> None:
         assert export_rationale_expr(conn) == "coalesce(rationale, '') AS rationale"
     finally:
         conn.close()
+
+
+def test_neo4j_link_edges_merge_by_link_uid() -> None:
+    sync_text = _normalized_text(REPO_ROOT / "chronicle/store/neo4j_sync.py")
+    rels_text = _normalized_text(REPO_ROOT / "neo4j/rebuild/03_relationships.cyp")
+    assert "MERGE (s)-[r:SUPPORTS {link_uid: row.link_uid}]->(c)" in sync_text
+    assert "MERGE (s)-[r:CHALLENGES {link_uid: row.link_uid}]->(c)" in sync_text
+    assert "MERGE (s)-[r:SUPPORTS {link_uid: row.link_uid}]->(c)" in rels_text
+    assert "MERGE (s)-[r:CHALLENGES {link_uid: row.link_uid}]->(c)" in rels_text

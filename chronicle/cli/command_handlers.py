@@ -489,7 +489,15 @@ def cmd_neo4j_export(path: Path, output: Path) -> int:
     return 0
 
 
-def cmd_neo4j_sync(path: Path, *, dedupe_evidence_by_content_hash: bool = False) -> int:
+def cmd_neo4j_sync(
+    path: Path,
+    *,
+    dedupe_evidence_by_content_hash: bool = False,
+    database: str | None = None,
+    max_retries: int | None = None,
+    retry_backoff_seconds: float | None = None,
+    connection_timeout_seconds: float | None = None,
+) -> int:
     """Sync read model to Neo4j (optional; requires [neo4j] and NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)."""
 
     try:
@@ -522,10 +530,17 @@ def cmd_neo4j_sync(path: Path, *, dedupe_evidence_by_content_hash: bool = False)
             user or "neo4j",
             password,
             dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash,
+            database=database,
+            max_retries=max_retries,
+            retry_backoff_seconds=retry_backoff_seconds,
+            connection_timeout_seconds=connection_timeout_seconds,
         )
         print("Synced read model to Neo4j.")
         return 0
     except FileNotFoundError as e:
+        print(str(e), file=sys.stderr)
+        return 1
+    except ValueError as e:
         print(str(e), file=sys.stderr)
         return 1
     except ConnectionError as e:
