@@ -131,6 +131,20 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ---
 
+## Postgres bootstrap: "docker: command not found" or Docker daemon unavailable
+
+**Cause:** Local Postgres bootstrap (`make postgres-up`) depends on Docker + `docker compose`.
+
+**Fix:**
+
+- Install Docker Desktop/Engine with Compose plugin, then retry.
+- Or skip Docker and use managed Postgres directly:
+  - Set `CHRONICLE_POSTGRES_URL`
+  - Run `PYTHONPATH=. python3 scripts/postgres_doctor.py --database-url "$CHRONICLE_POSTGRES_URL"`
+  - Run `PYTHONPATH=. python3 scripts/postgres_smoke.py --database-url "$CHRONICLE_POSTGRES_URL"`
+
+---
+
 ## `ModuleNotFoundError: No module named 'chronicle'` when running a script
 
 **Cause:** The script imports `chronicle` or `tools` but the repo root isn’t on `PYTHONPATH`.

@@ -1,13 +1,12 @@
-# Minimal CI: ruff lint + pytest (scorer, session, verifier smoke).
-# Disabled until maintainer turns it on: triggers removed; run manually via "Run workflow" if needed.
+# CI: core checks, frontend checks, and Postgres event-store smoke.
 name: CI
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [main, master]
-  # pull_request:
-  #   branches: [main, master]
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 jobs:
   lint-and-test:
@@ -99,3 +98,42 @@ jobs:
       - name: Frontend build
         working-directory: frontend
         run: npm run build
+
+  postgres-event-store-smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: chronicle
+          POSTGRES_USER: chronicle
+          POSTGRES_PASSWORD: chronicle_dev_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chronicle -d chronicle"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install project with postgres extra
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[postgres]"
+
+      - name: Postgres doctor
+        env:
+          CHRONICLE_POSTGRES_URL: postgresql://chronicle:chronicle_dev_password@127.0.0.1:5432/chronicle
+        run: python3 scripts/postgres_doctor.py --database-url "$CHRONICLE_POSTGRES_URL"
+
+      - name: Postgres event-store smoke
+        env:
+          CHRONICLE_POSTGRES_URL: postgresql://chronicle:chronicle_dev_password@127.0.0.1:5432/chronicle
+        run: PYTHONPATH=. python3 scripts/postgres_smoke.py --database-url "$CHRONICLE_POSTGRES_URL"

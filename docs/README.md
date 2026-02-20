@@ -45,6 +45,12 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Role-based review checklists](role-based-review-checklists.md) | Role templates for journalism/legal/compliance/history review decisions using review packets and policy compatibility. |
 | [Identity providers](identity-providers.md) | Configured IdP (none, traditional, gov_id, did, zk); how to implement custom IdP adapters. |
 | [Neo4j](neo4j.md) | Optional graph projection and contract check command for sync/export/rebuild parity. |
+| [PostgreSQL backend](POSTGRES.md) | Convergence quickstart for local/managed Postgres, doctor/smoke checks, and current backend scope. |
+| [Support policy](support-policy.md) | Support tiers plus GA/Beta/Experimental status, compatibility policy, and deprecation timeline format. |
+| [Production readiness checklist](production-readiness-checklist.md) | Objective pass/fail release criteria across trust, backend, CI, security, and docs. |
+| [CI branch protection checklist](ci-branch-protection.md) | Exact required checks to configure in branch protection rules. |
+| [Postgres operations runbook](postgres-operations-runbook.md) | Backup, restore, and disaster-recovery runbook for Postgres-backed Chronicle deployments. |
+| [Managed Postgres hardening](postgres-hardening.md) | TLS, least privilege, credential rotation, and network hardening for managed Postgres. |
 | [Supply-chain automation](security-automation.md) | Manual dependency scan workflow (`pip-audit`, `npm audit`) and threshold gating guidance. |
 | [Trust metrics](trust-metrics.md) | KPI definitions and scripts for tracking unsupported-claim reduction over time. |
 | [Lizzie Borden case study](case-study-lizzie-borden.md) | Why we use the inquest transcript as a trust benchmark and how to evaluate responsibly without sensational framing. |

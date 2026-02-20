@@ -12,6 +12,12 @@ Chronicle includes a manual workflow for dependency scanning:
 2. `npm audit --json` for frontend dependencies (`reports/npm-audit.json`)
 3. `scripts/supply_chain_gate.py` to enforce thresholds
 
+For release posture and operational hardening references, see:
+
+- `docs/production-readiness-checklist.md`
+- `docs/postgres-hardening.md`
+- `docs/postgres-operations-runbook.md`
+
 ## Local run
 
 From repo root:

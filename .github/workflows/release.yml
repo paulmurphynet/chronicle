@@ -24,6 +24,20 @@ on:
 jobs:
   validate-and-build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: chronicle
+          POSTGRES_USER: chronicle
+          POSTGRES_PASSWORD: chronicle_dev_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chronicle -d chronicle"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
 
@@ -32,21 +46,65 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install build/test tools
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,postgres]"
+          pip install pip-audit
           pip install build twine
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
 
       - name: Validate release tag
         run: python3 scripts/validate_release_tag.py --tag "${{ inputs.tag }}"
 
-      - name: Core quality gates
+      - name: Core quality gates (SQLite baseline)
         run: |
           ruff check chronicle tools
           ruff format --check chronicle tools
           mypy chronicle
           pytest tests/ -q
+
+      - name: Docs and parity gates
+        run: |
+          python3 scripts/check_doc_links.py .
+          python3 scripts/check_docs_currency.py
+          python3 scripts/check_neo4j_contract.py
+          python3 scripts/adapters/check_examples.py
+
+      - name: Verifier and conformance release gate
+        run: |
+          pytest tests/test_verify.py tests/test_verifier.py tests/test_verifier_parity.py -q
+          PYTHONPATH=. python3 scripts/verticals/journalism/generate_sample.py --output /tmp/release_gate_sample.chronicle
+          PYTHONPATH=. python3 scripts/run_conformance.py /tmp/release_gate_sample.chronicle
+
+      - name: Postgres event-store gate
+        env:
+          CHRONICLE_POSTGRES_URL: postgresql://chronicle:chronicle_dev_password@127.0.0.1:5432/chronicle
+        run: |
+          PYTHONPATH=. python3 scripts/postgres_doctor.py --database-url "$CHRONICLE_POSTGRES_URL"
+          PYTHONPATH=. python3 scripts/postgres_smoke.py --database-url "$CHRONICLE_POSTGRES_URL"
+
+      - name: Dependency vulnerability gate
+        run: |
+          mkdir -p reports
+          pip-audit --format json --output reports/pip-audit.json || true
+          cd frontend
+          npm audit --json > ../reports/npm-audit.json || true
+          cd ..
+          python3 scripts/supply_chain_gate.py \
+            --pip-report reports/pip-audit.json \
+            --npm-report reports/npm-audit.json \
+            --max-python-vulns 0 \
+            --max-high 0 \
+            --max-critical 0
 
       - name: Build distribution
         run: python -m build

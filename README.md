@@ -118,6 +118,10 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Errors](docs/errors.md) | Error types (ChronicleUserError, etc.); when to use which; how CLI/API map to exit codes and HTTP status. |
 | [Technical report](docs/technical-report.md) | Defensibility definition and schema (citable). |
 | [Neo4j](docs/neo4j.md) | Optional graph projection for multi-run analysis and visualization, with a parity check across sync/export/rebuild/docs. |
+| [PostgreSQL backend](docs/POSTGRES.md) | Postgres convergence track: local bootstrap (`make postgres-up`), doctor/smoke checks, and current scope. |
+| [Support policy](docs/support-policy.md) | Support tiers (Lite/Team/Managed), GA/Beta/Experimental status, compatibility guarantees, and deprecation timeline policy. |
+| [Production readiness checklist](docs/production-readiness-checklist.md) | Objective go/no-go criteria for trust gates, backend checks, CI branch protection, security, and docs. |
+| [CI branch protection checklist](docs/ci-branch-protection.md) | Exact required CI checks to enforce before merge on protected branches. |
 | [Neo4j schema](docs/neo4j-schema.md) | Node labels, relationship types, and example Cypher for the sync output. |
 | [Aura graph pipeline](docs/aura-graph-pipeline.md) | Run an ever-growing Chronicle graph on Neo4j Aura (verify → import → sync). |
 | [Chronicle file format](docs/chronicle-file-format.md) | What's inside a .chronicle (ZIP): manifest, DB, evidence; where claims and tensions live. |
@@ -140,6 +144,8 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Integration quick reference](docs/integration-quick-reference.md) | One page: score one run, verify .chronicle, add to harness, optional API/adapters. |
 | [Reference workflows](docs/reference-workflows.md) | Reproducible, end-to-end workflow set for journalism, compliance-style audit, and benchmark trust tracking. |
 | [Integration acceptance checklist](docs/integration-acceptance-checklist.md) | Release checklist for adapters and connectors (contract, trust posture, reproducibility). |
+| [Postgres operations runbook](docs/postgres-operations-runbook.md) | Backup, restore, and disaster-recovery procedure for Chronicle deployments using Postgres. |
+| [Managed Postgres hardening](docs/postgres-hardening.md) | TLS, least-privilege, credential rotation, and network/monitoring hardening guidance. |
 | [User manual](docs/manual/README.md) | Short how-to manual (install, scorer, verifier, format, integration, limits). |
 | [RAG in 5 minutes](docs/rag-in-5-minutes.md) | One command (`chronicle quickstart-rag`) to see defensibility; next steps to scorer and integration. |
 | [Human-in-the-loop and attestation](docs/human-in-the-loop-and-attestation.md) | Human-curated data, actor identity (CLI env, API headers), attestation and verification level; curation workflow. |

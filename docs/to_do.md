@@ -12,10 +12,63 @@ Chronicle should optimize for:
 2. **Contract stability** (scorer contract, API/client parity, reproducible behavior)
 3. **Reference surfaces as adapters** (CLI/API/UI/integrations can evolve without breaking core trust)
 
+## Active convergence program (public + CI + Postgres)
+
+Target: converge to a production-first architecture while keeping SQLite accessible for low-friction local use.
+
+### A. Installability and onboarding (do not lock out users)
+
+- [x] Define support tiers in docs and release notes:
+  - Lite (SQLite, local-first)
+  - Team/Prod (Postgres)
+  - Cloud-managed Postgres (Neon/RDS/Azure/GCP)
+- [x] Add one-command local Postgres bootstrap (`docker compose`) and healthcheck UX.
+- [x] Add `.env` bootstrap path for Postgres that does not overwrite user secrets.
+- [x] Add `doctor` check for Postgres connectivity + dependency readiness.
+- [x] Add smoke flow for Postgres event-store append/read/idempotency-key path.
+- [x] Add troubleshooting section for Docker unavailable / managed-Postgres-only environments.
+
+### B. Backend convergence (SQLite/Postgres parity)
+
+- [ ] Introduce explicit backend factory/config wiring for event store selection (env + session entry points).
+- [ ] Implement Postgres read model schema + projector parity with SQLite.
+- [ ] Implement replay/snapshot parity for Postgres-backed paths.
+- [ ] Ensure `.chronicle` export/import semantics stay backend-independent.
+- [ ] Add invariants verification parity for Postgres projects.
+- [ ] Publish and enforce migration/versioning policy for both backends.
+
+### C. CI and public repo readiness
+
+- [x] Enable push/PR triggers in `.github/workflows/ci.yml`.
+- [x] Add backend matrix jobs (SQLite + Postgres service container).
+- [x] Keep docs/contract/parity checks required in CI.
+- [x] Add required check list for branch protection (document exact required jobs).
+- [x] Add release gate for backend parity suite + verifier/conformance.
+
+### D. Security and operations hardening
+
+- [x] Keep import verification and evidence conflict protections release-critical.
+- [x] Add structured operational runbook for DB backup/restore and disaster recovery.
+- [ ] Add dependency and container vulnerability checks to release criteria.
+- [x] Add environment hardening guide for managed Postgres (TLS, least privilege, rotation).
+
+### E. Support policy and communication
+
+- [x] Define GA/beta/experimental support levels in README/docs.
+- [x] Define backward compatibility policy for contracts and `.chronicle` format.
+- [x] Add deprecation policy and timeline format.
+- [x] Publish "what production-ready means" checklist with objective pass/fail criteria.
+
+### Program release criteria (must pass together)
+
+- [ ] Backend parity: same scenario outputs equivalent defensibility results on SQLite and Postgres.
+- [ ] CI green for required jobs on push/PR with branch protection active.
+- [ ] Postgres onboarding from zero to first successful smoke run in <= 10 minutes.
+- [ ] Docs and troubleshooting validated by docs link/currency checks.
+
 ## On hold by design
 
-- **CI auto-triggers**: push/PR triggers in `.github/workflows/ci.yml` remain disabled; workflow is manual (`workflow_dispatch`) only.
-- **Postgres read model**: `chronicle/store/postgres_event_store.py` exists, but a Postgres read model is not implemented.
+- No active on-hold-by-design items for convergence work. Use this section only for explicit deferrals.
 
 ## Recently completed
 
@@ -63,6 +116,11 @@ Chronicle should optimize for:
 - **R2-01 completed**: shipped policy sensitivity comparison report across session/API/CLI (`get_policy_sensitivity_report`, `GET /investigations/{id}/policy-sensitivity`, `chronicle policy sensitivity`) with claim-level side-by-side outcomes, pairwise delta summaries, practical review implications, and interpretation guidance in reference workflows.
 - **R2-02 completed**: shipped portfolio risk summary command (`scripts/portfolio_risk_summary.py`) with cross-investigation unresolved-tension totals/rates, override concentration analytics, readiness posture breakdown, deterministic risk ranking, JSON artifact output, and regression tests for unresolved/override aggregation behavior.
 - **R2-03 completed**: shipped a deterministic messy-corpus stress pack (`scripts/verticals/messy/generate_sample.py`) covering partial metadata, evidence supersession, redaction, and ambiguous chronology; integrated it into sample quality checks (`scripts/verticals/check_sample_quality.py`) and reference workflow runner coverage (`scripts/run_reference_workflows.py` workflow `messy`) with tests/docs updates.
+- **Postgres onboarding baseline completed**: added local bootstrap tooling (`docker-compose.postgres.yml`, `.env.postgres.example`, `make postgres-*` targets), connectivity doctor (`scripts/postgres_doctor.py`), and event-store smoke runner (`scripts/postgres_smoke.py`) with docs wiring in `docs/POSTGRES.md`.
+- **CI convergence kickoff completed**: enabled CI push/PR triggers and added a Postgres service-container smoke job (`postgres_doctor.py` + `postgres_smoke.py`) in `.github/workflows/ci.yml`.
+- **Support and release policy baseline completed**: added formal support/compatibility/deprecation policy (`docs/support-policy.md`) and objective production-go checklist (`docs/production-readiness-checklist.md`), then linked both from README/docs index.
+- **Branch protection and Postgres ops docs completed**: added required-check configuration guide (`docs/ci-branch-protection.md`), Postgres backup/restore DR runbook (`docs/postgres-operations-runbook.md`), and managed Postgres hardening guidance (`docs/postgres-hardening.md`).
+- **Release-gate hardening completed**: expanded manual release workflow to include docs/parity gates, verifier+conformance checks, Postgres doctor/smoke checks, and dependency vulnerability threshold enforcement.
 
 ## Release blockers
 

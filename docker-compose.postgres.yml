@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: chronicle-postgres
+    restart: unless-stopped
+    ports:
+      - "${CHRONICLE_POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: "${CHRONICLE_POSTGRES_DB:-chronicle}"
+      POSTGRES_USER: "${CHRONICLE_POSTGRES_USER:-chronicle}"
+      POSTGRES_PASSWORD: "${CHRONICLE_POSTGRES_PASSWORD:-chronicle_dev_password}"
+    volumes:
+      - chronicle_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${CHRONICLE_POSTGRES_USER:-chronicle} -d ${CHRONICLE_POSTGRES_DB:-chronicle}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  chronicle_postgres_data:
