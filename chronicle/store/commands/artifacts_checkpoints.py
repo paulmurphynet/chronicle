@@ -25,6 +25,7 @@ from chronicle.core.policy import (
     validate_checkpoint_scope,
 )
 from chronicle.core.uid import generate_artifact_uid, generate_checkpoint_uid, generate_event_id
+from chronicle.store.commands.attestation import apply_attestation_to_payload
 from chronicle.store.protocols import EventStore, ReadModel
 
 
@@ -39,6 +40,8 @@ def create_artifact(
     actor_id: str = "default",
     actor_type: str = "human",
     workspace: str = "spark",
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """CreateArtifact(type, title): title non-empty; emit ArtifactCreated. Returns (event_id, artifact_uid). Forge+ tier. Spec 1.5.1, 1.5.1a."""
     require_workspace_for_command(workspace, "create_artifact")
@@ -57,6 +60,11 @@ def create_artifact(
         title=title.strip(),
         created_by=ActorRef(actor_type=actor_type, actor_id=actor_id),
         notes=notes,
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -68,7 +76,7 @@ def create_artifact(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
     )
     store.append(event)
     return event_id, artifact_uid
@@ -88,6 +96,8 @@ def create_checkpoint(
     actor_type: str = "human",
     workspace: str = "spark",
     policy_profile: PolicyProfile | None = None,
+    verification_level: str | None = None,
+    attestation_ref: str | None = None,
 ) -> tuple[str, str]:
     """CreateCheckpoint(scope_refs): validate scope_refs exist; enforce checkpoint_rules. Returns (event_id, checkpoint_uid). Spec 1.5.1, 1.5.1a."""
     require_workspace_for_command(workspace, "create_checkpoint")
@@ -214,6 +224,11 @@ def create_checkpoint(
         policy_summary=policy_summary,
         certifying_org_id=certifying_org_id,
         certified_at=certified_at,
+    ).to_dict()
+    apply_attestation_to_payload(
+        payload,
+        verification_level=verification_level,
+        attestation_ref=attestation_ref,
     )
     event = Event(
         event_id=event_id,
@@ -225,7 +240,7 @@ def create_checkpoint(
         actor_type=actor_type,
         actor_id=actor_id,
         workspace=workspace,
-        payload=payload.to_dict(),
+        payload=payload,
     )
     store.append(event)
     return event_id, checkpoint_uid

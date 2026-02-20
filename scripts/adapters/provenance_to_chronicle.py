@@ -38,14 +38,15 @@ import base64
 import json
 import sys
 import uuid
+from importlib import import_module
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from chronicle.store.project import create_project
-from chronicle.store.session import ChronicleSession
+create_project = import_module("chronicle.store.project").create_project
+ChronicleSession = import_module("chronicle.store.session").ChronicleSession
 
 
 def decode_content(raw: str, b64: bool = False) -> bytes:
@@ -89,6 +90,7 @@ def run_one(obj: dict, project_path: Path, actor_id: str = "provenance-adapter")
                     source_type=source_type,
                     actor_id=actor_id,
                     actor_type="tool",
+                    workspace="forge",
                 )
                 created_sources.append(source_uid)
             content = a.get("evidence_content")
@@ -111,6 +113,7 @@ def run_one(obj: dict, project_path: Path, actor_id: str = "provenance-adapter")
                 source_uid,
                 actor_id=actor_id,
                 actor_type="tool",
+                workspace="forge",
             )
             created_links += 1
         return {
@@ -128,10 +131,7 @@ def main() -> int:
     parser.add_argument("--path", type=Path, required=True, help="Project path (must exist or will be created)")
     parser.add_argument("--actor-id", default="provenance-adapter", help="Actor id for events")
     args = parser.parse_args()
-    if args.input:
-        raw = Path(args.input).read_text()
-    else:
-        raw = sys.stdin.read()
+    raw = Path(args.input).read_text() if args.input else sys.stdin.read()
     lines = [ln.strip() for ln in raw.strip().splitlines() if ln.strip()]
     if not lines:
         print(json.dumps({"error": "no_input", "message": "empty input"}))

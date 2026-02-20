@@ -1045,6 +1045,8 @@ class ChronicleSessionWriteMixin:
         actor_id: str = "default",
         actor_type: str = "human",
         workspace: str = "spark",
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Create artifact; returns (event_id, artifact_uid)."""
         return create_artifact(
@@ -1057,6 +1059,8 @@ class ChronicleSessionWriteMixin:
             actor_id=actor_id,
             actor_type=actor_type,
             workspace=workspace,
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def create_checkpoint(
@@ -1071,6 +1075,8 @@ class ChronicleSessionWriteMixin:
         actor_id: str = "default",
         actor_type: str = "human",
         workspace: str = "spark",
+        verification_level: str | None = None,
+        attestation_ref: str | None = None,
     ) -> tuple[str, str]:
         """Create checkpoint; returns (event_id, checkpoint_uid). E5.3: optional certifying_org_id, certified_at."""
         return create_checkpoint(
@@ -1086,6 +1092,8 @@ class ChronicleSessionWriteMixin:
             actor_type=actor_type,
             workspace=workspace,
             policy_profile=load_policy_profile(self._path / POLICY_FILENAME),
+            verification_level=verification_level,
+            attestation_ref=attestation_ref,
         )
 
     def freeze_artifact_version(

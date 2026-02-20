@@ -75,4 +75,7 @@ Chronicle-specific fields that have no direct PROV term stay namespaced under th
 - JSON-LD export profile details: [Standards JSON-LD export](standards-jsonld-export.md)
 - ClaimReview profile details: [ClaimReview export](claimreview-export.md)
 - RO-Crate profile details: [RO-Crate export](ro-crate-export.md)
+- C2PA compatibility export details: [C2PA compatibility export](c2pa-compatibility-export.md)
+- VC/Data Integrity export details: [VC/Data Integrity export](vc-data-integrity-export.md)
+- Adjacent standards boundaries: [Adjacent standards guidance](adjacent-standards-guidance.md)
 - Publication process: [Whitepaper and standards submission plan](whitepaper-plan.md)

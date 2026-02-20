@@ -17,6 +17,8 @@ CLAIM_EVIDENCE_METRICS_SCHEMA_VERSION = 1
 STANDARDS_JSONLD_SCHEMA_VERSION = 1
 CLAIMREVIEW_EXPORT_SCHEMA_VERSION = 1
 RO_CRATE_EXPORT_SCHEMA_VERSION = 1
+C2PA_EXPORT_SCHEMA_VERSION = 1
+VC_DATA_INTEGRITY_EXPORT_SCHEMA_VERSION = 1
 
 
 class ReadModelLike(Protocol):
@@ -40,6 +42,8 @@ class ReadModelLike(Protocol):
     def list_sources_by_investigation(self, investigation_uid: str) -> list: ...
     def get_source(self, uid: str) -> Any: ...
     def list_evidence_source_links(self, evidence_uid: str) -> list: ...
+    def list_artifacts_by_investigation(self, investigation_uid: str) -> list: ...
+    def list_checkpoints(self, investigation_uid: str, limit: int = ...) -> list: ...
 
 
 def _get_sources_backing_claim_safe(read_model: ReadModelLike, claim_uid: str) -> list[dict[str, Any]]:
@@ -113,6 +117,24 @@ def _list_evidence_source_links_safe(read_model: ReadModelLike, evidence_uid: st
     """Return evidence-source links when supported by read model; otherwise empty list."""
     try:
         rows = read_model.list_evidence_source_links(evidence_uid)
+    except AttributeError:
+        return []
+    return rows if isinstance(rows, list) else []
+
+
+def _list_artifacts_safe(read_model: ReadModelLike, investigation_uid: str) -> list:
+    """Return artifacts when supported by read model; otherwise empty list."""
+    try:
+        rows = read_model.list_artifacts_by_investigation(investigation_uid)
+    except AttributeError:
+        return []
+    return rows if isinstance(rows, list) else []
+
+
+def _list_checkpoints_safe(read_model: ReadModelLike, investigation_uid: str) -> list:
+    """Return checkpoints when supported by read model; otherwise empty list."""
+    try:
+        rows = read_model.list_checkpoints(investigation_uid, limit=10_000)
     except AttributeError:
         return []
     return rows if isinstance(rows, list) else []
@@ -801,6 +823,316 @@ def build_ro_crate_export(
         "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/ro-crate-export.md",
         "@context": ["https://w3id.org/ro/crate/1.2/context", {"chronicle": "https://w3id.org/chronicle/ns#"}],
         "@graph": graph,
+    }
+
+
+_C2PA_STATUS_VALUES = frozenset({"verified", "failed", "not_verified", "unknown"})
+_C2PA_METADATA_KEYS = (
+    "c2pa_claim_id",
+    "c2pa_assertion_id",
+    "c2pa_manifest_digest",
+    "c2pa_manifest_url",
+    "c2pa_issuer",
+    "c2pa_signer",
+    "c2pa_generator",
+    "c2pa_signature_algorithm",
+    "c2pa_assertion_hash",
+    "c2pa_validation_report_uri",
+)
+
+
+def _extract_c2pa_metadata(meta: dict[str, Any]) -> dict[str, Any]:
+    """Return normalized C2PA metadata fields from evidence metadata dict."""
+    out: dict[str, Any] = {}
+    for key in _C2PA_METADATA_KEYS:
+        value = meta.get(key)
+        if value is None:
+            continue
+        if isinstance(value, str) and not value.strip():
+            continue
+        out[key] = value
+    return out
+
+
+def _normalize_c2pa_status(raw: Any, *, verification_enabled: bool) -> str:
+    """Normalize C2PA verification status with explicit disabled behavior."""
+    if not verification_enabled:
+        return "not_verified"
+    if isinstance(raw, str):
+        value = raw.strip().lower()
+        if value in _C2PA_STATUS_VALUES:
+            return value
+    return "unknown"
+
+
+def build_c2pa_compatibility_export(
+    read_model: ReadModelLike,
+    investigation_uid: str,
+    *,
+    verification_enabled: bool = False,
+) -> dict[str, Any]:
+    """Build C2PA compatibility export from evidence metadata references."""
+    inv = read_model.get_investigation(investigation_uid)
+    if inv is None:
+        raise ValueError("Investigation not found")
+
+    evidence = read_model.list_evidence_by_investigation(investigation_uid)
+    entries: list[dict[str, Any]] = []
+    for item in evidence:
+        metadata = _parse_json_maybe(getattr(item, "metadata_json", None))
+        if not isinstance(metadata, dict):
+            continue
+        c2pa = _extract_c2pa_metadata(metadata)
+        if not c2pa:
+            continue
+        c2pa["c2pa_verification_status"] = _normalize_c2pa_status(
+            metadata.get("c2pa_verification_status"),
+            verification_enabled=verification_enabled,
+        )
+        entries.append(
+            {
+                "evidence_uid": getattr(item, "evidence_uid", ""),
+                "uri": getattr(item, "uri", ""),
+                "content_hash": getattr(item, "content_hash", ""),
+                "metadata": c2pa,
+            }
+        )
+
+    verification_mode = "metadata_only" if verification_enabled else "disabled"
+    return {
+        "schema_version": C2PA_EXPORT_SCHEMA_VERSION,
+        "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/c2pa-compatibility-export.md",
+        "investigation_uid": investigation_uid,
+        "verification": {
+            "enabled": verification_enabled,
+            "mode": verification_mode,
+            "note": (
+                "Chronicle records C2PA references; verification status is metadata-driven."
+                if verification_enabled
+                else "Verification is disabled; all entries are marked not_verified."
+            ),
+        },
+        "evidence_assertions": entries,
+    }
+
+
+_VC_STATUS_VALUES = frozenset({"verified", "failed", "not_verified", "unknown"})
+_VC_VERIFIED_LEVELS = frozenset({"verified_credential", "decentralized", "zk_attested"})
+_VC_NOT_VERIFIED_LEVELS = frozenset({"none", "claimed", "account"})
+
+
+def _normalize_optional_str(raw: Any) -> str | None:
+    if not isinstance(raw, str):
+        return None
+    value = raw.strip()
+    return value or None
+
+
+def _collect_subject_attestation_metadata(
+    read_model: ReadModelLike,
+    investigation_uid: str,
+    subject_uids: list[str],
+) -> dict[str, dict[str, str]]:
+    """Best-effort extraction of attestation metadata from sqlite event payloads."""
+    if not subject_uids:
+        return {}
+    conn = getattr(read_model, "_conn", None)
+    if conn is None or not hasattr(conn, "execute"):
+        return {}
+    placeholders = ",".join("?" for _ in subject_uids)
+    sql = (
+        "SELECT subject_uid, payload, recorded_at, event_id "
+        f"FROM events WHERE investigation_uid = ? AND subject_uid IN ({placeholders}) "
+        "ORDER BY recorded_at DESC, event_id DESC"
+    )
+    params: list[str] = [investigation_uid, *subject_uids]
+    rows = conn.execute(sql, params).fetchall()
+    out: dict[str, dict[str, str]] = {}
+    for subject_uid, payload_raw, recorded_at, event_id in rows:
+        if not isinstance(subject_uid, str) or subject_uid in out:
+            continue
+        payload = _parse_json_maybe(payload_raw)
+        if not isinstance(payload, dict):
+            continue
+        verification_level = _normalize_optional_str(payload.get("_verification_level"))
+        attestation_ref = _normalize_optional_str(payload.get("_attestation_ref"))
+        raw_status = _normalize_optional_str(payload.get("vc_verification_status"))
+        if verification_level is None and attestation_ref is None and raw_status is None:
+            continue
+        entry: dict[str, str] = {}
+        if verification_level is not None:
+            entry["verification_level"] = verification_level
+        if attestation_ref is not None:
+            entry["attestation_ref"] = attestation_ref
+        if raw_status is not None:
+            entry["raw_status"] = raw_status
+        if isinstance(recorded_at, str) and recorded_at:
+            entry["recorded_at"] = recorded_at
+        if isinstance(event_id, str) and event_id:
+            entry["event_id"] = event_id
+        out[subject_uid] = entry
+    return out
+
+
+def _normalize_vc_status(
+    *,
+    raw_status: str | None,
+    verification_level: str | None,
+    verification_enabled: bool,
+) -> str:
+    """Normalize VC/Data Integrity status with explicit disabled behavior."""
+    if not verification_enabled:
+        return "not_verified"
+    if isinstance(raw_status, str):
+        value = raw_status.strip().lower()
+        if value in _VC_STATUS_VALUES:
+            return value
+    level = (verification_level or "").strip().lower()
+    if level in _VC_VERIFIED_LEVELS:
+        return "verified"
+    if not level or level in _VC_NOT_VERIFIED_LEVELS:
+        return "not_verified"
+    return "unknown"
+
+
+def _build_vc_subject_entry(
+    subject_uid: str,
+    metadata: dict[str, dict[str, str]],
+    *,
+    verification_enabled: bool,
+) -> dict[str, Any]:
+    attestation = metadata.get(subject_uid, {})
+    verification_level = attestation.get("verification_level")
+    attestation_ref = attestation.get("attestation_ref")
+    out: dict[str, Any] = {
+        "verification_status": _normalize_vc_status(
+            raw_status=attestation.get("raw_status"),
+            verification_level=verification_level,
+            verification_enabled=verification_enabled,
+        )
+    }
+    if verification_level:
+        out["verification_level"] = verification_level
+    if attestation_ref:
+        out["attestation_ref"] = attestation_ref
+    if attestation.get("recorded_at"):
+        out["recorded_at"] = attestation["recorded_at"]
+    if attestation.get("event_id"):
+        out["source_event_id"] = attestation["event_id"]
+    return out
+
+
+def build_vc_data_integrity_export(
+    read_model: ReadModelLike,
+    investigation_uid: str,
+    *,
+    verification_enabled: bool = False,
+) -> dict[str, Any]:
+    """Build VC/Data Integrity compatibility export for claims, artifacts, and checkpoints."""
+    inv = read_model.get_investigation(investigation_uid)
+    if inv is None:
+        raise ValueError("Investigation not found")
+
+    claims = read_model.list_claims_by_type(investigation_uid=investigation_uid, limit=10_000)
+    artifacts = _list_artifacts_safe(read_model, investigation_uid)
+    checkpoints = _list_checkpoints_safe(read_model, investigation_uid)
+
+    subject_uids = [
+        *[
+            uid
+            for uid in (getattr(c, "claim_uid", None) for c in claims)
+            if isinstance(uid, str) and uid
+        ],
+        *[
+            uid
+            for uid in (getattr(a, "artifact_uid", None) for a in artifacts)
+            if isinstance(uid, str) and uid
+        ],
+        *[
+            uid
+            for uid in (getattr(cp, "checkpoint_uid", None) for cp in checkpoints)
+            if isinstance(uid, str) and uid
+        ],
+    ]
+    attestation_meta = _collect_subject_attestation_metadata(
+        read_model,
+        investigation_uid,
+        subject_uids,
+    )
+
+    claim_entries: list[dict[str, Any]] = []
+    for claim in claims:
+        claim_uid = getattr(claim, "claim_uid", None)
+        if not isinstance(claim_uid, str) or not claim_uid:
+            continue
+        claim_entries.append(
+            {
+                "claim_uid": claim_uid,
+                "claim_text": getattr(claim, "claim_text", ""),
+                "attestation": _build_vc_subject_entry(
+                    claim_uid,
+                    attestation_meta,
+                    verification_enabled=verification_enabled,
+                ),
+            }
+        )
+
+    artifact_entries: list[dict[str, Any]] = []
+    for artifact in artifacts:
+        artifact_uid = getattr(artifact, "artifact_uid", None)
+        if not isinstance(artifact_uid, str) or not artifact_uid:
+            continue
+        artifact_entries.append(
+            {
+                "artifact_uid": artifact_uid,
+                "title": getattr(artifact, "title", "") or artifact_uid,
+                "artifact_type": getattr(artifact, "artifact_type", None),
+                "attestation": _build_vc_subject_entry(
+                    artifact_uid,
+                    attestation_meta,
+                    verification_enabled=verification_enabled,
+                ),
+            }
+        )
+
+    checkpoint_entries: list[dict[str, Any]] = []
+    for checkpoint in checkpoints:
+        checkpoint_uid = getattr(checkpoint, "checkpoint_uid", None)
+        if not isinstance(checkpoint_uid, str) or not checkpoint_uid:
+            continue
+        checkpoint_entries.append(
+            {
+                "checkpoint_uid": checkpoint_uid,
+                "created_at": getattr(checkpoint, "created_at", None),
+                "certifying_org_id": getattr(checkpoint, "certifying_org_id", None),
+                "certified_at": getattr(checkpoint, "certified_at", None),
+                "attestation": _build_vc_subject_entry(
+                    checkpoint_uid,
+                    attestation_meta,
+                    verification_enabled=verification_enabled,
+                ),
+            }
+        )
+
+    verification_mode = "metadata_only" if verification_enabled else "disabled"
+    return {
+        "schema_version": VC_DATA_INTEGRITY_EXPORT_SCHEMA_VERSION,
+        "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/vc-data-integrity-export.md",
+        "investigation_uid": investigation_uid,
+        "verification": {
+            "enabled": verification_enabled,
+            "mode": verification_mode,
+            "note": (
+                "Chronicle records VC/Data Integrity attestation metadata; verification status is metadata-driven."
+                if verification_enabled
+                else "Verification is disabled; entries are marked not_verified."
+            ),
+        },
+        "attestations": {
+            "claims": claim_entries,
+            "artifacts": artifact_entries,
+            "checkpoints": checkpoint_entries,
+        },
     }
 
 

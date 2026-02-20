@@ -24,6 +24,8 @@ If your pipeline produces **provenance assertions** (e.g. “this blob from this
 
 An **adapter** that reads C2PA/CR output and calls Chronicle’s session (register_source, ingest_evidence with metadata, link_evidence_to_source) is the intended way to “land” provenance results in Chronicle. We do not verify the assertions; we persist them so that defensibility and reasoning trails can reference your provenance model.
 
+For a starter C2PA ingestion path, see `scripts/adapters/c2pa_to_chronicle.py` and [C2PA compatibility export](c2pa-compatibility-export.md).
+
 ---
 
 ## Summary

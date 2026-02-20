@@ -87,13 +87,13 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 - [x] **S-05** Add RO-Crate export profile for package interoperability.
   - Include metadata and pointers to Chronicle artifacts.
   - Add sample crate fixtures and compatibility checks.
-- [ ] **S-06** Add C2PA compatibility path.
+- [x] **S-06** Add C2PA compatibility path.
   - Record/import C2PA assertion references in evidence metadata.
-  - Add optional verification integration path (feature-flagged/explicitly marked).
-- [ ] **S-07** Add VC/Data Integrity compatibility path.
+  - Export explicit verification semantics (`disabled` or `metadata_only`) without claiming cryptographic verification.
+- [x] **S-07** Add VC/Data Integrity compatibility path.
   - Define attestation envelope for claims/checkpoints/artifacts.
-  - Add verification-status fields and non-verified-state behavior.
-- [ ] **S-08** Publish adjacent standards guidance.
+  - Add verification-status fields and explicit non-verified behavior (`disabled` vs `metadata_only`).
+- [x] **S-08** Publish adjacent standards guidance.
   - Document integration boundaries for OpenLineage, in-toto, and SLSA.
   - Explicitly state these are complementary layers, not Chronicle replacements.
 

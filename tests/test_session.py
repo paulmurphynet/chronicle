@@ -309,6 +309,120 @@ def test_ro_crate_export_profile(tmp_path: Path) -> None:
     assert evidence_node.get("encodingFormat") == "text/plain"
 
 
+def test_c2pa_compatibility_export_profile(tmp_path: Path) -> None:
+    """build_c2pa_compatibility_export exposes C2PA references from evidence metadata."""
+    from chronicle.store.commands.generic_export import build_c2pa_compatibility_export
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("C2PA export", actor_id="test", actor_type="tool")
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            b"Image bytes placeholder",
+            "image/jpeg",
+            original_filename="photo.jpg",
+            metadata={
+                "c2pa_claim_id": "urn:uuid:claim-1",
+                "c2pa_assertion_id": "assertion-1",
+                "c2pa_manifest_digest": "sha256:abcd",
+                "c2pa_verification_status": "verified",
+            },
+            actor_id="test",
+            actor_type="tool",
+        )
+        disabled = build_c2pa_compatibility_export(session.read_model, inv_uid, verification_enabled=False)
+        enabled = build_c2pa_compatibility_export(session.read_model, inv_uid, verification_enabled=True)
+
+    assert disabled["schema_version"] == 1
+    assert disabled["verification"]["enabled"] is False
+    assert len(disabled["evidence_assertions"]) == 1
+    disabled_entry = disabled["evidence_assertions"][0]
+    assert disabled_entry["evidence_uid"] == ev_uid
+    assert disabled_entry["metadata"]["c2pa_verification_status"] == "not_verified"
+
+    assert enabled["verification"]["enabled"] is True
+    enabled_entry = enabled["evidence_assertions"][0]
+    assert enabled_entry["metadata"]["c2pa_verification_status"] == "verified"
+
+
+def test_vc_data_integrity_export_profile(tmp_path: Path) -> None:
+    """build_vc_data_integrity_export exposes claim/artifact/checkpoint attestation metadata."""
+    from chronicle.store.commands.generic_export import build_vc_data_integrity_export
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "VC export",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "Attested claim",
+            initial_type="SEF",
+            actor_id="test",
+            actor_type="tool",
+            verification_level="verified_credential",
+            attestation_ref="urn:vc:claim-1",
+        )
+        _, artifact_uid = session.create_artifact(
+            inv_uid,
+            "Attested report",
+            actor_id="test",
+            actor_type="tool",
+            workspace="forge",
+            verification_level="verified_credential",
+            attestation_ref="urn:vc:artifact-1",
+        )
+        _, checkpoint_uid = session.create_checkpoint(
+            inv_uid,
+            [claim_uid],
+            artifact_refs=[artifact_uid],
+            reason="Attested checkpoint",
+            actor_id="test",
+            actor_type="tool",
+            workspace="vault",
+            verification_level="claimed",
+            attestation_ref="urn:vc:checkpoint-1",
+        )
+        disabled = build_vc_data_integrity_export(
+            session.read_model,
+            inv_uid,
+            verification_enabled=False,
+        )
+        enabled = build_vc_data_integrity_export(
+            session.read_model,
+            inv_uid,
+            verification_enabled=True,
+        )
+
+    assert disabled["schema_version"] == 1
+    assert disabled["verification"]["enabled"] is False
+    disabled_claim = next(
+        x for x in disabled["attestations"]["claims"] if x["claim_uid"] == claim_uid
+    )
+    assert disabled_claim["attestation"]["verification_status"] == "not_verified"
+
+    assert enabled["verification"]["enabled"] is True
+    claim_entry = next(x for x in enabled["attestations"]["claims"] if x["claim_uid"] == claim_uid)
+    assert claim_entry["attestation"]["verification_status"] == "verified"
+    assert claim_entry["attestation"]["attestation_ref"] == "urn:vc:claim-1"
+
+    artifact_entry = next(
+        x for x in enabled["attestations"]["artifacts"] if x["artifact_uid"] == artifact_uid
+    )
+    assert artifact_entry["attestation"]["verification_status"] == "verified"
+    assert artifact_entry["attestation"]["attestation_ref"] == "urn:vc:artifact-1"
+
+    checkpoint_entry = next(
+        x
+        for x in enabled["attestations"]["checkpoints"]
+        if x["checkpoint_uid"] == checkpoint_uid
+    )
+    assert checkpoint_entry["attestation"]["verification_status"] == "not_verified"
+    assert checkpoint_entry["attestation"]["attestation_ref"] == "urn:vc:checkpoint-1"
+
+
 def test_standards_jsonld_export_profile(tmp_path: Path) -> None:
     """build_standards_jsonld_export includes claims, links, tensions, and source relations."""
     from chronicle.store.commands.generic_export import (

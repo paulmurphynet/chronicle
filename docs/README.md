@@ -45,6 +45,9 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Standards JSON-LD export](standards-jsonld-export.md) | JSON-LD + PROV-oriented investigation export profile (S-02 baseline). |
 | [ClaimReview export](claimreview-export.md) | schema.org ClaimReview profile generated from Chronicle claim defensibility. |
 | [RO-Crate export](ro-crate-export.md) | RO-Crate profile for Chronicle investigation package interoperability. |
+| [C2PA compatibility export](c2pa-compatibility-export.md) | C2PA metadata compatibility export with explicit verification-mode semantics. |
+| [VC/Data Integrity export](vc-data-integrity-export.md) | VC/Data Integrity compatibility export for claim/artifact/checkpoint attestations. |
+| [Adjacent standards guidance](adjacent-standards-guidance.md) | Integration boundaries for OpenLineage, in-toto, and SLSA as complementary layers. |
 | [Whitepaper plan](whitepaper-plan.md) | Process and quality gates for publication and standards-body engagement. |
 | [Whitepaper draft](whitepaper-draft.md) | Working standards-facing whitepaper draft for iterative review. |
 | [Policy profiles](policy-profiles/README.md) | Example JSON profiles (journalism, legal, compliance, history/research) for verticals. |
