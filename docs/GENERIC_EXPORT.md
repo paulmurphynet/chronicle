@@ -2,6 +2,8 @@
 
 Chronicle can export a single investigation’s **read model** as generic JSON or as a ZIP of CSV files. Use this when you need to feed Chronicle data into BI tools, fact-checking pipelines, dashboards, or other systems that don’t consume the full .chronicle format.
 
+For standards-oriented interoperability output, see [Standards JSON-LD export](standards-jsonld-export.md).
+
 ---
 
 ## 1. JSON export

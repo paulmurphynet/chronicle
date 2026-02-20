@@ -1,9 +1,10 @@
-"""Generic export for integrations: JSON/CSL schema. Phase 7.1."""
+"""Generic export for integrations: JSON/CSV and standards-oriented exports."""
 
 from __future__ import annotations
 
 import csv
 import io
+import json
 import zipfile
 from collections.abc import Callable
 from typing import Any, Protocol
@@ -13,6 +14,7 @@ from chronicle.store.read_model import DefensibilityScorecard
 
 GENERIC_EXPORT_SCHEMA_VERSION = 1
 CLAIM_EVIDENCE_METRICS_SCHEMA_VERSION = 1
+STANDARDS_JSONLD_SCHEMA_VERSION = 1
 
 
 class ReadModelLike(Protocol):
@@ -33,6 +35,9 @@ class ReadModelLike(Protocol):
     def get_evidence_span(self, span_uid: str) -> Any: ...
     def get_evidence_item(self, evidence_uid: str) -> Any: ...
     def get_sources_backing_claim(self, claim_uid: str) -> list[dict[str, Any]]: ...
+    def list_sources_by_investigation(self, investigation_uid: str) -> list: ...
+    def get_source(self, uid: str) -> Any: ...
+    def list_evidence_source_links(self, evidence_uid: str) -> list: ...
 
 
 def _get_sources_backing_claim_safe(read_model: ReadModelLike, claim_uid: str) -> list[dict[str, Any]]:
@@ -51,6 +56,86 @@ def _row_to_dict(obj: Any) -> dict[str, Any]:
     if hasattr(obj, "__dataclass_fields__"):
         return {k: getattr(obj, k) for k in obj.__dataclass_fields__}
     return {}
+
+
+def _parse_json_maybe(value: Any) -> Any:
+    """Best-effort parse for JSON-encoded string fields; keep raw on parse failure."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return value
+    stripped = value.strip()
+    if not stripped:
+        return None
+    if not (stripped.startswith("{") or stripped.startswith("[")):
+        return value
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError:
+        return value
+
+
+def _normalize_link_type(raw: str | None) -> str:
+    value = (raw or "").strip().upper()
+    if value == "SUPPORTS":
+        return "SUPPORT"
+    if value == "CHALLENGES":
+        return "CHALLENGE"
+    if value in {"SUPPORT", "CHALLENGE"}:
+        return value
+    return "SUPPORT"
+
+
+def _chronicle_urn(kind: str, uid: str) -> str:
+    return f"urn:chronicle:{kind}:{uid}"
+
+
+def _list_sources_safe(read_model: ReadModelLike, investigation_uid: str) -> list:
+    """Return sources when supported by read model; otherwise empty list."""
+    try:
+        rows = read_model.list_sources_by_investigation(investigation_uid)
+    except AttributeError:
+        return []
+    return rows if isinstance(rows, list) else []
+
+
+def _get_source_safe(read_model: ReadModelLike, source_uid: str) -> Any:
+    """Return one source object when supported by read model; otherwise None."""
+    try:
+        return read_model.get_source(source_uid)
+    except AttributeError:
+        return None
+
+
+def _list_evidence_source_links_safe(read_model: ReadModelLike, evidence_uid: str) -> list:
+    """Return evidence-source links when supported by read model; otherwise empty list."""
+    try:
+        rows = read_model.list_evidence_source_links(evidence_uid)
+    except AttributeError:
+        return []
+    return rows if isinstance(rows, list) else []
+
+
+def _source_node(source: Any) -> dict[str, Any]:
+    """Build one JSON-LD source node."""
+    source_uid = getattr(source, "source_uid", "") or ""
+    source_id = _chronicle_urn("source", source_uid)
+    node: dict[str, Any] = {
+        "@id": source_id,
+        "@type": ["prov:Agent", "chronicle:Source"],
+        "chronicle:sourceUid": source_uid,
+        "chronicle:displayName": getattr(source, "display_name", "") or "",
+        "chronicle:sourceType": getattr(source, "source_type", "") or "",
+    }
+    if getattr(source, "alias", None):
+        node["chronicle:alias"] = source.alias
+    if getattr(source, "notes", None):
+        node["chronicle:notes"] = source.notes
+    if getattr(source, "independence_notes", None):
+        node["chronicle:independenceNotes"] = source.independence_notes
+    if getattr(source, "reliability_notes", None):
+        node["chronicle:reliabilityNotes"] = source.reliability_notes
+    return node
 
 
 def build_generic_export_json(
@@ -147,6 +232,241 @@ def build_claim_evidence_metrics_export(
         "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/claim-evidence-metrics-export.md",
         "investigation_uid": inv_uid,
         "claims": out_claims,
+    }
+
+
+def build_standards_jsonld_export(
+    read_model: ReadModelLike,
+    investigation_uid: str,
+    *,
+    claim_limit: int = 10_000,
+    include_withdrawn: bool = True,
+) -> dict[str, Any]:
+    """Build JSON-LD export profile for one investigation (JSON-LD + PROV-oriented mapping)."""
+    inv = read_model.get_investigation(investigation_uid)
+    if inv is None:
+        raise ValueError("Investigation not found")
+
+    investigation_id = _chronicle_urn("investigation", investigation_uid)
+    claims = read_model.list_claims_by_type(
+        investigation_uid=investigation_uid,
+        limit=claim_limit,
+        include_withdrawn=include_withdrawn,
+    )
+    evidence = read_model.list_evidence_by_investigation(investigation_uid)
+    tensions = read_model.list_tensions(investigation_uid, limit=5000)
+    sources = _list_sources_safe(read_model, investigation_uid)
+
+    graph: list[dict[str, Any]] = [
+        {
+            "@id": investigation_id,
+            "@type": ["prov:Bundle", "chronicle:Investigation"],
+            "chronicle:investigationUid": investigation_uid,
+            "chronicle:title": getattr(inv, "title", "") or "",
+            "chronicle:description": getattr(inv, "description", None),
+            "chronicle:createdAt": getattr(inv, "created_at", None),
+            "chronicle:updatedAt": getattr(inv, "updated_at", None),
+        }
+    ]
+
+    source_uids_seen: set[str] = set()
+    for source in sources:
+        source_uid = getattr(source, "source_uid", None)
+        if not isinstance(source_uid, str) or not source_uid or source_uid in source_uids_seen:
+            continue
+        source_uids_seen.add(source_uid)
+        graph.append(_source_node(source))
+
+    evidence_ids_by_uid: dict[str, str] = {}
+    for item in evidence:
+        evidence_uid = getattr(item, "evidence_uid", "")
+        if not isinstance(evidence_uid, str) or not evidence_uid:
+            continue
+        evidence_id = _chronicle_urn("evidence", evidence_uid)
+        evidence_ids_by_uid[evidence_uid] = evidence_id
+
+        node: dict[str, Any] = {
+            "@id": evidence_id,
+            "@type": ["prov:Entity", "chronicle:EvidenceItem"],
+            "chronicle:evidenceUid": evidence_uid,
+            "chronicle:investigation": {"@id": investigation_id},
+            "chronicle:uri": getattr(item, "uri", "") or "",
+            "chronicle:mediaType": getattr(item, "media_type", "") or "",
+            "chronicle:contentHash": getattr(item, "content_hash", "") or "",
+            "chronicle:integrityStatus": getattr(item, "integrity_status", "") or "",
+            "chronicle:createdAt": getattr(item, "created_at", None),
+        }
+        metadata = _parse_json_maybe(getattr(item, "metadata_json", None))
+        if metadata is not None:
+            node["chronicle:metadata"] = metadata
+
+        evidence_source_links = _list_evidence_source_links_safe(read_model, evidence_uid)
+        source_refs: list[dict[str, str]] = []
+        for es_link in evidence_source_links:
+            source_uid = getattr(es_link, "source_uid", "")
+            if not isinstance(source_uid, str) or not source_uid:
+                continue
+            source_id = _chronicle_urn("source", source_uid)
+            source_refs.append({"@id": source_id})
+
+            if source_uid not in source_uids_seen:
+                source_obj = _get_source_safe(read_model, source_uid)
+                if source_obj is not None:
+                    source_uids_seen.add(source_uid)
+                    graph.append(_source_node(source_obj))
+
+            link_event = getattr(es_link, "source_event_id", "") or ""
+            link_id = _chronicle_urn(
+                "evidence-source-link",
+                f"{evidence_uid}:{source_uid}:{link_event}",
+            )
+            link_node: dict[str, Any] = {
+                "@id": link_id,
+                "@type": ["prov:Attribution", "chronicle:EvidenceSourceLink"],
+                "chronicle:evidence": {"@id": evidence_id},
+                "chronicle:source": {"@id": source_id},
+                "prov:entity": {"@id": evidence_id},
+                "prov:agent": {"@id": source_id},
+            }
+            if getattr(es_link, "relationship", None):
+                link_node["chronicle:relationship"] = es_link.relationship
+            if getattr(es_link, "created_at", None):
+                link_node["chronicle:createdAt"] = es_link.created_at
+            if link_event:
+                link_node["chronicle:sourceEventId"] = link_event
+            graph.append(link_node)
+        if source_refs:
+            node["prov:wasAttributedTo"] = source_refs
+        graph.append(node)
+
+    span_uids_seen: set[str] = set()
+    for claim in claims:
+        claim_uid = getattr(claim, "claim_uid", "")
+        if not isinstance(claim_uid, str) or not claim_uid:
+            continue
+        claim_id = _chronicle_urn("claim", claim_uid)
+
+        support_links = read_model.get_support_for_claim(claim_uid)
+        challenge_links = read_model.get_challenges_for_claim(claim_uid)
+        support_evidence_refs: list[dict[str, str]] = []
+        challenge_evidence_refs: list[dict[str, str]] = []
+        support_seen: set[str] = set()
+        challenge_seen: set[str] = set()
+
+        for link in support_links + challenge_links:
+            span_uid = getattr(link, "span_uid", "")
+            span = read_model.get_evidence_span(span_uid) if span_uid else None
+            if span is None:
+                continue
+            evidence_uid = getattr(span, "evidence_uid", "")
+            evidence_id = evidence_ids_by_uid.get(evidence_uid, _chronicle_urn("evidence", evidence_uid))
+            span_id = _chronicle_urn("span", span_uid)
+
+            if span_uid and span_uid not in span_uids_seen:
+                span_uids_seen.add(span_uid)
+                graph.append(
+                    {
+                        "@id": span_id,
+                        "@type": ["prov:Entity", "chronicle:EvidenceSpan"],
+                        "chronicle:spanUid": span_uid,
+                        "chronicle:evidence": {"@id": evidence_id},
+                        "chronicle:anchorType": getattr(span, "anchor_type", "") or "",
+                        "chronicle:anchor": _parse_json_maybe(getattr(span, "anchor_json", None)),
+                    }
+                )
+
+            link_uid = getattr(link, "link_uid", "") or f"{claim_uid}:{span_uid}"
+            link_id = _chronicle_urn("evidence-link", link_uid)
+            normalized = _normalize_link_type(getattr(link, "link_type", None))
+            graph.append(
+                {
+                    "@id": link_id,
+                    "@type": ["prov:Influence", "chronicle:EvidenceLink"],
+                    "chronicle:linkUid": link_uid,
+                    "chronicle:linkType": normalized,
+                    "chronicle:claim": {"@id": claim_id},
+                    "chronicle:evidence": {"@id": evidence_id},
+                    "chronicle:span": {"@id": span_id},
+                    "prov:entity": {"@id": evidence_id},
+                    "prov:influenced": {"@id": claim_id},
+                    "chronicle:rationale": getattr(link, "rationale", None),
+                    "chronicle:notes": getattr(link, "notes", None),
+                    "chronicle:strength": getattr(link, "strength", None),
+                    "chronicle:defeaterKind": getattr(link, "defeater_kind", None),
+                    "chronicle:createdAt": getattr(link, "created_at", None),
+                }
+            )
+
+            if normalized == "SUPPORT":
+                if evidence_id not in support_seen:
+                    support_seen.add(evidence_id)
+                    support_evidence_refs.append({"@id": evidence_id})
+            else:
+                if evidence_id not in challenge_seen:
+                    challenge_seen.add(evidence_id)
+                    challenge_evidence_refs.append({"@id": evidence_id})
+
+        claim_node: dict[str, Any] = {
+            "@id": claim_id,
+            "@type": ["prov:Entity", "chronicle:Claim"],
+            "chronicle:claimUid": claim_uid,
+            "chronicle:text": getattr(claim, "claim_text", "") or "",
+            "chronicle:status": getattr(claim, "current_status", "") or "",
+            "chronicle:claimType": getattr(claim, "claim_type", None),
+            "chronicle:investigation": {"@id": investigation_id},
+            "chronicle:createdAt": getattr(claim, "created_at", None),
+            "chronicle:updatedAt": getattr(claim, "updated_at", None),
+        }
+        if support_evidence_refs:
+            claim_node["prov:wasDerivedFrom"] = support_evidence_refs
+            claim_node["chronicle:supportingEvidence"] = support_evidence_refs
+        if challenge_evidence_refs:
+            claim_node["chronicle:challengingEvidence"] = challenge_evidence_refs
+        graph.append(claim_node)
+
+    for tension in tensions:
+        tension_uid = getattr(tension, "tension_uid", "")
+        claim_a_uid = getattr(tension, "claim_a_uid", "")
+        claim_b_uid = getattr(tension, "claim_b_uid", "")
+        if not isinstance(tension_uid, str) or not tension_uid:
+            continue
+        if not isinstance(claim_a_uid, str) or not isinstance(claim_b_uid, str):
+            continue
+        tension_id = _chronicle_urn("tension", tension_uid)
+        claim_a_id = _chronicle_urn("claim", claim_a_uid)
+        claim_b_id = _chronicle_urn("claim", claim_b_uid)
+        graph.append(
+            {
+                "@id": tension_id,
+                "@type": ["prov:Influence", "chronicle:Tension"],
+                "chronicle:tensionUid": tension_uid,
+                "chronicle:status": getattr(tension, "status", "") or "",
+                "chronicle:tensionKind": getattr(tension, "tension_kind", None),
+                "chronicle:defeaterKind": getattr(tension, "defeater_kind", None),
+                "chronicle:notes": getattr(tension, "notes", None),
+                "chronicle:claimA": {"@id": claim_a_id},
+                "chronicle:claimB": {"@id": claim_b_id},
+                "prov:influencer": {"@id": claim_a_id},
+                "prov:influenced": {"@id": claim_b_id},
+                "chronicle:createdAt": getattr(tension, "created_at", None),
+                "chronicle:updatedAt": getattr(tension, "updated_at", None),
+            }
+        )
+
+    return {
+        "@context": {
+            "prov": "http://www.w3.org/ns/prov#",
+            "chronicle": "https://w3id.org/chronicle/ns#",
+            "schema": "https://schema.org/",
+            "xsd": "http://www.w3.org/2001/XMLSchema#",
+        },
+        "schema_version": STANDARDS_JSONLD_SCHEMA_VERSION,
+        "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/standards-jsonld-export.md",
+        "chronicle_context_version": 1,
+        "@id": investigation_id,
+        "@type": ["prov:Bundle", "chronicle:InvestigationBundle"],
+        "chronicle:investigationUid": investigation_uid,
+        "@graph": graph,
     }
 
 

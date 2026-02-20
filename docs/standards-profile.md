@@ -72,4 +72,5 @@ Chronicle-specific fields that have no direct PROV term stay namespaced under th
 
 - Backlog and sequencing: [Implementation To-Do](to_do.md)
 - Architecture decision: [ADR 0003](adr/0003-standards-interoperability-profile.md)
+- JSON-LD export profile details: [Standards JSON-LD export](standards-jsonld-export.md)
 - Publication process: [Whitepaper and standards submission plan](whitepaper-plan.md)

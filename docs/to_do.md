@@ -75,7 +75,7 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 - [x] **S-01** Define and publish Chronicle standards profile v0.1 (scope, compatibility tiers, non-goals).
   - Track canonical stance in docs and ADRs.
   - Keep `.chronicle` and verifier as canonical trust artifacts.
-- [ ] **S-02** Implement JSON-LD export profile for investigation-level data.
+- [x] **S-02** Implement JSON-LD export profile for investigation-level data.
   - Include claims, evidence, support/challenge links, tensions, sources.
   - Add versioned JSON-LD context and fixture tests.
 - [ ] **S-03** Implement PROV-compatible mapping profile and validation fixtures.
@@ -189,7 +189,7 @@ Continue validating changes against:
 
 Priority implementation items accepted on 2026-02-20 for immediate execution:
 
-- [ ] Start standards profile implementation with JSON-LD + PROV export MVP.
+- [x] Start standards profile implementation with JSON-LD + PROV export MVP.
   - Add a first `build_standards_jsonld_export(...)` path in export commands.
   - Include fixture tests for one investigation containing support/challenge/tension/source cases.
 - [ ] Prepare whitepaper v0.2 from the working draft with concrete Chronicle examples.

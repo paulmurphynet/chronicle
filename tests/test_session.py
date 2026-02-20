@@ -201,6 +201,140 @@ def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
     assert claim["defensibility"].get("link_assurance_level") == "tool_generated"
 
 
+def test_standards_jsonld_export_profile(tmp_path: Path) -> None:
+    """build_standards_jsonld_export includes claims, links, tensions, and source relations."""
+    from chronicle.store.commands.generic_export import build_standards_jsonld_export
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("JSON-LD export", actor_id="t", actor_type="tool")
+        _, ev_support = session.ingest_evidence(
+            inv_uid,
+            b"Primary support evidence.",
+            "text/plain",
+            original_filename="support.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, span_support = session.anchor_span(
+            inv_uid,
+            ev_support,
+            "text_offset",
+            {"start_char": 0, "end_char": 24},
+            quote="Primary support evidence.",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, ev_challenge = session.ingest_evidence(
+            inv_uid,
+            b"Conflicting evidence snippet.",
+            "text/plain",
+            original_filename="challenge.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, span_challenge = session.anchor_span(
+            inv_uid,
+            ev_challenge,
+            "text_offset",
+            {"start_char": 0, "end_char": 28},
+            quote="Conflicting evidence snippet.",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "The event happened at noon.",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, other_claim_uid = session.propose_claim(
+            inv_uid,
+            "The event happened at midnight.",
+            actor_id="t",
+            actor_type="tool",
+        )
+        session.link_support(inv_uid, span_support, claim_uid, actor_id="t", actor_type="tool")
+        session.link_challenge(inv_uid, span_challenge, claim_uid, actor_id="t", actor_type="tool")
+        session.set_tier(inv_uid, "forge", actor_id="t", actor_type="tool")
+        _, source_uid = session.register_source(
+            inv_uid,
+            "Primary Witness",
+            "person",
+            actor_id="t",
+            actor_type="tool",
+            workspace="forge",
+        )
+        session.link_evidence_to_source(
+            ev_support,
+            source_uid,
+            relationship="provided_by",
+            actor_id="t",
+            actor_type="tool",
+            workspace="forge",
+        )
+        session.declare_tension(
+            inv_uid,
+            claim_uid,
+            other_claim_uid,
+            actor_id="t",
+            actor_type="tool",
+            workspace="forge",
+        )
+
+        data = build_standards_jsonld_export(session.read_model, inv_uid)
+
+    assert data["schema_version"] == 1
+    assert data["chronicle_context_version"] == 1
+    assert "prov" in data["@context"]
+    assert data["@type"] == ["prov:Bundle", "chronicle:InvestigationBundle"]
+
+    graph = data["@graph"]
+    assert isinstance(graph, list)
+    assert len(graph) > 0
+
+    claim_id = f"urn:chronicle:claim:{claim_uid}"
+    source_id = f"urn:chronicle:source:{source_uid}"
+    support_evidence_id = f"urn:chronicle:evidence:{ev_support}"
+
+    claim_node = next((n for n in graph if n.get("@id") == claim_id), None)
+    assert claim_node is not None
+    assert "chronicle:Claim" in claim_node.get("@type", [])
+    assert claim_node.get("prov:wasDerivedFrom") == [{"@id": support_evidence_id}]
+
+    support_link_nodes = [
+        n
+        for n in graph
+        if "chronicle:EvidenceLink" in n.get("@type", [])
+        and n.get("chronicle:linkType") == "SUPPORT"
+    ]
+    challenge_link_nodes = [
+        n
+        for n in graph
+        if "chronicle:EvidenceLink" in n.get("@type", [])
+        and n.get("chronicle:linkType") == "CHALLENGE"
+    ]
+    assert len(support_link_nodes) == 1
+    assert len(challenge_link_nodes) == 1
+
+    source_node = next((n for n in graph if n.get("@id") == source_id), None)
+    assert source_node is not None
+    assert "chronicle:Source" in source_node.get("@type", [])
+
+    evidence_source_nodes = [
+        n for n in graph if "chronicle:EvidenceSourceLink" in n.get("@type", [])
+    ]
+    assert len(evidence_source_nodes) == 1
+    assert evidence_source_nodes[0].get("prov:agent") == {"@id": source_id}
+
+    tension_nodes = [n for n in graph if "chronicle:Tension" in n.get("@type", [])]
+    assert len(tension_nodes) == 1
+    assert tension_nodes[0].get("chronicle:claimA") == {"@id": claim_id}
+    assert tension_nodes[0].get("chronicle:claimB") == {
+        "@id": f"urn:chronicle:claim:{other_claim_uid}"
+    }
+
+
 def test_session_policy_compatibility_preflight(tmp_path: Path) -> None:
     """Session can compare built-under and viewing policy profiles for one investigation."""
     create_project(tmp_path)

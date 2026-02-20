@@ -138,6 +138,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [30/60/90 roadmap](docs/roadmap-30-60-90.md) | Time-bound execution plan from trust baseline to design-partner readiness. |
 | [To-do](docs/to_do.md) | Single implementation to-do list (clear when batch is done and docs are updated). |
 | [Standards profile](docs/standards-profile.md) | Chronicle interoperability profile across JSON-LD/PROV, C2PA, VC/Data Integrity, RO-Crate, and ClaimReview. |
+| [Standards JSON-LD export](docs/standards-jsonld-export.md) | JSON-LD + PROV-oriented export profile for investigations (claims/evidence/links/tensions/sources). |
 | [Whitepaper plan](docs/whitepaper-plan.md) | Publication workflow and standards-submission process for Chronicle. |
 | [Whitepaper draft](docs/whitepaper-draft.md) | Working draft for standards-facing publication and external review. |
 | [Core vs reference architecture](docs/architecture-core-reference.md) | How trust-critical core differs from API/CLI/UI reference surfaces and why that boundary matters. |
