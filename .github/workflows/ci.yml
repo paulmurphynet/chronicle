@@ -137,3 +137,28 @@ jobs:
         env:
           CHRONICLE_POSTGRES_URL: postgresql://chronicle:chronicle_dev_password@127.0.0.1:5432/chronicle
         run: PYTHONPATH=. python3 scripts/postgres_smoke.py --database-url "$CHRONICLE_POSTGRES_URL"
+
+      - name: Postgres backend parity gate
+        env:
+          CHRONICLE_POSTGRES_URL: postgresql://chronicle:chronicle_dev_password@127.0.0.1:5432/chronicle
+        run: |
+          mkdir -p reports
+          PYTHONPATH=. python3 scripts/postgres_backend_parity.py \
+            --database-url "$CHRONICLE_POSTGRES_URL" \
+            --output reports/postgres_backend_parity_ci.json
+
+      - name: Postgres onboarding timed gate
+        env:
+          CHRONICLE_POSTGRES_URL: postgresql://chronicle:chronicle_dev_password@127.0.0.1:5432/chronicle
+        run: |
+          mkdir -p reports
+          PYTHONPATH=. python3 scripts/postgres_onboarding_timed_check.py \
+            --database-url "$CHRONICLE_POSTGRES_URL" \
+            --max-duration-seconds 600 \
+            --output reports/postgres_onboarding_timed_ci.json
+
+      - name: Upload Postgres gate reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-gate-reports
+          path: reports/postgres_*_ci.json

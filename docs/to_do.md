@@ -127,6 +127,7 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - **B4 completed (backend-independent archive semantics)**: decoupled `.chronicle` import/export paths from session backend selection so CLI/API archive operations remain available under `CHRONICLE_EVENT_STORE=postgres`, with routing regression tests.
 - **B5 completed (verify parity)**: added Postgres invariant verification entrypoint (`verify_postgres_url`) and wired CLI `chronicle verify` to use Postgres checks under `CHRONICLE_EVENT_STORE=postgres`.
 - **B6 completed (migration/versioning policy)**: added backend migration and versioning policy doc (`docs/backend-migration-versioning-policy.md`) and linked it in README/docs index for release/process enforcement.
+- **Release-criteria automation expanded**: added deterministic backend parity gate (`scripts/postgres_backend_parity.py`) and timed onboarding gate (`scripts/postgres_onboarding_timed_check.py`), then wired both into CI/release Postgres jobs with JSON artifacts.
 - **Security release criteria expanded**: added Trivy-based container vulnerability gating (`scripts/container_security_gate.py`) and wired supply-chain/release workflows to enforce container HIGH/CRITICAL thresholds alongside dependency scans.
 - **Docs release-criteria check completed**: reran docs link and docs currency gates (`scripts/check_doc_links.py`, `scripts/check_docs_currency.py`) and confirmed pass.
 

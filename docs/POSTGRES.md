@@ -87,6 +87,18 @@ Postgres snapshots currently use a JSON read-model snapshot format for restore +
 
 Archive import/export behavior is backend-independent: `.chronicle` CLI/API archive operations continue to use the canonical archive pipeline and do not require `ChronicleSession` query-surface parity.
 
+## Backend parity and onboarding gates
+
+Use these scripts for convergence/release criteria:
+
+```bash
+PYTHONPATH=. python3 scripts/postgres_backend_parity.py --database-url "$CHRONICLE_POSTGRES_URL"
+PYTHONPATH=. python3 scripts/postgres_onboarding_timed_check.py --database-url "$CHRONICLE_POSTGRES_URL"
+```
+
+- `postgres_backend_parity.py` seeds a deterministic SQLite scenario, replays the same event stream into Postgres, and compares canonical defensibility scorecards claim-by-claim.
+- `postgres_onboarding_timed_check.py` runs doctor + smoke and fails if required steps fail or total elapsed time exceeds 10 minutes (configurable).
+
 The active implementation plan and release criteria live in [to_do](to_do.md#active-convergence-program-public--ci--postgres).
 
 Operational references:

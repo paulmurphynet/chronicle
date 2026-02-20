@@ -89,8 +89,16 @@ jobs:
         env:
           CHRONICLE_POSTGRES_URL: postgresql://chronicle:chronicle_dev_password@127.0.0.1:5432/chronicle
         run: |
+          mkdir -p reports
           PYTHONPATH=. python3 scripts/postgres_doctor.py --database-url "$CHRONICLE_POSTGRES_URL"
           PYTHONPATH=. python3 scripts/postgres_smoke.py --database-url "$CHRONICLE_POSTGRES_URL"
+          PYTHONPATH=. python3 scripts/postgres_backend_parity.py \
+            --database-url "$CHRONICLE_POSTGRES_URL" \
+            --output reports/postgres_backend_parity_release.json
+          PYTHONPATH=. python3 scripts/postgres_onboarding_timed_check.py \
+            --database-url "$CHRONICLE_POSTGRES_URL" \
+            --max-duration-seconds 600 \
+            --output reports/postgres_onboarding_timed_release.json
 
       - name: Dependency vulnerability gate
         run: |

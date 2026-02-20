@@ -4,7 +4,7 @@ MYPY ?= ./.venv/bin/mypy
 PYTEST ?= ./.venv/bin/pytest
 POSTGRES_ENV_FILE ?= .env.postgres.local
 
-.PHONY: help lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke
+.PHONY: help lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
 
 help:
 	@echo "Targets:"
@@ -23,6 +23,8 @@ help:
 	@echo "  postgres-logs - Tail local Postgres logs"
 	@echo "  postgres-doctor - Check Postgres dependency + connectivity"
 	@echo "  postgres-smoke - Run Postgres event-store smoke test"
+	@echo "  postgres-parity - Run SQLite vs Postgres defensibility parity check and write report"
+	@echo "  postgres-onboarding-check - Run timed doctor+smoke onboarding check (<=10 minutes)"
 	@echo "  check        - lint + typecheck + test + docs-check + docs-currency + neo4j-check + adapter-check + reference-workflows"
 
 lint:
@@ -80,3 +82,9 @@ postgres-doctor:
 
 postgres-smoke:
 	PYTHONPATH=. $(PYTHON) scripts/postgres_smoke.py --env-file "$(POSTGRES_ENV_FILE)"
+
+postgres-parity:
+	PYTHONPATH=. $(PYTHON) scripts/postgres_backend_parity.py --env-file "$(POSTGRES_ENV_FILE)"
+
+postgres-onboarding-check:
+	PYTHONPATH=. $(PYTHON) scripts/postgres_onboarding_timed_check.py --env-file "$(POSTGRES_ENV_FILE)"

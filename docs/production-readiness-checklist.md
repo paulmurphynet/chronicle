@@ -20,6 +20,10 @@ This checklist defines objective pass/fail criteria before Chronicle is treated 
 - [ ] Postgres event-store smoke path passes:
   - `PYTHONPATH=. python3 scripts/postgres_doctor.py --database-url "$CHRONICLE_POSTGRES_URL"`
   - `PYTHONPATH=. python3 scripts/postgres_smoke.py --database-url "$CHRONICLE_POSTGRES_URL"`
+- [ ] Backend parity gate passes (SQLite vs Postgres defensibility):
+  - `PYTHONPATH=. python3 scripts/postgres_backend_parity.py --database-url "$CHRONICLE_POSTGRES_URL"`
+- [ ] Timed onboarding gate passes (doctor + smoke <= 10 minutes):
+  - `PYTHONPATH=. python3 scripts/postgres_onboarding_timed_check.py --database-url "$CHRONICLE_POSTGRES_URL"`
 - [ ] Postgres limitation is clearly documented if read-model parity is not yet complete.
 
 ## 3) CI and branch protection gates (required)
