@@ -10,7 +10,7 @@ Each workflow is designed to be:
 
 ## One-command runner
 
-Run the full reference set (journalism, legal, history/research, sample quality gate, compliance report, benchmark trust tracking, Neo4j contract check):
+Run the full reference set (journalism, legal, history/research, sample quality gate, readiness gate, compliance report, benchmark trust tracking, Neo4j contract check):
 
 ```bash
 PYTHONPATH=. python3 scripts/run_reference_workflows.py
@@ -182,3 +182,27 @@ PYTHONPATH=. python3 scripts/adapters/check_examples.py
 ```
 
 Use this with [Integration acceptance checklist](integration-acceptance-checklist.md) before publishing adapters.
+
+## Optional extension: Review readiness gate
+
+For CI/compliance/editorial handoff checks on one investigation:
+
+```bash
+PYTHONPATH=. python3 scripts/review_readiness_gate.py \
+  --path /path/to/project \
+  --investigation-uid <investigation_uid> \
+  --max-unresolved-tensions 0
+```
+
+Typical stricter options:
+
+```bash
+PYTHONPATH=. python3 scripts/review_readiness_gate.py \
+  --path /path/to/project \
+  --investigation-uid <investigation_uid> \
+  --max-unresolved-tensions 0 \
+  --require-built-under-policy \
+  --require-decision-rationale \
+  --require-chain-of-custody-report \
+  --output readiness_gate_report.json
+```

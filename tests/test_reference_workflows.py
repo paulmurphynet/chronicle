@@ -92,3 +92,14 @@ def test_reference_workflow_runner_samples(tmp_path: Path) -> None:
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["summary"]["failed"] == 0
     assert {wf["name"] for wf in report["workflows"]} == {"samples"}
+
+
+def test_reference_workflow_runner_readiness(tmp_path: Path) -> None:
+    out_dir = tmp_path / "runs"
+    rc = runner_module.main(["--output-dir", str(out_dir), "--only", "readiness"])
+    assert rc == 0
+    report_path = out_dir / "reference_workflow_report.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["summary"]["failed"] == 0
+    assert {wf["name"] for wf in report["workflows"]} == {"readiness"}

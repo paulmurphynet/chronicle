@@ -189,6 +189,121 @@ def _workflow_samples(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     return result
 
 
+def _workflow_readiness(repo_root: Path, run_dir: Path) -> dict[str, Any]:
+    from tools.verify_chronicle.verify_chronicle import verify_chronicle_file
+
+    work = run_dir / "readiness"
+    work.mkdir(parents=True, exist_ok=True)
+    sample_path = work / "sample_compliance.chronicle"
+    project_path = work / "project"
+    report_path = work / "readiness_gate_report.json"
+
+    cmd_generate = [
+        sys.executable,
+        str(repo_root / "scripts/verticals/compliance/generate_sample.py"),
+        "--output",
+        str(sample_path),
+    ]
+    run_generate = _run_cmd(cmd_generate, cwd=repo_root)
+
+    result: dict[str, Any] = {
+        "name": "readiness",
+        "status": "failed",
+        "commands": [run_generate],
+        "artifacts": {
+            "sample_chronicle": str(sample_path),
+            "project_path": str(project_path),
+            "readiness_report": str(report_path),
+        },
+    }
+    if run_generate["returncode"] != 0:
+        result["error"] = "sample_generator_failed"
+        return result
+    if not sample_path.is_file():
+        result["error"] = f"missing_sample_file:{sample_path}"
+        return result
+
+    checks = verify_chronicle_file(sample_path, run_invariants=True)
+    failed = [name for name, passed, _detail in checks if not passed]
+    result["verification_checks"] = [
+        {"name": name, "passed": passed, "detail": detail} for name, passed, detail in checks
+    ]
+    if failed:
+        result["error"] = f"sample_verification_failed:{failed}"
+        return result
+
+    cmd_init = [sys.executable, "-m", "chronicle.cli.main", "init", str(project_path)]
+    run_init = _run_cmd(cmd_init, cwd=repo_root)
+    result["commands"].append(run_init)
+    if run_init["returncode"] != 0:
+        result["error"] = "project_init_failed"
+        return result
+
+    cmd_import = [
+        sys.executable,
+        "-m",
+        "chronicle.cli.main",
+        "import",
+        str(sample_path),
+        "--path",
+        str(project_path),
+    ]
+    run_import = _run_cmd(cmd_import, cwd=repo_root)
+    result["commands"].append(run_import)
+    if run_import["returncode"] != 0:
+        result["error"] = "sample_import_failed"
+        return result
+
+    from chronicle.store.session import ChronicleSession
+
+    with ChronicleSession(project_path) as session:
+        invs = session.read_model.list_investigations()
+        if not invs:
+            result["error"] = "no_investigations_after_import"
+            return result
+        investigation_uid = invs[0].investigation_uid
+
+    cmd_gate = [
+        sys.executable,
+        str(repo_root / "scripts/review_readiness_gate.py"),
+        "--path",
+        str(project_path),
+        "--investigation-uid",
+        investigation_uid,
+        "--max-unresolved-tensions",
+        "1",
+        "--output",
+        str(report_path),
+    ]
+    run_gate = _run_cmd(cmd_gate, cwd=repo_root)
+    result["commands"].append(run_gate)
+    if run_gate["returncode"] != 0:
+        result["error"] = "readiness_gate_failed"
+        return result
+    if not report_path.is_file():
+        result["error"] = f"missing_readiness_report:{report_path}"
+        return result
+
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        result["error"] = f"readiness_report_parse_failed:{e}"
+        return result
+
+    result["summary"] = {
+        "investigation_uid": investigation_uid,
+        "status": payload.get("status"),
+        "unresolved_tensions_count": (payload.get("metrics") or {}).get("unresolved_tensions_count"),
+        "policy_deltas_count": (payload.get("metrics") or {}).get("policy_deltas_count"),
+    }
+    if payload.get("status") != "passed":
+        result["error"] = "readiness_report_status_failed"
+        return result
+
+    result["status"] = "passed"
+    return result
+
+
 def _workflow_benchmark(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     work = run_dir / "benchmark"
     work.mkdir(parents=True, exist_ok=True)
@@ -302,6 +417,7 @@ WORKFLOW_RUNNERS: dict[str, Callable[[Path, Path], dict[str, Any]]] = {
     "legal": _workflow_legal,
     "history": _workflow_history,
     "samples": _workflow_samples,
+    "readiness": _workflow_readiness,
     "benchmark": _workflow_benchmark,
     "compliance": _workflow_compliance,
     "neo4j": _workflow_neo4j,
