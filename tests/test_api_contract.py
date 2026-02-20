@@ -307,6 +307,52 @@ def test_api_policy_compatibility_preflight(
         assert any("min_independent_sources" in d.get("rule", "") for d in body["deltas"])
 
 
+def test_api_policy_sensitivity_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Policy sensitivity endpoint returns profile and pairwise comparison deltas."""
+    project_path = tmp_path / "api-policy-sensitivity"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+
+    permissive = default_policy_profile().to_dict()
+    permissive["profile_id"] = "policy_permissive_test"
+    permissive["display_name"] = "Permissive test profile"
+    permissive["mes_rules"][0]["min_independent_sources"] = 0
+    permissive_profile = PolicyProfile.from_dict(permissive)
+    import_policy_to_project(project_path, permissive_profile, activate=False)
+
+    strict = default_policy_profile().to_dict()
+    strict["profile_id"] = "policy_strict_test"
+    strict["display_name"] = "Strict test profile"
+    strict["mes_rules"][0]["min_independent_sources"] = 2
+    strict_profile = PolicyProfile.from_dict(strict)
+    import_policy_to_project(project_path, strict_profile, activate=False)
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+        _seed_claim_flow(client, inv_uid)
+
+        response = client.get(
+            f"/investigations/{inv_uid}/policy-sensitivity",
+            params=[
+                ("profile_id", "policy_permissive_test"),
+                ("profile_id", "policy_strict_test"),
+                ("built_under_profile_id", "policy_permissive_test"),
+                ("limit_claims", "50"),
+            ],
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["investigation_uid"] == inv_uid
+        assert [p["profile_id"] for p in body["selected_profiles"]] == [
+            "policy_permissive_test",
+            "policy_strict_test",
+        ]
+        assert len(body["pairwise_deltas"]) == 1
+        assert body["pairwise_deltas"][0]["summary"]["changed_count"] >= 1
+        assert isinstance(body.get("practical_review_implications"), list)
+
+
 def test_api_reviewer_decision_ledger(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

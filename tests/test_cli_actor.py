@@ -125,6 +125,97 @@ def test_cli_policy_compat_json_output(tmp_path: Path, capsys: pytest.CaptureFix
     assert isinstance(payload.get("deltas"), list)
 
 
+def test_cli_policy_sensitivity_json_output(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """policy sensitivity subcommand returns machine-readable JSON when --json is set."""
+    create_project(tmp_path)
+
+    base = default_policy_profile().to_dict()
+    base["profile_id"] = "policy_permissive_test"
+    base["display_name"] = "Permissive test profile"
+    base["mes_rules"][0]["min_independent_sources"] = 0
+    permissive_profile = PolicyProfile.from_dict(base)
+    import_policy_to_project(tmp_path, permissive_profile, activate=False)
+
+    strict = default_policy_profile().to_dict()
+    strict["profile_id"] = "policy_strict_test"
+    strict["display_name"] = "Strict test profile"
+    strict["mes_rules"][0]["min_independent_sources"] = 2
+    strict_profile = PolicyProfile.from_dict(strict)
+    import_policy_to_project(tmp_path, strict_profile, activate=False)
+
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Policy sensitivity CLI test",
+            actor_id="cli_tester",
+            actor_type="tool",
+        )
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            b"Single-source timeline note.",
+            "text/plain",
+            original_filename="timeline.txt",
+            actor_id="cli_tester",
+            actor_type="tool",
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": len("Single-source timeline note.")},
+            quote="Single-source timeline note.",
+            actor_id="cli_tester",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "Timeline note is reliable.",
+            actor_id="cli_tester",
+            actor_type="tool",
+        )
+        session.link_support(
+            inv_uid,
+            span_uid,
+            claim_uid,
+            actor_id="cli_tester",
+            actor_type="tool",
+        )
+
+    old_argv = sys.argv
+    try:
+        sys.argv = [
+            "chronicle",
+            "policy",
+            "sensitivity",
+            "--path",
+            str(tmp_path),
+            "--investigation",
+            inv_uid,
+            "--profile-id",
+            "policy_permissive_test",
+            "--profile-id",
+            "policy_strict_test",
+            "--built-under-profile-id",
+            "policy_permissive_test",
+            "--json",
+        ]
+        exit_code = main()
+        assert exit_code == 0
+    finally:
+        sys.argv = old_argv
+
+    out = capsys.readouterr().out
+    payload = json.loads(out)
+    assert payload["investigation_uid"] == inv_uid
+    assert [p["profile_id"] for p in payload["selected_profiles"]] == [
+        "policy_permissive_test",
+        "policy_strict_test",
+    ]
+    assert len(payload.get("pairwise_deltas", [])) == 1
+    assert payload["pairwise_deltas"][0]["summary"]["changed_count"] >= 1
+
+
 def test_cli_reviewer_decision_ledger_output(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

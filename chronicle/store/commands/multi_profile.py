@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any
 
-from chronicle.core.policy import load_policy_profile_by_id
+from chronicle.core.policy import POLICY_FILENAME, load_policy_profile, load_policy_profile_by_id
 from chronicle.store.commands.claims import get_defensibility_score
 from chronicle.store.commands.policy_impact import _mes_rule_for_claim_type
 from chronicle.store.protocols import ReadModel
@@ -38,9 +38,12 @@ def get_defensibility_multi_profile(
         for uid in (t.claim_a_uid, t.claim_b_uid):
             claim_uid_to_tensions.setdefault(uid, []).append(t)
 
+    active_profile = load_policy_profile(project_dir / POLICY_FILENAME)
     profiles_out: list[dict[str, Any]] = []
     for profile_id in profile_ids:
         profile = load_policy_profile_by_id(project_dir, profile_id)
+        if profile is None and active_profile.profile_id == profile_id:
+            profile = active_profile
         if profile is None:
             profiles_out.append(
                 {

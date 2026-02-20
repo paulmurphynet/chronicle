@@ -60,6 +60,7 @@ Chronicle should optimize for:
 - **TE-D01 completed (migration-safe)**: temporal uncertainty extension shipped without schema migration by standardizing extended `temporal_json` keys (`known_range_start`, `known_range_end`, `temporal_confidence`) in temporalization command validation, exposing them in defensibility/eval knowability outputs, and updating docs/schema/tests.
 - **Sample data quality hardening completed**: expanded vertical generators (journalism/legal/history + new compliance) with richer provenance/challenge/tension realism, fixed journalism policy-profile pathing, added vertical sample quality gate (`scripts/verticals/check_sample_quality.py`), and integrated sample-quality workflow coverage/tests.
 - **R2-04 completed**: shipped one-shot readiness gate (`scripts/review_readiness_gate.py`) and integrated it into the reference workflow runner (`scripts/run_reference_workflows.py` workflow `readiness`) with tests/docs coverage.
+- **R2-01 completed**: shipped policy sensitivity comparison report across session/API/CLI (`get_policy_sensitivity_report`, `GET /investigations/{id}/policy-sensitivity`, `chronicle policy sensitivity`) with claim-level side-by-side outcomes, pairwise delta summaries, practical review implications, and interpretation guidance in reference workflows.
 
 ## Release blockers
 
@@ -73,8 +74,6 @@ No active release blockers at this time. Keep validating changes against:
 
 Round 2 prioritized backlog (from thought-experiment rerun on 2026-02-20):
 
-- **R2-01 policy sensitivity comparison report**: add one artifact showing the same investigation under selected policy profiles (e.g. journalism/legal/compliance) with side-by-side deltas and practical review implications.
-  Acceptance criteria: session/API/CLI surface returns profile-by-profile comparison; docs include interpretation guidance; regression tests cover at least two profile combinations.
 - **R2-02 portfolio risk summary across investigations**: add cross-investigation analytics for unresolved tensions, override concentration, and readiness posture to support newsroom/legal/compliance portfolio triage.
   Acceptance criteria: project-level report command with JSON output, deterministic ordering, and tests for unresolved/override aggregations.
 - **R2-03 messy corpus stress pack**: add realistic noisy sample pack (partial metadata, supersession/redaction, ambiguous chronology) to test caveat visibility and workflow robustness beyond clean deterministic examples.

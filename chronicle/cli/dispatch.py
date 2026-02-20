@@ -20,6 +20,7 @@ from chronicle.cli.command_handlers import (
     cmd_policy_export,
     cmd_policy_import,
     cmd_policy_list,
+    cmd_policy_sensitivity,
     cmd_quickstart_rag,
     cmd_reasoning_brief,
     cmd_reasoning_trail,
@@ -164,6 +165,17 @@ def dispatch_command(args: argparse.Namespace, actor_id: str, actor_type: str) -
                 viewing_profile_id=args.viewing_profile_id,
                 built_under_profile_id=args.built_under_profile_id,
                 built_under_policy_version=args.built_under_policy_version,
+                as_json=args.json,
+            )
+        if args.policy_command == "sensitivity":
+            return cmd_policy_sensitivity(
+                args.path,
+                args.investigation,
+                profile_ids=args.profile_id,
+                built_under_profile_id=args.built_under_profile_id,
+                built_under_policy_version=args.built_under_policy_version,
+                limit_claims=args.limit_claims,
+                output=args.output,
                 as_json=args.json,
             )
     return 0

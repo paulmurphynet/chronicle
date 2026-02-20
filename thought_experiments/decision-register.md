@@ -27,10 +27,10 @@ All initial `TE-01` through `TE-06` recommendations are now implemented (see `do
 
 | ID | Recommendation | Reason for defer |
 |----|----------------|------------------|
-| TE-R2-01 | Policy sensitivity comparison report across multiple selected profiles for same investigation. | High-value additive artifact; current compatibility primitives exist but report composition is not yet first-class. |
 | TE-R2-02 | Messy real-world stress corpus (partial metadata, supersession, redactions, conflicting/ambiguous chronology). | Valuable for operational trust calibration; should follow current sample-quality hardening rollout. |
 | TE-R2-03 | Portfolio-level cross-investigation summaries (unresolved tensions, override concentration, readiness posture). | Needed for larger-team operations; best staged as reference analytics layer. |
 | TE-R2-04 | One-shot readiness gate command/report composing compatibility, decision posture, and unresolved-risk thresholds. | **Completed** (`scripts/review_readiness_gate.py` + reference workflow runner integration); profile-specific preset guidance remains optional enhancement. |
+| TE-R2-01 | Policy sensitivity comparison report across multiple selected profiles for same investigation. | **Completed** (`get_policy_sensitivity_report`, API `/policy-sensitivity`, CLI `policy sensitivity`) with pairwise deltas and practical implication summaries. |
 
 ## Reject
 

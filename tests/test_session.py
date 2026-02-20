@@ -230,6 +230,84 @@ def test_session_policy_compatibility_preflight(tmp_path: Path) -> None:
     assert any("min_independent_sources" in d.get("rule", "") for d in result["deltas"])
 
 
+def test_session_policy_sensitivity_report(tmp_path: Path) -> None:
+    """R2-01: session policy sensitivity report includes per-profile and pairwise claim deltas."""
+    create_project(tmp_path)
+
+    base = default_policy_profile().to_dict()
+    base["profile_id"] = "policy_permissive_test"
+    base["display_name"] = "Permissive test profile"
+    base["mes_rules"][0]["min_independent_sources"] = 0
+    permissive_profile = PolicyProfile.from_dict(base)
+    import_policy_to_project(tmp_path, permissive_profile, activate=False)
+
+    strict = default_policy_profile().to_dict()
+    strict["profile_id"] = "policy_strict_test"
+    strict["display_name"] = "Strict test profile"
+    strict["mes_rules"][0]["min_independent_sources"] = 2
+    strict_profile = PolicyProfile.from_dict(strict)
+    import_policy_to_project(tmp_path, strict_profile, activate=False)
+
+    text = b"A source reported a key timeline detail."
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Policy sensitivity session test",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            text,
+            "text/plain",
+            original_filename="note.txt",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": len(text.decode("utf-8"))},
+            quote=text.decode("utf-8"),
+            actor_id="tester",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "The timeline detail is accurate.",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        session.link_support(
+            inv_uid,
+            span_uid,
+            claim_uid,
+            actor_id="tester",
+            actor_type="tool",
+        )
+        report = session.get_policy_sensitivity_report(
+            inv_uid,
+            profile_ids=["policy_permissive_test", "policy_strict_test"],
+            built_under_profile_id="policy_permissive_test",
+            limit_claims=100,
+        )
+
+    assert report["investigation_uid"] == inv_uid
+    assert [p["profile_id"] for p in report["selected_profiles"]] == [
+        "policy_permissive_test",
+        "policy_strict_test",
+    ]
+    assert any(c["claim_uid"] == claim_uid for c in report["claim_comparison"])
+    assert len(report["pairwise_deltas"]) == 1
+    pair = report["pairwise_deltas"][0]
+    assert pair["summary"]["changed_count"] >= 1
+    assert pair["summary"]["strong_to_weak_count"] >= 1
+    assert any(
+        item.get("kind") == "profile_outcome_shift"
+        for item in report.get("practical_review_implications", [])
+    )
+
+
 def test_session_temporal_uncertainty_knowability_fields(tmp_path: Path) -> None:
     """Defensibility knowability includes temporal range and confidence when temporalized."""
     from chronicle.eval_metrics import defensibility_metrics_for_claim

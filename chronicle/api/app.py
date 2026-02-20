@@ -386,6 +386,32 @@ def get_policy_compatibility_preflight(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
 
+@app.get("/investigations/{investigation_uid}/policy-sensitivity")
+def get_policy_sensitivity_report(
+    investigation_uid: str,
+    profile_id: list[str] | None = None,
+    built_under_profile_id: str | None = None,
+    built_under_policy_version: str | None = None,
+    limit_claims: int = 200,
+) -> dict[str, Any]:
+    """R2-01: Compare one investigation across selected policy profiles."""
+    effective_claim_limit = _clamp_limit(limit_claims, default=200)
+    path = _get_project_path()
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                raise HTTPException(status_code=404, detail="Investigation not found")
+            return session.get_policy_sensitivity_report(
+                investigation_uid,
+                profile_ids=profile_id,
+                built_under_profile_id=built_under_profile_id,
+                built_under_policy_version=built_under_policy_version,
+                limit_claims=effective_claim_limit,
+            )
+    except ChronicleUserError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
 @app.get("/investigations/{investigation_uid}/reviewer-decision-ledger")
 def get_reviewer_decision_ledger(
     investigation_uid: str,

@@ -564,5 +564,59 @@ def build_parser(_path_arg: Callable[[str], Path]) -> argparse.ArgumentParser:
         action="store_true",
         help="Output compatibility result as JSON",
     )
+    policy_sensitivity_p = policy_sub.add_parser(
+        "sensitivity",
+        help="Compare one investigation across multiple policy profiles",
+    )
+    policy_sensitivity_p.add_argument(
+        "--path",
+        "-p",
+        default=".",
+        type=_path_arg,
+        help="Project path",
+    )
+    policy_sensitivity_p.add_argument(
+        "--investigation",
+        "-i",
+        required=True,
+        help="Investigation UID",
+    )
+    policy_sensitivity_p.add_argument(
+        "--profile-id",
+        action="append",
+        default=None,
+        help=(
+            "Selected profile id; repeat this flag for multiple profiles. "
+            "Default: policy_investigative_journalism + policy_legal + policy_compliance."
+        ),
+    )
+    policy_sensitivity_p.add_argument(
+        "--built-under-profile-id",
+        default=None,
+        help="Built-under profile id override (default: latest checkpoint metadata)",
+    )
+    policy_sensitivity_p.add_argument(
+        "--built-under-policy-version",
+        default=None,
+        help="Built-under policy version/hash override",
+    )
+    policy_sensitivity_p.add_argument(
+        "--limit-claims",
+        type=int,
+        default=200,
+        help="Maximum claims to include in the report (default: 200)",
+    )
+    policy_sensitivity_p.add_argument(
+        "--output",
+        "-o",
+        default=None,
+        type=_path_arg,
+        help="Write full JSON report to this file path",
+    )
+    policy_sensitivity_p.add_argument(
+        "--json",
+        action="store_true",
+        help="Output full policy sensitivity report as JSON",
+    )
 
     return parser

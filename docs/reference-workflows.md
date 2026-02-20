@@ -206,3 +206,24 @@ PYTHONPATH=. python3 scripts/review_readiness_gate.py \
   --require-chain-of-custody-report \
   --output readiness_gate_report.json
 ```
+
+## Optional extension: Policy sensitivity comparison (R2-01)
+
+For side-by-side review of one investigation under multiple policy profiles:
+
+```bash
+chronicle policy sensitivity \
+  --path /path/to/project \
+  --investigation <investigation_uid> \
+  --profile-id policy_investigative_journalism \
+  --profile-id policy_legal \
+  --profile-id policy_compliance \
+  --json
+```
+
+Interpretation guidance:
+
+1. Start with `pairwise_deltas[].summary.changed_count` to see if profile changes materially alter claim outcomes.
+2. Treat `strong_to_weak_count` as a threshold-sensitivity signal that often needs explicit reviewer rationale.
+3. Treat blocked/non-blocked shifts as highest-severity handoff risk, especially before legal or compliance review.
+4. Use `practical_review_implications` as a triage hint, then inspect affected `claim_uid`s before final decisions.

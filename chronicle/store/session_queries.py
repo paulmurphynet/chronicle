@@ -7,12 +7,14 @@ from datetime import (
     UTC,
     datetime,
 )
+from itertools import combinations
 from typing import Any
 
 from chronicle.core.errors import ChronicleUserError
 from chronicle.core.events import EVENT_CHAIN_OF_CUSTODY_REPORT_GENERATED
 from chronicle.core.policy import (
     POLICY_FILENAME,
+    list_policy_profiles,
     load_policy_profile,
     load_policy_profile_by_id,
 )
@@ -407,6 +409,296 @@ class ChronicleSessionQueryMixin:
             "viewing": viewing_resolution,
         }
         return out
+
+    def get_policy_sensitivity_report(
+        self,
+        investigation_uid: str,
+        *,
+        profile_ids: list[str] | None = None,
+        built_under_profile_id: str | None = None,
+        built_under_policy_version: str | None = None,
+        limit_claims: int = 200,
+    ) -> dict[str, Any]:
+        """R2-01: Compare one investigation under multiple policy profiles with side-by-side deltas."""
+        inv = self.read_model.get_investigation(investigation_uid)
+        if inv is None:
+            raise ChronicleUserError("Investigation not found")
+        if limit_claims < 1:
+            raise ChronicleUserError("limit_claims must be >= 1")
+        effective_limit = min(limit_claims, MAX_LIST_LIMIT)
+
+        active_profile = load_policy_profile(self._path / POLICY_FILENAME)
+        def _can_resolve_profile_id(profile_id: str) -> bool:
+            loaded = load_policy_profile_by_id(self._path, profile_id)
+            if loaded is not None:
+                return True
+            return active_profile.profile_id == profile_id
+
+        raw_profile_ids = [p.strip() for p in (profile_ids or []) if isinstance(p, str) and p.strip()]
+        if not raw_profile_ids:
+            preferred_profile_ids = [
+                "policy_investigative_journalism",
+                "policy_legal",
+                "policy_compliance",
+            ]
+            raw_profile_ids = [pid for pid in preferred_profile_ids if _can_resolve_profile_id(pid)]
+            if len(raw_profile_ids) < 2:
+                discovered = [
+                    str(item.get("profile_id"))
+                    for item in list_policy_profiles(self._path)
+                    if item.get("profile_id")
+                ]
+                for pid in discovered:
+                    if pid not in raw_profile_ids:
+                        raw_profile_ids.append(pid)
+
+        selected_profile_ids = list(dict.fromkeys(raw_profile_ids))
+        if len(selected_profile_ids) < 2:
+            raise ChronicleUserError(
+                "Policy sensitivity requires at least two available profiles. "
+                "Import additional profiles or pass --profile-id explicitly."
+            )
+
+        def _resolve_profile(profile_id: str) -> Any:
+            loaded = load_policy_profile_by_id(self._path, profile_id)
+            if loaded is not None:
+                return loaded
+            if active_profile.profile_id == profile_id:
+                return active_profile
+            raise ChronicleUserError(f"Policy profile not found: {profile_id}")
+
+        resolved_profiles = [_resolve_profile(pid) for pid in selected_profile_ids]
+        profile_display_names = {
+            profile.profile_id: (profile.display_name or profile.profile_id)
+            for profile in resolved_profiles
+        }
+
+        compat_by_profile: dict[str, dict[str, Any]] = {}
+        for profile_id in selected_profile_ids:
+            compat_by_profile[profile_id] = self.get_policy_compatibility_preflight(
+                investigation_uid,
+                viewing_profile_id=profile_id,
+                built_under_profile_id=built_under_profile_id,
+                built_under_policy_version=built_under_policy_version,
+            )
+
+        multi_profile = self.get_defensibility_multi_profile(investigation_uid, selected_profile_ids)
+        profiles_payload = multi_profile.get("profiles") or []
+        profile_claim_index: dict[str, dict[str, dict[str, Any]]] = {}
+        for profile_entry in profiles_payload:
+            pid = profile_entry.get("profile_id")
+            if not isinstance(pid, str) or not pid:
+                continue
+            by_claim: dict[str, dict[str, Any]] = {}
+            for claim_entry in profile_entry.get("claims") or []:
+                claim_uid = claim_entry.get("claim_uid")
+                if not isinstance(claim_uid, str) or not claim_uid:
+                    continue
+                by_claim[claim_uid] = claim_entry
+            profile_claim_index[pid] = by_claim
+
+        claims = self.read_model.list_claims_by_type(
+            investigation_uid=investigation_uid,
+            limit=effective_limit,
+            include_withdrawn=False,
+        )
+
+        claim_comparison: list[dict[str, Any]] = []
+        for claim in claims:
+            per_profile: dict[str, Any] = {}
+            summaries: list[str] = []
+            for profile_id in selected_profile_ids:
+                view = (profile_claim_index.get(profile_id) or {}).get(claim.claim_uid) or {}
+                summary = view.get("summary_under_profile")
+                if isinstance(summary, str) and summary:
+                    summaries.append(summary)
+                per_profile[profile_id] = {
+                    "summary_under_profile": summary,
+                    "meets_mes": view.get("meets_mes"),
+                    "blocking_tension_uids": list(view.get("blocking_tension_uids") or []),
+                    "provenance_quality": view.get("provenance_quality"),
+                    "contradiction_status": view.get("contradiction_status"),
+                }
+            claim_comparison.append(
+                {
+                    "claim_uid": claim.claim_uid,
+                    "claim_text": claim.claim_text,
+                    "claim_type": claim.claim_type,
+                    "current_status": claim.current_status,
+                    "outcome_varies_by_profile": len(set(summaries)) > 1 if summaries else False,
+                    "profile_views": per_profile,
+                }
+            )
+
+        profile_summaries: list[dict[str, Any]] = []
+        for profile_id in selected_profile_ids:
+            stats = {
+                "total_claims": 0,
+                "strong_count": 0,
+                "weak_count": 0,
+                "blocked_count": 0,
+            }
+            by_claim = profile_claim_index.get(profile_id) or {}
+            for claim in claims:
+                view = by_claim.get(claim.claim_uid) or {}
+                summary = view.get("summary_under_profile")
+                if not isinstance(summary, str):
+                    continue
+                stats["total_claims"] += 1
+                if summary == "strong":
+                    stats["strong_count"] += 1
+                elif summary == "weak":
+                    stats["weak_count"] += 1
+                elif summary == "blocked":
+                    stats["blocked_count"] += 1
+            compatibility = compat_by_profile.get(profile_id, {})
+            deltas = compatibility.get("deltas") or []
+            if compatibility.get("message"):
+                posture = "no_baseline"
+            elif deltas:
+                posture = "changed"
+            else:
+                posture = "compatible"
+            profile_summaries.append(
+                {
+                    "profile_id": profile_id,
+                    "display_name": profile_display_names.get(profile_id, profile_id),
+                    "claim_summary": stats,
+                    "compatibility_summary": {
+                        "posture": posture,
+                        "delta_count": len(deltas),
+                    },
+                    "compatibility": compatibility,
+                }
+            )
+
+        pairwise_deltas: list[dict[str, Any]] = []
+        for left_id, right_id in combinations(selected_profile_ids, 2):
+            summary_counts = {
+                "stable_count": 0,
+                "changed_count": 0,
+                "strong_to_weak_count": 0,
+                "weak_to_strong_count": 0,
+                "blocked_to_non_blocked_count": 0,
+                "non_blocked_to_blocked_count": 0,
+            }
+            changed_claims: list[dict[str, Any]] = []
+            for row in claim_comparison:
+                left_summary = row["profile_views"].get(left_id, {}).get("summary_under_profile")
+                right_summary = row["profile_views"].get(right_id, {}).get("summary_under_profile")
+                if not isinstance(left_summary, str) or not isinstance(right_summary, str):
+                    continue
+                if left_summary == right_summary:
+                    summary_counts["stable_count"] += 1
+                    continue
+                summary_counts["changed_count"] += 1
+                if left_summary == "strong" and right_summary == "weak":
+                    summary_counts["strong_to_weak_count"] += 1
+                elif left_summary == "weak" and right_summary == "strong":
+                    summary_counts["weak_to_strong_count"] += 1
+                if left_summary == "blocked" and right_summary != "blocked":
+                    summary_counts["blocked_to_non_blocked_count"] += 1
+                if left_summary != "blocked" and right_summary == "blocked":
+                    summary_counts["non_blocked_to_blocked_count"] += 1
+                changed_claims.append(
+                    {
+                        "claim_uid": row.get("claim_uid"),
+                        "claim_text": row.get("claim_text"),
+                        "from_summary": left_summary,
+                        "to_summary": right_summary,
+                    }
+                )
+            pairwise_deltas.append(
+                {
+                    "left_profile_id": left_id,
+                    "left_display_name": profile_display_names.get(left_id, left_id),
+                    "right_profile_id": right_id,
+                    "right_display_name": profile_display_names.get(right_id, right_id),
+                    "summary": summary_counts,
+                    "changed_claims": changed_claims,
+                }
+            )
+
+        practical_review_implications: list[dict[str, Any]] = []
+        for profile_summary in profile_summaries:
+            delta_count = (
+                profile_summary.get("compatibility_summary", {}).get("delta_count", 0) or 0
+            )
+            if delta_count > 0:
+                practical_review_implications.append(
+                    {
+                        "kind": "policy_delta",
+                        "severity": "medium",
+                        "profile_id": profile_summary.get("profile_id"),
+                        "message": (
+                            f"{profile_summary.get('display_name')} has {delta_count} policy "
+                            "delta(s) from built-under context; reviewer rationale should confirm "
+                            "that threshold changes are intentional."
+                        ),
+                    }
+                )
+        for pair in pairwise_deltas:
+            p_summary = pair.get("summary") or {}
+            strong_to_weak = int(p_summary.get("strong_to_weak_count", 0) or 0)
+            blocked_shift = int(
+                (p_summary.get("blocked_to_non_blocked_count", 0) or 0)
+                + (p_summary.get("non_blocked_to_blocked_count", 0) or 0)
+            )
+            changed_count = int(p_summary.get("changed_count", 0) or 0)
+            if changed_count <= 0:
+                continue
+            if blocked_shift > 0:
+                severity = "high"
+            elif strong_to_weak > 0:
+                severity = "medium"
+            else:
+                severity = "low"
+            practical_review_implications.append(
+                {
+                    "kind": "profile_outcome_shift",
+                    "severity": severity,
+                    "left_profile_id": pair.get("left_profile_id"),
+                    "right_profile_id": pair.get("right_profile_id"),
+                    "message": (
+                        f"{changed_count} claim(s) change outcome between "
+                        f"{pair.get('left_display_name')} and {pair.get('right_display_name')}."
+                    ),
+                    "summary": p_summary,
+                }
+            )
+        if not practical_review_implications:
+            practical_review_implications.append(
+                {
+                    "kind": "alignment",
+                    "severity": "low",
+                    "message": "Selected profiles produced aligned outcomes for the compared claims.",
+                }
+            )
+
+        first_compat = compat_by_profile.get(selected_profile_ids[0], {})
+        return {
+            "investigation_uid": investigation_uid,
+            "investigation_title": inv.title,
+            "generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "claim_limit": effective_limit,
+            "selected_profiles": [
+                {
+                    "profile_id": pid,
+                    "display_name": profile_display_names.get(pid, pid),
+                }
+                for pid in selected_profile_ids
+            ],
+            "built_under_context": {
+                "built_under": first_compat.get("built_under"),
+                "built_under_policy_id": first_compat.get("built_under_policy_id"),
+                "built_under_policy_version": first_compat.get("built_under_policy_version"),
+                "resolution": (first_compat.get("resolution") or {}).get("built_under"),
+            },
+            "profile_summaries": profile_summaries,
+            "claim_comparison": claim_comparison,
+            "pairwise_deltas": pairwise_deltas,
+            "practical_review_implications": practical_review_implications,
+        }
 
     def get_review_packet(
         self,

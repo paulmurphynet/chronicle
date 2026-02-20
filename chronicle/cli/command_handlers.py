@@ -213,6 +213,75 @@ def cmd_policy_compat(
     return 0
 
 
+def cmd_policy_sensitivity(
+    path: Path,
+    investigation_uid: str,
+    *,
+    profile_ids: list[str] | None = None,
+    built_under_profile_id: str | None = None,
+    built_under_policy_version: str | None = None,
+    limit_claims: int = 200,
+    output: Path | None = None,
+    as_json: bool = False,
+) -> int:
+    """R2-01: Compare the same investigation under multiple policy profiles."""
+    if not project_exists(path):
+        print(f"Not a Chronicle project. Run: chronicle init {path}", file=sys.stderr)
+        return 1
+    try:
+        with ChronicleSession(path) as session:
+            if session.read_model.get_investigation(investigation_uid) is None:
+                print(f"Investigation not found: {investigation_uid}", file=sys.stderr)
+                return 1
+            report = session.get_policy_sensitivity_report(
+                investigation_uid,
+                profile_ids=profile_ids,
+                built_under_profile_id=built_under_profile_id,
+                built_under_policy_version=built_under_policy_version,
+                limit_claims=limit_claims,
+            )
+    except ChronicleUserError as e:
+        print(str(e), file=sys.stderr)
+        return 1
+
+    out_json = json.dumps(report, indent=2)
+    if output is not None:
+        output.write_text(out_json, encoding="utf-8")
+        print(f"Policy sensitivity report written to {output}", file=sys.stderr)
+    if as_json:
+        print(out_json)
+        return 0
+    if output is not None:
+        return 0
+
+    print("Policy sensitivity report")
+    print(f"  Investigation: {report.get('investigation_uid')}")
+    selected = report.get("selected_profiles") or []
+    if selected:
+        print("  Profiles:")
+        for profile in selected:
+            print(f"    - {profile.get('profile_id')} ({profile.get('display_name')})")
+    for profile_summary in report.get("profile_summaries") or []:
+        claim_summary = profile_summary.get("claim_summary") or {}
+        compat_summary = profile_summary.get("compatibility_summary") or {}
+        print(f"  {profile_summary.get('display_name')} ({profile_summary.get('profile_id')}):")
+        print(
+            "    claims="
+            f"{claim_summary.get('total_claims', 0)} strong={claim_summary.get('strong_count', 0)} "
+            f"weak={claim_summary.get('weak_count', 0)} blocked={claim_summary.get('blocked_count', 0)}"
+        )
+        print(
+            "    compatibility="
+            f"{compat_summary.get('posture')} deltas={compat_summary.get('delta_count', 0)}"
+        )
+    implications = report.get("practical_review_implications") or []
+    if implications:
+        print("  Practical implications:")
+        for implication in implications:
+            print(f"    - [{implication.get('severity')}] {implication.get('message')}")
+    return 0
+
+
 def cmd_verify_chronicle(chronicle_file: Path, no_invariants: bool) -> int:
     """Verify a .chronicle file (ZIP) without Chronicle runtime. Phase 8."""
     from tools.verify_chronicle.verify_chronicle import verify_chronicle_file
