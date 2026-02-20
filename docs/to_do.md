@@ -78,13 +78,13 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 - [x] **S-02** Implement JSON-LD export profile for investigation-level data.
   - Include claims, evidence, support/challenge links, tensions, sources.
   - Add versioned JSON-LD context and fixture tests.
-- [ ] **S-03** Implement PROV-compatible mapping profile and validation fixtures.
+- [x] **S-03** Implement PROV-compatible mapping profile and validation fixtures.
   - Provide deterministic mapping rules from Chronicle entities/events.
   - Add regression tests for required PROV-aligned fields.
-- [ ] **S-04** Add ClaimReview export adapter/profile.
+- [x] **S-04** Add ClaimReview export adapter/profile.
   - Map Chronicle claim/review outputs to schema.org `ClaimReview`.
   - Document caveats for fields that are optional or unavailable.
-- [ ] **S-05** Add RO-Crate export profile for package interoperability.
+- [x] **S-05** Add RO-Crate export profile for package interoperability.
   - Include metadata and pointers to Chronicle artifacts.
   - Add sample crate fixtures and compatibility checks.
 - [ ] **S-06** Add C2PA compatibility path.

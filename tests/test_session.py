@@ -201,9 +201,120 @@ def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
     assert claim["defensibility"].get("link_assurance_level") == "tool_generated"
 
 
+def test_claimreview_export_profile(tmp_path: Path) -> None:
+    """build_claimreview_export returns schema.org ClaimReview entries with mapped ratings."""
+    from chronicle.store.commands.generic_export import build_claimreview_export
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "ClaimReview export", actor_id="test", actor_type="tool"
+        )
+        _, ev_support = session.ingest_evidence(
+            inv_uid,
+            b"Support text",
+            "text/plain",
+            original_filename="support.txt",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, span_support = session.anchor_span(
+            inv_uid,
+            ev_support,
+            "text_offset",
+            {"start_char": 0, "end_char": 12},
+            quote="Support text",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, ev_challenge = session.ingest_evidence(
+            inv_uid,
+            b"Challenge text",
+            "text/plain",
+            original_filename="challenge.txt",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, span_challenge = session.anchor_span(
+            inv_uid,
+            ev_challenge,
+            "text_offset",
+            {"start_char": 0, "end_char": 14},
+            quote="Challenge text",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid, "A disputed claim.", actor_id="test", actor_type="tool"
+        )
+        session.link_support(inv_uid, span_support, claim_uid, actor_id="test", actor_type="tool")
+        session.link_challenge(inv_uid, span_challenge, claim_uid, actor_id="test", actor_type="tool")
+
+        data = build_claimreview_export(
+            session.read_model,
+            session.get_defensibility_score,
+            inv_uid,
+            publisher_name="Chronicle Test Publisher",
+        )
+
+    assert data["schema_version"] == 1
+    assert data["@context"] == "https://schema.org"
+    assert data["@type"] == "ItemList"
+    assert len(data["itemListElement"]) == 1
+    review = data["itemListElement"][0]
+    assert review["@type"] == "ClaimReview"
+    assert review["itemReviewed"]["identifier"] == claim_uid
+    assert review["author"]["name"] == "Chronicle Test Publisher"
+    assert review["reviewRating"]["ratingValue"] == 1
+    assert review["reviewRating"]["alternateName"] == "Challenged"
+    assert isinstance(review.get("reviewBody"), str)
+
+
+def test_ro_crate_export_profile(tmp_path: Path) -> None:
+    """build_ro_crate_export returns RO-Crate-shaped metadata with Chronicle parts."""
+    from chronicle.store.commands.generic_export import build_ro_crate_export
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("RO-Crate export", actor_id="test", actor_type="tool")
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            b"Evidence bytes",
+            "text/plain",
+            original_filename="evidence.txt",
+            actor_id="test",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid, "A simple claim.", actor_id="test", actor_type="tool"
+        )
+        data = build_ro_crate_export(session.read_model, inv_uid)
+
+    assert data["schema_version"] == 1
+    assert data["@context"][0] == "https://w3id.org/ro/crate/1.2/context"
+
+    graph = data["@graph"]
+    assert isinstance(graph, list)
+    dataset = next((n for n in graph if n.get("@id") == "./"), None)
+    assert dataset is not None
+    assert "Dataset" in dataset.get("@type", [])
+    parts = dataset.get("hasPart", [])
+    assert {"@id": "chronicle.db"} in parts
+    assert {"@id": "manifest.json"} in parts
+    assert {"@id": f"#claim:{claim_uid}"} in parts
+
+    evidence_node = next((n for n in graph if n.get("identifier") == ev_uid), None)
+    assert evidence_node is not None
+    assert evidence_node.get("@type") == "File"
+    assert evidence_node.get("encodingFormat") == "text/plain"
+
+
 def test_standards_jsonld_export_profile(tmp_path: Path) -> None:
     """build_standards_jsonld_export includes claims, links, tensions, and source relations."""
-    from chronicle.store.commands.generic_export import build_standards_jsonld_export
+    from chronicle.store.commands.generic_export import (
+        build_standards_jsonld_export,
+        validate_standards_jsonld_export,
+    )
 
     create_project(tmp_path)
     with ChronicleSession(tmp_path) as session:
@@ -333,6 +444,56 @@ def test_standards_jsonld_export_profile(tmp_path: Path) -> None:
     assert tension_nodes[0].get("chronicle:claimB") == {
         "@id": f"urn:chronicle:claim:{other_claim_uid}"
     }
+    assert validate_standards_jsonld_export(data) == []
+
+
+def test_standards_jsonld_export_validator_detects_missing_reference(tmp_path: Path) -> None:
+    """Validator reports missing references in PROV-required relation fields."""
+    from chronicle.store.commands.generic_export import (
+        build_standards_jsonld_export,
+        validate_standards_jsonld_export,
+    )
+
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "JSON-LD validation", actor_id="t", actor_type="tool"
+        )
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            b"Supporting evidence.",
+            "text/plain",
+            original_filename="support.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 20},
+            quote="Supporting evidence.",
+            actor_id="t",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid, "Claim text.", actor_id="t", actor_type="tool"
+        )
+        session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
+        payload = build_standards_jsonld_export(session.read_model, inv_uid)
+
+    graph = payload.get("@graph")
+    assert isinstance(graph, list)
+    broken_graph = [
+        node
+        for node in graph
+        if not (isinstance(node, dict) and node.get("@id") == f"urn:chronicle:evidence:{ev_uid}")
+    ]
+    broken = dict(payload)
+    broken["@graph"] = broken_graph
+
+    errors = validate_standards_jsonld_export(broken)
+    assert any("references missing node" in err for err in errors)
 
 
 def test_session_policy_compatibility_preflight(tmp_path: Path) -> None:

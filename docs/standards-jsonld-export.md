@@ -6,6 +6,10 @@ Chronicle provides a standards-oriented JSON-LD export profile for one investiga
 
 `chronicle.store.commands.generic_export.build_standards_jsonld_export(read_model, investigation_uid, *, claim_limit=10000, include_withdrawn=True)`
 
+Validation API:
+
+`chronicle.store.commands.generic_export.validate_standards_jsonld_export(payload)`
+
 Returns a JSON object containing:
 
 - `@context` with Chronicle and PROV prefixes
@@ -51,3 +55,15 @@ Chronicle-specific fields stay namespaced under `chronicle:*`.
 - This export is an interoperability profile; Chronicle's canonical artifact remains `.chronicle`.
 - Semantic compatibility does not imply cryptographic verification.
 - C2PA / VC / RO-Crate / ClaimReview compatibility layers are tracked separately in the standards program.
+
+## PROV-required invariants (S-03)
+
+The validator enforces minimum PROV-aligned mapping rules:
+
+1. `chronicle:Claim`, `chronicle:EvidenceItem`, `chronicle:EvidenceSpan` include `prov:Entity`.
+2. `chronicle:Source` includes `prov:Agent`.
+3. `chronicle:EvidenceLink` includes `prov:Influence` and has resolvable `prov:entity` and `prov:influenced`.
+4. `chronicle:EvidenceSourceLink` includes `prov:Attribution` and has resolvable `prov:entity` and `prov:agent`.
+5. `chronicle:Tension` includes `prov:Influence` and has resolvable `prov:influencer` and `prov:influenced` pointing to claims.
+
+Use this validator in tests or integration gates to ensure mapping regressions are caught early.

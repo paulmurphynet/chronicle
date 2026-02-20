@@ -15,6 +15,8 @@ from chronicle.store.read_model import DefensibilityScorecard
 GENERIC_EXPORT_SCHEMA_VERSION = 1
 CLAIM_EVIDENCE_METRICS_SCHEMA_VERSION = 1
 STANDARDS_JSONLD_SCHEMA_VERSION = 1
+CLAIMREVIEW_EXPORT_SCHEMA_VERSION = 1
+RO_CRATE_EXPORT_SCHEMA_VERSION = 1
 
 
 class ReadModelLike(Protocol):
@@ -466,6 +468,338 @@ def build_standards_jsonld_export(
         "@id": investigation_id,
         "@type": ["prov:Bundle", "chronicle:InvestigationBundle"],
         "chronicle:investigationUid": investigation_uid,
+        "@graph": graph,
+    }
+
+
+def _coerce_types(node: dict[str, Any]) -> set[str]:
+    """Return node @type values as a normalized set of strings."""
+    raw = node.get("@type")
+    if isinstance(raw, str):
+        return {raw}
+    if isinstance(raw, list):
+        return {x for x in raw if isinstance(x, str)}
+    return set()
+
+
+def _single_ref_id(value: Any) -> str | None:
+    """Extract one @id string from a dict reference; otherwise None."""
+    if not isinstance(value, dict):
+        return None
+    raw = value.get("@id")
+    return raw if isinstance(raw, str) and raw else None
+
+
+def _ref_ids(value: Any) -> list[str]:
+    """Extract one or many @id values from dict/list reference fields."""
+    if isinstance(value, dict):
+        ref = _single_ref_id(value)
+        return [ref] if ref else []
+    if isinstance(value, list):
+        out: list[str] = []
+        for item in value:
+            ref = _single_ref_id(item)
+            if ref:
+                out.append(ref)
+        return out
+    return []
+
+
+def validate_standards_jsonld_export(payload: dict[str, Any]) -> list[str]:
+    """Validate required PROV-aligned mapping invariants for standards JSON-LD export."""
+    errors: list[str] = []
+    graph = payload.get("@graph")
+    if not isinstance(graph, list):
+        return ["@graph must be a list of JSON-LD nodes"]
+
+    nodes_by_id: dict[str, dict[str, Any]] = {}
+    types_by_id: dict[str, set[str]] = {}
+    for index, node in enumerate(graph):
+        if not isinstance(node, dict):
+            errors.append(f"@graph[{index}] must be an object")
+            continue
+        node_id = node.get("@id")
+        if not isinstance(node_id, str) or not node_id:
+            errors.append(f"@graph[{index}] missing @id")
+            continue
+        if node_id in nodes_by_id:
+            errors.append(f"Duplicate node @id: {node_id}")
+            continue
+        nodes_by_id[node_id] = node
+        types_by_id[node_id] = _coerce_types(node)
+
+    def _ensure_ref_exists(owner: str, field: str, ref_id: str, required_type: str | None) -> None:
+        if ref_id not in nodes_by_id:
+            errors.append(f"{owner} field {field} references missing node {ref_id}")
+            return
+        if required_type and required_type not in types_by_id.get(ref_id, set()):
+            errors.append(f"{owner} field {field} must reference node typed {required_type}: {ref_id}")
+
+    for node_id, node in nodes_by_id.items():
+        node_types = types_by_id.get(node_id, set())
+
+        if "chronicle:Claim" in node_types and "prov:Entity" not in node_types:
+            errors.append(f"{node_id} chronicle:Claim must include prov:Entity type")
+        if "chronicle:EvidenceItem" in node_types and "prov:Entity" not in node_types:
+            errors.append(f"{node_id} chronicle:EvidenceItem must include prov:Entity type")
+        if "chronicle:EvidenceSpan" in node_types and "prov:Entity" not in node_types:
+            errors.append(f"{node_id} chronicle:EvidenceSpan must include prov:Entity type")
+        if "chronicle:Source" in node_types and "prov:Agent" not in node_types:
+            errors.append(f"{node_id} chronicle:Source must include prov:Agent type")
+
+        if "chronicle:Claim" in node_types:
+            for ref_id in _ref_ids(node.get("prov:wasDerivedFrom")):
+                _ensure_ref_exists(node_id, "prov:wasDerivedFrom", ref_id, "prov:Entity")
+
+        if "chronicle:EvidenceLink" in node_types:
+            if "prov:Influence" not in node_types:
+                errors.append(f"{node_id} chronicle:EvidenceLink must include prov:Influence type")
+            entity_ref = _single_ref_id(node.get("prov:entity"))
+            influenced_ref = _single_ref_id(node.get("prov:influenced"))
+            if not entity_ref:
+                errors.append(f"{node_id} missing prov:entity reference")
+            else:
+                _ensure_ref_exists(node_id, "prov:entity", entity_ref, "prov:Entity")
+            if not influenced_ref:
+                errors.append(f"{node_id} missing prov:influenced reference")
+            else:
+                _ensure_ref_exists(node_id, "prov:influenced", influenced_ref, "prov:Entity")
+
+        if "chronicle:EvidenceSourceLink" in node_types:
+            if "prov:Attribution" not in node_types:
+                errors.append(f"{node_id} chronicle:EvidenceSourceLink must include prov:Attribution type")
+            entity_ref = _single_ref_id(node.get("prov:entity"))
+            agent_ref = _single_ref_id(node.get("prov:agent"))
+            if not entity_ref:
+                errors.append(f"{node_id} missing prov:entity reference")
+            else:
+                _ensure_ref_exists(node_id, "prov:entity", entity_ref, "prov:Entity")
+            if not agent_ref:
+                errors.append(f"{node_id} missing prov:agent reference")
+            else:
+                _ensure_ref_exists(node_id, "prov:agent", agent_ref, "prov:Agent")
+
+        if "chronicle:Tension" in node_types:
+            if "prov:Influence" not in node_types:
+                errors.append(f"{node_id} chronicle:Tension must include prov:Influence type")
+            influencer_ref = _single_ref_id(node.get("prov:influencer"))
+            influenced_ref = _single_ref_id(node.get("prov:influenced"))
+            if not influencer_ref:
+                errors.append(f"{node_id} missing prov:influencer reference")
+            else:
+                _ensure_ref_exists(node_id, "prov:influencer", influencer_ref, "chronicle:Claim")
+            if not influenced_ref:
+                errors.append(f"{node_id} missing prov:influenced reference")
+            else:
+                _ensure_ref_exists(node_id, "prov:influenced", influenced_ref, "chronicle:Claim")
+
+    return errors
+
+
+def _claimreview_rating_for_provenance(provenance_quality: str | None) -> tuple[int, str]:
+    """Map Chronicle provenance labels to ClaimReview-compatible rating scale."""
+    normalized = (provenance_quality or "").strip().lower()
+    if normalized == "strong":
+        return 4, "Supported"
+    if normalized == "medium":
+        return 3, "Mostly Supported"
+    if normalized == "weak":
+        return 2, "Weakly Supported"
+    return 1, "Challenged"
+
+
+def build_claimreview_export(
+    read_model: ReadModelLike,
+    get_defensibility_score: DefensibilityGetter,
+    investigation_uid: str,
+    *,
+    claim_limit: int = 10_000,
+    publisher_name: str = "Chronicle",
+) -> dict[str, Any]:
+    """Build schema.org ClaimReview profile for one investigation."""
+    inv = read_model.get_investigation(investigation_uid)
+    if inv is None:
+        raise ValueError("Investigation not found")
+
+    claim_rows = read_model.list_claims_by_type(
+        investigation_uid=investigation_uid,
+        limit=claim_limit,
+        include_withdrawn=False,
+    )
+    claimreviews: list[dict[str, Any]] = []
+    for claim in claim_rows:
+        claim_uid = getattr(claim, "claim_uid", None)
+        if not isinstance(claim_uid, str) or not claim_uid:
+            continue
+        scorecard = get_defensibility_score(claim_uid)
+        if scorecard is None:
+            continue
+
+        rating_value, label = _claimreview_rating_for_provenance(
+            getattr(scorecard, "provenance_quality", None)
+        )
+        claim_id = _chronicle_urn("claim", claim_uid)
+        review_id = _chronicle_urn("claimreview", claim_uid)
+        review_body = (
+            "Chronicle defensibility rating derived from recorded support/challenge links, "
+            "source modeling, and tension state. This is not a claim of absolute truth."
+        )
+        claimreviews.append(
+            {
+                "@type": "ClaimReview",
+                "@id": review_id,
+                "url": review_id,
+                "claimReviewed": getattr(claim, "claim_text", "") or "",
+                "itemReviewed": {
+                    "@type": "Claim",
+                    "@id": claim_id,
+                    "identifier": claim_uid,
+                    "text": getattr(claim, "claim_text", "") or "",
+                },
+                "author": {"@type": "Organization", "name": publisher_name},
+                "reviewRating": {
+                    "@type": "Rating",
+                    "ratingValue": rating_value,
+                    "bestRating": 4,
+                    "worstRating": 1,
+                    "alternateName": label,
+                },
+                "datePublished": getattr(claim, "created_at", None),
+                "dateModified": getattr(claim, "updated_at", None),
+                "inLanguage": getattr(claim, "language", None) or "en",
+                "isPartOf": {"@id": _chronicle_urn("investigation", investigation_uid)},
+                "reviewBody": review_body,
+                "additionalType": "https://w3id.org/chronicle/ns#ClaimReviewProfileV1",
+            }
+        )
+
+    return {
+        "schema_version": CLAIMREVIEW_EXPORT_SCHEMA_VERSION,
+        "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/claimreview-export.md",
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": f"ClaimReview export for {getattr(inv, 'title', investigation_uid)}",
+        "itemListElement": claimreviews,
+    }
+
+
+def build_ro_crate_export(
+    read_model: ReadModelLike,
+    investigation_uid: str,
+    *,
+    claim_limit: int = 10_000,
+) -> dict[str, Any]:
+    """Build a Chronicle RO-Crate profile for one investigation."""
+    inv = read_model.get_investigation(investigation_uid)
+    if inv is None:
+        raise ValueError("Investigation not found")
+
+    claims = read_model.list_claims_by_type(
+        investigation_uid=investigation_uid,
+        limit=claim_limit,
+        include_withdrawn=True,
+    )
+    evidence = read_model.list_evidence_by_investigation(investigation_uid)
+    tensions = read_model.list_tensions(investigation_uid, limit=5000)
+
+    graph: list[dict[str, Any]] = [
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {"@id": "./"},
+            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
+        },
+        {
+            "@id": "chronicle.db",
+            "@type": "File",
+            "encodingFormat": "application/vnd.sqlite3",
+            "name": "Chronicle SQLite store",
+            "description": "Chronicle event log and read model database.",
+        },
+        {
+            "@id": "manifest.json",
+            "@type": "File",
+            "encodingFormat": "application/json",
+            "name": "Chronicle package manifest",
+        },
+    ]
+
+    has_part: list[dict[str, str]] = [{"@id": "chronicle.db"}, {"@id": "manifest.json"}]
+    for claim in claims:
+        claim_uid = getattr(claim, "claim_uid", None)
+        if not isinstance(claim_uid, str) or not claim_uid:
+            continue
+        claim_id = f"#claim:{claim_uid}"
+        has_part.append({"@id": claim_id})
+        text = getattr(claim, "claim_text", "") or ""
+        graph.append(
+            {
+                "@id": claim_id,
+                "@type": "CreativeWork",
+                "additionalType": "https://w3id.org/chronicle/ns#Claim",
+                "identifier": claim_uid,
+                "name": text[:120] + ("..." if len(text) > 120 else ""),
+                "text": text,
+                "dateCreated": getattr(claim, "created_at", None),
+                "dateModified": getattr(claim, "updated_at", None),
+            }
+        )
+
+    for item in evidence:
+        evidence_uid = getattr(item, "evidence_uid", None)
+        if not isinstance(evidence_uid, str) or not evidence_uid:
+            continue
+        uri = getattr(item, "uri", "") or f"#evidence:{evidence_uid}"
+        has_part.append({"@id": uri})
+        graph.append(
+            {
+                "@id": uri,
+                "@type": "File",
+                "additionalType": "https://w3id.org/chronicle/ns#EvidenceItem",
+                "identifier": evidence_uid,
+                "name": getattr(item, "original_filename", "") or evidence_uid,
+                "encodingFormat": getattr(item, "media_type", "") or "application/octet-stream",
+                "sha256": getattr(item, "content_hash", "") or "",
+                "dateCreated": getattr(item, "created_at", None),
+            }
+        )
+
+    for tension in tensions:
+        tension_uid = getattr(tension, "tension_uid", None)
+        if not isinstance(tension_uid, str) or not tension_uid:
+            continue
+        tension_id = f"#tension:{tension_uid}"
+        has_part.append({"@id": tension_id})
+        graph.append(
+            {
+                "@id": tension_id,
+                "@type": "CreativeWork",
+                "additionalType": "https://w3id.org/chronicle/ns#Tension",
+                "identifier": tension_uid,
+                "name": f"Tension {tension_uid}",
+                "description": getattr(tension, "notes", None),
+                "dateCreated": getattr(tension, "created_at", None),
+                "dateModified": getattr(tension, "updated_at", None),
+            }
+        )
+
+    graph.append(
+        {
+            "@id": "./",
+            "@type": ["Dataset", "https://w3id.org/chronicle/ns#InvestigationDataset"],
+            "identifier": investigation_uid,
+            "name": getattr(inv, "title", "") or investigation_uid,
+            "description": getattr(inv, "description", None),
+            "dateCreated": getattr(inv, "created_at", None),
+            "dateModified": getattr(inv, "updated_at", None),
+            "hasPart": has_part,
+        }
+    )
+
+    return {
+        "schema_version": RO_CRATE_EXPORT_SCHEMA_VERSION,
+        "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/ro-crate-export.md",
+        "@context": ["https://w3id.org/ro/crate/1.2/context", {"chronicle": "https://w3id.org/chronicle/ns#"}],
         "@graph": graph,
     }
 

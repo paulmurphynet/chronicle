@@ -128,6 +128,8 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Consuming .chronicle](docs/consuming-chronicle.md) | How to read a .chronicle without the Chronicle package (ZIP + SQLite + evidence). |
 | [Generic export](docs/GENERIC_EXPORT.md) | Export investigation as JSON or CSV ZIP for BI, dashboards, fact-checking pipelines. |
 | [Claim–evidence–metrics export](docs/claim-evidence-metrics-export.md) | Stable JSON shape for one claim + evidence refs + defensibility (fact-checking UIs, dashboards). |
+| [ClaimReview export](docs/claimreview-export.md) | schema.org ClaimReview interoperability profile mapped from Chronicle defensibility. |
+| [RO-Crate export](docs/ro-crate-export.md) | RO-Crate interoperability profile for Chronicle investigations and package metadata. |
 | [External IDs](docs/external-ids.md) | How to store fact-check IDs, C2PA claim IDs, etc. in evidence metadata (and claim notes/tags when exposed). |
 | [Provenance recording](docs/provenance-recording.md) | Store source and evidence–source links; feed C2PA/CR assertions (we record, we don’t verify). |
 | [Epistemology scope](docs/epistemology-scope.md) | What the project covers (and does not) regarding epistemology. |
