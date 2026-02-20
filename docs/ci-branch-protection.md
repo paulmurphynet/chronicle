@@ -2,6 +2,18 @@
 
 Use this checklist when enabling branch protection for `main`/`master`.
 
+## Private repo support
+
+You can enforce this checklist while the repository is still private.
+
+As of **February 20, 2026**, GitHub docs state:
+
+- Protected branches are available for private repositories on GitHub Pro, Team, and Enterprise plans.
+- GitHub Actions can run on private repositories.
+- GitHub Free private repositories may not expose branch-protection enforcement controls.
+
+If branch protection settings are unavailable in your private repo UI, verify plan eligibility first.
+
 ## Required status checks
 
 Mark these as required in GitHub branch protection:
@@ -32,3 +44,10 @@ Recommended minimum settings:
 ## Verification step after setup
 
 Open a test PR and confirm all required checks are listed as blocking checks before merge.
+
+Recommended validation sequence:
+
+1. Push a non-trivial test PR.
+2. Confirm all required checks complete successfully.
+3. Confirm merge is blocked when any required check fails.
+4. Confirm direct pushes to the protected branch are blocked (if configured).

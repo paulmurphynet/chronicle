@@ -137,6 +137,7 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 Active release blocker:
 
 - CI branch-protection rollout still pending verification (`CI green for required jobs on push/PR with branch protection active`).
+- GitHub plan constraint: private-repo branch protection unavailable on current tier; unblock by upgrading to Pro/Team/Enterprise or switching to public before final release sign-off.
 
 Continue validating changes against:
 
@@ -144,11 +145,22 @@ Continue validating changes against:
 - Contract stability (scorer schema and API/client parity)
 - Documentation accuracy and explicit limitations
 
-## Post-release high-value work
+## Immediate next sprint (tomorrow)
 
-Round 2 prioritized backlog (from thought-experiment rerun on 2026-02-20):
+Priority implementation items accepted on 2026-02-20 for immediate execution:
 
-All Round 2 backlog items are now completed. Add new post-release items here as they are accepted.
+- [ ] Ship opinionated starter packs (Journalism, Legal, Audit) to reduce first-project ambiguity and improve adoption.
+  - Add template bootstrap commands/fixtures for each pack.
+  - Include schema defaults, policy profile defaults, and report/export examples per pack.
+  - Add docs walkthroughs and acceptance tests proving each starter pack reaches a defensible report from a clean workspace.
+- [ ] Publish trust artifacts focused on defensibility and failure handling (not marketing collateral).
+  - Add an explicit "rejected feature decisions" log with rationale and tradeoffs.
+  - Add adversarial/failure-mode examples that show uncertainty disclosure and safe failure behavior.
+  - Add reproducibility checks for deterministic scenarios (`same input -> same defensibility outcome`) in CI/release gates.
+- [ ] Prioritize integration hooks for real-world workflow interoperability.
+  - Harden import/export paths for CSV, Markdown, JSON, and signed `.chronicle` archive bundles.
+  - Add one end-to-end API ingestion example pipeline (batch input -> Chronicle -> defensibility artifact output).
+  - Add integration contract tests to keep adapter/API behavior stable across releases.
 
 ## Later / research backlog
 
