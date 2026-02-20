@@ -88,6 +88,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 markers = [
     "ollama: tests that require Ollama (skip when CHRONICLE_LLM_ENABLED unset or Ollama unreachable). See docs/testing-with-ollama.md.",
+    "neo4j_live: tests that require a live Neo4j instance (run with CHRONICLE_RUN_NEO4J_LIVE_TESTS=1 and NEO4J_* env vars).",
 ]
 
 [tool.coverage.run]

@@ -74,6 +74,27 @@ It exits non-zero if there is drift between:
 - When you want a **graph view** (e.g. after 100 eval runs), run **neo4j-export** (or **neo4j-sync**) for that project (or for a project that aggregates many investigations).
 - Query or visualize in Neo4j; defensibility itself stays computed in the relational store and is not recomputed in Neo4j.
 
+## Live integration tests
+
+Chronicle includes a live Neo4j integration suite (`tests/test_neo4j_live_integration.py`) that validates:
+
+- End-to-end sync against a real Neo4j instance (not only static contract checks).
+- Dedupe and non-dedupe mode behavior.
+- Idempotent re-sync behavior and support/challenge link identity semantics.
+
+Run locally (with a reachable Neo4j):
+
+```bash
+export CHRONICLE_RUN_NEO4J_LIVE_TESTS=1
+export NEO4J_URI=bolt://127.0.0.1:7687
+export NEO4J_USER=neo4j
+export NEO4J_PASSWORD=chronicle_dev_password
+CHRONICLE_EVENT_STORE=sqlite pytest tests/test_neo4j_live_integration.py -q
+```
+
+If `CHRONICLE_RUN_NEO4J_LIVE_TESTS` is unset, the suite skips by default.
+You can also run `make neo4j-live-test` after setting `NEO4J_URI`, `NEO4J_USER`, and `NEO4J_PASSWORD`.
+
 ## Summary
 
 Neo4j is a **projection** of the same read model. It does not replace the scorer or the verifier. Use it for multi-run analysis, lineage traversal, and visualization when your workflow benefits from a graph.

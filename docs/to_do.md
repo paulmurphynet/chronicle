@@ -112,9 +112,11 @@ Goal: raise Neo4j from "contract-correct optional projection" to a production-gr
 
 ### N. Quality and verification upgrades
 
-- [ ] **N-06** Add live Neo4j integration tests (service-container) beyond static contract parity checks.
+- [x] **N-06** Add live Neo4j integration tests (service-container) beyond static contract parity checks.
   - Validate end-to-end sync behavior against real Neo4j (not only fixture/text checks).
   - Include dedupe and non-dedupe mode assertions.
+  - Added `tests/test_neo4j_live_integration.py` and wired CI/release service-container jobs.
+  - First public CI run still required to record external `status=passed` evidence.
 - [ ] **N-07** Add performance benchmark harness for graph projection paths.
   - Generate medium/large fixture datasets.
   - Track export/sync throughput and memory ceilings.
@@ -142,6 +144,7 @@ Goal: raise Neo4j from "contract-correct optional projection" to a production-gr
 
 - [ ] Large-project sync/export can run with bounded memory and deterministic results.
 - [ ] Live Neo4j integration tests pass in CI and are part of release gating.
+  - CI/release service-container jobs are wired; awaiting first public CI evidence run.
 - [ ] Performance baseline + regression thresholds are captured in release artifacts.
 - [ ] Ops runbook + query pack are published and validated by docs checks.
 - [ ] Neo4j support level and compatibility policy are explicit in docs.
