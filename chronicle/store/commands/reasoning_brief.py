@@ -332,6 +332,18 @@ def reasoning_brief_to_html(
             blocks.append(
                 f"<p class='meta'>Establishable from evidence as of: {esc(known_as_of)}</p>"
             )
+        known_range_start = know.get("known_range_start")
+        known_range_end = know.get("known_range_end")
+        if known_range_start or known_range_end:
+            blocks.append(
+                "<p class='meta'>Temporal uncertainty range: "
+                f"{esc(str(known_range_start or 'unknown'))} → {esc(str(known_range_end or 'unknown'))}</p>"
+            )
+        temporal_confidence = know.get("temporal_confidence")
+        if temporal_confidence is not None:
+            blocks.append(
+                f"<p class='meta'>Temporal confidence: {esc(str(temporal_confidence))}</p>"
+            )
 
     weakest = brief.get("weakest_link")
     if weakest and weakest.get("dimension") != "none":

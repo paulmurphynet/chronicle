@@ -214,6 +214,7 @@ def temporalize_claim(
     _require_active_claim(read_model, claim_uid)
     if not isinstance(temporal, dict):
         raise ChronicleUserError("temporal must be a JSON object")
+    temporal = _normalize_temporal_context(temporal)
     claim = read_model.get_claim(claim_uid)
     investigation_uid = claim.investigation_uid if claim else ""
     event_id = generate_event_id()
@@ -592,6 +593,67 @@ def analyze_claim_atomicity(
     return event_id
 
 
+_TEMPORAL_STRING_FIELDS = frozenset(
+    {
+        "event_time",
+        "known_as_of",
+        "known_range_start",
+        "known_range_end",
+        "knowable_from",
+        "time_notes",
+    }
+)
+
+
+def _normalize_temporal_context(temporal: dict[str, Any]) -> dict[str, Any]:
+    """Normalize temporal fields while preserving unknown keys for forward compatibility.
+
+    Migration-safe: no schema changes; this only normalizes well-known fields in payload.
+    """
+    normalized = dict(temporal)
+    for key in _TEMPORAL_STRING_FIELDS:
+        value = normalized.get(key)
+        if value is None:
+            continue
+        as_text = str(value).strip()
+        normalized[key] = as_text if as_text else None
+
+    if normalized.get("temporal_confidence") is not None:
+        raw = normalized["temporal_confidence"]
+        try:
+            confidence = float(raw)
+        except (TypeError, ValueError) as exc:
+            raise ChronicleUserError(
+                "temporal_confidence must be a number between 0 and 1"
+            ) from exc
+        if confidence < 0 or confidence > 1:
+            raise ChronicleUserError("temporal_confidence must be between 0 and 1")
+        normalized["temporal_confidence"] = confidence
+
+    start_raw = normalized.get("known_range_start")
+    end_raw = normalized.get("known_range_end")
+    if start_raw and end_raw:
+        start_dt = _parse_iso_datetime(str(start_raw))
+        end_dt = _parse_iso_datetime(str(end_raw))
+        if start_dt is not None and end_dt is not None and start_dt > end_dt:
+            raise ChronicleUserError("known_range_start must be <= known_range_end")
+
+    return normalized
+
+
+def _parse_temporal_confidence(value: Any) -> float | None:
+    """Best-effort parse of temporal confidence for read-time metrics."""
+    if value is None:
+        return None
+    try:
+        confidence = float(value)
+    except (TypeError, ValueError):
+        return None
+    if confidence < 0 or confidence > 1:
+        return None
+    return confidence
+
+
 def _parse_iso_datetime(s: str | None) -> datetime | None:
     """Parse ISO-8601 string to datetime (UTC). Returns None if invalid or None."""
     if not s or not s.strip():
@@ -923,15 +985,29 @@ def get_defensibility_score(
     temporal_validity = (
         "set" if (claim.temporal_json and claim.temporal_json != "null") else "unset"
     )
-    # Phase 5: knowability from temporal_json (known_as_of, knowable_from)
-    knowability: dict[str, str | None] = {"known_as_of": None, "knowable_from": None}
+    # Phase 5 + TE-D01: knowability from temporal_json.
+    knowability: dict[str, str | float | None] = {
+        "known_as_of": None,
+        "known_range_start": None,
+        "known_range_end": None,
+        "knowable_from": None,
+        "temporal_confidence": None,
+    }
     if claim.temporal_json and claim.temporal_json != "null":
         try:
             temporal = json.loads(claim.temporal_json)
             if isinstance(temporal, dict):
-                for key in ("known_as_of", "knowable_from"):
+                for key in (
+                    "known_as_of",
+                    "known_range_start",
+                    "known_range_end",
+                    "knowable_from",
+                ):
                     v = temporal.get(key)
                     knowability[key] = str(v).strip() if v is not None and str(v).strip() else None
+                knowability["temporal_confidence"] = _parse_temporal_confidence(
+                    temporal.get("temporal_confidence")
+                )
         except (TypeError, ValueError):
             pass
 

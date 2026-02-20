@@ -278,8 +278,8 @@ class DefensibilityScorecard:
     ]  # [{ tension_uid, status, rationale_or_notes, other_claim_uid }, ...]
     # Phase 5: when could we first defend this claim?
     knowability: dict[
-        str, str | None
-    ]  # { known_as_of: ISO8601 | null, knowable_from: "..." | null }
+        str, str | float | None
+    ]  # { known_as_of, known_range_start, known_range_end, knowable_from, temporal_confidence }
     # Epistemology red team #6: supporting evidence integrity (verified | unverified | mismatch)
     evidence_integrity: str = "verified"
     # Phase 5 (evidence-trust-assessments): per supporting evidence: assessments, required_gaps, warnings

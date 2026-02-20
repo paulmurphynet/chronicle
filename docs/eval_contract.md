@@ -61,7 +61,7 @@ On success, the evaluator returns a single JSON object with the **defensibility 
 | `contradiction_status` | string | `none` \| `open` \| `acknowledged` \| `resolved`. |
 | `link_assurance_level` | string (optional) | `human_reviewed` \| `tool_generated` \| `mixed_human_tool` \| `unknown` \| `no_links`. Helps interpret support/challenge counts. |
 | `link_assurance_caveat` | string (optional) | Human-readable caveat about link provenance (e.g. tool-generated links still need review for high-assurance uses). |
-| `knowability` | object (optional) | When present: `known_as_of`, `knowable_from`. |
+| `knowability` | object (optional) | When present: `known_as_of`, `known_range_start`, `known_range_end`, `knowable_from`, `temporal_confidence` (0..1). |
 
 **Example output (success):**
 

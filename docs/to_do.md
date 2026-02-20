@@ -57,6 +57,7 @@ Chronicle should optimize for:
 - **TE-05 completed**: shipped a unified review packet generator across session/API/CLI (`get_review_packet`, `GET /investigations/{id}/review-packet`, `chronicle review-packet`) combining policy compatibility, policy rationale summary, decision ledger snapshot, chain-of-custody report metadata, reasoning briefs, and audit export bundle in one action.
 - **TE-06 completed**: added role-based review checklist templates (`docs/role-based-review-checklists.md`) and linked them from policy profile docs, reference workflows, and Reference UI policy guidance.
 - **TE-03 completed**: expanded multi-vertical workflow parity with new legal/history deterministic sample generators and reference workflow runner coverage (`scripts/verticals/legal/generate_sample.py`, `scripts/verticals/history/generate_sample.py`, `scripts/run_reference_workflows.py`), plus a new history/research policy example profile (`docs/policy-profiles/history_research.json`).
+- **TE-D01 completed (migration-safe)**: temporal uncertainty extension shipped without schema migration by standardizing extended `temporal_json` keys (`known_range_start`, `known_range_end`, `temporal_confidence`) in temporalization command validation, exposing them in defensibility/eval knowability outputs, and updating docs/schema/tests.
 
 ## Release blockers
 
@@ -75,7 +76,6 @@ No active TE batch items remain from `thought_experiments/decision-register.md` 
 Keep this section for longer-horizon items that are intentionally deferred. Current deferred item:
 
 - Postgres read model parity (explicitly out of scope until SQLite baseline remains stable and maintainable).
-- TE-D01 temporal uncertainty extension (range/confidence fields beyond `known_as_of`) deferred until current TE batch is complete and a migration-safe schema design is approved.
 
 ## Done criteria
 

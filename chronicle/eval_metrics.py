@@ -25,11 +25,16 @@ def _stable_corroboration(corroboration: dict[str, int | float]) -> dict[str, in
     return {k: v for k, v in corroboration.items() if k in stable_keys}
 
 
-def _stable_knowability(knowability: dict[str, str | None]) -> dict[str, str | None]:
-    """Return only known_as_of and knowable_from."""
+def _stable_knowability(
+    knowability: dict[str, str | float | None],
+) -> dict[str, str | float | None]:
+    """Return the stable knowability subset including temporal uncertainty fields."""
     return {
         "known_as_of": knowability.get("known_as_of"),
+        "known_range_start": knowability.get("known_range_start"),
+        "known_range_end": knowability.get("known_range_end"),
         "knowable_from": knowability.get("knowable_from"),
+        "temporal_confidence": knowability.get("temporal_confidence"),
     }
 
 

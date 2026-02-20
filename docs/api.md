@@ -93,7 +93,7 @@ For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_pa
 | GET | `/evidence/{evidence_uid}/content` | Return evidence file content (text/plain for text/*; binary otherwise). For Reading UI. |
 | GET | `/investigations/{id}/graph` | Nodes (claims, evidence) plus paged edges (support/challenge). Query: `node_limit?`, `edge_limit?`, `edge_cursor?`. Returns `edges_page` metadata. |
 | POST | `/investigations/{id}/spans` | Create a text_offset span (e.g. from selection). Body: `{ "evidence_uid", "start_char", "end_char", "quote?" }`. Returns `event_id`, `span_uid`. |
-| GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output), including optional `link_assurance_level` and `link_assurance_caveat` to contextualize support/challenge link provenance. Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
+| GET | `/claims/{claim_uid}/defensibility` | Defensibility scorecard (same shape as eval contract output), including optional `link_assurance_level` and `link_assurance_caveat` to contextualize support/challenge link provenance and `knowability` temporal fields (`known_as_of`, optional range/confidence). Includes **sources_backing_claim** when present (source_uid, display_name, independence_notes, reliability_notes). Query: `use_strength_weighting=false`. |
 | GET | `/claims/{claim_uid}` | Get claim (includes **notes**, **tags_json**, and optional **epistemic_stance** when set). |
 | GET | `/claims/{claim_uid}/reasoning-brief` | Reasoning brief (claim, defensibility, support/challenge, tensions, trail). Query: `limit?`. |
 

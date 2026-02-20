@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from chronicle.core.errors import ChronicleUserError
 from chronicle.core.policy import PolicyProfile, default_policy_profile, import_policy_to_project
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
@@ -227,6 +228,108 @@ def test_session_policy_compatibility_preflight(tmp_path: Path) -> None:
     assert result["viewing_under"] == "policy_strict_test"
     assert isinstance(result.get("deltas"), list)
     assert any("min_independent_sources" in d.get("rule", "") for d in result["deltas"])
+
+
+def test_session_temporal_uncertainty_knowability_fields(tmp_path: Path) -> None:
+    """Defensibility knowability includes temporal range and confidence when temporalized."""
+    from chronicle.eval_metrics import defensibility_metrics_for_claim
+
+    create_project(tmp_path)
+    text = b"Bridge completion records vary by source."
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Temporal uncertainty test",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        _, ev_uid = session.ingest_evidence(
+            inv_uid,
+            text,
+            "text/plain",
+            original_filename="history.txt",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        _, span_uid = session.anchor_span(
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": len(text.decode("utf-8"))},
+            quote=text.decode("utf-8"),
+            actor_id="tester",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "Bridge was completed in the early 1860s.",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        session.link_support(
+            inv_uid,
+            span_uid,
+            claim_uid,
+            actor_id="tester",
+            actor_type="tool",
+        )
+        session.temporalize_claim(
+            claim_uid,
+            {
+                "known_as_of": "1865-01-01",
+                "known_range_start": "1862-01-01",
+                "known_range_end": "1864-12-31",
+                "temporal_confidence": 0.82,
+                "knowable_from": "archival letter + newspaper digest",
+            },
+            actor_id="tester",
+            actor_type="human",
+            workspace="forge",
+        )
+        scorecard = session.get_defensibility_score(claim_uid)
+        metrics = defensibility_metrics_for_claim(session, claim_uid)
+
+    assert scorecard is not None
+    knowability = scorecard.knowability
+    assert knowability.get("known_as_of") == "1865-01-01"
+    assert knowability.get("known_range_start") == "1862-01-01"
+    assert knowability.get("known_range_end") == "1864-12-31"
+    assert knowability.get("temporal_confidence") == 0.82
+    assert knowability.get("knowable_from") == "archival letter + newspaper digest"
+    assert metrics is not None
+    assert metrics.get("knowability", {}).get("temporal_confidence") == 0.82
+
+
+def test_session_temporalize_claim_rejects_invalid_uncertainty_fields(tmp_path: Path) -> None:
+    """Temporalize claim validates temporal_confidence and temporal range ordering."""
+    create_project(tmp_path)
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation(
+            "Temporal validation test",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        _, claim_uid = session.propose_claim(
+            inv_uid,
+            "Test claim.",
+            actor_id="tester",
+            actor_type="tool",
+        )
+        with pytest.raises(ChronicleUserError, match="temporal_confidence must be between 0 and 1"):
+            session.temporalize_claim(
+                claim_uid,
+                {"temporal_confidence": 1.5},
+                actor_id="tester",
+                actor_type="human",
+                workspace="forge",
+            )
+        with pytest.raises(ChronicleUserError, match="known_range_start must be <= known_range_end"):
+            session.temporalize_claim(
+                claim_uid,
+                {"known_range_start": "2025-01-02", "known_range_end": "2025-01-01"},
+                actor_id="tester",
+                actor_type="human",
+                workspace="forge",
+            )
 
 
 def test_session_link_assurance_human_reviewed(tmp_path: Path) -> None:

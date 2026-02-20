@@ -29,7 +29,7 @@ Eval harnesses can rely on the following fields. All are present in the API resp
 | `contradiction_status` | string | `none` \| `open` \| `acknowledged` \| `resolved`. |
 | `link_assurance_level` | string (optional) | `human_reviewed` \| `tool_generated` \| `mixed_human_tool` \| `unknown` \| `no_links`. Indicates who created support/challenge links. |
 | `link_assurance_caveat` | string (optional) | Caveat text for interpreting link-based metrics; reminds readers that Chronicle does not verify entailment. |
-| `knowability` | object (optional) | When set: `known_as_of` (ISO8601 or null), `knowable_from` (string or null). "When could we first defend this claim?" |
+| `knowability` | object (optional) | When set: `known_as_of` (ISO8601 or null), `known_range_start` (ISO8601/date or null), `known_range_end` (ISO8601/date or null), `knowable_from` (string or null), `temporal_confidence` (0..1 or null). "When could we first defend this claim, and how uncertain is that temporal estimate?" |
 
 **sources_backing_claim** (optional): when present, list of sources backing the claim, each with `source_uid`, `display_name`, and optional `independence_notes` / `reliability_notes` (user-supplied; we record, we don't verify). Support/challenge links may include optional **rationale** (warrant) and **defeater_kind** (e.g. rebutting, undercutting on challenges); we record, we don't verify.
 
@@ -62,7 +62,10 @@ For "defensibility as of event E or timestamp T" (e.g. for audits or time-series
   "contradiction_status": "none",
   "knowability": {
     "known_as_of": "2024-01-15",
-    "knowable_from": null
+    "known_range_start": "2024-01-01",
+    "known_range_end": "2024-01-31",
+    "knowable_from": null,
+    "temporal_confidence": 0.82
   }
 }
 ```
