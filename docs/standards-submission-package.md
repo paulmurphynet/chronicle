@@ -14,7 +14,8 @@ Prepare a submission folder with:
 6. `standards-profile.md`
 7. `adjacent-standards-guidance.md`
 8. `adr/0003-standards-interoperability-profile.md`
-9. `to_do.md` excerpt for standards/whitepaper status
+9. `external-standards-review-cycle.md`
+10. `to_do.md` excerpt for standards/whitepaper status
 
 ## Build commands
 
@@ -22,6 +23,12 @@ From repo root:
 
 ```bash
 PYTHONPATH=. python3 scripts/whitepaper/build_evidence_pack.py
+```
+
+Build venue-specific submission bundles for a whitepaper revision:
+
+```bash
+PYTHONPATH=. python3 scripts/whitepaper/build_submission_bundles.py --revision v0.3
 ```
 
 Optional narrow build:
@@ -79,3 +86,7 @@ Record each external feedback item with:
 - `classification` (`accepted`, `rejected`, `needs_followup`)
 - `resolution_note`
 - `target_revision`
+
+Operational tracker:
+
+- [External standards review cycle tracker](external-standards-review-cycle.md)

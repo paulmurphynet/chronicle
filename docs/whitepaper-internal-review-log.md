@@ -74,5 +74,4 @@ This document captures internal technical review outcomes for Chronicle's standa
 
 ### Open follow-ups
 
-1. Run external standards-community review and classify all feedback in accepted/rejected/follow-up format.
-2. Produce venue-specific formatting and submission bundles once target publication channels are selected.
+1. Dispatch the prepared v0.3 external review bundles after repo publication and classify all feedback in accepted/rejected/follow-up format.

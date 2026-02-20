@@ -57,6 +57,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Whitepaper citation metadata](whitepaper-citation.md) | Citation format and versioned publication metadata for whitepaper revisions. |
 | [Whitepaper internal review log](whitepaper-internal-review-log.md) | Accepted/rejected technical edits captured per whitepaper revision. |
 | [Standards submission package](standards-submission-package.md) | Submission bundle checklist and outreach notes for standards/community review. |
+| [External standards review cycle tracker](external-standards-review-cycle.md) | Send log, feedback schema, and execution state for external standards review rounds. |
 | [Policy profiles](policy-profiles/README.md) | Example JSON profiles (journalism, legal, compliance, history/research) for verticals. |
 | [Role-based review checklists](role-based-review-checklists.md) | Role templates for journalism/legal/compliance/history review decisions using review packets and policy compatibility. |
 | [Identity providers](identity-providers.md) | Configured IdP (none, traditional, gov_id, did, zk); how to implement custom IdP adapters. |

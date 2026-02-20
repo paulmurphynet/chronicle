@@ -45,6 +45,10 @@ Implementation reference: [Whitepaper evidence pack](whitepaper-evidence-pack.md
 2. Collect issue-driven feedback and track accepted/rejected changes.
 3. Publish periodic profile revisions with versioned compatibility notes.
 
+Execution tracker:
+
+- [External standards review cycle tracker](external-standards-review-cycle.md)
+
 ## Suggested target venues and communities
 
 Use a parallel outreach strategy; do not block on a single venue:
