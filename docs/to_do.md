@@ -100,11 +100,11 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 ### W. Whitepaper and publication track
 
 - [x] **W-01** Publish working whitepaper draft and editorial workflow.
-- [ ] **W-02** Build a reproducible evidence pack for whitepaper claims.
+- [x] **W-02** Build a reproducible evidence pack for whitepaper claims.
   - Mapping fixtures, benchmark commands, verifier outputs, profile examples.
-- [ ] **W-03** Add versioned citation and publication metadata for whitepaper revisions.
-- [ ] **W-04** Run internal technical review and capture accepted/rejected edits.
-- [ ] **W-05** Prepare standards-submission package and outreach notes for relevant communities.
+- [x] **W-03** Add versioned citation and publication metadata for whitepaper revisions.
+- [x] **W-04** Run internal technical review and capture accepted/rejected edits.
+- [x] **W-05** Prepare standards-submission package and outreach notes for relevant communities.
 
 ## On hold by design
 

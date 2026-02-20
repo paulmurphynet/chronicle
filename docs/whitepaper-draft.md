@@ -2,6 +2,7 @@
 
 Status: **working draft (v0.1)**  
 Last updated: **2026-02-20**
+Citation and revision metadata: [Whitepaper citation and publication metadata](whitepaper-citation.md)
 
 ## Title
 
@@ -88,4 +89,4 @@ Chronicle can remain model-first and verifiability-first while interoperating wi
 1. Profile mapping examples (JSON-LD/PROV)
 2. C2PA/VC adapter examples
 3. RO-Crate and ClaimReview export fixtures
-4. Reproducibility command list and expected outputs
+4. Reproducibility command list and expected outputs (see [Whitepaper evidence pack](whitepaper-evidence-pack.md))

@@ -17,6 +17,8 @@ This plan defines how Chronicle should produce a publication-quality whitepaper 
 3. **Conformance evidence pack** (verifier results, reproducible workflows, example artifacts, mapping test fixtures).
 4. **Submission package** for standards/community review (PDF/Markdown draft, references, reproducibility instructions).
 
+Implementation reference: [Whitepaper evidence pack](whitepaper-evidence-pack.md), [Whitepaper citation and publication metadata](whitepaper-citation.md), [Whitepaper internal review log](whitepaper-internal-review-log.md), [Standards submission package](standards-submission-package.md), and `scripts/whitepaper/build_evidence_pack.py`.
+
 ## Recommended process
 
 ### Phase 1: authoring baseline

@@ -146,6 +146,10 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Standards JSON-LD export](docs/standards-jsonld-export.md) | JSON-LD + PROV-oriented export profile for investigations (claims/evidence/links/tensions/sources). |
 | [Whitepaper plan](docs/whitepaper-plan.md) | Publication workflow and standards-submission process for Chronicle. |
 | [Whitepaper draft](docs/whitepaper-draft.md) | Working draft for standards-facing publication and external review. |
+| [Whitepaper evidence pack](docs/whitepaper-evidence-pack.md) | Reproducible evidence bundle for whitepaper claims and standards-review discussions. |
+| [Whitepaper citation metadata](docs/whitepaper-citation.md) | Versioned citation and publication metadata for whitepaper revisions. |
+| [Whitepaper internal review log](docs/whitepaper-internal-review-log.md) | Accepted/rejected technical review outcomes per whitepaper revision. |
+| [Standards submission package](docs/standards-submission-package.md) | Checklist and outreach notes for standards-body/community submissions. |
 | [Core vs reference architecture](docs/architecture-core-reference.md) | How trust-critical core differs from API/CLI/UI reference surfaces and why that boundary matters. |
 | [Testing with Ollama](docs/testing-with-ollama.md) | Use local Ollama for real LLM-backed testing (decomposer, contradiction, type inference, etc.). |
 | [Verification guarantees](docs/verification-guarantees.md) | What the verifier does and does not guarantee; runtime invariants and audit. |
