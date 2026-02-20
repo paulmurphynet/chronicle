@@ -31,7 +31,7 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 ### B. Backend convergence (SQLite/Postgres parity)
 
 - [x] Introduce explicit backend factory/config wiring for event store selection (env + session entry points).
-- [ ] Implement Postgres read model schema + projector parity with SQLite.
+- [x] Implement Postgres read model schema + projector parity with SQLite.
 - [ ] Implement replay/snapshot parity for Postgres-backed paths.
 - [ ] Ensure `.chronicle` export/import semantics stay backend-independent.
 - [ ] Add invariants verification parity for Postgres projects.
@@ -122,6 +122,7 @@ Target: converge to a production-first architecture while keeping SQLite accessi
 - **Branch protection and Postgres ops docs completed**: added required-check configuration guide (`docs/ci-branch-protection.md`), Postgres backup/restore DR runbook (`docs/postgres-operations-runbook.md`), and managed Postgres hardening guidance (`docs/postgres-hardening.md`).
 - **Release-gate hardening completed**: expanded manual release workflow to include docs/parity gates, verifier+conformance checks, Postgres doctor/smoke checks, and dependency vulnerability threshold enforcement.
 - **B1 completed (backend wiring)**: added explicit backend config/factory wiring (`chronicle/store/backend_config.py`) and session entrypoint integration (`chronicle/store/session.py`) so `CHRONICLE_EVENT_STORE` is parsed/validated consistently, with fail-fast user guidance for current Postgres read-model limitation.
+- **B2 completed (schema + projector parity)**: added Postgres read-model schema initializer and SQLite-to-Postgres projection SQL compatibility layer (`chronicle/store/postgres_projection.py`), then wired `PostgresEventStore` append flow to project events into Postgres read-model tables.
 
 ## Release blockers
 

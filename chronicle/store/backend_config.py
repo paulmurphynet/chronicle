@@ -78,5 +78,5 @@ def create_event_store(
             raise ChronicleUserError(
                 "CHRONICLE_POSTGRES_URL is required when CHRONICLE_EVENT_STORE=postgres."
             )
-        return PostgresEventStore(config.postgres_url)
+        return PostgresEventStore(config.postgres_url, run_projection=run_projection)
     return SqliteEventStore(project_dir / CHRONICLE_DB, run_projection=run_projection)

@@ -5,6 +5,7 @@ Chronicle includes a PostgreSQL **event-store** implementation today and is acti
 Current scope:
 
 - PostgreSQL event-store append/read is available via `chronicle/store/postgres_event_store.py`.
+- PostgreSQL event append now also projects into Postgres read-model tables (schema + projector parity path).
 - SQLite remains the complete baseline path for read model + projections.
 - Postgres read-model parity is tracked in the main convergence program in [to_do](to_do.md#active-convergence-program-public--ci--postgres).
 
@@ -65,11 +66,12 @@ Backend wiring behavior (current):
 
 - `ChronicleSession` now resolves event-store backend from `CHRONICLE_EVENT_STORE` (or explicit constructor args).
 - `sqlite` is the default and remains the only full session/API/CLI path.
-- `postgres` selection is parsed and validated, but session entry points intentionally fail fast with a clear user error until Postgres read-model parity is implemented.
+- `postgres` selection is parsed and validated.
+- Postgres read-model tables are projected, but query-surface parity remains in progress; session/API guardrails remain SQLite-first for now.
 
 ## Important limitation (current)
 
-Postgres read model is not yet parity-complete. Queries and projections for claims/defensibility/tensions remain SQLite-first in the current runtime path.
+Postgres read model is not yet parity-complete. Query surfaces for claims/defensibility/tensions remain SQLite-first in the current runtime path even though Postgres read-model projection tables are now written.
 
 The active implementation plan and release criteria live in [to_do](to_do.md#active-convergence-program-public--ci--postgres).
 

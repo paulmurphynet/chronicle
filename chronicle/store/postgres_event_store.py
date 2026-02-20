@@ -16,6 +16,10 @@ try:
 except ImportError:
     psycopg = None  # type: ignore[assignment]
 
+from chronicle.store.postgres_projection import (
+    apply_event_to_postgres_read_model,
+    init_postgres_read_model_schema,
+)
 from chronicle.store.schema import EVENT_STORE_VERSION
 
 EVENTS_TABLE_DDL = """
@@ -83,13 +87,14 @@ def _row_to_event(row: tuple) -> Event:
 
 
 class PostgresEventStore:
-    """EventStore backed by PostgreSQL. Requires psycopg. Does not run projection (read model is separate)."""
+    """EventStore backed by PostgreSQL. Requires psycopg. Can project to Postgres read-model tables."""
 
-    def __init__(self, database_url: str) -> None:
+    def __init__(self, database_url: str, run_projection: bool = True) -> None:
         if psycopg is None:
             raise ImportError("PostgreSQL support requires pip install -e '.[postgres]' (psycopg)")
         self._url = database_url
         self._conn: psycopg.Connection | None = None
+        self._run_projection = run_projection
 
     def _connection(self) -> psycopg.Connection:
         if self._conn is None or self._conn.closed:
@@ -107,6 +112,8 @@ class PostgresEventStore:
                     (EVENT_STORE_VERSION, now),
                 )
             self._conn.commit()
+            if self._run_projection:
+                init_postgres_read_model_schema(self._conn)
         return self._conn
 
     def append(self, event: Event) -> None:
@@ -143,6 +150,8 @@ class PostgresEventStore:
                 """,
                 row,
             )
+        if self._run_projection:
+            apply_event_to_postgres_read_model(conn, event)
         conn.commit()
 
     def _after_clause(self, after_event_id: str) -> tuple[str, Sequence[str | None]]:
@@ -274,9 +283,10 @@ class PostgresEventStore:
         return _row_to_event(row) if row else None
 
     def get_read_model(self) -> None:
-        """PostgreSQL read model is not implemented yet. See POSTGRES.md."""
+        """Read-model query API parity is still in progress."""
         raise NotImplementedError(
-            "PostgresReadModel is not implemented. Use SQLite for the read model; see docs/POSTGRES.md."
+            "PostgresReadModel query API is not implemented yet. Event projection now writes read-model tables, "
+            "but session/query parity is still SQLite-first. See docs/POSTGRES.md."
         )
 
     def close(self) -> None:
