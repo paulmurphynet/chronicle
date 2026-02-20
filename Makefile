@@ -4,7 +4,7 @@ MYPY ?= ./.venv/bin/mypy
 PYTEST ?= ./.venv/bin/pytest
 POSTGRES_ENV_FILE ?= .env.postgres.local
 
-.PHONY: help lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check deterministic-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
+.PHONY: help lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
 
 help:
 	@echo "Targets:"
@@ -17,6 +17,7 @@ help:
 	@echo "  neo4j-check  - Neo4j export/sync/docs/rebuild contract parity checks"
 	@echo "  adapter-check - Validate adapter examples and contract validation flow"
 	@echo "  integration-export-contract-check - Validate JSON/CSV/Markdown/signed-bundle integration export/import contracts"
+	@echo "  branch-protection-rollout-check - Query GitHub API for branch protection + required CI green evidence (requires token)"
 	@echo "  deterministic-check - Verify repeated scorer runs produce stable defensibility metrics"
 	@echo "  reference-workflows - Run reference workflow suite and write report under /tmp"
 	@echo "  postgres-env - Create $(POSTGRES_ENV_FILE) from .env.postgres.example if missing"
@@ -55,6 +56,9 @@ adapter-check:
 
 integration-export-contract-check:
 	PYTHONPATH=. $(PYTHON) scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_integration_contract_project --output-dir /tmp/chronicle_integration_contract_out
+
+branch-protection-rollout-check:
+	PYTHONPATH=. $(PYTHON) scripts/check_branch_protection_rollout.py --repo "$${GITHUB_REPOSITORY:?set GITHUB_REPOSITORY=owner/name}" --branch "$${CHRONICLE_PROTECTED_BRANCH:-main}" --output reports/branch_protection_rollout_report.json --stdout-json
 
 deterministic-check:
 	$(PYTHON) scripts/check_deterministic_defensibility.py --rounds 3 --output /tmp/chronicle_deterministic_defensibility_check.json

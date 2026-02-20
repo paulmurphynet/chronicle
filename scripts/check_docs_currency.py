@@ -31,6 +31,13 @@ REQUIRED_SNIPPETS: dict[str, list[str]] = {
         "scripts/adapters/check_examples.py",
         "scripts/check_integration_export_contracts.py",
     ],
+    "docs/ci-branch-protection.md": [
+        "scripts/check_branch_protection_rollout.py",
+    ],
+    "docs/production-readiness-checklist.md": [
+        "scripts/check_branch_protection_rollout.py",
+        "reports/branch_protection_rollout_report.json",
+    ],
     "lessons/07-integrations-and-scripts.md": [
         "starter_batch_to_scorer.py",
         "validate_adapter_outputs.py",

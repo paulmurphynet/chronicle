@@ -65,6 +65,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Support policy](support-policy.md) | Support tiers plus GA/Beta/Experimental status, compatibility policy, and deprecation timeline format. |
 | [Production readiness checklist](production-readiness-checklist.md) | Objective pass/fail release criteria across trust, backend, CI, security, and docs. |
 | [CI branch protection checklist](ci-branch-protection.md) | Exact required checks to configure in branch protection rules. |
+| [Branch protection rollout verification](branch-protection-rollout-verification.md) | Scripted verification/evidence workflow for branch-protection and required CI checks. |
 | [Postgres operations runbook](postgres-operations-runbook.md) | Backup, restore, and disaster-recovery runbook for Postgres-backed Chronicle deployments. |
 | [Managed Postgres hardening](postgres-hardening.md) | TLS, least privilege, credential rotation, and network hardening for managed Postgres. |
 | [Backend migration/versioning policy](backend-migration-versioning-policy.md) | Versioning/migration policy for event and read-model schemas across SQLite and Postgres. |

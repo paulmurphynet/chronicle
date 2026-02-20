@@ -35,8 +35,13 @@ This checklist defines objective pass/fail criteria before Chronicle is treated 
   - `postgres-event-store-smoke`
   - Note: `postgres-event-store-smoke` includes doctor + smoke + backend parity + timed onboarding gates.
 - [ ] Branch protection requires these checks before merge.
+- [ ] Branch protection rollout report status is `passed`:
+  - `PYTHONPATH=. python3 scripts/check_branch_protection_rollout.py --repo "$GITHUB_REPOSITORY" --branch main --output reports/branch_protection_rollout_report.json`
 
-Reference: `docs/ci-branch-protection.md`.
+References:
+
+- `docs/ci-branch-protection.md`
+- `docs/branch-protection-rollout-verification.md`
 
 ## 4) Security and operational gates (required)
 

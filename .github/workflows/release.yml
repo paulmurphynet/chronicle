@@ -74,11 +74,13 @@ jobs:
 
       - name: Docs and parity gates
         run: |
+          mkdir -p reports
           python3 scripts/check_doc_links.py .
           python3 scripts/check_docs_currency.py
           python3 scripts/check_neo4j_contract.py
           python3 scripts/adapters/check_examples.py
           PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_integration_contract_project_release --output-dir /tmp/chronicle_integration_contract_release
+          PYTHONPATH=. python3 scripts/check_branch_protection_rollout.py --repo "$GITHUB_REPOSITORY" --branch "${GITHUB_REF_NAME:-main}" --output reports/branch_protection_rollout_report.json
           python3 scripts/check_deterministic_defensibility.py --rounds 3 --output reports/deterministic_defensibility_release.json
 
       - name: Verifier and conformance release gate

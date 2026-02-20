@@ -171,12 +171,13 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 - **Local Postgres convergence validation completed**: confirmed `make postgres-parity` and `make postgres-onboarding-check` pass against local Docker Postgres after smoke payload parity fix.
 - **Security release criteria expanded**: added Trivy-based container vulnerability gating (`scripts/container_security_gate.py`) and wired supply-chain/release workflows to enforce container HIGH/CRITICAL thresholds alongside dependency scans.
 - **Docs release-criteria check completed**: reran docs link and docs currency gates (`scripts/check_doc_links.py`, `scripts/check_docs_currency.py`) and confirmed pass.
+- **Branch-protection rollout automation completed**: added GitHub API verifier script (`scripts/check_branch_protection_rollout.py`), fixture-based regression tests (`tests/test_branch_protection_rollout.py`), make target (`branch-protection-rollout-check`), and release-evidence doc path (`docs/branch-protection-rollout-verification.md`).
 
 ## Release blockers
 
 Active release blocker:
 
-- CI branch-protection rollout still pending verification (`CI green for required jobs on push/PR with branch protection active`).
+- CI branch-protection rollout still pending final external verification (`reports/branch_protection_rollout_report.json` must report `status=passed` against live repo settings).
 - GitHub plan constraint: private-repo branch protection unavailable on current tier; unblock by upgrading to Pro/Team/Enterprise or switching to public before final release sign-off.
 
 Continue validating changes against:

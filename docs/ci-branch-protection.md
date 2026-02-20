@@ -45,6 +45,18 @@ Recommended minimum settings:
 
 Open a test PR and confirm all required checks are listed as blocking checks before merge.
 
+For a machine-readable verification artifact, run:
+
+```bash
+PYTHONPATH=. python3 scripts/check_branch_protection_rollout.py \
+  --repo owner/repo \
+  --branch main \
+  --output reports/branch_protection_rollout_report.json \
+  --stdout-json
+```
+
+See [Branch protection rollout verification](branch-protection-rollout-verification.md) for full process and exit-code semantics.
+
 Recommended validation sequence:
 
 1. Push a non-trivial test PR.
