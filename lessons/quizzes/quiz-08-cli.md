@@ -14,7 +14,7 @@ Answer these after reading the lesson and the CLI main. Try not to peek at the a
 
 3. What is the difference between **chronicle verify** and **chronicle verify-chronicle**?
 
-4. Which subcommand do you use to **push** the project’s read model to Neo4j? What environment variables are required?
+4. Which subcommands do you use to (a) export Neo4j CSV rebuild files and (b) push the project’s read model to Neo4j? What environment variables are required for sync?
 
 5. Where is the CLI **entry point** defined? (File and symbol.)
 
@@ -32,7 +32,9 @@ Answer these after reading the lesson and the CLI main. Try not to peek at the a
 
 3. **chronicle verify** runs the **project invariant suite** on a **project directory** (checks project state, schema, evidence files). **chronicle verify-chronicle** runs the **.chronicle file verifier** on a **ZIP file** (manifest, DB schema, evidence hashes). Same logic as the standalone **chronicle-verify** entry point.
 
-4. **chronicle neo4j-sync --path /path/to/project**. Required: **NEO4J_URI** and **NEO4J_PASSWORD** (and optionally NEO4J_USER). Often set via .env in the repo root.
+4. (a) **`chronicle neo4j-export --path /path/to/project --output /path/to/import_dir`** for CSV rebuild files.  
+   (b) **`chronicle neo4j-sync --path /path/to/project`** to push to a running Neo4j instance.  
+   Required for sync: **NEO4J_URI** and **NEO4J_PASSWORD** (optionally `NEO4J_USER`, `NEO4J_DATABASE`). Both commands also support `--report` and `--progress`.
 
 5. In **pyproject.toml**: **chronicle = chronicle.cli.main:main** (the **main** function in **chronicle/cli/main.py**).
 

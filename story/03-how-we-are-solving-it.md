@@ -49,6 +49,8 @@ Chronicle is designed to plug into many workflows without locking you in:
 - **Same contract everywhere.** The [eval contract](../docs/eval_contract.md) and [defensibility metrics schema](../docs/defensibility-metrics-schema.md) are stable. Whether you call the scorer script, the session, or POST /score, the output shape is the same—so eval harnesses and UIs can swap backends.
 - **Optional depth for evals.** Support and challenge links can carry an optional **rationale** (why this evidence supports or challenges this claim). That helps NLI or entailment-style evals record “warrant” without committing to full argument schemas; see [epistemology scope](../docs/epistemology-scope.md).
 - **Graph and deduplication.** For graph RAG or analytics, you can sync a Chronicle project to **Neo4j/Aura** ([aura-graph-pipeline](../docs/aura-graph-pipeline.md)). Optional **full deduplication** (one EvidenceItem per content hash, one Claim per hash of claim text) keeps the graph compact while preserving lineage via CONTAINS_EVIDENCE and CONTAINS_CLAIM.
+- **Operational Neo4j tooling.** Neo4j export/sync now support chunked processing, retry/timeout hardening, and structured progress/report artifacts (`--progress`, `--report`) so runs are observable and release evidence is machine-readable.
+- **Live graph validation.** Beyond static contract checks, we maintain a live Neo4j integration suite (dedupe and non-dedupe) and run it in CI/release gates when infrastructure is available.
 
 ---
 

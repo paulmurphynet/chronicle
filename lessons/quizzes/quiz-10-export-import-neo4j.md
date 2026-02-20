@@ -20,7 +20,11 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 
 6. What command should you run to check Neo4j export/sync/docs/rebuild parity before syncing?
 
-7. What helper functions support signed `.chronicle` bundle wrapping and verification before import?
+7. Name one **observability flag** for `neo4j-export` and one for `neo4j-sync`.
+
+8. How do you enable and run the **live Neo4j integration tests**?
+
+9. What helper functions support signed `.chronicle` bundle wrapping and verification before import?
 
 ---
 
@@ -38,7 +42,11 @@ Answer these after reading the lesson and the export_import/neo4j_sync code. Try
 
 6. `PYTHONPATH=. python3 scripts/check_neo4j_contract.py`
 
-7. `export_signed_investigation_bundle(...)`, `verify_signed_investigation_bundle(...)`, and `import_signed_investigation_bundle(...)` in `chronicle/store/export_import.py`.
+7. `neo4j-export`: `--report` (or `--progress`). `neo4j-sync`: `--report` (or `--progress`).
+
+8. Set `CHRONICLE_RUN_NEO4J_LIVE_TESTS=1` plus `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`, then run `CHRONICLE_EVENT_STORE=sqlite pytest tests/test_neo4j_live_integration.py -q`.
+
+9. `export_signed_investigation_bundle(...)`, `verify_signed_investigation_bundle(...)`, and `import_signed_investigation_bundle(...)` in `chronicle/store/export_import.py`.
 
 ---
 

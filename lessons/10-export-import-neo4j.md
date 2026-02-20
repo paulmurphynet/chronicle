@@ -1,17 +1,20 @@
 # Lesson 10: Export, import, and Neo4j
 
-**Objectives:** You’ll understand how an investigation is **exported** to a .chronicle file (ZIP with manifest, DB, evidence), how **import** merges a .chronicle into a project, how signed bundle wrapping works for `.chronicle` handoff, and how the **Neo4j sync** pushes the read model to a graph (e.g. Aura) for visualization and graph RAG.
+**Objectives:** You’ll understand how an investigation is **exported** to a .chronicle file (ZIP with manifest, DB, evidence), how **import** merges a .chronicle into a project, how signed bundle wrapping works for `.chronicle` handoff, and how **Neo4j export/sync** project the read model to a graph (e.g. Aura) with observability, hardening controls, and live integration validation.
 
 **Key files:**
 
 - [chronicle/store/export_import.py](../chronicle/store/export_import.py) — export_investigation, import_investigation
+- [chronicle/store/neo4j_export.py](../chronicle/store/neo4j_export.py) — export_project_to_neo4j_csv (streaming CSV export + report/progress)
 - [chronicle/store/neo4j_sync.py](../chronicle/store/neo4j_sync.py) — sync_project_to_neo4j
 - [docs/chronicle-file-format.md](../docs/chronicle-file-format.md) — what’s inside a .chronicle
 - [docs/consuming-chronicle.md](../docs/consuming-chronicle.md) — how to read a .chronicle from another language or tool (ZIP, manifest, SQLite, evidence)
 - [docs/GENERIC_EXPORT.md](../docs/GENERIC_EXPORT.md) — export investigation as JSON or CSV ZIP (no evidence blobs) for BI/dashboards
 - [docs/integration-export-hardening.md](../docs/integration-export-hardening.md) — contract hardening for JSON/CSV/Markdown/signed-bundle import-export paths
 - [docs/neo4j-schema.md](../docs/neo4j-schema.md) — node labels, relationship types, and example Cypher for the sync output
+- [docs/neo4j.md](../docs/neo4j.md) — Neo4j usage guide, observability flags, and live test workflow
 - [docs/aura-graph-pipeline.md](../docs/aura-graph-pipeline.md) — verify → import → sync runbook
+- [tests/test_neo4j_live_integration.py](../tests/test_neo4j_live_integration.py) — live Neo4j integration assertions (dedupe and non-dedupe)
 
 ---
 
@@ -50,16 +53,24 @@ The export/import module also supports a digest-verified signed bundle wrapper f
 
 By default this is metadata-oriented (`signature.status = metadata_only`) unless an external signature value is supplied. See [integration export hardening](../docs/integration-export-hardening.md).
 
-## Neo4j sync
+## Neo4j export and sync
 
-Open **chronicle/store/neo4j_sync.py**.
+Open **chronicle/store/neo4j_export.py** and **chronicle/store/neo4j_sync.py**.
 
-- **sync_project_to_neo4j(project_dir, uri, user, password, ...)** (or equivalent):
+- **export_project_to_neo4j_csv(project_dir, output_dir, ...)**:
+  1. Streams read-model rows in chunks (bounded memory).
+  2. Writes deterministic CSVs for rebuild scripts.
+  3. Can emit structured progress events and an optional JSON report artifact.
+
+- **sync_project_to_neo4j(project_dir, uri, user, password, ...)**:
   1. Opens the project’s read model (from its chronicle.db).
-  2. Reads **all** investigations, claims, evidence items, evidence spans, evidence links, tensions, sources (if any).
-  3. Pushes them to Neo4j using **MERGE** (by UID) so the graph has nodes for Investigation, Claim, EvidenceItem, EvidenceSpan, Tension, etc., and relationships: CONTAINS, SUPPORTS, CHALLENGES, BETWEEN (tension), etc.
+  2. Runs schema, nodes, relationships, and retractions phases against Neo4j.
+  3. Uses **MERGE** semantics for idempotent re-sync behavior.
+  4. Supports dedupe mode (claim/evidence content-hash identity + lineage edges).
+  5. Supports hardening controls (`--database`, retries/backoff, connection timeout).
+  6. Can emit structured progress events and an optional JSON report artifact.
 
-So the **same** data you have in SQLite (read model) is mirrored in Neo4j for graph queries, visualization (e.g. Aura Browser), or graph RAG. Sync is **idempotent**: re-syncing the same project updates the graph to match the project.
+So the **same** data in SQLite (read model) is mirrored in Neo4j for graph queries, visualization (e.g. Aura Browser), or graph RAG. Sync is **idempotent**: re-syncing the same project updates the graph to match the project.
 
 Before running export/import/sync in production workflows, run:
 
@@ -68,6 +79,16 @@ PYTHONPATH=. python3 scripts/check_neo4j_contract.py
 ```
 
 This checks parity across sync code, CSV export, rebuild Cypher files, and schema docs so drift is caught early.
+
+For runtime validation against a **real** Neo4j instance, run the live integration suite:
+
+```bash
+export CHRONICLE_RUN_NEO4J_LIVE_TESTS=1
+export NEO4J_URI=bolt://127.0.0.1:7687
+export NEO4J_USER=neo4j
+export NEO4J_PASSWORD=chronicle_dev_password
+CHRONICLE_EVENT_STORE=sqlite pytest tests/test_neo4j_live_integration.py -q
+```
 
 **Graph schema reference:** **docs/neo4j-schema.md** documents node labels (Investigation, Claim, EvidenceItem, EvidenceSpan, Tension, etc.), relationship types (CONTAINS, SUPPORTS, CHALLENGES, BETWEEN, …), and example Cypher queries (e.g. claims in tension, evidence supporting a claim). Use it when building graph RAG or custom queries without reverse-engineering the sync output.
 
@@ -88,13 +109,16 @@ For **full** coverage of the .chronicle format and data schema (manifest, all DB
 1. Generate a sample .chronicle: **PYTHONPATH=. python3 scripts/generate_sample_chronicle.py** (or use an existing one). Run **chronicle-verify path/to/file.chronicle** and confirm it passes.
 2. Unzip the .chronicle and list its contents: **manifest.json**, **chronicle.db**, **evidence/**.
 3. Run `PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_lesson10_contract_project --output-dir /tmp/chronicle_lesson10_contract_out` and inspect JSON/CSV/Markdown/`.chronicle`/signed-bundle outputs.
-4. If you have Neo4j (or Aura) credentials, run **chronicle neo4j-sync --path /path/to/project** and inspect the graph in Neo4j Browser (nodes and relationships).
+4. If you have Neo4j credentials, run:
+   - `chronicle neo4j-export --path /path/to/project --output /tmp/neo4j_import --report /tmp/neo4j_export_report.json --progress`
+   - `chronicle neo4j-sync --path /path/to/project --report /tmp/neo4j_sync_report.json --progress`
+   Then inspect the graph and report artifacts.
 
 ## Summary
 
 - **Export** writes one investigation to a .chronicle (ZIP: manifest, DB subset, evidence files). **Import** merges a .chronicle into a project by appending its events and copying evidence.
 - Signed bundle helpers can wrap `.chronicle` exports in a digest-verified bundle for interoperability handoff while preserving the canonical verifier path.
-- **Neo4j sync** pushes the project’s read model to Neo4j so you can query or visualize the graph (claims, evidence, support, tensions).
+- **Neo4j export/sync** project the read model to Neo4j with chunked processing, idempotent semantics, observability outputs, and retry/timeout controls.
 - The **verifier** checks .chronicle files; the **Aura pipeline** (verify → import → sync) is the full runbook for getting Chronicle data into a shared graph.
 
 **← Previous:** [Lesson 09: Epistemic tools](09-epistemic-tools.md) | **Index:** [Lessons](README.md) | **Next →:** [Lesson 11: Interoperability, API, and tests](11-interoperability-api-and-tests.md)

@@ -1,6 +1,6 @@
 # Lesson 08: The Chronicle CLI
 
-**Objectives:** You’ll know how the `chronicle` CLI is organized, what the main subcommands do (init, verify-chronicle, neo4j-sync, export, defensibility, etc.), and where to find the implementation.
+**Objectives:** You’ll know how the `chronicle` CLI is organized, what the main subcommands do (init, verify-chronicle, neo4j-export, neo4j-sync, export, defensibility, etc.), and where to find the implementation.
 
 **Key files:**
 
@@ -19,6 +19,7 @@ After **`pip install -e .`** (and with the venv activated if you use one), the c
 chronicle --help
 chronicle init --help
 chronicle verify-chronicle --help
+chronicle neo4j-export --path /path/to/project --output /tmp/neo4j_import
 chronicle neo4j-sync --path /path/to/project
 ```
 
@@ -42,8 +43,8 @@ Open **chronicle/cli/main.py** and scan the **subparsers**. Then open **chronicl
 | **reasoning-brief** | Generate the reasoning brief (human-readable summary) for a claim. |
 | **verify** | Run the **project** invariant suite (different from verify-chronicle: checks project state). |
 | **verify-chronicle** | Run the **.chronicle file** verifier (manifest, schema, evidence hashes). Same as the standalone `chronicle-verify` entry point. |
-| **neo4j-sync** | Sync the project’s read model to Neo4j (requires NEO4J_URI, NEO4J_PASSWORD). |
-| **neo4j** (subcommands) | Neo4j export (e.g. CSV) and related. |
+| **neo4j-export** | Export project read-model CSVs for Neo4j rebuild scripts; supports `--report` and `--progress`. |
+| **neo4j-sync** | Sync the project’s read model to Neo4j (requires NEO4J_URI, NEO4J_PASSWORD); supports hardening flags plus `--report` and `--progress`. |
 | **policy** | List, export, or import policy profiles. |
 
 So the CLI is a **wrapper** around the same session and commands used by the scorer and scripts: init creates the project, then other commands use ChronicleSession (or the verifier, or Neo4j sync) under the hood.
@@ -72,7 +73,7 @@ Scripts that use the session (e.g. **scripts/ingest_transcript_csv.py**) also re
 ## Summary
 
 - The **chronicle** CLI entry point and argument parsing live in **chronicle/cli/main.py**; several command implementations are factored into **chronicle/cli/project_commands.py**.
-- **quickstart-rag** gives a one-command RAG flow (project, investigation, evidence, claim, defensibility); **init**, **create-investigation**, **ingest-evidence**, **export**, **import**, **get-defensibility**, **reasoning-trail**, **reasoning-brief**, **verify**, **verify-chronicle**, **neo4j-sync**, **policy** are the other main subcommands.
+- **quickstart-rag** gives a one-command RAG flow (project, investigation, evidence, claim, defensibility); **init**, **create-investigation**, **ingest-evidence**, **export**, **import**, **get-defensibility**, **reasoning-trail**, **reasoning-brief**, **verify**, **verify-chronicle**, **neo4j-export**, **neo4j-sync**, **policy** are the other main subcommands.
 - Set **CHRONICLE_ACTOR_ID** (or **--actor-id**) so write commands are attributed to you; see human-in-the-loop doc.
 - **verify** = project invariants; **verify-chronicle** = .chronicle file verifier (same as chronicle-verify).
 
