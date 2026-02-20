@@ -46,7 +46,9 @@ class ReadModelLike(Protocol):
     def list_checkpoints(self, investigation_uid: str, limit: int = ...) -> list: ...
 
 
-def _get_sources_backing_claim_safe(read_model: ReadModelLike, claim_uid: str) -> list[dict[str, Any]]:
+def _get_sources_backing_claim_safe(
+    read_model: ReadModelLike, claim_uid: str
+) -> list[dict[str, Any]]:
     """Return sources_backing_claim when read_model supports it (includes independence_notes)."""
     try:
         result = read_model.get_sources_backing_claim(claim_uid)
@@ -204,9 +206,7 @@ def build_claim_evidence_metrics_export(
     if inv is None:
         raise ValueError("Investigation not found")
     inv_uid = getattr(inv, "investigation_uid", investigation_uid)
-    claims = read_model.list_claims_by_type(
-        investigation_uid=investigation_uid, limit=claim_limit
-    )
+    claims = read_model.list_claims_by_type(investigation_uid=investigation_uid, limit=claim_limit)
     out_claims: list[dict[str, Any]] = []
     for c in claims:
         raw_claim_uid = getattr(c, "claim_uid", None)
@@ -224,7 +224,11 @@ def build_claim_evidence_metrics_export(
             if evidence_uid:
                 item = read_model.get_evidence_item(evidence_uid)
                 uri = getattr(item, "uri", None) if item else None
-            link_type = (getattr(link, "link_type", "") or "").replace("SUPPORTS", "SUPPORT").replace("CHALLENGES", "CHALLENGE")
+            link_type = (
+                (getattr(link, "link_type", "") or "")
+                .replace("SUPPORTS", "SUPPORT")
+                .replace("CHALLENGES", "CHALLENGE")
+            )
             ref: dict[str, Any] = {
                 "evidence_uid": evidence_uid or "",
                 "link_type": link_type or "SUPPORT",
@@ -383,7 +387,9 @@ def build_standards_jsonld_export(
             if span is None:
                 continue
             evidence_uid = getattr(span, "evidence_uid", "")
-            evidence_id = evidence_ids_by_uid.get(evidence_uid, _chronicle_urn("evidence", evidence_uid))
+            evidence_id = evidence_ids_by_uid.get(
+                evidence_uid, _chronicle_urn("evidence", evidence_uid)
+            )
             span_id = _chronicle_urn("span", span_uid)
 
             if span_uid and span_uid not in span_uids_seen:
@@ -555,7 +561,9 @@ def validate_standards_jsonld_export(payload: dict[str, Any]) -> list[str]:
             errors.append(f"{owner} field {field} references missing node {ref_id}")
             return
         if required_type and required_type not in types_by_id.get(ref_id, set()):
-            errors.append(f"{owner} field {field} must reference node typed {required_type}: {ref_id}")
+            errors.append(
+                f"{owner} field {field} must reference node typed {required_type}: {ref_id}"
+            )
 
     for node_id, node in nodes_by_id.items():
         node_types = types_by_id.get(node_id, set())
@@ -589,7 +597,9 @@ def validate_standards_jsonld_export(payload: dict[str, Any]) -> list[str]:
 
         if "chronicle:EvidenceSourceLink" in node_types:
             if "prov:Attribution" not in node_types:
-                errors.append(f"{node_id} chronicle:EvidenceSourceLink must include prov:Attribution type")
+                errors.append(
+                    f"{node_id} chronicle:EvidenceSourceLink must include prov:Attribution type"
+                )
             entity_ref = _single_ref_id(node.get("prov:entity"))
             agent_ref = _single_ref_id(node.get("prov:agent"))
             if not entity_ref:
@@ -821,7 +831,10 @@ def build_ro_crate_export(
     return {
         "schema_version": RO_CRATE_EXPORT_SCHEMA_VERSION,
         "schema_doc": "https://github.com/chronicle-app/chronicle/blob/main/docs/ro-crate-export.md",
-        "@context": ["https://w3id.org/ro/crate/1.2/context", {"chronicle": "https://w3id.org/chronicle/ns#"}],
+        "@context": [
+            "https://w3id.org/ro/crate/1.2/context",
+            {"chronicle": "https://w3id.org/chronicle/ns#"},
+        ],
         "@graph": graph,
     }
 

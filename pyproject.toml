@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chronicle-standard"
-version = "0.1.0"
+version = "0.9.0"
 description = "Defensibility scoring for RAG and evals. Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier."
 readme = "README.md"
 requires-python = ">=3.11"

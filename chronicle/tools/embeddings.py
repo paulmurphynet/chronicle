@@ -34,7 +34,9 @@ def embed(text: str) -> list[float] | None:
 
 def _embed_ollama(base_url: str, model: str, text: str, timeout: float) -> list[float] | None:
     try:
-        url = ensure_safe_http_url(f"{base_url.rstrip('/')}/api/embeddings", block_private_hosts=False)
+        url = ensure_safe_http_url(
+            f"{base_url.rstrip('/')}/api/embeddings", block_private_hosts=False
+        )
         body = json.dumps({"model": model, "input": text}).encode("utf-8")
         req = urllib.request.Request(url, data=body, method="POST")
         req.add_header("Content-Type", "application/json")

@@ -90,7 +90,9 @@ class ProposeClaimBody(BaseModel):
 class LinkBody(BaseModel):
     span_uid: str
     claim_uid: str
-    rationale: str | None = None  # Optional: why this evidence supports/challenges this claim (warrant)
+    rationale: str | None = (
+        None  # Optional: why this evidence supports/challenges this claim (warrant)
+    )
     defeater_kind: str | None = None  # Optional: rebutting | undercutting (for challenge links)
 
 
@@ -168,7 +170,9 @@ async def _read_upload_file_limited(file: UploadFile, max_bytes: int) -> bytes:
             break
         buf.extend(chunk)
         if len(buf) > max_bytes:
-            raise HTTPException(status_code=413, detail=f"File exceeds max size ({max_bytes} bytes)")
+            raise HTTPException(
+                status_code=413, detail=f"File exceeds max size ({max_bytes} bytes)"
+            )
     return bytes(buf)
 
 
@@ -252,9 +256,7 @@ def handle_idempotency_capacity_error(
 
 
 @app.exception_handler(ChronicleProjectNotFoundError)
-def handle_project_not_found(
-    request: Request, exc: ChronicleProjectNotFoundError
-) -> JSONResponse:
+def handle_project_not_found(request: Request, exc: ChronicleProjectNotFoundError) -> JSONResponse:
     """Map project-not-found user errors to HTTP 404."""
     return JSONResponse(status_code=404, content=_error_content(request, str(exc)))
 
@@ -278,7 +280,9 @@ def handle_http_error(request: Request, exc: HTTPException) -> JSONResponse:
 @app.exception_handler(Exception)
 def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
     """Return a generic 500 with request_id while logging traceback server-side."""
-    log.exception("Unhandled Chronicle API exception request_id=%s", _request_id_for(request), exc_info=exc)
+    log.exception(
+        "Unhandled Chronicle API exception request_id=%s", _request_id_for(request), exc_info=exc
+    )
     return JSONResponse(status_code=500, content=_error_content(request, "Internal server error"))
 
 
@@ -811,9 +815,7 @@ def get_investigation_graph(
         )
         nodes: list[dict[str, Any]] = []
         for c in claims:
-            nodes.append(
-                {"id": c.claim_uid, "type": "claim", "label": (c.claim_text or "")[:80]}
-            )
+            nodes.append({"id": c.claim_uid, "type": "claim", "label": (c.claim_text or "")[:80]})
         for e in evidence_items:
             nodes.append(
                 {
@@ -885,7 +887,9 @@ def get_evidence_content(evidence_uid: str) -> Response:
         return Response(
             content=blob,
             media_type=mt,
-            headers={"Content-Disposition": f'inline; filename="{item.original_filename or evidence_uid}"'},
+            headers={
+                "Content-Disposition": f'inline; filename="{item.original_filename or evidence_uid}"'
+            },
         )
 
 
@@ -936,7 +940,9 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
             try:
                 blob = base64.b64decode(body["content_base64"], validate=True)
             except (ValueError, binascii.Error) as exc:
-                raise HTTPException(status_code=400, detail="Invalid content_base64 payload") from exc
+                raise HTTPException(
+                    status_code=400, detail="Invalid content_base64 payload"
+                ) from exc
         elif body.get("content") is not None:
             blob = (body["content"] or "").encode("utf-8")
         original_filename = body.get("original_filename") or "evidence"
@@ -992,9 +998,7 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
 
 
 @app.post("/investigations/{investigation_uid}/spans")
-def create_span(
-    request: Request, investigation_uid: str, body: AnchorSpanBody
-) -> dict[str, Any]:
+def create_span(request: Request, investigation_uid: str, body: AnchorSpanBody) -> dict[str, Any]:
     """Create a text_offset span (e.g. from selection in Reading UI). Returns event_id, span_uid."""
     actor_id, actor_type, verification_level = _get_actor(request)
     path = _get_project_path()
@@ -1004,7 +1008,9 @@ def create_span(
                 raise HTTPException(status_code=404, detail="Investigation not found")
             item = session.read_model.get_evidence_item(body.evidence_uid)
             if item is None or item.investigation_uid != investigation_uid:
-                raise HTTPException(status_code=404, detail="Evidence not found in this investigation")
+                raise HTTPException(
+                    status_code=404, detail="Evidence not found in this investigation"
+                )
             event_id, span_uid = session.anchor_span(
                 investigation_uid,
                 body.evidence_uid,

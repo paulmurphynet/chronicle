@@ -14,7 +14,13 @@ def _ts_key(operation_id: str) -> str:
 
 
 def generate(output: Path) -> None:
-    from chronicle.api.app import app
+    try:
+        from chronicle.api.app import app
+    except ImportError as exc:
+        raise RuntimeError(
+            "Generating frontend API routes requires API dependencies. "
+            "Install with: pip install -e '.[api]'"
+        ) from exc
 
     spec = app.openapi()
     paths = spec.get("paths") or {}

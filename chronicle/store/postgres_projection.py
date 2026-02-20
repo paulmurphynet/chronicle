@@ -460,9 +460,7 @@ def _restore_table_rows(connection: Any, table: str, rows: list[dict[str, Any]])
         return
     cur = connection.cursor()
     cur.execute(f"SELECT * FROM {table_sql} LIMIT 0")  # nosec B608
-    allowed_columns = {
-        c.name if hasattr(c, "name") else c[0] for c in (cur.description or [])
-    }
+    allowed_columns = {c.name if hasattr(c, "name") else c[0] for c in (cur.description or [])}
     if not all(isinstance(col, str) and col in allowed_columns for col in columns):
         raise ValueError(f"Snapshot contains unsupported columns for table {table!r}")
     cols_sql = ", ".join(_quote_ident(col) for col in columns)

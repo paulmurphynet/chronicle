@@ -99,18 +99,30 @@ def run_scorer_contract(
     evidence = data.get("evidence")
 
     if not isinstance(query, str):
-        return {"contract_version": "1.0", "error": "invalid_input", "message": "query must be a string"}
+        return {
+            "contract_version": "1.0",
+            "error": "invalid_input",
+            "message": "query must be a string",
+        }
     if not isinstance(answer, str):
-        return {"contract_version": "1.0", "error": "invalid_input", "message": "answer must be a string"}
+        return {
+            "contract_version": "1.0",
+            "error": "invalid_input",
+            "message": "answer must be a string",
+        }
     if not isinstance(evidence, list):
-        return {"contract_version": "1.0", "error": "invalid_input", "message": "evidence must be an array"}
+        return {
+            "contract_version": "1.0",
+            "error": "invalid_input",
+            "message": "evidence must be an array",
+        }
 
     chunks = _normalize_evidence(evidence, allow_path=allow_path)
     if not chunks:
         return {
             "contract_version": "1.0",
             "error": "invalid_input",
-            "message": "evidence must contain at least one non-empty text chunk (string or object with \"text\", \"path\", or \"url\")",
+            "message": 'evidence must contain at least one non-empty text chunk (string or object with "text", "path", or "url")',
         }
 
     with tempfile.TemporaryDirectory(prefix="chronicle_scorer_") as tmp:

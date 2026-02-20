@@ -45,7 +45,9 @@ def get_defensibility_as_of(
                 found = True
                 break
         if not found:
-            raise ChronicleUserError(f"as_of_event_id {as_of_event_id!r} not found in investigation stream")
+            raise ChronicleUserError(
+                f"as_of_event_id {as_of_event_id!r} not found in investigation stream"
+            )
         filtered = seen
         as_of_label = as_of_event_id
 

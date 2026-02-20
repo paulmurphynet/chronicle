@@ -34,7 +34,7 @@ jobs:
         run: ruff format --check chronicle tools
 
       - name: Pytest with coverage (core)
-        run: pytest tests/ -v --cov=chronicle --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=60
+        run: CHRONICLE_EVENT_STORE=sqlite pytest tests/ -v --cov=chronicle --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=60
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -45,7 +45,11 @@ jobs:
             coverage.xml
 
       - name: Check doc links
-        run: python3 scripts/check_doc_links.py .
+        run: |
+          python3 scripts/check_doc_links.py docs
+          python3 scripts/check_doc_links.py lessons
+          python3 scripts/check_doc_links.py story
+          python3 scripts/check_doc_links.py critical_areas
 
       - name: Check docs currency
         run: python3 scripts/check_docs_currency.py
@@ -60,7 +64,7 @@ jobs:
         run: PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_integration_contract_project_ci --output-dir /tmp/chronicle_integration_contract_ci
 
       - name: Deterministic defensibility reproducibility check
-        run: python3 scripts/check_deterministic_defensibility.py --rounds 3 --output /tmp/deterministic_defensibility_ci.json
+        run: PYTHONPATH=. python3 scripts/check_deterministic_defensibility.py --rounds 3 --output /tmp/deterministic_defensibility_ci.json
 
       - name: Run reference workflows
         run: python3 scripts/run_reference_workflows.py --output-dir /tmp/chronicle_reference_workflows_ci

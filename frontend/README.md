@@ -11,8 +11,8 @@ This directory is the home for the **Chronicle Reference UI**: the official huma
 - `npm run lint` — ESLint checks
 - `npm run test` — Vitest unit/smoke tests (jsdom + Testing Library)
 - `npm run build` — TypeScript compile + production bundle check
-- `npm run check:api-routes` — verifies generated frontend route constants are in sync with API OpenAPI output
-- `npm run generate:api-routes` — regenerates `src/lib/generated/routes.ts` from API OpenAPI
+- `npm run check:api-routes` — verifies generated frontend route constants are in sync with API OpenAPI output (requires API deps installed in Python env, e.g. `pip install -e ".[api]"`)
+- `npm run generate:api-routes` — regenerates `src/lib/generated/routes.ts` from API OpenAPI (requires API deps installed in Python env)
 
 **Plan:** See [Reference UI plan](../docs/reference-ui-plan.md) for:
 

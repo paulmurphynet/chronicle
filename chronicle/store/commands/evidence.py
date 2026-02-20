@@ -285,7 +285,13 @@ def link_support(
     event_id = generate_event_id()
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     payload = EvidenceLinkPayload(
-        link_uid=link_uid, claim_uid=claim_uid, span_uid=span_uid, strength=strength, notes=notes, rationale=rationale, defeater_kind=defeater_kind
+        link_uid=link_uid,
+        claim_uid=claim_uid,
+        span_uid=span_uid,
+        strength=strength,
+        notes=notes,
+        rationale=rationale,
+        defeater_kind=defeater_kind,
     ).to_dict()
     apply_attestation_to_payload(
         payload,
@@ -342,7 +348,13 @@ def link_challenge(
     event_id = generate_event_id()
     now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     payload = EvidenceLinkPayload(
-        link_uid=link_uid, claim_uid=claim_uid, span_uid=span_uid, strength=strength, notes=notes, rationale=rationale, defeater_kind=defeater_kind
+        link_uid=link_uid,
+        claim_uid=claim_uid,
+        span_uid=span_uid,
+        strength=strength,
+        notes=notes,
+        rationale=rationale,
+        defeater_kind=defeater_kind,
     ).to_dict()
     apply_attestation_to_payload(
         payload,

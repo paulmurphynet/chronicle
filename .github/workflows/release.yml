@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to validate (e.g. v0.1.0)"
+        description: "Release tag to validate (e.g. v0.9.0)"
         required: true
         type: string
       publish:
@@ -70,22 +70,25 @@ jobs:
           ruff check chronicle tools
           ruff format --check chronicle tools
           mypy chronicle
-          pytest tests/ -q
+          CHRONICLE_EVENT_STORE=sqlite pytest tests/ -q
 
       - name: Docs and parity gates
         run: |
           mkdir -p reports
-          python3 scripts/check_doc_links.py .
+          python3 scripts/check_doc_links.py docs
+          python3 scripts/check_doc_links.py lessons
+          python3 scripts/check_doc_links.py story
+          python3 scripts/check_doc_links.py critical_areas
           python3 scripts/check_docs_currency.py
           python3 scripts/check_neo4j_contract.py
           python3 scripts/adapters/check_examples.py
           PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_integration_contract_project_release --output-dir /tmp/chronicle_integration_contract_release
           PYTHONPATH=. python3 scripts/check_branch_protection_rollout.py --repo "$GITHUB_REPOSITORY" --branch "${GITHUB_REF_NAME:-main}" --output reports/branch_protection_rollout_report.json
-          python3 scripts/check_deterministic_defensibility.py --rounds 3 --output reports/deterministic_defensibility_release.json
+          PYTHONPATH=. python3 scripts/check_deterministic_defensibility.py --rounds 3 --output reports/deterministic_defensibility_release.json
 
       - name: Verifier and conformance release gate
         run: |
-          pytest tests/test_verify.py tests/test_verifier.py tests/test_verifier_parity.py -q
+          CHRONICLE_EVENT_STORE=sqlite pytest tests/test_verify.py tests/test_verifier.py tests/test_verifier_parity.py -q
           PYTHONPATH=. python3 scripts/verticals/journalism/generate_sample.py --output /tmp/release_gate_sample.chronicle
           PYTHONPATH=. python3 scripts/run_conformance.py /tmp/release_gate_sample.chronicle
 

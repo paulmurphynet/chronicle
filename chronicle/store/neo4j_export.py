@@ -133,7 +133,15 @@ def export_read_model_to_csv(conn: sqlite3.Connection, output_dir: Path) -> None
     cur.execute(_evidence_link_select_sql(conn))
     _write_csv(
         output_dir / "links.csv",
-        ["link_uid", "claim_uid", "span_uid", "link_type", "rationale", "created_at", "source_event_id"],
+        [
+            "link_uid",
+            "claim_uid",
+            "span_uid",
+            "link_type",
+            "rationale",
+            "created_at",
+            "source_event_id",
+        ],
         cur.fetchall(),
     )
 

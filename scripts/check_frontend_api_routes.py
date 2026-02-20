@@ -22,7 +22,11 @@ generate = _MODULE.generate
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="chronicle_routes_") as td:
         tmp_out = Path(td) / "routes.ts"
-        generate(tmp_out)
+        try:
+            generate(tmp_out)
+        except RuntimeError as exc:
+            print(str(exc))
+            return 2
         expected = tmp_out.read_text(encoding="utf-8")
 
     if not TARGET.exists():

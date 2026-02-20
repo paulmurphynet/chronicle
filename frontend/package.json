@@ -1,7 +1,7 @@
 {
   "name": "chronicle-reference-ui",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.9.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,8 +10,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate:api-routes": "python3 ../scripts/generate_frontend_api_routes.py",
-    "check:api-routes": "python3 ../scripts/check_frontend_api_routes.py"
+    "generate:api-routes": "PYTHONPATH=.. python3 ../scripts/generate_frontend_api_routes.py",
+    "check:api-routes": "PYTHONPATH=.. python3 ../scripts/check_frontend_api_routes.py"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -50,6 +50,11 @@ python3 scripts/container_security_gate.py \
   --max-critical 0
 ```
 
+Important frontend prerequisite:
+
+- `npm audit` requires `frontend/package-lock.json`. If missing, generate and commit it first (for example: `cd frontend && npm install --package-lock-only`).
+- Once lockfile is committed, prefer `npm ci` over `npm install` in CI/release/local scan runs for deterministic dependency resolution.
+
 ## Triage guidance
 
 - If a report fails the gate, review whether the vulnerability is:

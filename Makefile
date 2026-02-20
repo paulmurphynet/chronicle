@@ -4,12 +4,14 @@ MYPY ?= ./.venv/bin/mypy
 PYTEST ?= ./.venv/bin/pytest
 POSTGRES_ENV_FILE ?= .env.postgres.local
 
-.PHONY: help lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
+.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
 
 help:
 	@echo "Targets:"
-	@echo "  lint         - Ruff lint for core Python modules"
-	@echo "  format-check - Ruff format check"
+	@echo "  lint         - Ruff lint for release-gated core surfaces (chronicle + tools)"
+	@echo "  lint-all     - Ruff lint for full repo Python surfaces (chronicle + tools + scripts + tests)"
+	@echo "  format-check - Ruff format check for release-gated core surfaces (chronicle + tools)"
+	@echo "  format-check-all - Ruff format check for full repo Python surfaces (chronicle + tools + scripts + tests)"
 	@echo "  typecheck    - Mypy type checks"
 	@echo "  test         - Pytest suite"
 	@echo "  docs-check   - Internal markdown link checks"
@@ -33,17 +35,26 @@ help:
 lint:
 	$(RUFF) check chronicle tools
 
+lint-all:
+	$(RUFF) check chronicle tools scripts tests
+
 format-check:
+	$(RUFF) format --check chronicle tools
+
+format-check-all:
 	$(RUFF) format --check chronicle tools scripts tests
 
 typecheck:
 	$(MYPY) chronicle tools
 
 test:
-	$(PYTEST) -q
+	CHRONICLE_EVENT_STORE=sqlite $(PYTEST) -q
 
 docs-check:
-	python3 scripts/check_doc_links.py .
+	python3 scripts/check_doc_links.py docs
+	python3 scripts/check_doc_links.py lessons
+	python3 scripts/check_doc_links.py story
+	python3 scripts/check_doc_links.py critical_areas
 
 docs-currency:
 	$(PYTHON) scripts/check_docs_currency.py
@@ -66,7 +77,7 @@ deterministic-check:
 reference-workflows:
 	$(PYTHON) scripts/run_reference_workflows.py --output-dir /tmp/chronicle_reference_workflows_check
 
-check: lint typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check deterministic-check reference-workflows
+check: lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check deterministic-check reference-workflows
 
 postgres-env:
 	@if [ -f "$(POSTGRES_ENV_FILE)" ]; then \

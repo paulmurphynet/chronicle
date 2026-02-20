@@ -172,7 +172,9 @@ class PolicyProfile:
     profile_id: str
     display_name: str = ""
     description: str = ""
-    policy_rationale: str | None = None  # Optional: why thresholds were chosen (e.g. "per benchmark X")
+    policy_rationale: str | None = (
+        None  # Optional: why thresholds were chosen (e.g. "per benchmark X")
+    )
     mes_rules: list[MESRule] = field(default_factory=list)
     evidence_admissibility: EvidenceAdmissibility | None = None
     tension_rules: TensionRules | None = None

@@ -382,7 +382,9 @@ class ChronicleSessionQueryMixin:
             viewing_resolution = "active_policy"
 
         resolved_built_under = built_under_profile_id.strip() if built_under_profile_id else None
-        resolved_built_version = built_under_policy_version.strip() if built_under_policy_version else None
+        resolved_built_version = (
+            built_under_policy_version.strip() if built_under_policy_version else None
+        )
         built_under_resolution = "provided"
         if not resolved_built_under:
             resolved_built_under, checkpoint_version = self.get_investigation_built_under_policy(
@@ -428,13 +430,16 @@ class ChronicleSessionQueryMixin:
         effective_limit = min(limit_claims, MAX_LIST_LIMIT)
 
         active_profile = load_policy_profile(self._path / POLICY_FILENAME)
+
         def _can_resolve_profile_id(profile_id: str) -> bool:
             loaded = load_policy_profile_by_id(self._path, profile_id)
             if loaded is not None:
                 return True
             return active_profile.profile_id == profile_id
 
-        raw_profile_ids = [p.strip() for p in (profile_ids or []) if isinstance(p, str) and p.strip()]
+        raw_profile_ids = [
+            p.strip() for p in (profile_ids or []) if isinstance(p, str) and p.strip()
+        ]
         if not raw_profile_ids:
             preferred_profile_ids = [
                 "policy_investigative_journalism",
@@ -482,7 +487,9 @@ class ChronicleSessionQueryMixin:
                 built_under_policy_version=built_under_policy_version,
             )
 
-        multi_profile = self.get_defensibility_multi_profile(investigation_uid, selected_profile_ids)
+        multi_profile = self.get_defensibility_multi_profile(
+            investigation_uid, selected_profile_ids
+        )
         profiles_payload = multi_profile.get("profiles") or []
         profile_claim_index: dict[str, dict[str, dict[str, Any]]] = {}
         for profile_entry in profiles_payload:
@@ -796,7 +803,7 @@ class ChronicleSessionQueryMixin:
                 }
             )
         chain_of_custody_reports.sort(
-            key=lambda x: (x.get("generated_at") or x.get("recorded_at") or ""),
+            key=lambda x: x.get("generated_at") or x.get("recorded_at") or "",
             reverse=True,
         )
 
@@ -823,7 +830,9 @@ class ChronicleSessionQueryMixin:
             warnings.append(
                 "No chain-of-custody report found. Generate one for the investigation if the review workflow requires it."
             )
-        unresolved_count = reviewer_decision_ledger.get("summary", {}).get("unresolved_tensions_count", 0)
+        unresolved_count = reviewer_decision_ledger.get("summary", {}).get(
+            "unresolved_tensions_count", 0
+        )
         if isinstance(unresolved_count, int) and unresolved_count > 0:
             warnings.append(f"{unresolved_count} unresolved tensions remain in this review packet.")
 

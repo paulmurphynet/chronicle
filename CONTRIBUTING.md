@@ -4,7 +4,7 @@ Thanks for your interest in contributing. This file explains how to set up a dev
 
 ## Project notes (style and CI)
 
-1. **CI is disabled** until the maintainer turns it on. The workflow in [.github/workflows/ci.yml](.github/workflows/ci.yml) does not run on push or pull_request; it can be run manually via "Run workflow" if needed. Do not re-enable push/PR triggers until the maintainer requests it.
+1. **CI is enabled** on push/pull request for `main`/`master` in [.github/workflows/ci.yml](.github/workflows/ci.yml). If your local checks pass but CI fails, treat CI as source of truth.
 2. **Do not use section symbols** (e.g. §) in this project. Use section numbers instead (e.g. "Section 5", "Section 3.2").
 
 ## Development setup
@@ -50,10 +50,12 @@ Use the repo `Makefile` to run consistent checks from the project root:
 
 ```bash
 make lint
+make format-check
 make typecheck
 make test
 make docs-check
-make check   # runs lint + typecheck + test + docs-check
+make check   # release-gated checks
+make lint-all format-check-all   # optional wider hygiene checks for scripts/tests
 ```
 
 If your venv lives somewhere else, override tool paths, e.g.:
@@ -66,7 +68,7 @@ make check PYTHON=.venv/bin/python RUFF=.venv/bin/ruff MYPY=.venv/bin/mypy PYTES
 
 - Chronicle core development is designed to work locally once dependencies are installed.
 - If network/DNS is unavailable, skip fresh installs and use your existing `.venv`.
-- Run all gates locally with `make check`; these checks do not require internet access.
+- Run release-gated checks locally with `make check`; these checks do not require internet access.
 - Optional surfaces that may need extra setup are:
   - API extras (`pip install -e ".[api]"`)
   - Neo4j extras (`pip install -e ".[neo4j]"`) and a reachable Neo4j instance
@@ -79,7 +81,7 @@ make check PYTHON=.venv/bin/python RUFF=.venv/bin/ruff MYPY=.venv/bin/mypy PYTES
 ## Changelog and releases
 
 - **Changelog:** Meaningful user-facing changes (new features, contract changes, breaking changes) should be reflected in [CHANGELOG.md](CHANGELOG.md). Add a new `[X.Y.Z]` section with a short list of changes; link the version to the release tag when the release is cut.
-- **Releases:** Tagged releases (e.g. `v0.1.0`) allow downstream users to pin a version.
+- **Releases:** Tagged releases (e.g. `v0.9.0`) allow downstream users to pin a version.
 
 **Release checklist** (when cutting a release):
 
@@ -92,7 +94,13 @@ make check PYTHON=.venv/bin/python RUFF=.venv/bin/ruff MYPY=.venv/bin/mypy PYTES
 
 ## Code style and linting
 
-- The project uses **ruff** for linting. Run `ruff check .` and `ruff format .` from the repo root (see `pyproject.toml` for config).
+- The project uses **ruff** for linting/format checks.
+- Release-gated scope is `chronicle` + `tools`:
+  - `make lint`
+  - `make format-check`
+- Wider repo hygiene for `scripts` + `tests` is tracked separately and currently optional:
+  - `make lint-all`
+  - `make format-check-all`
 - Type hints are used; run `mypy chronicle` (see **Mypy** below).
 
 ## Mypy
@@ -103,7 +111,7 @@ make check PYTHON=.venv/bin/python RUFF=.venv/bin/ruff MYPY=.venv/bin/mypy PYTES
 
 - Tests live under `tests/` (when present). Run with `pytest` from the repo root (e.g. `pytest tests/ -v`). Requires dev deps: `pip install -e ".[dev]"`.
 - **Coverage:** Scorer, session (ingest → claim → link → defensibility), verifier, identity, attestation, and core store are covered. The same coverage threshold and omit list are used locally and in CI: `fail_under = 60` for the `chronicle` package (see `pyproject.toml` and [docs/coverage-core.md](docs/coverage-core.md)). To enforce locally: `pytest tests/ --cov=chronicle --cov-report=term-missing --cov-fail-under=60`.
-- **CI:** Currently disabled (workflow runs only on manual trigger). When run, CI uses the same `--cov-fail-under=60`, uploads a coverage report artifact (htmlcov/, coverage.xml), and runs the doc link check (`scripts/check_doc_links.py`). See [.github/workflows/ci.yml](.github/workflows/ci.yml) and "Project notes" above.
+- **CI:** Push/PR CI runs the same core trust checks plus docs/parity gates. See [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 ## Documentation
 

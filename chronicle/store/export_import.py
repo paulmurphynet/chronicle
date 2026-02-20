@@ -651,7 +651,8 @@ def export_signed_investigation_bundle(
         "archive_sha256": _sha256_bytes(archive_bytes),
         "signature": {
             "status": "provided" if signature_value else "metadata_only",
-            "algorithm": signature_algorithm or ("unspecified" if signature_value else "digest_only"),
+            "algorithm": signature_algorithm
+            or ("unspecified" if signature_value else "digest_only"),
             "value": signature_value,
             "signer": signer,
         },

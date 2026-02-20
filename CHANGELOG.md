@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.9.0] — 2026-02-20
+
+### Added
+
+- Standards and whitepaper publication track artifacts, including standards profile mappings and reproducible submission bundles.
+- External standards review-cycle tracker and venue-specific submission package generation workflow.
+
+### Changed
+
+- Security hardening across store/projection/export code paths with updated scan baselines.
+- API ingestion pipeline example now supports restricted-environment fallback execution without socket binding.
+- Release and CI docs/link checks now validate docs, lessons, story, and critical areas explicitly.
+- Frontend API-route scripts now set `PYTHONPATH=..` to align local and CI route-generation behavior.
+
+### Fixed
+
+- PostgreSQL event-store mypy issue in idempotency-capacity count path.
+- Supply-chain gate parsing for `pip-audit` reports containing `skip_reason` entries.
+- Deterministic defensibility check script now supports direct invocation without manual `PYTHONPATH` setup.
+
 ## [0.2.0] — 2025-02-17
 
 ### Added
@@ -38,5 +58,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Integrations** — LangChain, LlamaIndex, Haystack (optional callbacks/components).
 - **Docs** — Eval contract, verifier, technical report, story, critical areas, lessons 00–11, troubleshooting, errors.
 
+[0.9.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.9.0
 [0.2.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.2.0
 [0.1.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.1.0

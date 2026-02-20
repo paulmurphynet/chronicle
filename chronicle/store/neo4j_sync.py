@@ -21,6 +21,7 @@ def _claim_content_hash(claim_text: str | None) -> str:
     text = (claim_text or "").strip()
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
+
 BATCH_SIZE = 500
 
 # Schema: constraints and indexes (01_schema.cyp equivalent)
@@ -433,7 +434,9 @@ def _sync_relationships(
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
-                r["claim_content_hash"] = claim_uid_to_content_hash.get(r["claim_uid"], r["claim_uid"])
+                r["claim_content_hash"] = claim_uid_to_content_hash.get(
+                    r["claim_uid"], r["claim_uid"]
+                )
             for batch in _batched(rows, BATCH_SIZE):
                 session.run(
                     """
@@ -465,7 +468,9 @@ def _sync_relationships(
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
-                r["claim_content_hash"] = claim_uid_to_content_hash.get(r["claim_uid"], r["claim_uid"])
+                r["claim_content_hash"] = claim_uid_to_content_hash.get(
+                    r["claim_uid"], r["claim_uid"]
+                )
             for batch in _batched(rows, BATCH_SIZE):
                 session.run(
                     """
@@ -499,7 +504,9 @@ def _sync_relationships(
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
-                r["claim_content_hash"] = claim_uid_to_content_hash.get(r["claim_uid"], r["claim_uid"])
+                r["claim_content_hash"] = claim_uid_to_content_hash.get(
+                    r["claim_uid"], r["claim_uid"]
+                )
         for batch in _batched(rows, BATCH_SIZE):
             claim_key = "claim_content_hash" if dedupe_evidence_by_content_hash else "claim_uid"
             session.run(
@@ -524,8 +531,12 @@ def _sync_relationships(
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
-                r["claim_a_content_hash"] = claim_uid_to_content_hash.get(r["claim_a_uid"], r["claim_a_uid"])
-                r["claim_b_content_hash"] = claim_uid_to_content_hash.get(r["claim_b_uid"], r["claim_b_uid"])
+                r["claim_a_content_hash"] = claim_uid_to_content_hash.get(
+                    r["claim_a_uid"], r["claim_a_uid"]
+                )
+                r["claim_b_content_hash"] = claim_uid_to_content_hash.get(
+                    r["claim_b_uid"], r["claim_b_uid"]
+                )
         for batch in _batched(rows, BATCH_SIZE):
             if dedupe_evidence_by_content_hash:
                 session.run(
@@ -613,8 +624,12 @@ def _sync_relationships(
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
-                r["parent_content_hash"] = claim_uid_to_content_hash.get(r["parent_uid"], r["parent_uid"])
-                r["child_content_hash"] = claim_uid_to_content_hash.get(r["child_uid"], r["child_uid"])
+                r["parent_content_hash"] = claim_uid_to_content_hash.get(
+                    r["parent_uid"], r["parent_uid"]
+                )
+                r["child_content_hash"] = claim_uid_to_content_hash.get(
+                    r["child_uid"], r["child_uid"]
+                )
         for batch in _batched(rows, BATCH_SIZE):
             if dedupe_evidence_by_content_hash:
                 session.run(
@@ -762,10 +777,9 @@ def sync_project_to_neo4j(
         raise FileNotFoundError(f"Not a Chronicle project (no {CHRONICLE_DB}): {project_dir}")
 
     if dedupe_evidence_by_content_hash is None:
-        dedupe_evidence_by_content_hash = (
-            os.environ.get("NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH", "").strip().lower()
-            in ("1", "true", "yes")
-        )
+        dedupe_evidence_by_content_hash = os.environ.get(
+            "NEO4J_DEDUPE_EVIDENCE_BY_CONTENT_HASH", ""
+        ).strip().lower() in ("1", "true", "yes")
 
     from neo4j import GraphDatabase  # type: ignore[attr-defined]
 
@@ -780,7 +794,9 @@ def sync_project_to_neo4j(
         conn = sqlite3.connect(str(db_path))
         try:
             _run_schema(driver)
-            _sync_nodes(conn, driver, dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash)
+            _sync_nodes(
+                conn, driver, dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash
+            )
             _sync_relationships(
                 conn, driver, dedupe_evidence_by_content_hash=dedupe_evidence_by_content_hash
             )

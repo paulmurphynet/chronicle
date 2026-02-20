@@ -11,6 +11,11 @@ from importlib import import_module
 from pathlib import Path
 from typing import Any
 
+# Allow direct invocation from repo root without requiring PYTHONPATH.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 run_scorer = import_module("scripts.standalone_defensibility_scorer")._run_scorer
 
 DEFAULT_INPUT = {

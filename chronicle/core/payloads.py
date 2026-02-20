@@ -485,7 +485,9 @@ class EvidenceLinkPayload:
     span_uid: str
     strength: float | None = None  # 0..1
     notes: str | None = None
-    rationale: str | None = None  # Optional warrant: why this evidence supports/challenges this claim (evals, NLI)
+    rationale: str | None = (
+        None  # Optional warrant: why this evidence supports/challenges this claim (evals, NLI)
+    )
     defeater_kind: str | None = None  # Optional: rebutting | undercutting (for challenge links)
 
     def to_dict(self) -> dict[str, Any]:

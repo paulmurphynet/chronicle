@@ -37,9 +37,9 @@ class ChronicleClient:
         actor_type: str = "human",
     ):
         try:
-            self.base_url = ensure_safe_http_url(base_url.rstrip("/"), block_private_hosts=False).rstrip(
-                "/"
-            )
+            self.base_url = ensure_safe_http_url(
+                base_url.rstrip("/"), block_private_hosts=False
+            ).rstrip("/")
         except ValueError as exc:
             raise ChronicleClientError(f"Invalid API base URL: {exc}") from exc
         self.project_path = str(project_path).strip()
@@ -172,13 +172,13 @@ class ChronicleClient:
                 if isinstance(invs, list):
                     return cast(list[dict[str, Any]], invs)
             return []
-        return self._collect_paginated(path="/investigations", items_key="investigations", params=params)
+        return self._collect_paginated(
+            path="/investigations", items_key="investigations", params=params
+        )
 
     def get_investigation(self, investigation_uid: str) -> dict[str, Any]:
         """GET /investigations/{uid} — one investigation (title, description, etc.). E.5."""
-        out = self._request(
-            "GET", f"/investigations/{self._quote(investigation_uid)}"
-        )
+        out = self._request("GET", f"/investigations/{self._quote(investigation_uid)}")
         if not out:
             raise ChronicleClientError("Investigation not found", status=404, body=out)
         return cast(dict[str, Any], out)
@@ -399,7 +399,9 @@ class ChronicleClient:
         except urllib.error.URLError as e:
             raise ChronicleClientError(f"URL fetch failed: {e}") from e
         filename = (
-            (title or "").strip() or Path(urllib.parse.urlparse(safe_source_url).path).name or "evidence"
+            (title or "").strip()
+            or Path(urllib.parse.urlparse(safe_source_url).path).name
+            or "evidence"
         )
         body: dict[str, Any] = {
             "content_base64": base64.b64encode(blob).decode("ascii"),

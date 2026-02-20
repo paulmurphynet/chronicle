@@ -126,7 +126,8 @@ class PostgresEventStore:
         if row.get("idempotency_key") and MAX_IDEMPOTENCY_KEY_EVENTS > 0:
             with conn.cursor() as cur:
                 cur.execute("SELECT COUNT(*) FROM events WHERE idempotency_key IS NOT NULL")
-                (count,) = cur.fetchone()
+                count_row = cur.fetchone()
+                count = int(count_row[0]) if count_row is not None else 0
             if count >= MAX_IDEMPOTENCY_KEY_EVENTS:
                 raise ChronicleIdempotencyCapacityError(
                     "Idempotency key capacity reached; increase CHRONICLE_MAX_IDEMPOTENCY_KEY_EVENTS or retry without Idempotency-Key"

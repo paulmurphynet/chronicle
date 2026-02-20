@@ -597,9 +597,7 @@ def reasoning_brief_to_markdown(brief: dict[str, Any]) -> str:
     lines.append(f"- Support count: `{corroboration.get('support_count')}`")
     lines.append(f"- Challenge count: `{corroboration.get('challenge_count')}`")
     lines.append(f"- Independent sources: `{corroboration.get('independent_sources_count')}`")
-    lines.append(
-        f"- Contradiction status: `{defensibility.get('contradiction_status') or ''}`"
-    )
+    lines.append(f"- Contradiction status: `{defensibility.get('contradiction_status') or ''}`")
     lines.append("")
 
     lines.append("## Supporting Evidence")

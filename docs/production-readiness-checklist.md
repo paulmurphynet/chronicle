@@ -46,6 +46,7 @@ References:
 ## 4) Security and operational gates (required)
 
 - [ ] Dependency scan gate passes (`pip-audit` + `npm audit` thresholds).
+  - Frontend dependency audit requires committed `frontend/package-lock.json`.
 - [ ] Container scan gate passes (Trivy filesystem + base image thresholds).
 - [ ] Managed Postgres hardening checklist reviewed and signed off.
 - [ ] Backup/restore and disaster-recovery drill steps are current and runnable.
@@ -58,7 +59,11 @@ References:
 
 ## 5) Documentation gates (required)
 
-- [ ] Docs links check passes: `python3 scripts/check_doc_links.py .`
+- [ ] Docs links check passes:
+  - `python3 scripts/check_doc_links.py docs`
+  - `python3 scripts/check_doc_links.py lessons`
+  - `python3 scripts/check_doc_links.py story`
+  - `python3 scripts/check_doc_links.py critical_areas`
 - [ ] Docs currency check passes: `python3 scripts/check_docs_currency.py`
 - [ ] README/docs include current support tiers and known backend limits.
 

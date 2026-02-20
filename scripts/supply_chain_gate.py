@@ -16,6 +16,15 @@ def _load_json(path: Path) -> object:
 
 
 def _count_pip_vulns(report: object) -> int:
+    def _count_dep_vulns(dep: dict) -> int:
+        # pip-audit may emit entries with skip_reason and no vulns field for local/unpublished packages.
+        if dep.get("skip_reason"):
+            return 0
+        vulns = dep.get("vulns")
+        if not isinstance(vulns, list):
+            raise ValueError("pip dependency entry missing 'vulns' list")
+        return len(vulns)
+
     if isinstance(report, dict):
         # pip-audit has emitted both list and dict shapes across versions.
         deps = report.get("dependencies")
@@ -28,10 +37,7 @@ def _count_pip_vulns(report: object) -> int:
             for dep in deps:
                 if not isinstance(dep, dict):
                     raise ValueError("pip dependency entry must be an object")
-                vulns = dep.get("vulns")
-                if not isinstance(vulns, list):
-                    raise ValueError("pip dependency entry missing 'vulns' list")
-                total += len(vulns)
+                total += _count_dep_vulns(dep)
             return total
         vulns = report.get("vulnerabilities")
         if isinstance(vulns, list):
@@ -42,10 +48,7 @@ def _count_pip_vulns(report: object) -> int:
         for dep in report:
             if not isinstance(dep, dict):
                 raise ValueError("pip dependency entry must be an object")
-            vulns = dep.get("vulns")
-            if not isinstance(vulns, list):
-                raise ValueError("pip dependency entry missing 'vulns' list")
-            total += len(vulns)
+            total += _count_dep_vulns(dep)
         if not report:
             raise ValueError("pip dependency report is empty")
         return total
@@ -56,7 +59,15 @@ def _count_npm_severity(report: object, severity: str) -> int:
     if not isinstance(report, dict):
         raise ValueError("npm report must be an object")
     if isinstance(report.get("error"), dict):
-        summary = report["error"].get("summary")
+        err = report["error"]
+        summary = err.get("summary")
+        code = str(err.get("code") or "").upper()
+        if code == "ENOLOCK":
+            raise ValueError(
+                "npm audit error: missing lockfile (ENOLOCK). "
+                "Generate and commit frontend/package-lock.json (e.g. npm install --package-lock-only) "
+                "before running supply-chain gates."
+            )
         raise ValueError(f"npm audit error: {summary or 'unknown'}")
     metadata = report.get("metadata")
     if not isinstance(metadata, dict):
