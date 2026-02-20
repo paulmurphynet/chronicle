@@ -1,6 +1,6 @@
-# Chronicle standards whitepaper draft (working)
+# Chronicle Standards Whitepaper (Working Draft)
 
-Status: **working draft (v0.2)**  
+Status: **working draft (v0.3)**  
 Last updated: **2026-02-20**  
 Citation and revision metadata: [Whitepaper citation and publication metadata](whitepaper-citation.md)
 
@@ -10,111 +10,178 @@ Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible I
 
 ## Abstract
 
-Chronicle is an event-sourced system for recording claims, evidence, support/challenge links, and tensions, then computing defensibility metrics for review and evaluation workflows. This draft presents a standards-compatible interoperability profile that preserves Chronicle's trust-critical core while mapping to JSON-LD/PROV semantics and staged compatibility layers for C2PA, VC Data Integrity, RO-Crate, and ClaimReview. The paper also provides a reproducible evidence-pack workflow and explicit guarantee boundaries to prevent overclaiming.
+Chronicle is an event-sourced provenance system for recording investigations, claims, evidence, support/challenge links, and contradictions ("tensions"), then computing defensibility metrics for review workflows. This draft specifies Chronicle's standards interoperability profile and evidence requirements. The profile uses JSON-LD 1.1 and PROV-compatible mappings as the semantic baseline, with compatibility adapters for ClaimReview, RO-Crate, C2PA metadata, and VC/Data Integrity metadata. Chronicle remains model-first: interoperability layers do not replace Chronicle's canonical `.chronicle` artifact, event history, or verifier. The draft includes reproducible build commands, measured outputs, conformance boundaries, and explicit non-goals to avoid overclaiming.
 
 ## 1. Problem statement
 
-AI-assisted workflows can generate plausible outputs that are weakly supported, difficult to audit, and hard to compare across systems. Teams need artifacts that answer:
+AI-assisted outputs are often fluent but hard to audit. Teams need artifacts that answer three operational questions:
 
-1. What evidence supports or challenges each claim?
-2. Which contradictions remain unresolved?
-3. Which guarantees are structural integrity checks versus policy-relative quality metrics versus cryptographic verification?
+1. Which evidence supports or challenges each claim?
+2. Which contradictions remain unresolved at decision time?
+3. Which assurances are structural checks, policy-relative defensibility signals, or cryptographic verification claims?
 
-## 2. Chronicle model summary
+Chronicle addresses these questions with auditable provenance structure and explicit trust boundaries.
 
-Chronicle centers on:
+## 2. Chronicle system model
+
+Chronicle centers on five primitives:
 
 1. Immutable event history
-2. Evidence and span anchoring
-3. Claim lifecycle and typed support/challenge links
-4. Tension lifecycle for contradiction handling
+2. Evidence item and span anchoring
+3. Claim lifecycle with typed support/challenge links
+4. Tension lifecycle for contradiction tracking
 5. Defensibility scorecards and reasoning trails
 
-Chronicle remains the canonical internal model; standards mappings are interoperability profiles layered on top.
+Canonical trust artifacts remain Chronicle-native:
 
-## 3. Standards interoperability profile
+1. `.chronicle` package format
+2. Event/read-model invariants
+3. `chronicle-verify` integrity checks
 
-### 3.1 Semantic baseline
+Standards exports are interoperability projections over this canonical model.
 
-- JSON-LD 1.1 serialization profile
-- PROV-compatible mapping for entities, agents, activities, and qualified relations
+## 3. Interoperability profile
 
-### 3.2 Cryptographic compatibility layers
+### 3.1 Adopted standards layers
 
-- C2PA adapter path for media/content provenance assertions
-- VC Data Model 2.0 + VC Data Integrity 1.0 for signed attestation compatibility
+Chronicle adopts a layered profile:
 
-### 3.3 Packaging and publication interoperability
+1. Semantic interoperability baseline: JSON-LD 1.1 + PROV family compatibility
+2. Fact-checking ecosystem interoperability: schema.org `ClaimReview`
+3. Data packaging interoperability: RO-Crate profile
+4. Content provenance compatibility: C2PA metadata adapter path
+5. Attestation compatibility: VC Data Model 2.0 + VC Data Integrity 1.0 metadata adapter path
 
-- RO-Crate profile for portable research/data packages
-- schema.org ClaimReview export profile for fact-checking ecosystems
+### 3.2 Chronicle-to-standards mapping
 
-### 3.4 Adjacent standards boundaries
+| Chronicle concept | Standards-oriented mapping |
+|---|---|
+| Investigation | `prov:Bundle` + Chronicle investigation profile type |
+| Claim | `prov:Entity` + `chronicle:Claim` |
+| Evidence item | `prov:Entity` + `chronicle:EvidenceItem` |
+| Evidence span | `prov:Entity` + `chronicle:EvidenceSpan` |
+| Support/challenge link | `prov:Influence` + `chronicle:EvidenceLink` + typed `chronicle:linkType` |
+| Tension | `prov:Influence` + `chronicle:Tension` |
+| Source | `prov:Agent` + `chronicle:Source` |
+| Evidence-source link | `prov:Attribution` + `chronicle:EvidenceSourceLink` |
 
-OpenLineage, in-toto, and SLSA are treated as complementary ecosystems rather than Chronicle replacements. See [Adjacent standards guidance](adjacent-standards-guidance.md).
+Chronicle fields without direct PROV terms remain namespaced in the Chronicle JSON-LD context.
 
-## 4. End-to-end reproducible example (deterministic)
+### 3.3 Conformance implementation status (2026-02-20)
 
-This revision includes a concrete reproducible flow based on the whitepaper evidence pack tooling.
+| Profile area | Status | Evidence |
+|---|---|---|
+| JSON-LD/PROV export + validator | Implemented | `docs/standards-jsonld-export.md`, `standards_profiles/standards_jsonld_export.json`, `standards_profiles/standards_jsonld_validation.json` |
+| ClaimReview export | Implemented | `docs/claimreview-export.md`, `standards_profiles/claimreview_export.json` |
+| RO-Crate export | Implemented | `docs/ro-crate-export.md`, `standards_profiles/ro_crate_export.json` |
+| C2PA compatibility export (`disabled`, `metadata_only`) | Implemented (metadata compatibility) | `docs/c2pa-compatibility-export.md`, `standards_profiles/c2pa_export_*.json` |
+| VC/Data Integrity compatibility export (`disabled`, `metadata_only`) | Implemented (metadata compatibility) | `docs/vc-data-integrity-export.md`, `standards_profiles/vc_export_*.json` |
 
-Run from repo root:
+### 3.4 Explicit boundaries
+
+Chronicle does not claim:
+
+1. Truth of user-recorded claims
+2. External source independence verification
+3. Default cryptographic verification in C2PA/VC compatibility exports
+4. Replacement of OpenLineage, in-toto, or SLSA ecosystems
+
+See [Adjacent standards guidance](adjacent-standards-guidance.md).
+
+## 4. Reproducible evidence and observed results
+
+The whitepaper evidence flow is generated by:
 
 ```bash
 PYTHONPATH=. python3 scripts/whitepaper/build_evidence_pack.py \
   --components standards verifier \
-  --output-dir whitepaper_evidence_runs/v0_2_example
+  --output-dir whitepaper_evidence_runs/v0_3_example
 ```
 
-Expected outputs include:
+Observed output from a local run on **2026-02-20**:
+
+1. Manifest summary: 2 components requested, 2 passed, 0 failed
+2. Standards component summary:
+   - JSON-LD graph nodes: 12
+   - ClaimReview entries: 2
+   - RO-Crate graph nodes: 9
+   - C2PA evidence assertions: 1
+   - VC claim attestations: 2
+3. Standards JSON-LD validation errors: 0
+4. Verifier summary: `verified=true`, checks=7
+
+Expected artifact set:
 
 1. `standards_profiles/standards_jsonld_export.json`
-2. `standards_profiles/claimreview_export.json`
-3. `standards_profiles/ro_crate_export.json`
-4. `standards_profiles/c2pa_export_metadata_only.json`
-5. `standards_profiles/vc_export_metadata_only.json`
-6. `standards_profiles/sample_investigation.chronicle`
-7. `verifier/verification_report.json`
-8. `evidence_pack_manifest.json`
+2. `standards_profiles/standards_jsonld_validation.json`
+3. `standards_profiles/claimreview_export.json`
+4. `standards_profiles/ro_crate_export.json`
+5. `standards_profiles/c2pa_export_disabled.json`
+6. `standards_profiles/c2pa_export_metadata_only.json`
+7. `standards_profiles/vc_export_disabled.json`
+8. `standards_profiles/vc_export_metadata_only.json`
+9. `standards_profiles/sample_investigation.chronicle`
+10. `verifier/verification_report.json`
+11. `evidence_pack_manifest.json`
 
-This deterministic example demonstrates one investigation containing support, challenge, source linkage, tension modeling, C2PA metadata references, VC attestation metadata, and verifier-backed package integrity.
-
-## 5. Guarantees and non-guarantees matrix
+## 5. Guarantees and non-guarantees
 
 | Area | Chronicle guarantees | Chronicle does not guarantee | Primary source |
-|------|----------------------|------------------------------|----------------|
-| `.chronicle` package verification | Structural ZIP/manifest/schema checks; evidence hash integrity; optional append-only timestamp monotonicity checks. | Event semantic correctness, claim truth, source independence verification. | [Verification guarantees](verification-guarantees.md) |
-| Runtime invariants | Append-only event history, replayable read model, consistency checks via runtime verification commands. | That user-recorded provenance assertions are externally true. | [Verification guarantees](verification-guarantees.md) |
-| Defensibility scorecards | Stable metrics shape for claim-level defensibility (`provenance_quality`, corroboration, contradiction status, optional knowability/link assurance). | Truth judgments or entailment proof of support/challenge links. | [Defensibility metrics schema](defensibility-metrics-schema.md) |
-| C2PA compatibility export | Explicit verification modes (`disabled`, `metadata_only`) and normalized status semantics. | Cryptographic C2PA verification by default. | [C2PA compatibility export](c2pa-compatibility-export.md) |
-| VC/Data Integrity compatibility export | Explicit verification modes (`disabled`, `metadata_only`) and attestation metadata projection for claims/artifacts/checkpoints. | Cryptographic VC/Data Integrity verification by default. | [VC/Data Integrity export](vc-data-integrity-export.md) |
-| Standards mapping posture | JSON-LD/PROV/RO-Crate/ClaimReview/C2PA/VC interoperability profiles with versioned docs and tests. | Replacement of Chronicle canonical model with external schema-first storage. | [Standards profile](standards-profile.md) |
+|---|---|---|---|
+| `.chronicle` package verification | Structural ZIP/manifest/schema checks, evidence hash integrity, optional append-only timestamp monotonicity checks | Claim truth, semantic correctness, source independence proof | [Verification guarantees](verification-guarantees.md) |
+| Runtime invariants | Append-only event history, replay consistency, invariant checks | Real-world truth of recorded provenance assertions | [Verification guarantees](verification-guarantees.md) |
+| Defensibility scorecards | Stable output fields (`provenance_quality`, corroboration, contradiction status, optional knowability/link assurance) | Entailment proof or truth certification | [Defensibility metrics schema](defensibility-metrics-schema.md) |
+| C2PA compatibility export | Explicit modes (`disabled`, `metadata_only`) and normalized status projection | Automatic cryptographic C2PA verification | [C2PA compatibility export](c2pa-compatibility-export.md) |
+| VC/Data Integrity compatibility export | Explicit modes (`disabled`, `metadata_only`) and attestation metadata projection | Automatic cryptographic VC/Data Integrity verification | [VC/Data Integrity export](vc-data-integrity-export.md) |
+| Standards profile posture | Versioned interoperability mappings with fixtures and docs | Schema-first replacement of Chronicle storage model | [Standards profile](standards-profile.md) |
 
 ## 6. Security and threat considerations
 
-This profile addresses:
+Key threat surfaces and mitigations:
 
-1. Tampering and package integrity checks (`.chronicle` verifier and evidence hashes)
-2. Provenance assertion spoofing risk (recorded-vs-verified boundary is explicit)
-3. Evidence/source trust boundaries (modeled links are auditable but not self-authenticating)
-4. Replay and reproducibility safeguards (event log + deterministic tooling + manifested evidence pack)
+1. Package tampering:
+   - Mitigation: verifier checks over manifest/schema/evidence hashes
+2. Provenance spoofing:
+   - Mitigation: explicit recorded-vs-verified distinction in compatibility exports and docs
+3. Contradiction hiding:
+   - Mitigation: first-class tension modeling and contradiction-aware defensibility fields
+4. Reproducibility drift:
+   - Mitigation: deterministic tooling, manifested command traces, versioned evidence packs
+
+These controls improve auditability but do not establish truth.
 
 ## 7. Evaluation methodology
 
-Evaluation and reporting are grounded in reproducible commands:
+Evaluation artifacts are generated with reproducible commands:
 
-1. Deterministic benchmark scenarios (`scripts/benchmark_data/run_defensibility_benchmark.py`)
-2. Trust metric reporting (`scripts/benchmark_data/trust_progress_report.py`)
-3. Standards profile examples via whitepaper evidence pack (`scripts/whitepaper/build_evidence_pack.py`)
+1. `scripts/benchmark_data/run_defensibility_benchmark.py`
+2. `scripts/benchmark_data/trust_progress_report.py`
+3. `scripts/whitepaper/build_evidence_pack.py`
 
-This yields a repeatable artifact chain from benchmark rows to defensibility metrics to export compatibility examples and verifier outputs.
+This provides a traceable chain from benchmark scenarios to defensibility outputs to standards interoperability fixtures and verifier reports.
 
-## 8. Standardization path
+## 8. Limitations and future work
+
+Current limitations:
+
+1. C2PA and VC/Data Integrity adapters are metadata compatibility paths, not full cryptographic verification engines
+2. Chronicle captures provenance structure and policy-relative defensibility, not absolute truth
+3. Interoperability profiles are currently export-focused; broader bi-directional exchange profiles remain future work
+
+Planned follow-ups:
+
+1. External review cycle for mapping language and conformance expectations
+2. Venue-specific formatting packages for submission-ready publication
+3. Expanded compatibility fixtures for ecosystem-specific integration feedback
+
+## 9. Publication and standards engagement process
 
 Versioned progression:
 
-1. Publish and revise the whitepaper draft with explicit citations and metadata.
-2. Run internal and external review loops; log accepted/rejected changes.
-3. Share submission package artifacts with relevant communities using the outreach template.
+1. Maintain revisioned draft + citation metadata
+2. Capture internal/external review outcomes with accepted/rejected deltas
+3. Share submission package with relevant communities (JSON-LD/PROV/VC, C2PA, applied research)
+4. Publish revision notes with explicit compatibility and guarantee boundaries
 
 Operational references:
 
@@ -122,9 +189,9 @@ Operational references:
 - [Whitepaper internal review log](whitepaper-internal-review-log.md)
 - [Standards submission package](standards-submission-package.md)
 
-## 9. Conclusion
+## 10. Conclusion
 
-Chronicle can remain model-first and verifiability-first while interoperating with established provenance and attestation standards through explicit, testable profile layers. The key requirement is explicit separation between structural integrity guarantees, policy-relative defensibility metrics, and cryptographic verification claims.
+Chronicle can remain model-first and verifiability-first while interoperating with existing standards through explicit profile layers. The core requirement is strict boundary discipline: structural verification, defensibility scoring, and cryptographic verification claims must remain clearly separated and independently evidenced.
 
 ## Appendix A: reproducibility commands
 
@@ -135,16 +202,28 @@ PYTHONPATH=. python3 scripts/whitepaper/build_evidence_pack.py
 # Build standards + verifier subset used in this revision
 PYTHONPATH=. python3 scripts/whitepaper/build_evidence_pack.py \
   --components standards verifier \
-  --output-dir whitepaper_evidence_runs/v0_2_example
+  --output-dir whitepaper_evidence_runs/v0_3_example
+
+# Run whitepaper-focused regression tests
+CHRONICLE_EVENT_STORE=sqlite ./.venv/bin/pytest -q \
+  tests/test_whitepaper_evidence_pack.py \
+  tests/test_whitepaper_publication_metadata.py
 
 # Re-run docs integrity checks before publication update
-PYTHONPATH=. python3 scripts/check_doc_links.py .
+PYTHONPATH=. python3 scripts/check_doc_links.py
 PYTHONPATH=. python3 scripts/check_docs_currency.py
 ```
 
-## Appendix B: artifacts to attach before public release
+## Appendix B: external review checklist
 
-1. Profile mapping examples (JSON-LD/PROV)
-2. C2PA/VC adapter examples
-3. RO-Crate and ClaimReview export fixtures
-4. Reproducibility command list and expected outputs (see [Whitepaper evidence pack](whitepaper-evidence-pack.md))
+1. Mapping correctness against JSON-LD/PROV terms
+2. Boundary clarity between semantics, defensibility, and cryptographic verification
+3. Interoperability viability for ClaimReview and RO-Crate consumers
+4. Compatibility expectations for C2PA and VC/Data Integrity integrations
+
+## Appendix C: submission package minimum
+
+1. Whitepaper draft + citation metadata
+2. Evidence pack manifest + generated artifacts
+3. Standards profile and ADR references
+4. Review log with accepted/rejected deltas

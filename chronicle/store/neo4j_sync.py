@@ -56,7 +56,47 @@ def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
     return {str(row[1]) for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
 
 
+def _evidence_link_select_sql(conn: sqlite3.Connection, *, link_type: str) -> str:
+    rationale_expr = _evidence_link_rationale_expr(conn)
+    if link_type == "SUPPORTS":
+        if rationale_expr == "coalesce(rationale, '') AS rationale":
+            return (
+                "SELECT span_uid, claim_uid, link_uid, source_event_id, "
+                "coalesce(rationale, '') AS rationale "
+                "FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid"
+            )
+        if rationale_expr == "coalesce(notes, '') AS rationale":
+            return (
+                "SELECT span_uid, claim_uid, link_uid, source_event_id, "
+                "coalesce(notes, '') AS rationale "
+                "FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid"
+            )
+        return (
+            "SELECT span_uid, claim_uid, link_uid, source_event_id, "
+            "'' AS rationale FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid"
+        )
+    if link_type == "CHALLENGES":
+        if rationale_expr == "coalesce(rationale, '') AS rationale":
+            return (
+                "SELECT span_uid, claim_uid, link_uid, source_event_id, "
+                "coalesce(rationale, '') AS rationale "
+                "FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid"
+            )
+        if rationale_expr == "coalesce(notes, '') AS rationale":
+            return (
+                "SELECT span_uid, claim_uid, link_uid, source_event_id, "
+                "coalesce(notes, '') AS rationale "
+                "FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid"
+            )
+        return (
+            "SELECT span_uid, claim_uid, link_uid, source_event_id, "
+            "'' AS rationale FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid"
+        )
+    raise ValueError(f"Unsupported link_type: {link_type}")
+
+
 def _evidence_link_rationale_expr(conn: sqlite3.Connection) -> str:
+    """Backward-compatible helper used by tests and scripts."""
     columns = _table_columns(conn, "evidence_link")
     if "rationale" in columns:
         return "coalesce(rationale, '') AS rationale"
@@ -349,8 +389,6 @@ def _sync_relationships(
             claim_uid_to_content_hash[r["claim_uid"]] = _claim_content_hash(r.get("claim_text"))
 
     with driver.session() as session:
-        evidence_link_rationale_expr = _evidence_link_rationale_expr(conn)
-
         # Span IN EvidenceItem (when dedupe: match EvidenceItem by content_hash)
         if dedupe_evidence_by_content_hash:
             rows = _fetch_rows(
@@ -391,8 +429,7 @@ def _sync_relationships(
         # SUPPORTS
         rows = _fetch_rows(
             conn,
-            f"SELECT span_uid, claim_uid, link_uid, source_event_id, {evidence_link_rationale_expr} "
-            "FROM evidence_link WHERE link_type = 'SUPPORTS' ORDER BY link_uid",
+            _evidence_link_select_sql(conn, link_type="SUPPORTS"),
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:
@@ -424,8 +461,7 @@ def _sync_relationships(
         # CHALLENGES
         rows = _fetch_rows(
             conn,
-            f"SELECT span_uid, claim_uid, link_uid, source_event_id, {evidence_link_rationale_expr} "
-            "FROM evidence_link WHERE link_type = 'CHALLENGES' ORDER BY link_uid",
+            _evidence_link_select_sql(conn, link_type="CHALLENGES"),
         )
         if dedupe_evidence_by_content_hash:
             for r in rows:

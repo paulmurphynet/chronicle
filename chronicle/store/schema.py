@@ -5,12 +5,14 @@ On first init (create_project or first open of chronicle.db), all schema_version
 therefore assume the table and version rows exist for both new and migrated projects.
 """
 
+import re
 import sqlite3
 from datetime import UTC, datetime
 
 EVENT_STORE_VERSION = 2
 READ_MODEL_VERSION = 1
 PROJECT_FORMAT_VERSION = 1
+_SQL_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 EVENTS_DDL = """
 CREATE TABLE IF NOT EXISTS events (
@@ -624,7 +626,9 @@ def init_event_store_schema(conn: sqlite3.Connection) -> None:
 def truncate_read_model_tables(conn: sqlite3.Connection) -> None:
     """Delete all rows from read model tables (keep events). Order respects FKs. Spec 15.3."""
     for table in READ_MODEL_TABLES_TRUNCATE_ORDER:
-        conn.execute(f"DELETE FROM {table}")
+        if not _SQL_IDENT_RE.fullmatch(table):
+            raise ValueError(f"Invalid table name in truncate order: {table!r}")
+        conn.execute(f'DELETE FROM "{table}"')  # nosec B608
     conn.commit()
 
 

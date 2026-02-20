@@ -11,6 +11,7 @@ import argparse
 import dataclasses
 import json
 import os
+import re
 import sqlite3
 import tempfile
 from datetime import UTC, datetime
@@ -31,6 +32,19 @@ EVENT_COLUMNS = (
     "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
     "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash"
 )
+EVENT_SELECT_SQLITE_BY_INVESTIGATION = (
+    "SELECT event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+    "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
+    "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash "
+    "FROM events WHERE investigation_uid = ? ORDER BY rowid ASC"
+)
+EVENT_SELECT_POSTGRES_BY_INVESTIGATION = (
+    "SELECT event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+    "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
+    "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash "
+    "FROM events WHERE investigation_uid = %s ORDER BY recorded_at ASC, event_id ASC"
+)
+_SQL_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 READ_MODEL_TABLES_FOR_SCORECARD = (
     "investigation",
@@ -44,6 +58,15 @@ READ_MODEL_TABLES_FOR_SCORECARD = (
     "evidence_source_link",
     "tension",
 )
+_PARITY_ALLOWED_TABLES = frozenset({"events", *READ_MODEL_TABLES_FOR_SCORECARD})
+
+
+def _quote_sqlite_ident(name: str, *, allowed: set[str] | frozenset[str] | None = None) -> str:
+    if allowed is not None and name not in allowed:
+        raise ValueError(f"Unsupported SQLite identifier: {name!r}")
+    if not _SQL_IDENT_RE.fullmatch(name):
+        raise ValueError(f"Invalid SQLite identifier: {name!r}")
+    return '"' + name.replace('"', '""') + '"'
 
 
 def _load_env_file(path: Path) -> None:
@@ -261,7 +284,7 @@ def _read_events_for_investigation(project_dir: Path, investigation_uid: str) ->
     conn = sqlite3.connect(str(project_dir / CHRONICLE_DB))
     try:
         rows = conn.execute(
-            f"SELECT {EVENT_COLUMNS} FROM events WHERE investigation_uid = ? ORDER BY rowid ASC",
+            EVENT_SELECT_SQLITE_BY_INVESTIGATION,
             (investigation_uid,),
         ).fetchall()
         return [_row_to_event(tuple(row)) for row in rows]
@@ -272,9 +295,18 @@ def _read_events_for_investigation(project_dir: Path, investigation_uid: str) ->
 def _insert_sqlite_rows(conn: sqlite3.Connection, table: str, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
+    table_sql = _quote_sqlite_ident(table, allowed=_PARITY_ALLOWED_TABLES)
+    if not all(isinstance(row, dict) for row in rows):
+        raise ValueError(f"Rows must be object mappings for table {table!r}")
     columns = list(rows[0].keys())
+    if not columns:
+        return
+    allowed_columns = {str(r[1]) for r in conn.execute(f"PRAGMA table_info({table_sql})").fetchall()}  # nosec B608
+    if not all(isinstance(col, str) and col in allowed_columns for col in columns):
+        raise ValueError(f"Unexpected columns for table {table!r}")
     placeholders = ", ".join("?" for _ in columns)
-    sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
+    cols_sql = ", ".join(_quote_sqlite_ident(col) for col in columns)
+    sql = f"INSERT INTO {table_sql} ({cols_sql}) VALUES ({placeholders})"  # nosec B608
     conn.executemany(sql, [tuple(row.get(col) for col in columns) for row in rows])
 
 
@@ -282,13 +314,20 @@ def _fetch_postgres_rows(
     pg_conn: Any, table: str, *, investigation_uid: str
 ) -> list[dict[str, Any]]:
     cur = pg_conn.cursor()
-    if table in {"investigation", "tier_history", "claim", "evidence_item", "source", "tension"}:
-        cur.execute(f"SELECT * FROM {table} WHERE investigation_uid = %s", (investigation_uid,))
+    if table == "investigation":
+        cur.execute("SELECT * FROM investigation WHERE investigation_uid = %s", (investigation_uid,))
+    elif table == "tier_history":
+        cur.execute("SELECT * FROM tier_history WHERE investigation_uid = %s", (investigation_uid,))
+    elif table == "claim":
+        cur.execute("SELECT * FROM claim WHERE investigation_uid = %s", (investigation_uid,))
+    elif table == "evidence_item":
+        cur.execute("SELECT * FROM evidence_item WHERE investigation_uid = %s", (investigation_uid,))
+    elif table == "source":
+        cur.execute("SELECT * FROM source WHERE investigation_uid = %s", (investigation_uid,))
+    elif table == "tension":
+        cur.execute("SELECT * FROM tension WHERE investigation_uid = %s", (investigation_uid,))
     elif table == "events":
-        cur.execute(
-            f"SELECT {EVENT_COLUMNS} FROM events WHERE investigation_uid = %s ORDER BY recorded_at ASC, event_id ASC",
-            (investigation_uid,),
-        )
+        cur.execute(EVENT_SELECT_POSTGRES_BY_INVESTIGATION, (investigation_uid,))
     elif table == "evidence_span":
         cur.execute(
             """

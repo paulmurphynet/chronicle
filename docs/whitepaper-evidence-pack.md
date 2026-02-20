@@ -53,6 +53,7 @@ The generated pack includes:
 - `benchmark/trust_progress_report.json`
 - `reference_workflows/reference_workflow_report.json`
 - `standards_profiles/standards_jsonld_export.json`
+- `standards_profiles/standards_jsonld_validation.json`
 - `standards_profiles/claimreview_export.json`
 - `standards_profiles/ro_crate_export.json`
 - `standards_profiles/c2pa_export_disabled.json`

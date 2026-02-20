@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import re
 import sqlite3
 from pathlib import Path
 
@@ -36,6 +37,25 @@ _EVENT_COLUMNS = (
     "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
     "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash"
 )
+_EVENT_SELECT_ASC_SQL = (
+    "SELECT event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+    "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
+    "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash "
+    "FROM events ORDER BY rowid ASC"
+)
+_EVENT_SELECT_TAIL_SQL = (
+    "SELECT rowid, event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+    "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
+    "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash "
+    "FROM events WHERE rowid > ? ORDER BY rowid ASC"
+)
+_SQL_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _quote_ident(name: str) -> str:
+    if not _SQL_IDENT_RE.fullmatch(name):
+        raise ValueError(f"Invalid SQL identifier: {name!r}")
+    return '"' + name.replace('"', '""') + '"'
 
 
 def _row_to_event(row: tuple) -> Event:
@@ -94,8 +114,7 @@ def create_read_model_snapshot(
         try:
             run_read_model_ddl_only(snap_conn)
             snap_conn.executescript(SNAPSHOT_META_DDL)
-            query = f"SELECT {_EVENT_COLUMNS} FROM events ORDER BY rowid ASC"
-            cur = main_conn.execute(query)
+            cur = main_conn.execute(_EVENT_SELECT_ASC_SQL)
             applied = 0
             for row in cur.fetchall():
                 event = _row_to_event(row)
@@ -151,14 +170,16 @@ def restore_from_snapshot(
         try:
             for table in _INSERT_ORDER:
                 with contextlib.suppress(sqlite3.OperationalError):
-                    main_conn.execute(f"INSERT INTO {table} SELECT * FROM snap.{table}")
+                    table_sql = _quote_ident(table)
+                    main_conn.execute(
+                        f"INSERT INTO {table_sql} SELECT * FROM snap.{table_sql}"  # nosec B608
+                    )
             main_conn.commit()
         finally:
             main_conn.execute("DETACH DATABASE snap")
 
         # Replay tail: events with rowid > as_of_event_rowid
-        query = f"SELECT rowid, {_EVENT_COLUMNS} FROM events WHERE rowid > ? ORDER BY rowid ASC"
-        cur = main_conn.execute(query, (as_of_event_rowid,))
+        cur = main_conn.execute(_EVENT_SELECT_TAIL_SQL, (as_of_event_rowid,))
         tail_count = 0
         for row in cur.fetchall():
             rowid, *event_row = row

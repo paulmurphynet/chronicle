@@ -24,7 +24,7 @@ Implementation reference: [Whitepaper evidence pack](whitepaper-evidence-pack.md
 ### Phase 1: authoring baseline
 
 1. Freeze terminology and guarantees using existing docs (`technical-report`, `verification-guarantees`, `critical_areas`).
-2. Draft whitepaper v0.1 using the template in `docs/whitepaper-draft.md`.
+2. Maintain the current working whitepaper revision in `docs/whitepaper-draft.md` with versioned metadata updates on each publication-grade edit.
 3. Add explicit non-goals and limitations to avoid overclaiming.
 
 ### Phase 2: technical evidence

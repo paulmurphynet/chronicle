@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import os
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -17,7 +19,9 @@ from pathlib import Path
 from typing import Any
 
 from chronicle.core.http_safety import ensure_safe_http_url
+from chronicle.store import export_import as export_import_mod
 from chronicle.store.project import create_project, project_exists
+from chronicle.store.session import ChronicleSession
 
 DEFAULT_BATCH = {
     "title": "API ingestion example: contested revenue timing",
@@ -153,49 +157,33 @@ def _run_pipeline(batch: dict[str, Any], project_path: Path, output_dir: Path) -
         project_path.mkdir(parents=True, exist_ok=True)
         create_project(project_path)
 
-    port = _find_free_port()
-    base_url = f"http://127.0.0.1:{port}"
-    env = os.environ.copy()
-    env["CHRONICLE_PROJECT_PATH"] = str(project_path.resolve())
-    cmd = [
-        sys.executable,
-        "-m",
-        "uvicorn",
-        "chronicle.api.app:app",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        str(port),
-        "--log-level",
-        "warning",
-    ]
-    proc = subprocess.Popen(
-        cmd,
-        cwd=str(Path(__file__).resolve().parent.parent),
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    try:
-        _wait_for_health(base_url, proc=proc)
-
-        created = _http_json(
-            base_url,
+    def _run_requests(
+        json_request: Any,
+        bytes_request: Any,
+    ) -> tuple[
+        str,
+        str,
+        str,
+        dict[str, Any],
+        list[dict[str, Any]],
+        dict[str, Any],
+        dict[str, Any],
+        dict[str, Any],
+        bytes,
+    ]:
+        created = json_request(
             "POST",
             "/investigations",
             {"title": batch.get("title") or "API ingestion example"},
         )
         investigation_uid = created["investigation_uid"]
-        _http_json(
-            base_url,
+        json_request(
             "POST",
             f"/investigations/{investigation_uid}/tier",
             {"tier": "forge", "reason": "API ingestion example requires tension modeling."},
         )
 
-        claim_resp = _http_json(
-            base_url,
+        claim_resp = json_request(
             "POST",
             f"/investigations/{investigation_uid}/claims",
             {"text": batch.get("claim") or "Example claim from API ingestion"},
@@ -213,8 +201,7 @@ def _run_pipeline(batch: dict[str, Any], project_path: Path, output_dir: Path) -
             text = str(row.get("text") or "")
             if not text.strip():
                 continue
-            ingest = _http_json(
-                base_url,
+            ingest = json_request(
                 "POST",
                 f"/investigations/{investigation_uid}/evidence",
                 {
@@ -229,15 +216,13 @@ def _run_pipeline(batch: dict[str, Any], project_path: Path, output_dir: Path) -
             stance = str(row.get("stance") or "support").strip().lower()
             rationale = str(row.get("rationale") or "").strip() or None
             if stance == "challenge":
-                linked = _http_json(
-                    base_url,
+                linked = json_request(
                     "POST",
                     f"/investigations/{investigation_uid}/links/challenge",
                     {"claim_uid": claim_uid, "span_uid": span_uid, "rationale": rationale},
                 )
             else:
-                linked = _http_json(
-                    base_url,
+                linked = json_request(
                     "POST",
                     f"/investigations/{investigation_uid}/links/support",
                     {"claim_uid": claim_uid, "span_uid": span_uid, "rationale": rationale},
@@ -251,15 +236,13 @@ def _run_pipeline(batch: dict[str, Any], project_path: Path, output_dir: Path) -
                 }
             )
 
-        claim_2 = _http_json(
-            base_url,
+        claim_2 = json_request(
             "POST",
             f"/investigations/{investigation_uid}/claims",
             {"text": "Revenue can be recognized in March 2024 without exception."},
         )
         claim_2_uid = claim_2["claim_uid"]
-        tension = _http_json(
-            base_url,
+        tension = json_request(
             "POST",
             f"/investigations/{investigation_uid}/tensions",
             {
@@ -269,19 +252,205 @@ def _run_pipeline(batch: dict[str, Any], project_path: Path, output_dir: Path) -
             },
         )
 
-        defensibility = _http_json(base_url, "GET", f"/claims/{claim_uid}/defensibility")
-        reasoning_brief = _http_json(base_url, "GET", f"/claims/{claim_uid}/reasoning-brief")
-        review_packet = _http_json(
-            base_url, "GET", f"/investigations/{investigation_uid}/review-packet"
+        defensibility = json_request("GET", f"/claims/{claim_uid}/defensibility")
+        reasoning_brief = json_request("GET", f"/claims/{claim_uid}/reasoning-brief")
+        review_packet = json_request(
+            "GET", f"/investigations/{investigation_uid}/review-packet"
         )
-        exported = _http_bytes(base_url, "POST", f"/investigations/{investigation_uid}/export")
-    finally:
-        proc.terminate()
+        exported = bytes_request("POST", f"/investigations/{investigation_uid}/export")
+        return (
+            investigation_uid,
+            claim_uid,
+            claim_2_uid,
+            tension,
+            evidence_rows,
+            defensibility,
+            reasoning_brief,
+            review_packet,
+            exported,
+        )
+
+    def _run_over_uvicorn() -> tuple[
+        str,
+        str,
+        str,
+        dict[str, Any],
+        list[dict[str, Any]],
+        dict[str, Any],
+        dict[str, Any],
+        dict[str, Any],
+        bytes,
+    ]:
+        port = _find_free_port()
+        base_url = f"http://127.0.0.1:{port}"
+        env = os.environ.copy()
+        env["CHRONICLE_PROJECT_PATH"] = str(project_path.resolve())
+        cmd = [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "chronicle.api.app:app",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            str(port),
+            "--log-level",
+            "warning",
+        ]
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(Path(__file__).resolve().parent.parent),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
         try:
-            proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            proc.wait(timeout=5)
+            _wait_for_health(base_url, proc=proc)
+            return _run_requests(
+                lambda method, path, payload=None: _http_json(base_url, method, path, payload),
+                lambda method, path: _http_bytes(base_url, method, path),
+            )
+        finally:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait(timeout=5)
+
+    def _run_in_process() -> tuple[
+        str,
+        str,
+        str,
+        dict[str, Any],
+        list[dict[str, Any]],
+        dict[str, Any],
+        dict[str, Any],
+        dict[str, Any],
+        bytes,
+    ]:
+        with ChronicleSession(project_path, event_store_backend="sqlite") as session:
+            _, investigation_uid = session.create_investigation(
+                str(batch.get("title") or "API ingestion example"),
+            )
+            session.set_tier(
+                investigation_uid,
+                "forge",
+                reason="API ingestion example requires tension modeling.",
+            )
+            _, claim_uid = session.propose_claim(
+                investigation_uid,
+                str(batch.get("claim") or "Example claim from API ingestion"),
+            )
+
+            records = batch.get("records") or []
+            if not isinstance(records, list) or not records:
+                raise ValueError("Batch payload requires non-empty 'records' array")
+
+            evidence_rows: list[dict[str, Any]] = []
+            for idx, row in enumerate(records):
+                if not isinstance(row, dict):
+                    continue
+                text = str(row.get("text") or "")
+                if not text.strip():
+                    continue
+                _, evidence_uid = session.ingest_evidence(
+                    investigation_uid,
+                    text.encode("utf-8"),
+                    "text/plain",
+                    original_filename=str(row.get("filename") or f"record_{idx + 1}.txt"),
+                )
+                _, span_uid = session.anchor_span(
+                    investigation_uid,
+                    evidence_uid,
+                    "text_offset",
+                    {"start_char": 0, "end_char": len(text)},
+                    quote=text[:2000] if len(text) > 2000 else text,
+                )
+                stance = str(row.get("stance") or "support").strip().lower()
+                rationale = str(row.get("rationale") or "").strip() or None
+                if stance == "challenge":
+                    _, link_uid = session.link_challenge(
+                        investigation_uid,
+                        span_uid,
+                        claim_uid,
+                        rationale=rationale,
+                    )
+                else:
+                    _, link_uid = session.link_support(
+                        investigation_uid,
+                        span_uid,
+                        claim_uid,
+                        rationale=rationale,
+                    )
+                evidence_rows.append(
+                    {
+                        "evidence_uid": evidence_uid,
+                        "span_uid": span_uid,
+                        "stance": "challenge" if stance == "challenge" else "support",
+                        "link_uid": link_uid,
+                    }
+                )
+
+            _, claim_2_uid = session.propose_claim(
+                investigation_uid,
+                "Revenue can be recognized in March 2024 without exception.",
+            )
+            _, tension_uid = session.declare_tension(
+                investigation_uid,
+                claim_uid,
+                claim_2_uid,
+                tension_kind="contradiction",
+            )
+            scorecard = session.get_defensibility_score(claim_uid)
+            defensibility = dataclasses.asdict(scorecard) if scorecard is not None else {}
+            reasoning_brief = session.get_reasoning_brief(claim_uid) or {}
+            review_packet = session.get_review_packet(investigation_uid)
+
+        with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:
+            out_path = Path(f.name)
+        try:
+            export_import_mod.export_investigation(project_path, investigation_uid, out_path)
+            exported = out_path.read_bytes()
+        finally:
+            out_path.unlink(missing_ok=True)
+        return (
+            investigation_uid,
+            claim_uid,
+            claim_2_uid,
+            {"tension_uid": tension_uid},
+            evidence_rows,
+            defensibility,
+            reasoning_brief,
+            review_packet,
+            exported,
+        )
+
+    try:
+        (
+            investigation_uid,
+            claim_uid,
+            claim_2_uid,
+            tension,
+            evidence_rows,
+            defensibility,
+            reasoning_brief,
+            review_packet,
+            exported,
+        ) = _run_over_uvicorn()
+    except PermissionError:
+        (
+            investigation_uid,
+            claim_uid,
+            claim_2_uid,
+            tension,
+            evidence_rows,
+            defensibility,
+            reasoning_brief,
+            review_packet,
+            exported,
+        ) = _run_in_process()
 
     output_dir.mkdir(parents=True, exist_ok=True)
     export_path = output_dir / "api_ingestion_export.chronicle"

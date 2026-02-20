@@ -942,7 +942,7 @@ def _collect_subject_attestation_metadata(
     placeholders = ",".join("?" for _ in subject_uids)
     sql = (
         "SELECT subject_uid, payload, recorded_at, event_id "
-        f"FROM events WHERE investigation_uid = ? AND subject_uid IN ({placeholders}) "
+        f"FROM events WHERE investigation_uid = ? AND subject_uid IN ({placeholders}) "  # nosec B608
         "ORDER BY recorded_at DESC, event_id DESC"
     )
     params: list[str] = [investigation_uid, *subject_uids]

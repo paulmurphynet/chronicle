@@ -19,6 +19,24 @@ def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
     return {str(row[1]) for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
 
 
+def _evidence_link_select_sql(conn: sqlite3.Connection) -> str:
+    rationale_expr = _evidence_link_rationale_expr(conn)
+    if rationale_expr == "coalesce(rationale, '') AS rationale":
+        return (
+            "SELECT link_uid, claim_uid, span_uid, link_type, coalesce(rationale, '') AS rationale, "
+            "created_at, source_event_id FROM evidence_link ORDER BY link_uid"
+        )
+    if rationale_expr == "coalesce(notes, '') AS rationale":
+        return (
+            "SELECT link_uid, claim_uid, span_uid, link_type, coalesce(notes, '') AS rationale, "
+            "created_at, source_event_id FROM evidence_link ORDER BY link_uid"
+        )
+    return (
+        "SELECT link_uid, claim_uid, span_uid, link_type, '' AS rationale, "
+        "created_at, source_event_id FROM evidence_link ORDER BY link_uid"
+    )
+
+
 def _evidence_link_rationale_expr(conn: sqlite3.Connection) -> str:
     columns = _table_columns(conn, "evidence_link")
     if "rationale" in columns:
@@ -112,11 +130,7 @@ def export_read_model_to_csv(conn: sqlite3.Connection, output_dir: Path) -> None
         cur.fetchall(),
     )
 
-    evidence_link_rationale_expr = _evidence_link_rationale_expr(conn)
-    cur.execute(
-        f"SELECT link_uid, claim_uid, span_uid, link_type, {evidence_link_rationale_expr}, "
-        "created_at, source_event_id FROM evidence_link ORDER BY link_uid"
-    )
+    cur.execute(_evidence_link_select_sql(conn))
     _write_csv(
         output_dir / "links.csv",
         ["link_uid", "claim_uid", "span_uid", "link_type", "rationale", "created_at", "source_event_id"],

@@ -30,6 +30,29 @@ _EVENT_COLUMNS = (
 )
 _POSTGRES_TRUNCATE_ORDER = [t for t in schema.READ_MODEL_TABLES_TRUNCATE_ORDER if t != "claim_fts"]
 _POSTGRES_INSERT_ORDER = list(reversed(_POSTGRES_TRUNCATE_ORDER))
+_POSTGRES_TABLES = frozenset(_POSTGRES_TRUNCATE_ORDER)
+_SELECT_EVENTS_ORDERED_SQL = (
+    "SELECT event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+    "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
+    "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash "
+    "FROM events ORDER BY recorded_at ASC, event_id ASC"
+)
+_SELECT_TAIL_EVENTS_SQL = (
+    "SELECT event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+    "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
+    "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash "
+    "FROM events WHERE (recorded_at > %s) OR (recorded_at = %s AND event_id > %s) "
+    "ORDER BY recorded_at ASC, event_id ASC"
+)
+_SQL_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _quote_ident(name: str, *, allowed: set[str] | frozenset[str] | None = None) -> str:
+    if allowed is not None and name not in allowed:
+        raise ValueError(f"Unsupported SQL identifier: {name!r}")
+    if not _SQL_IDENT_RE.fullmatch(name):
+        raise ValueError(f"Invalid SQL identifier: {name!r}")
+    return '"' + name.replace('"', '""') + '"'
 
 
 def _split_sql_statements(sql: str) -> list[str]:
@@ -178,7 +201,7 @@ def translate_sqlite_to_postgres_sql(sql_text: str) -> str:
         sql = _append_on_conflict_do_nothing(sql)
         sql = (
             sql[: -len(" ON CONFLICT DO NOTHING")]
-            + " ON CONFLICT (link_uid) DO UPDATE SET "
+            + " ON CONFLICT (link_uid) DO UPDATE SET "  # nosec B608
             + "retracted_at = EXCLUDED.retracted_at, rationale = EXCLUDED.rationale"
         )
 
@@ -332,12 +355,10 @@ def replay_postgres_read_model(
     init_postgres_read_model_schema(connection)
     cur = connection.cursor()
     for table in _POSTGRES_TRUNCATE_ORDER:
-        cur.execute(f"DELETE FROM {table}")
+        cur.execute(f"DELETE FROM {_quote_ident(table, allowed=_POSTGRES_TABLES)}")  # nosec B608
 
     events_cur = connection.cursor()
-    events_cur.execute(
-        f"SELECT {_EVENT_COLUMNS} FROM events ORDER BY recorded_at ASC, event_id ASC"
-    )
+    events_cur.execute(_SELECT_EVENTS_ORDERED_SQL)
     rows = events_cur.fetchall()
     applied = 0
     found_target = up_to_event_id is None
@@ -380,7 +401,7 @@ def replay_postgres_read_model_from_url(
 
 def _dump_table_rows(connection: Any, table: str) -> list[dict[str, Any]]:
     cur = connection.cursor()
-    cur.execute(f"SELECT * FROM {table}")
+    cur.execute(f"SELECT * FROM {_quote_ident(table, allowed=_POSTGRES_TABLES)}")  # nosec B608
     names = [c.name if hasattr(c, "name") else c[0] for c in (cur.description or [])]
     return [dict(zip(names, tuple(row), strict=False)) for row in cur.fetchall()]
 
@@ -425,17 +446,28 @@ def create_postgres_read_model_snapshot_from_url(
 def _truncate_postgres_read_model(connection: Any) -> None:
     cur = connection.cursor()
     for table in _POSTGRES_TRUNCATE_ORDER:
-        cur.execute(f"DELETE FROM {table}")
+        cur.execute(f"DELETE FROM {_quote_ident(table, allowed=_POSTGRES_TABLES)}")  # nosec B608
 
 
 def _restore_table_rows(connection: Any, table: str, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
+    table_sql = _quote_ident(table, allowed=_POSTGRES_TABLES)
+    if not all(isinstance(row, dict) for row in rows):
+        raise ValueError(f"Snapshot rows must be objects for table {table!r}")
     columns = list(rows[0].keys())
-    cols_sql = ", ".join(columns)
-    placeholders = ", ".join("%s" for _ in columns)
-    sql = f"INSERT INTO {table} ({cols_sql}) VALUES ({placeholders})"
+    if not columns:
+        return
     cur = connection.cursor()
+    cur.execute(f"SELECT * FROM {table_sql} LIMIT 0")  # nosec B608
+    allowed_columns = {
+        c.name if hasattr(c, "name") else c[0] for c in (cur.description or [])
+    }
+    if not all(isinstance(col, str) and col in allowed_columns for col in columns):
+        raise ValueError(f"Snapshot contains unsupported columns for table {table!r}")
+    cols_sql = ", ".join(_quote_ident(col) for col in columns)
+    placeholders = ", ".join("%s" for _ in columns)
+    sql = f"INSERT INTO {table_sql} ({cols_sql}) VALUES ({placeholders})"  # nosec B608
     for row in rows:
         cur.execute(sql, [row.get(col) for col in columns])
 
@@ -470,15 +502,7 @@ def restore_postgres_read_model_snapshot_from_url(
             _restore_table_rows(conn, table, raw_rows)
 
         cur = conn.cursor()
-        cur.execute(
-            f"""
-            SELECT {_EVENT_COLUMNS}
-            FROM events
-            WHERE (recorded_at > %s) OR (recorded_at = %s AND event_id > %s)
-            ORDER BY recorded_at ASC, event_id ASC
-            """,
-            (as_of_recorded_at, as_of_recorded_at, as_of_event_id),
-        )
+        cur.execute(_SELECT_TAIL_EVENTS_SQL, (as_of_recorded_at, as_of_recorded_at, as_of_event_id))
         tail_count = 0
         for row in cur.fetchall():
             apply_event_to_postgres_read_model(conn, _row_to_event(tuple(row)))

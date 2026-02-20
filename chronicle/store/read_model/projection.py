@@ -598,21 +598,26 @@ def handle_tension_exception_updated(conn: sqlite3.Connection, event: Event) -> 
     payload = event.payload
     tension_uid = payload["tension_uid"]
     now = event.recorded_at
-    updates: list[str] = ["updated_at = ?"]
-    args: list[object] = [now]
-    if "assigned_to" in payload:
-        updates.append("assigned_to = ?")
-        args.append(payload["assigned_to"])
-    if "due_date" in payload:
-        updates.append("due_date = ?")
-        args.append(payload["due_date"])
-    if "remediation_type" in payload:
-        updates.append("remediation_type = ?")
-        args.append(payload["remediation_type"])
-    args.append(tension_uid)
     conn.execute(
-        f"UPDATE tension SET {', '.join(updates)} WHERE tension_uid = ?",
-        tuple(args),
+        """
+        UPDATE tension
+        SET
+          updated_at = ?,
+          assigned_to = CASE WHEN ? THEN ? ELSE assigned_to END,
+          due_date = CASE WHEN ? THEN ? ELSE due_date END,
+          remediation_type = CASE WHEN ? THEN ? ELSE remediation_type END
+        WHERE tension_uid = ?
+        """,
+        (
+            now,
+            int("assigned_to" in payload),
+            payload.get("assigned_to"),
+            int("due_date" in payload),
+            payload.get("due_date"),
+            int("remediation_type" in payload),
+            payload.get("remediation_type"),
+            tension_uid,
+        ),
     )
     conn.execute(
         "INSERT OR IGNORE INTO processed_event (projection_name, event_id, processed_at) VALUES (?, ?, ?)",

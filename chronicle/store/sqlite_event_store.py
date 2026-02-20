@@ -115,13 +115,12 @@ def replay_read_model(
     """
     run_read_model_ddl_only(conn)
     truncate_read_model_tables(conn)
-    columns = (
-        "event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
+    cur = conn.execute(
+        "SELECT rowid, event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, "
         "actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, "
-        "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash"
+        "envelope_version, payload_version, payload, idempotency_key, prev_event_hash, event_hash "
+        "FROM events ORDER BY rowid ASC"
     )
-    query = f"SELECT rowid, {columns} FROM events ORDER BY rowid ASC"
-    cur = conn.execute(query)
     applied = 0
     for row in cur.fetchall():
         _, *event_row = row

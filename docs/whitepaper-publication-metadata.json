@@ -3,8 +3,25 @@
   "document_id": "chronicle-standards-whitepaper",
   "title": "Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability",
   "canonical_document_path": "docs/whitepaper-draft.md",
-  "current_revision": "v0.2",
+  "current_revision": "v0.3",
   "revisions": [
+    {
+      "revision": "v0.3",
+      "published_at": "2026-02-20",
+      "status": "working_draft",
+      "document_path": "docs/whitepaper-draft.md",
+      "evidence_pack_doc": "docs/whitepaper-evidence-pack.md",
+      "metadata_doc": "docs/whitepaper-publication-metadata.json",
+      "notes": [
+        "Expanded whitepaper structure for publication readiness with conformance status, explicit limitations, and external review checklist.",
+        "Added reproducible observed-output summary from standards and verifier evidence-pack run.",
+        "Aligned appendices and artifact inventory with current generated evidence-pack layout."
+      ],
+      "citation": {
+        "apa": "Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.3). GitHub. https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md",
+        "bibtex": "@misc{chronicle_whitepaper_v0_3_2026,\n  author       = {Chronicle},\n  title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},\n  year         = {2026},\n  note         = {Working draft v0.3},\n  howpublished = {\\url{https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md}}\n}"
+      }
+    },
     {
       "revision": "v0.2",
       "published_at": "2026-02-20",

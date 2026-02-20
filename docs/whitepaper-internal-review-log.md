@@ -51,3 +51,28 @@ This document captures internal technical review outcomes for Chronicle's standa
 
 1. Run external review pass and collect accepted/rejected edits for v0.3 planning.
 2. Add venue-specific formatting package once target publication venue is selected.
+
+## Review round: v0.3
+
+- Date: 2026-02-20
+- Revision under review: `docs/whitepaper-draft.md` (v0.3)
+- Evidence bundle: `docs/whitepaper-evidence-pack.md`
+- Metadata source: `docs/whitepaper-publication-metadata.json`
+
+### Accepted edits
+
+1. Reworked the draft to publication-style structure with clearer model, conformance, threat, and limitation sections.
+2. Added implementation status table tied to concrete standards export artifacts.
+3. Added reproducible observed-output summary grounded in a standards+verifier evidence-pack run.
+4. Expanded appendices with external review checklist and submission minimum package requirements.
+5. Updated citation and publication metadata to `v0.3`.
+
+### Rejected edits
+
+1. Rejected adding claims of default cryptographic verification for C2PA or VC/Data Integrity adapters.
+   - Rationale: current implementation remains explicit metadata compatibility unless verification is separately executed and recorded.
+
+### Open follow-ups
+
+1. Run external standards-community review and classify all feedback in accepted/rejected/follow-up format.
+2. Produce venue-specific formatting and submission bundles once target publication channels are selected.

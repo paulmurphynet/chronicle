@@ -42,3 +42,23 @@ def test_api_ingestion_pipeline_example_outputs_artifacts(tmp_path: Path) -> Non
     assert defensibility_path.is_file()
     assert review_packet_path.is_file()
     assert reasoning_path.is_file()
+
+
+def test_api_ingestion_pipeline_falls_back_when_sockets_unavailable(
+    tmp_path: Path, monkeypatch
+) -> None:
+    project_path = tmp_path / "project"
+    output_dir = tmp_path / "out"
+    monkeypatch.setattr(module, "_find_free_port", lambda: (_ for _ in ()).throw(PermissionError(1, "Operation not permitted")))
+    rc = module.main(
+        [
+            "--project-path",
+            str(project_path),
+            "--output-dir",
+            str(output_dir),
+        ]
+    )
+    assert rc == 0
+    report_path = output_dir / "api_ingestion_pipeline_report.json"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["status"] == "passed"

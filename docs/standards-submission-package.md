@@ -54,7 +54,7 @@ PYTHONPATH=. python3 scripts/whitepaper/build_evidence_pack.py \
 
 ## Outreach note template
 
-Subject: Chronicle standards interoperability profile review request (v0.1)
+Subject: Chronicle standards interoperability profile review request (v0.3)
 
 1. What we are sharing:
    - Whitepaper draft revision and citation metadata
@@ -66,7 +66,7 @@ Subject: Chronicle standards interoperability profile review request (v0.1)
    - Practical interoperability concerns for your ecosystem
 3. Timeline:
    - Requested feedback window
-   - Planned revision target (e.g. v0.2)
+   - Planned revision target (e.g. v0.4)
 
 ## Issue-tracking fields for responses
 

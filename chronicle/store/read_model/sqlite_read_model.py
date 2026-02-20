@@ -852,13 +852,13 @@ class SqliteReadModel:
         """Return distinct evidence UIDs linked (support or challenge) to any of the given claims. Phase E.1."""
         if not claim_uids:
             return []
-        placeholders = ",".join("?" for _ in claim_uids)
+        claim_uids_json = json.dumps(claim_uids)
         cur = self._conn.execute(
-            f"""SELECT DISTINCT es.evidence_uid FROM evidence_link el
+            """SELECT DISTINCT es.evidence_uid FROM evidence_link el
                 JOIN evidence_span es ON el.span_uid = es.span_uid
                 LEFT JOIN evidence_link_retraction r ON el.link_uid = r.link_uid
-                WHERE el.claim_uid IN ({placeholders}) AND r.link_uid IS NULL""",
-            claim_uids,
+                WHERE el.claim_uid IN (SELECT value FROM json_each(?)) AND r.link_uid IS NULL""",
+            (claim_uids_json,),
         )
         return [r[0] for r in cur.fetchall()]
 
@@ -868,13 +868,14 @@ class SqliteReadModel:
         """Return claim UIDs that have at least one support link from spans on any of these evidence items (Phase 2: source reliability)."""
         if not evidence_uids:
             return []
-        placeholders = ",".join("?" for _ in evidence_uids)
+        evidence_uids_json = json.dumps(evidence_uids)
         cur = self._conn.execute(
-            f"""SELECT DISTINCT el.claim_uid FROM evidence_link el
+            """SELECT DISTINCT el.claim_uid FROM evidence_link el
                 JOIN evidence_span es ON el.span_uid = es.span_uid
                 LEFT JOIN evidence_link_retraction r ON el.link_uid = r.link_uid
-                WHERE es.evidence_uid IN ({placeholders}) AND el.link_type = 'SUPPORTS' AND r.link_uid IS NULL""",
-            evidence_uids,
+                WHERE es.evidence_uid IN (SELECT value FROM json_each(?))
+                AND el.link_type = 'SUPPORTS' AND r.link_uid IS NULL""",
+            (evidence_uids_json,),
         )
         return [r[0] for r in cur.fetchall()]
 

@@ -72,7 +72,7 @@ class ClaimEmbeddingStore:
         conn = self._connection()
         placeholders = ",".join("?" * len(candidate_uids))
         rows = conn.execute(
-            f"SELECT claim_uid, embedding FROM claim_embedding WHERE claim_uid IN ({placeholders})",
+            f"SELECT claim_uid, embedding FROM claim_embedding WHERE claim_uid IN ({placeholders})",  # nosec B608
             candidate_uids,
         ).fetchall()
         scored: list[tuple[str, float]] = []

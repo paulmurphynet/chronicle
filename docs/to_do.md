@@ -105,6 +105,9 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 - [x] **W-03** Add versioned citation and publication metadata for whitepaper revisions.
 - [x] **W-04** Run internal technical review and capture accepted/rejected edits.
 - [x] **W-05** Prepare standards-submission package and outreach notes for relevant communities.
+- [x] **W-06** Raise whitepaper draft to publication-grade structure and conformance reporting (v0.3).
+- [ ] **W-07** Run external standards review cycle (JSON-LD/PROV/VC, C2PA, applied research) and log accepted/rejected deltas.
+- [ ] **W-08** Produce venue-specific publication bundles (formatting, submission checklists, and archive snapshots).
 
 ## On hold by design
 
