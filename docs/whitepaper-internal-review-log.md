@@ -28,3 +28,26 @@ This document captures internal technical review outcomes for Chronicle's standa
 
 1. Collect external reviewer feedback for v0.2 and map accepted/rejected deltas.
 2. Add publication venue-specific formatting once target venue is selected.
+
+## Review round: v0.2
+
+- Date: 2026-02-20
+- Revision under review: `docs/whitepaper-draft.md` (v0.2)
+- Evidence bundle: `docs/whitepaper-evidence-pack.md`
+- Metadata source: `docs/whitepaper-publication-metadata.json`
+
+### Accepted edits
+
+1. Added deterministic end-to-end reproducibility appendix with concrete command path and generated artifact set.
+2. Added explicit guarantees/non-guarantees matrix tied to verifier and defensibility schema docs.
+3. Updated citation metadata and publication records to `v0.2`.
+
+### Rejected edits
+
+1. Rejected broadening guarantee language beyond current verifier/runtime scope.
+   - Rationale: guarantees must remain strictly aligned to implemented checks and docs.
+
+### Open follow-ups
+
+1. Run external review pass and collect accepted/rejected edits for v0.3 planning.
+2. Add venue-specific formatting package once target publication venue is selected.

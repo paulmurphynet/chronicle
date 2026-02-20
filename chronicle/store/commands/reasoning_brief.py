@@ -575,3 +575,77 @@ def reasoning_brief_to_html(
     )
     blocks.append("</body></html>")
     return "\n".join(blocks)
+
+
+def reasoning_brief_to_markdown(brief: dict[str, Any]) -> str:
+    """Render reasoning brief as Markdown for low-friction external handoff."""
+    claim = brief.get("claim") or {}
+    defensibility = brief.get("defensibility") or {}
+    lines: list[str] = []
+    lines.append("# Reasoning Brief")
+    lines.append("")
+    lines.append("## Claim")
+    lines.append(f"- Claim UID: `{brief.get('claim_uid') or ''}`")
+    lines.append(f"- Investigation UID: `{brief.get('investigation_uid') or ''}`")
+    lines.append(f"- Type: `{claim.get('claim_type') or ''}`")
+    lines.append(f"- Status: `{claim.get('current_status') or ''}`")
+    lines.append(f"- Text: {claim.get('claim_text') or ''}")
+    lines.append("")
+    lines.append("## Defensibility")
+    lines.append(f"- Provenance quality: `{defensibility.get('provenance_quality') or ''}`")
+    corroboration = defensibility.get("corroboration") or {}
+    lines.append(f"- Support count: `{corroboration.get('support_count')}`")
+    lines.append(f"- Challenge count: `{corroboration.get('challenge_count')}`")
+    lines.append(f"- Independent sources: `{corroboration.get('independent_sources_count')}`")
+    lines.append(
+        f"- Contradiction status: `{defensibility.get('contradiction_status') or ''}`"
+    )
+    lines.append("")
+
+    lines.append("## Supporting Evidence")
+    supporting = brief.get("supporting_evidence") or []
+    if supporting:
+        for item in supporting:
+            lines.append(
+                f"- `{item.get('evidence_uid') or ''}` ({item.get('original_filename') or item.get('uri') or 'unknown'})"
+            )
+    else:
+        lines.append("- None")
+    lines.append("")
+
+    lines.append("## Challenges")
+    challenges = brief.get("challenges") or []
+    if challenges:
+        for item in challenges:
+            lines.append(
+                f"- `{item.get('evidence_uid') or ''}` ({item.get('original_filename') or item.get('uri') or 'unknown'})"
+            )
+    else:
+        lines.append("- None")
+    lines.append("")
+
+    lines.append("## Tensions")
+    tensions = brief.get("tensions") or []
+    if tensions:
+        for item in tensions:
+            lines.append(
+                f"- `{item.get('tension_uid') or ''}` with `{item.get('other_claim_uid') or ''}` ({item.get('status') or ''})"
+            )
+    else:
+        lines.append("- None")
+    lines.append("")
+
+    lines.append("## Reasoning Trail")
+    trail_events = (brief.get("reasoning_trail") or {}).get("events") or []
+    if trail_events:
+        for event in trail_events:
+            lines.append(
+                f"- `{event.get('event_type') or ''}` at `{event.get('occurred_at') or ''}`"
+            )
+    else:
+        lines.append("- None")
+    lines.append("")
+    lines.append(
+        "Verification: run `chronicle-verify path/to/file.chronicle` for package integrity checks."
+    )
+    return "\n".join(lines).strip() + "\n"

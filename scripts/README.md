@@ -18,6 +18,9 @@ These are the main entry points for integrating Chronicle into pipelines: scorin
 | **export_for_ml.py** | Export investigation data for ML/training. | `PYTHONPATH=. python3 scripts/export_for_ml.py` with `--path`, `--investigation`, etc. |
 | **run_reference_workflows.py** | Execute the reference workflow set and emit one consolidated JSON report. | `PYTHONPATH=. python3 scripts/run_reference_workflows.py` |
 | **whitepaper/build_evidence_pack.py** | Build whitepaper reproducibility evidence pack (benchmark outputs, workflow report, standards exports, verifier report, manifest). | `PYTHONPATH=. python3 scripts/whitepaper/build_evidence_pack.py` |
+| **starter_packs/bootstrap.py** | Bootstrap opinionated starter packs (`journalism`, `legal`, `audit`) with policy defaults, deterministic fixture import, and defensibility-ready reports/exports. | `PYTHONPATH=. python3 scripts/starter_packs/bootstrap.py --pack journalism --path /tmp/chronicle_journalism` |
+| **api_ingestion_pipeline_example.py** | End-to-end API ingestion example (batch input → investigation/evidence/claim links via API → defensibility, review packet, `.chronicle` export artifact). | `PYTHONPATH=. python3 scripts/api_ingestion_pipeline_example.py --project-path /tmp/chronicle_api --output-dir /tmp/chronicle_api_out` |
+| **check_integration_export_contracts.py** | End-to-end integration contract harness for JSON/CSV/Markdown export surfaces plus signed `.chronicle` bundle export/import verification. | `PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_contract_project --output-dir /tmp/chronicle_contract_out` |
 | **review_readiness_gate.py** | One-shot readiness gate report for one investigation (policy compatibility + decision posture + unresolved tension thresholds). | `PYTHONPATH=. python3 scripts/review_readiness_gate.py --path /path/to/project --investigation-uid <uid>` |
 | **portfolio_risk_summary.py** | Project-level portfolio risk summary across investigations (unresolved tensions, override concentration, readiness posture), with deterministic ranking and JSON output. | `PYTHONPATH=. python3 scripts/portfolio_risk_summary.py --path /path/to/project --output portfolio_risk_summary.json` |
 | **rag_path_demo.py** | Minimal RAG/agent path (ChronicleSession: project, investigation, ingest, claim, link). | `PYTHONPATH=. python3 scripts/rag_path_demo.py` |
@@ -58,6 +61,7 @@ Scripts for repo and doc maintenance. Not needed for normal eval or integration 
 | **update_doc_links_after_rename.py** | Update internal doc links after renaming files. |
 | **check_doc_links.py** | Check that linked docs and anchors exist. |
 | **check_docs_currency.py** | Check key README/docs/lessons/quizzes references against current workflow commands. |
+| **check_deterministic_defensibility.py** | Ensure repeated scorer runs with identical input produce stable normalized defensibility outputs; useful as CI/release gate. |
 | **check_neo4j_contract.py** | Check Neo4j schema/integration parity across sync, export, rebuild Cypher, and docs. |
 | **adapters/check_examples.py** | Validate checked-in adapter examples and starter-to-validator flow. |
 | **generate_agent_tools.py** | Regenerate `docs/agent-tools.json` (API operations in function-calling format for agents). |

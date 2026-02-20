@@ -56,6 +56,12 @@ jobs:
       - name: Check adapter examples and contract flow
         run: python3 scripts/adapters/check_examples.py
 
+      - name: Check integration export/import contracts
+        run: PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_integration_contract_project_ci --output-dir /tmp/chronicle_integration_contract_ci
+
+      - name: Deterministic defensibility reproducibility check
+        run: python3 scripts/check_deterministic_defensibility.py --rounds 3 --output /tmp/deterministic_defensibility_ci.json
+
       - name: Run reference workflows
         run: python3 scripts/run_reference_workflows.py --output-dir /tmp/chronicle_reference_workflows_ci
 

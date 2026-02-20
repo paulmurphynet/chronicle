@@ -41,6 +41,9 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [When to use Chronicle](when-to-use-chronicle.md) | Scope vs data lineage / ML provenance. |
 | [Reference workflows](reference-workflows.md) | Reproducible end-to-end workflow set (journalism, legal, history/research, compliance, benchmark trust tracking). |
 | [Integration acceptance checklist](integration-acceptance-checklist.md) | Release gate for adapters/connectors: contract, safety, reproducibility, and docs minimum. |
+| [Starter packs](starter-packs.md) | Opinionated bootstrap packs (journalism, legal, audit) with policy defaults and defensibility-ready report/export artifacts. |
+| [API ingestion pipeline example](api-ingestion-pipeline-example.md) | End-to-end batch input to API writes, defensibility readout, and `.chronicle` export artifact. |
+| [Integration export hardening](integration-export-hardening.md) | Contract baseline for JSON/CSV/Markdown and signed `.chronicle` bundle interoperability paths with harnessed tests. |
 | [Standards profile](standards-profile.md) | Chronicle interoperability profile across JSON-LD/PROV, C2PA, VC/Data Integrity, RO-Crate, and ClaimReview. |
 | [Standards JSON-LD export](standards-jsonld-export.md) | JSON-LD + PROV-oriented investigation export profile (S-02 baseline). |
 | [ClaimReview export](claimreview-export.md) | schema.org ClaimReview profile generated from Chronicle claim defensibility. |
@@ -67,6 +70,8 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Backend migration/versioning policy](backend-migration-versioning-policy.md) | Versioning/migration policy for event and read-model schemas across SQLite and Postgres. |
 | [Supply-chain automation](security-automation.md) | Manual dependency scan workflow (`pip-audit`, `npm audit`) and threshold gating guidance. |
 | [Trust metrics](trust-metrics.md) | KPI definitions and scripts for tracking unsupported-claim reduction over time. |
+| [Rejected feature decisions](rejected-feature-decisions.md) | Explicit log of intentionally rejected feature directions with rationale and tradeoffs. |
+| [Adversarial and failure-mode examples](adversarial-failure-modes.md) | Concrete safe-failure/uncertainty-disclosure scenarios and expected Chronicle behavior. |
 | [Lizzie Borden case study](case-study-lizzie-borden.md) | Why we use the inquest transcript as a trust benchmark and how to evaluate responsibly without sensational framing. |
 | [Architecture decisions (ADRs)](adr/README.md) | Durable architecture decisions and rationale (core/reference, SQLite-first posture, etc.). |
 | [North star](north-star.md) | Long-term direction: shared infrastructure, one model from early draft to auditable package, ecosystem; what stays in scope and what doesn't. |

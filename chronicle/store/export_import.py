@@ -29,6 +29,10 @@ from chronicle.store.schema import (
 
 CHRONICLE_FORMAT_VERSION = 1
 CHRONICLE_EXT = ".chronicle"
+SIGNED_BUNDLE_FORMAT_VERSION = 1
+SIGNED_BUNDLE_EXT = ".signed.zip"
+SIGNED_BUNDLE_MANIFEST = "signature_manifest.json"
+SIGNED_BUNDLE_ARCHIVE_PATH = "payload/investigation.chronicle"
 
 
 def _sha256_file(path: Path) -> str:
@@ -41,6 +45,11 @@ def _sha256_file(path: Path) -> str:
                 break
             h.update(chunk)
     return h.hexdigest()
+
+
+def _sha256_bytes(payload: bytes) -> str:
+    """Return SHA-256 digest for raw bytes."""
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _verify_importable_archive(chronicle_path: Path) -> None:
@@ -605,3 +614,113 @@ def import_investigation(chronicle_path: Path, target_dir: Path) -> None:
             if src_evidence.is_dir():
                 target_evidence.mkdir(parents=True, exist_ok=True)
                 _merge_copy_evidence_files(src_evidence, target_evidence)
+
+
+def export_signed_investigation_bundle(
+    project_dir: Path,
+    investigation_uid: str,
+    output_path: Path,
+    *,
+    signer: str = "chronicle",
+    signature_value: str | None = None,
+    signature_algorithm: str | None = None,
+) -> Path:
+    """Export a signed bundle ZIP that wraps one `.chronicle` archive and digest metadata.
+
+    Signature handling is metadata-oriented by default. If signature_value is not provided,
+    the bundle records a `metadata_only` signature mode with digest for downstream verification.
+    """
+    output_path = Path(output_path)
+    if output_path.suffix.lower() != ".zip":
+        output_path = output_path.with_suffix(SIGNED_BUNDLE_EXT)
+
+    with tempfile.NamedTemporaryFile(suffix=CHRONICLE_EXT, delete=False) as tmp:
+        chronicle_path = Path(tmp.name)
+    try:
+        exported_path = export_investigation(project_dir, investigation_uid, chronicle_path)
+        archive_bytes = exported_path.read_bytes()
+    finally:
+        chronicle_path.unlink(missing_ok=True)
+
+    manifest = {
+        "schema_version": SIGNED_BUNDLE_FORMAT_VERSION,
+        "bundle_type": "chronicle_signed_archive_bundle",
+        "created_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "investigation_uid": investigation_uid,
+        "archive_path": SIGNED_BUNDLE_ARCHIVE_PATH,
+        "archive_sha256": _sha256_bytes(archive_bytes),
+        "signature": {
+            "status": "provided" if signature_value else "metadata_only",
+            "algorithm": signature_algorithm or ("unspecified" if signature_value else "digest_only"),
+            "value": signature_value,
+            "signer": signer,
+        },
+    }
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(SIGNED_BUNDLE_ARCHIVE_PATH, archive_bytes)
+        zf.writestr(SIGNED_BUNDLE_MANIFEST, json.dumps(manifest, indent=2))
+    return output_path
+
+
+def verify_signed_investigation_bundle(bundle_path: Path) -> dict[str, Any]:
+    """Verify signed bundle structure and digest integrity; return parsed manifest."""
+    bundle_path = Path(bundle_path)
+    if not bundle_path.is_file() or bundle_path.suffix.lower() != ".zip":
+        raise FileNotFoundError(f"Not a signed bundle ZIP file: {bundle_path}")
+
+    with zipfile.ZipFile(bundle_path, "r") as zf:
+        names = set(zf.namelist())
+        if SIGNED_BUNDLE_MANIFEST not in names:
+            raise ValueError(f"Invalid signed bundle: missing {SIGNED_BUNDLE_MANIFEST}")
+        manifest_raw = zf.read(SIGNED_BUNDLE_MANIFEST).decode("utf-8")
+        manifest = json.loads(manifest_raw)
+        if not isinstance(manifest, dict):
+            raise ValueError("Invalid signed bundle: manifest must be an object")
+        if manifest.get("schema_version") != SIGNED_BUNDLE_FORMAT_VERSION:
+            raise ValueError(
+                f"Invalid signed bundle: schema_version must be {SIGNED_BUNDLE_FORMAT_VERSION}"
+            )
+        archive_path = manifest.get("archive_path")
+        if not isinstance(archive_path, str) or not archive_path.strip():
+            raise ValueError("Invalid signed bundle: archive_path missing")
+        archive_path = archive_path.strip()
+        if archive_path not in names:
+            raise ValueError(f"Invalid signed bundle: archive_path not found ({archive_path})")
+        archive_bytes = zf.read(archive_path)
+        expected_sha = manifest.get("archive_sha256")
+        if not isinstance(expected_sha, str) or not expected_sha:
+            raise ValueError("Invalid signed bundle: archive_sha256 missing")
+        actual_sha = _sha256_bytes(archive_bytes)
+        if actual_sha != expected_sha:
+            raise ValueError(
+                f"Invalid signed bundle: archive digest mismatch (expected {expected_sha}, got {actual_sha})"
+            )
+
+    # Reuse .chronicle verifier for nested archive integrity.
+    with tempfile.NamedTemporaryFile(suffix=CHRONICLE_EXT, delete=False) as tmp:
+        nested_path = Path(tmp.name)
+    try:
+        nested_path.write_bytes(archive_bytes)
+        _verify_importable_archive(nested_path)
+    finally:
+        nested_path.unlink(missing_ok=True)
+
+    return manifest
+
+
+def import_signed_investigation_bundle(bundle_path: Path, target_dir: Path) -> None:
+    """Import an investigation from a signed bundle ZIP after digest and archive verification."""
+    verify_signed_investigation_bundle(bundle_path)
+    with zipfile.ZipFile(bundle_path, "r") as zf:
+        manifest = json.loads(zf.read(SIGNED_BUNDLE_MANIFEST).decode("utf-8"))
+        archive_path = manifest["archive_path"]
+        archive_bytes = zf.read(archive_path)
+    with tempfile.NamedTemporaryFile(suffix=CHRONICLE_EXT, delete=False) as tmp:
+        nested_path = Path(tmp.name)
+    try:
+        nested_path.write_bytes(archive_bytes)
+        import_investigation(nested_path, target_dir)
+    finally:
+        nested_path.unlink(missing_ok=True)

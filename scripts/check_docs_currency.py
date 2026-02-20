@@ -29,6 +29,7 @@ REQUIRED_SNIPPETS: dict[str, list[str]] = {
     "docs/integration-acceptance-checklist.md": [
         "scripts/adapters/validate_adapter_outputs.py",
         "scripts/adapters/check_examples.py",
+        "scripts/check_integration_export_contracts.py",
     ],
     "lessons/07-integrations-and-scripts.md": [
         "starter_batch_to_scorer.py",

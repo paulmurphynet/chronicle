@@ -62,6 +62,7 @@ from chronicle.store.commands.multi_profile import get_defensibility_multi_profi
 from chronicle.store.commands.reasoning_brief import (
     assemble_reasoning_brief,
     reasoning_brief_to_html,
+    reasoning_brief_to_markdown,
 )
 from chronicle.store.commands.reasoning_trail import (
     get_reasoning_trail_checkpoint,
@@ -124,6 +125,7 @@ __all__ = [
     "get_tension_impact",
     "get_reasoning_trail_checkpoint",
     "reasoning_brief_to_html",
+    "reasoning_brief_to_markdown",
     "get_weakest_link",
     "import_investigation",
     "ingest_evidence",

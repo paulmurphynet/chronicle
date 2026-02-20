@@ -78,6 +78,8 @@ jobs:
           python3 scripts/check_docs_currency.py
           python3 scripts/check_neo4j_contract.py
           python3 scripts/adapters/check_examples.py
+          PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_integration_contract_project_release --output-dir /tmp/chronicle_integration_contract_release
+          python3 scripts/check_deterministic_defensibility.py --rounds 3 --output reports/deterministic_defensibility_release.json
 
       - name: Verifier and conformance release gate
         run: |

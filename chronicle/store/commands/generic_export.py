@@ -1192,6 +1192,99 @@ def build_generic_export_csv_zip(
     return buf.getvalue()
 
 
+def validate_generic_export_json(payload: dict[str, Any]) -> list[str]:
+    """Validate required generic JSON export structure and cross-field consistency."""
+    errors: list[str] = []
+    if not isinstance(payload, dict):
+        return ["payload must be an object"]
+    if payload.get("schema_version") != GENERIC_EXPORT_SCHEMA_VERSION:
+        errors.append(
+            f"schema_version must be {GENERIC_EXPORT_SCHEMA_VERSION} (got {payload.get('schema_version')!r})"
+        )
+    investigation = payload.get("investigation")
+    claims = payload.get("claims")
+    evidence = payload.get("evidence")
+    tensions = payload.get("tensions")
+    if not isinstance(investigation, dict):
+        errors.append("investigation must be an object")
+        inv_uid = None
+    else:
+        inv_uid = investigation.get("investigation_uid")
+        if not isinstance(inv_uid, str) or not inv_uid.strip():
+            errors.append("investigation.investigation_uid must be a non-empty string")
+    if not isinstance(claims, list):
+        errors.append("claims must be an array")
+    if not isinstance(evidence, list):
+        errors.append("evidence must be an array")
+    if not isinstance(tensions, list):
+        errors.append("tensions must be an array")
+
+    if isinstance(claims, list):
+        for idx, claim in enumerate(claims):
+            if not isinstance(claim, dict):
+                errors.append(f"claims[{idx}] must be an object")
+                continue
+            claim_uid = claim.get("claim_uid")
+            if not isinstance(claim_uid, str) or not claim_uid:
+                errors.append(f"claims[{idx}].claim_uid must be a non-empty string")
+            if inv_uid and claim.get("investigation_uid") != inv_uid:
+                errors.append(
+                    f"claims[{idx}].investigation_uid must match investigation_uid ({inv_uid})"
+                )
+    if isinstance(evidence, list):
+        for idx, item in enumerate(evidence):
+            if not isinstance(item, dict):
+                errors.append(f"evidence[{idx}] must be an object")
+                continue
+            ev_uid = item.get("evidence_uid")
+            if not isinstance(ev_uid, str) or not ev_uid:
+                errors.append(f"evidence[{idx}].evidence_uid must be a non-empty string")
+            if inv_uid and item.get("investigation_uid") != inv_uid:
+                errors.append(
+                    f"evidence[{idx}].investigation_uid must match investigation_uid ({inv_uid})"
+                )
+    return errors
+
+
+def validate_generic_export_csv_zip(payload: bytes) -> list[str]:
+    """Validate required files/columns in generic CSV ZIP export payload."""
+    errors: list[str] = []
+    required_files = {
+        "investigations.csv": "investigation_uid",
+        "claims.csv": "claim_uid",
+        "evidence.csv": "evidence_uid",
+    }
+    optional_files = {
+        "tensions.csv": "tension_uid",
+    }
+    try:
+        with zipfile.ZipFile(io.BytesIO(payload), "r") as zf:
+            names = set(zf.namelist())
+            missing = [name for name in required_files if name not in names]
+            if missing:
+                return [f"missing CSV file(s): {', '.join(sorted(missing))}"]
+            files_to_validate: dict[str, str] = dict(required_files)
+            for name, required_col in optional_files.items():
+                if name in names:
+                    files_to_validate[name] = required_col
+            for name, required_col in files_to_validate.items():
+                text = zf.read(name).decode("utf-8")
+                reader = csv.DictReader(io.StringIO(text))
+                if not reader.fieldnames:
+                    errors.append(f"{name} missing CSV header")
+                    continue
+                if required_col not in set(reader.fieldnames):
+                    errors.append(f"{name} missing required column {required_col!r}")
+                rows = list(reader)
+                if not rows:
+                    errors.append(f"{name} must contain at least one data row")
+    except zipfile.BadZipFile as exc:
+        errors.append(f"invalid ZIP payload: {exc}")
+    except UnicodeDecodeError as exc:
+        errors.append(f"invalid UTF-8 CSV payload: {exc}")
+    return errors
+
+
 # Phase 12: optional legal adapters (load file, exhibit list)
 
 LOAD_FILE_COLUMNS = [

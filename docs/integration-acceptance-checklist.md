@@ -28,6 +28,7 @@ Use this checklist before publishing or merging a Chronicle integration (adapter
 4. For end-to-end confidence, run `python3 scripts/run_reference_workflows.py`.
 5. If integration emits scored rows, validate contract shape with `python3 scripts/adapters/validate_adapter_outputs.py --input <file.jsonl>`.
 6. Run `python3 scripts/adapters/check_examples.py` before modifying adapter examples or starter behavior.
+7. For import/export adapters, run `PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_contract_project --output-dir /tmp/chronicle_contract_out`.
 
 ## Documentation minimum
 

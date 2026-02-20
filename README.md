@@ -112,6 +112,8 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Defensibility metrics schema](docs/defensibility-metrics-schema.md) | Field semantics for the scorer output. |
 | [Eval and benchmarking](docs/eval-and-benchmarking.md) | How to run pipelines and report Chronicle defensibility. |
 | [Trust metrics](docs/trust-metrics.md) | North-star KPI definitions and baseline comparison workflow for benchmark outputs. |
+| [Rejected feature decisions](docs/rejected-feature-decisions.md) | Intentional "no" decisions with rationale/tradeoffs to preserve trust boundaries. |
+| [Adversarial and failure-mode examples](docs/adversarial-failure-modes.md) | Safe-failure scenarios and uncertainty-disclosure expectations for defensibility workflows. |
 | [HTTP API](docs/api.md) | Optional minimal API: `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run uvicorn. Write/read/export/import. |
 | [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness as a defensibility metric. |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
@@ -157,6 +159,9 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Integration quick reference](docs/integration-quick-reference.md) | One page: score one run, verify .chronicle, add to harness, optional API/adapters. |
 | [Reference workflows](docs/reference-workflows.md) | Reproducible, end-to-end workflow set for journalism, compliance-style audit, and benchmark trust tracking. |
 | [Integration acceptance checklist](docs/integration-acceptance-checklist.md) | Release checklist for adapters and connectors (contract, trust posture, reproducibility). |
+| [Starter packs](docs/starter-packs.md) | Opinionated project bootstrap packs (journalism, legal, audit) with policy defaults and defensibility-ready artifacts. |
+| [API ingestion pipeline example](docs/api-ingestion-pipeline-example.md) | End-to-end API pipeline example: batch input to Chronicle writes, defensibility output, and export artifact. |
+| [Integration export hardening](docs/integration-export-hardening.md) | Hardened contract for JSON/CSV/Markdown exports and signed `.chronicle` bundle import/export with release-test harness. |
 | [Postgres operations runbook](docs/postgres-operations-runbook.md) | Backup, restore, and disaster-recovery procedure for Chronicle deployments using Postgres. |
 | [Managed Postgres hardening](docs/postgres-hardening.md) | TLS, least-privilege, credential rotation, and network/monitoring hardening guidance. |
 | [Backend migration/versioning policy](docs/backend-migration-versioning-policy.md) | Versioning and migration expectations for event/read-model schemas across SQLite and Postgres. |

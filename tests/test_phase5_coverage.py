@@ -8,7 +8,13 @@ from pathlib import Path
 
 import pytest
 from chronicle.store.commands.claims import get_defensibility_score
-from chronicle.store.export_import import export_investigation, import_investigation
+from chronicle.store.export_import import (
+    export_investigation,
+    export_signed_investigation_bundle,
+    import_investigation,
+    import_signed_investigation_bundle,
+    verify_signed_investigation_bundle,
+)
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
 
@@ -227,3 +233,70 @@ def test_import_investigation_blocks_merge_when_existing_evidence_differs(tmp_pa
 
     with pytest.raises(ValueError, match="evidence file conflict"):
         import_investigation(exported, target)
+
+
+def test_signed_bundle_export_and_import_roundtrip(tmp_path: Path) -> None:
+    """Signed bundle flow should preserve importability and digest integrity checks."""
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    create_project(source)
+    create_project(target)
+    signed_bundle = tmp_path / "investigation_signed.zip"
+
+    with ChronicleSession(source) as session:
+        _, inv_uid = session.create_investigation("Signed export", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Signed evidence bytes",
+            "text/plain",
+            original_filename="signed.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+
+    out = export_signed_investigation_bundle(source, inv_uid, signed_bundle, signer="contract-test")
+    assert out.is_file()
+    manifest = verify_signed_investigation_bundle(out)
+    assert manifest["investigation_uid"] == inv_uid
+    assert manifest["signature"]["signer"] == "contract-test"
+    assert manifest["signature"]["status"] == "metadata_only"
+
+    import_signed_investigation_bundle(out, target)
+    with ChronicleSession(target) as session:
+        investigations = session.read_model.list_investigations(limit=10)
+    assert any(i.investigation_uid == inv_uid for i in investigations)
+
+
+def test_signed_bundle_import_rejects_digest_mismatch(tmp_path: Path) -> None:
+    """Signed bundle import should fail when nested archive bytes do not match declared digest."""
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    create_project(source)
+    create_project(target)
+    signed_bundle = tmp_path / "investigation_signed.zip"
+    tampered_bundle = tmp_path / "investigation_signed_tampered.zip"
+
+    with ChronicleSession(source) as session:
+        _, inv_uid = session.create_investigation("Signed tamper", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Signed evidence bytes",
+            "text/plain",
+            original_filename="signed.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+
+    export_signed_investigation_bundle(source, inv_uid, signed_bundle)
+    with zipfile.ZipFile(signed_bundle, "r") as zin:
+        names = zin.namelist()
+        blobs = {name: zin.read(name) for name in names}
+    for name in list(blobs):
+        if name.endswith(".chronicle"):
+            blobs[name] = blobs[name] + b"tamper"
+    with zipfile.ZipFile(tampered_bundle, "w", zipfile.ZIP_DEFLATED) as zout:
+        for name in names:
+            zout.writestr(name, blobs[name])
+
+    with pytest.raises(ValueError, match="digest mismatch"):
+        import_signed_investigation_bundle(tampered_bundle, target)

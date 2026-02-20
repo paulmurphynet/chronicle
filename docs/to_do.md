@@ -192,21 +192,21 @@ Priority implementation items accepted on 2026-02-20 for immediate execution:
 - [x] Start standards profile implementation with JSON-LD + PROV export MVP.
   - Add a first `build_standards_jsonld_export(...)` path in export commands.
   - Include fixture tests for one investigation containing support/challenge/tension/source cases.
-- [ ] Prepare whitepaper v0.2 from the working draft with concrete Chronicle examples.
+- [x] Prepare whitepaper v0.2 from the working draft with concrete Chronicle examples.
   - Add one end-to-end example appendix based on an existing deterministic sample.
   - Add explicit guarantees/non-guarantees matrix tied to verifier and scorecard docs.
-- [ ] Ship opinionated starter packs (Journalism, Legal, Audit) to reduce first-project ambiguity and improve adoption.
+- [x] Ship opinionated starter packs (Journalism, Legal, Audit) to reduce first-project ambiguity and improve adoption.
   - Add template bootstrap commands/fixtures for each pack.
   - Include schema defaults, policy profile defaults, and report/export examples per pack.
   - Add docs walkthroughs and acceptance tests proving each starter pack reaches a defensible report from a clean workspace.
-- [ ] Publish trust artifacts focused on defensibility and failure handling (not marketing collateral).
+- [x] Publish trust artifacts focused on defensibility and failure handling (not marketing collateral).
   - Add an explicit "rejected feature decisions" log with rationale and tradeoffs.
   - Add adversarial/failure-mode examples that show uncertainty disclosure and safe failure behavior.
   - Add reproducibility checks for deterministic scenarios (`same input -> same defensibility outcome`) in CI/release gates.
-- [ ] Prioritize integration hooks for real-world workflow interoperability.
-  - Harden import/export paths for CSV, Markdown, JSON, and signed `.chronicle` archive bundles.
-  - Add one end-to-end API ingestion example pipeline (batch input -> Chronicle -> defensibility artifact output).
-  - Add integration contract tests to keep adapter/API behavior stable across releases.
+- [x] Prioritize integration hooks for real-world workflow interoperability.
+  - Hardened import/export paths for CSV, Markdown, JSON, and signed `.chronicle` archive bundles via validators, markdown renderer, signed-bundle helpers, and docs: `chronicle/store/commands/generic_export.py`, `chronicle/store/commands/reasoning_brief.py`, `chronicle/store/export_import.py`, `docs/integration-export-hardening.md`.
+  - Added one end-to-end API ingestion example pipeline (batch input -> Chronicle -> defensibility artifact output): `scripts/api_ingestion_pipeline_example.py`, `docs/api-ingestion-pipeline-example.md`, `tests/test_api_ingestion_pipeline_example.py`.
+  - Added integration contract tests and harnesses to stabilize adapter/API-facing import/export behavior across releases: `scripts/check_integration_export_contracts.py`, `tests/test_integration_export_contracts.py`, `tests/test_generic_export_contracts.py`, `tests/test_phase5_coverage.py`.
 
 ## Later / research backlog
 
