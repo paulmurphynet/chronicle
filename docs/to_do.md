@@ -106,7 +106,7 @@ Goal: raise Neo4j from "contract-correct optional projection" to a production-gr
   - CLI/config support for Neo4j database selection.
   - Retry/backoff and timeout controls for transient failures.
   - Clear user-facing diagnostics on connectivity/auth/db errors.
-- [ ] **N-05** Add sync/export observability outputs.
+- [x] **N-05** Add sync/export observability outputs.
   - Structured progress logs (table/phase, row counts, batch counts, elapsed time).
   - Optional JSON report artifact for sync/export runs (for release evidence).
 

@@ -145,7 +145,12 @@ def dispatch_command(args: argparse.Namespace, actor_id: str, actor_type: str) -
     if args.command == "verify-chronicle":
         return cmd_verify_chronicle(args.file, args.no_invariants)
     if args.command == "neo4j-export":
-        return cmd_neo4j_export(args.path, args.output)
+        return cmd_neo4j_export(
+            args.path,
+            args.output,
+            report=getattr(args, "report", None),
+            progress=getattr(args, "progress", False),
+        )
     if args.command == "neo4j-sync":
         return cmd_neo4j_sync(
             args.path,
@@ -154,6 +159,8 @@ def dispatch_command(args: argparse.Namespace, actor_id: str, actor_type: str) -
             max_retries=getattr(args, "max_retries", None),
             retry_backoff_seconds=getattr(args, "retry_backoff_seconds", None),
             connection_timeout_seconds=getattr(args, "connection_timeout_seconds", None),
+            report=getattr(args, "report", None),
+            progress=getattr(args, "progress", False),
         )
     if args.command == "policy":
         if args.policy_command == "list":

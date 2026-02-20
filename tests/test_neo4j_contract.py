@@ -13,11 +13,13 @@ _check_module = import_module("scripts.check_neo4j_contract")
 _ingest_module = import_module("scripts.ingest_chronicle_to_aura")
 _sync_module = import_module("chronicle.store.neo4j_sync")
 _export_module = import_module("chronicle.store.neo4j_export")
+_parser_module = import_module("chronicle.cli.parser")
 
 run_checks = _check_module.run_checks
 parse_ingest_args = _ingest_module._parse_args
 sync_rationale_expr = _sync_module._evidence_link_rationale_expr
 export_rationale_expr = _export_module._evidence_link_rationale_expr
+build_parser = _parser_module.build_parser
 
 
 def _normalized_text(path: Path) -> str:
@@ -55,12 +57,17 @@ def test_ingest_cli_parses_sync_hardening_options() -> None:
             "2.5",
             "--connection-timeout-seconds",
             "30",
+            "--sync-report",
+            "reports/neo4j_sync_report.json",
+            "--progress",
         ]
     )
     assert args.database == "neo4j"
     assert args.max_retries == 5
     assert args.retry_backoff_seconds == 2.5
     assert args.connection_timeout_seconds == 30.0
+    assert str(args.sync_report).endswith("reports/neo4j_sync_report.json")
+    assert args.progress is True
 
 
 def test_neo4j_sync_uses_legacy_notes_column_for_rationale() -> None:
@@ -111,3 +118,34 @@ def test_neo4j_link_edges_merge_by_link_uid() -> None:
     assert "MERGE (s)-[r:CHALLENGES {link_uid: row.link_uid}]->(c)" in sync_text
     assert "MERGE (s)-[r:SUPPORTS {link_uid: row.link_uid}]->(c)" in rels_text
     assert "MERGE (s)-[r:CHALLENGES {link_uid: row.link_uid}]->(c)" in rels_text
+
+
+def test_cli_parser_accepts_neo4j_observability_flags() -> None:
+    parser = build_parser(lambda raw: Path(raw))
+    export_args = parser.parse_args(
+        [
+            "neo4j-export",
+            "--path",
+            ".",
+            "--output",
+            "neo4j_import",
+            "--report",
+            "reports/neo4j_export_report.json",
+            "--progress",
+        ]
+    )
+    assert str(export_args.report).endswith("reports/neo4j_export_report.json")
+    assert export_args.progress is True
+
+    sync_args = parser.parse_args(
+        [
+            "neo4j-sync",
+            "--path",
+            ".",
+            "--report",
+            "reports/neo4j_sync_report.json",
+            "--progress",
+        ]
+    )
+    assert str(sync_args.report).endswith("reports/neo4j_sync_report.json")
+    assert sync_args.progress is True

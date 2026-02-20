@@ -480,12 +480,20 @@ def cmd_get_defensibility(claim_uid: str, path: Path) -> int:
         return 0
 
 
-def cmd_neo4j_export(path: Path, output: Path) -> int:
+def cmd_neo4j_export(
+    path: Path,
+    output: Path,
+    *,
+    report: Path | None = None,
+    progress: bool = False,
+) -> int:
     """Export read model to CSV for Neo4j rebuild (Spec 14.6.4, 16.8)."""
     from chronicle.store.neo4j_export import export_project_to_neo4j_csv
 
-    out = export_project_to_neo4j_csv(path, output)
+    out = export_project_to_neo4j_csv(path, output, report_path=report, log_progress=progress)
     print(f"Exported to {out} (use neo4j/rebuild/*.cyp with Neo4j import dir)")
+    if report is not None:
+        print(f"Export report written to {report}")
     return 0
 
 
@@ -497,6 +505,8 @@ def cmd_neo4j_sync(
     max_retries: int | None = None,
     retry_backoff_seconds: float | None = None,
     connection_timeout_seconds: float | None = None,
+    report: Path | None = None,
+    progress: bool = False,
 ) -> int:
     """Sync read model to Neo4j (optional; requires [neo4j] and NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)."""
 
@@ -534,8 +544,12 @@ def cmd_neo4j_sync(
             max_retries=max_retries,
             retry_backoff_seconds=retry_backoff_seconds,
             connection_timeout_seconds=connection_timeout_seconds,
+            report_path=report,
+            log_progress=progress,
         )
         print("Synced read model to Neo4j.")
+        if report is not None:
+            print(f"Sync report written to {report}")
         return 0
     except FileNotFoundError as e:
         print(str(e), file=sys.stderr)

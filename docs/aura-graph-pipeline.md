@@ -125,6 +125,13 @@ For transient network hardening, you can tune sync retries/timeouts via env:
 - `NEO4J_SYNC_RETRY_BACKOFF_SECONDS` (default `1.0`)
 - `NEO4J_CONNECTION_TIMEOUT_SECONDS` (default `15`)
 
+For run evidence and observability:
+
+- `chronicle neo4j-sync --path chronicle_graph_project --report reports/neo4j_sync_report.json`
+- Add `--progress` to stream structured JSON phase/batch progress to stderr.
+- Script path equivalent:
+  - `PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --sync-report reports/neo4j_sync_report.json --progress`
+
 ### 4. Query and analytics in Neo4j
 
 - Use **Neo4j Browser** (Aura console) or **cypher-shell** with the same URI/user/password.

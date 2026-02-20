@@ -12,6 +12,7 @@ Usage (from repo root):
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --project /path/to/project
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --dedupe-evidence-by-content-hash
   PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --database neo4j --max-retries 5
+  PYTHONPATH=. python scripts/ingest_chronicle_to_aura.py file.chronicle --progress --sync-report reports/neo4j_sync.json
 
 See docs/aura-graph-pipeline.md for full runbook and Aura setup.
 """
@@ -84,6 +85,17 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Neo4j connection timeout in seconds (default: NEO4J_CONNECTION_TIMEOUT_SECONDS or 15)",
     )
+    parser.add_argument(
+        "--sync-report",
+        type=Path,
+        default=None,
+        help="Optional JSON report output path for Neo4j sync metrics",
+    )
+    parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="Emit structured Neo4j sync progress logs to stderr",
+    )
     return parser.parse_args(argv)
 
 
@@ -99,6 +111,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: expected .chronicle file, got: {chronicle_path}", file=sys.stderr)
         return 1
 
+    project_dir: str | None
     if args.project is not None:
         project_dir = str(args.project)
     else:
@@ -164,6 +177,8 @@ def main(argv: list[str] | None = None) -> int:
         max_retries=args.max_retries,
         retry_backoff_seconds=args.retry_backoff_seconds,
         connection_timeout_seconds=args.connection_timeout_seconds,
+        report_path=args.sync_report,
+        log_progress=args.progress,
     )
     print("Synced to Neo4j.")
     return 0

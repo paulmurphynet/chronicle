@@ -35,6 +35,9 @@ It exits non-zero if there is drift between:
    ```
 
    This writes CSVs: investigations, claims, evidence_items, spans, links, tensions, etc.
+   - Optional observability flags:
+     - `--report /path/to/export_report.json`
+     - `--progress` (structured JSON progress logs to stderr)
 
 2. **Copy** the CSVs into Neo4j's import directory (or point Neo4j at that folder).
 
@@ -54,6 +57,9 @@ It exits non-zero if there is drift between:
      - `--max-retries <n>`
      - `--retry-backoff-seconds <seconds>`
      - `--connection-timeout-seconds <seconds>`
+   - Optional observability flags:
+     - `--report /path/to/sync_report.json`
+     - `--progress` (structured JSON progress logs to stderr)
    - Equivalent env vars:
      - `NEO4J_DATABASE`
      - `NEO4J_SYNC_MAX_RETRIES`

@@ -493,6 +493,17 @@ def build_parser(_path_arg: Callable[[str], Path]) -> argparse.ArgumentParser:
     neo4j_p.add_argument(
         "--output", "-o", required=True, type=_path_arg, help="Output directory for CSV files"
     )
+    neo4j_p.add_argument(
+        "--report",
+        type=_path_arg,
+        default=None,
+        help="Optional JSON report output path for export metrics",
+    )
+    neo4j_p.add_argument(
+        "--progress",
+        action="store_true",
+        help="Emit structured export progress logs to stderr",
+    )
 
     neo4j_sync_p = subparsers.add_parser(
         "neo4j-sync",
@@ -532,6 +543,17 @@ def build_parser(_path_arg: Callable[[str], Path]) -> argparse.ArgumentParser:
         type=float,
         default=None,
         help="Neo4j connection timeout in seconds (default: NEO4J_CONNECTION_TIMEOUT_SECONDS or 15)",
+    )
+    neo4j_sync_p.add_argument(
+        "--report",
+        type=_path_arg,
+        default=None,
+        help="Optional JSON report output path for sync metrics",
+    )
+    neo4j_sync_p.add_argument(
+        "--progress",
+        action="store_true",
+        help="Emit structured sync progress logs to stderr",
     )
 
     policy_p = subparsers.add_parser(
