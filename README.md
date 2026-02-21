@@ -7,6 +7,8 @@
 
 In the age of AI, generating answers is easy; deciding what to trust is hard. Systems can sound confident even when evidence is weak, missing, or contradictory. Chronicle does not try to define truth. Instead, it provides tools to examine and judge the quality of supporting evidence: link claims to evidence, surface support and challenge structure, score defensibility (provenance, corroboration, contradictions), and package the result in a portable **.chronicle** file that others can verify.
 
+**Status:** `v0.9.0` (pre-1.0, active development).
+
 ## New here?
 
 Chronicle answers: *How well is this answer supported by evidence?* It’s for RAG evaluation, audits, fact-checking, and anyone who needs a portable, verifiable record of claims and their evidence.
