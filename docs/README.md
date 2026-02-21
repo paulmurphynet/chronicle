@@ -41,6 +41,7 @@ User manual: A short manual (how-to and reference) lives under [manual/](manual/
 | [When to use Chronicle](when-to-use-chronicle.md) | Scope vs data lineage / ML provenance. |
 | [Reference workflows](reference-workflows.md) | Reproducible end-to-end workflow set (journalism, legal, history/research, compliance, benchmark trust tracking). |
 | [Integration acceptance checklist](integration-acceptance-checklist.md) | Release gate for adapters/connectors: contract, safety, reproducibility, and docs minimum. |
+| [MCP integration](mcp.md) | Chronicle MCP server for AI assistant tool-calling over stdio/HTTP transports. |
 | [Starter packs](starter-packs.md) | Opinionated bootstrap packs (journalism, legal, audit) with policy defaults and defensibility-ready report/export artifacts. |
 | [API ingestion pipeline example](api-ingestion-pipeline-example.md) | End-to-end batch input to API writes, defensibility readout, and `.chronicle` export artifact. |
 | [Integration export hardening](integration-export-hardening.md) | Contract baseline for JSON/CSV/Markdown and signed `.chronicle` bundle interoperability paths with harnessed tests. |

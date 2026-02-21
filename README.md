@@ -98,7 +98,7 @@ Fixed queries, recorded defensibility scores: `PYTHONPATH=. python3 scripts/benc
 - **Standalone defensibility scorer** — `scripts/standalone_defensibility_scorer.py`: (query, answer, evidence) in, defensibility JSON out. No API or RAG stack required. Implements the [eval contract](docs/eval_contract.md).
 - **chronicle-verify** — CLI to verify a .chronicle (ZIP) manifest, schema, and evidence hashes. Stdlib only; no Chronicle package needed for verification.
 - **Chronicle package** — Event store, read model, defensibility computation, session API for ingest → claim → link support → get defensibility. Used by the scorer and by integrations.
-- **Optional:** HTTP API (`pip install -e ".[api]"`) and Neo4j sync (`.[neo4j]`) for project-based and graph workflows; see [API](docs/api.md) and [Neo4j](docs/neo4j.md).
+- **Optional:** HTTP API (`pip install -e ".[api]"`), MCP server (`pip install -e ".[mcp]"`), and Neo4j sync (`.[neo4j]`) for project-based, agent-tooling, and graph workflows; see [API](docs/api.md), [MCP integration](docs/mcp.md), and [Neo4j](docs/neo4j.md).
 - **Frontend** — The [Reference UI](frontend/README.md) (human-in-the-loop) lives in `frontend/` in this repo. It will consume only the API; see [Reference UI plan](docs/reference-ui-plan.md) for the same-repo strategy and what we'll bring from V1. For local dev, run both servers together with `make web-dev`.
 
 The **.chronicle** format is “show your work”: export your investigation and anyone can verify it with `chronicle-verify`. We encourage tooling that consumes .chronicle (dashboards, fact-checking UIs, or other pipelines); see [Consuming .chronicle](docs/consuming-chronicle.md) and [Claim–evidence–metrics export](docs/claim-evidence-metrics-export.md).
@@ -130,6 +130,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Rejected feature decisions](docs/rejected-feature-decisions.md) | Intentional "no" decisions with rationale/tradeoffs to preserve trust boundaries. |
 | [Adversarial and failure-mode examples](docs/adversarial-failure-modes.md) | Safe-failure scenarios and uncertainty-disclosure expectations for defensibility workflows. |
 | [HTTP API](docs/api.md) | Optional minimal API: `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run uvicorn. Write/read/export/import. |
+| [MCP integration](docs/mcp.md) | Run Chronicle as an MCP server so AI assistants can call investigation/evidence/claim/defensibility/export tools. |
 | [RAG evals: defensibility metric](docs/rag-evals-defensibility-metric.md) | Contract, schema, and how to run the scorer in your RAG harness as a defensibility metric. |
 | [Verifier](docs/verifier.md) | How to verify a .chronicle file. |
 | [Errors](docs/errors.md) | Error types (ChronicleUserError, etc.); when to use which; how CLI/API map to exit codes and HTTP status. |
