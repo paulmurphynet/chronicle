@@ -7,12 +7,14 @@ import json
 import os
 import sys
 from pathlib import Path
-from urllib.parse import quote_plus
+
+from chronicle.store.backend_config import build_postgres_url
 
 
-def _load_env_file(path: Path) -> None:
+def _load_env_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
     if not path.is_file():
-        return
+        return values
     for raw in path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
@@ -20,22 +22,15 @@ def _load_env_file(path: Path) -> None:
         key, value = line.split("=", 1)
         key = key.strip()
         value = value.strip().strip('"').strip("'")
-        if key and key not in os.environ:
-            os.environ[key] = value
+        if key and key not in values:
+            values[key] = value
+    return values
 
 
-def _build_database_url() -> str:
-    explicit = (os.environ.get("CHRONICLE_POSTGRES_URL") or "").strip()
-    if explicit:
-        return explicit
-    host = (os.environ.get("CHRONICLE_POSTGRES_HOST") or "127.0.0.1").strip()
-    port = (os.environ.get("CHRONICLE_POSTGRES_PORT") or "5432").strip()
-    db = (os.environ.get("CHRONICLE_POSTGRES_DB") or "chronicle").strip()
-    user = quote_plus((os.environ.get("CHRONICLE_POSTGRES_USER") or "chronicle").strip())
-    password = quote_plus(
-        (os.environ.get("CHRONICLE_POSTGRES_PASSWORD") or "chronicle_dev_password").strip()
-    )
-    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+def _build_database_url(env_values: dict[str, str]) -> str:
+    merged_env = dict(env_values)
+    merged_env.update(os.environ)
+    return build_postgres_url(env=merged_env)
 
 
 def main() -> int:
@@ -59,8 +54,8 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    _load_env_file(Path(args.env_file))
-    database_url = (args.database_url or "").strip() or _build_database_url()
+    env_values = _load_env_file(Path(args.env_file))
+    database_url = (args.database_url or "").strip() or _build_database_url(env_values)
 
     try:
         import psycopg

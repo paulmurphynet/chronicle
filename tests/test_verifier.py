@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import sys
+import zipfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+import tools.verify_chronicle.verify_chronicle as verify_mod
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
 from tools.verify_chronicle.verify_chronicle import verify_chronicle_file
@@ -55,3 +57,60 @@ def test_verify_chronicle_file_wrong_extension(tmp_path: Path) -> None:
     bad.write_bytes(b"fake")
     results = verify_chronicle_file(bad, run_invariants=False)
     assert any(r[0] == "file" and not r[1] for r in results)
+
+
+def test_verify_chronicle_file_rejects_unexpected_archive_entries(tmp_path: Path) -> None:
+    """Verifier should fail when archive includes files outside manifest/db/evidence paths."""
+    create_project(tmp_path)
+    chronicle_path = tmp_path / "out.chronicle"
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("Verifier extra", actor_id="test", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Evidence",
+            "text/plain",
+            original_filename="doc.txt",
+            actor_id="test",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, chronicle_path)
+
+    with_extra = tmp_path / "with-extra.chronicle"
+    with zipfile.ZipFile(chronicle_path, "r") as zin, zipfile.ZipFile(
+        with_extra, "w", zipfile.ZIP_DEFLATED
+    ) as zout:
+        for name in zin.namelist():
+            zout.writestr(name, zin.read(name))
+        zout.writestr("extras/unexpected.txt", b"unexpected")
+
+    results = verify_chronicle_file(with_extra, run_invariants=False)
+    assert any(
+        name == "zip" and (not passed) and "unexpected archive entries" in detail
+        for name, passed, detail in results
+    )
+
+
+def test_verify_chronicle_file_enforces_archive_entry_limit(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Verifier should fail when entry-count safety budget is exceeded."""
+    create_project(tmp_path)
+    chronicle_path = tmp_path / "out.chronicle"
+    with ChronicleSession(tmp_path) as session:
+        _, inv_uid = session.create_investigation("Verifier limits", actor_id="test", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Evidence",
+            "text/plain",
+            original_filename="doc.txt",
+            actor_id="test",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, chronicle_path)
+
+    monkeypatch.setattr(verify_mod, "MAX_IMPORT_ARCHIVE_ENTRIES", 1)
+    results = verify_chronicle_file(chronicle_path, run_invariants=False)
+    assert any(
+        name == "zip" and (not passed) and "too many entries" in detail
+        for name, passed, detail in results
+    )

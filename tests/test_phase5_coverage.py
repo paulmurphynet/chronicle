@@ -6,6 +6,7 @@ import json
 import zipfile
 from pathlib import Path
 
+import chronicle.store.export_import as export_import_mod
 import pytest
 from chronicle.store.commands.claims import get_defensibility_score
 from chronicle.store.export_import import (
@@ -205,6 +206,61 @@ def test_import_investigation_rejects_tampered_archive(tmp_path: Path) -> None:
     target.mkdir(parents=True)
     with pytest.raises(ValueError, match="verification failed"):
         import_investigation(tampered, target)
+
+
+def test_import_investigation_rejects_unexpected_archive_entries(tmp_path: Path) -> None:
+    """Import should reject archives that contain files outside Chronicle contract paths."""
+    proj = tmp_path / "proj"
+    create_project(proj)
+    exported = tmp_path / "export.chronicle"
+    with_extra = tmp_path / "with-extra.chronicle"
+    with ChronicleSession(proj) as session:
+        _, inv_uid = session.create_investigation("Unexpected entry", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Bytes",
+            "text/plain",
+            original_filename="bytes.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, exported)
+
+    with zipfile.ZipFile(exported, "r") as zin, zipfile.ZipFile(with_extra, "w", zipfile.ZIP_DEFLATED) as zout:
+        for name in zin.namelist():
+            zout.writestr(name, zin.read(name))
+        zout.writestr("extras/unexpected.txt", b"unexpected")
+
+    target = tmp_path / "target"
+    target.mkdir(parents=True)
+    with pytest.raises(ValueError, match="unexpected archive entries"):
+        import_investigation(with_extra, target)
+
+
+def test_import_investigation_enforces_archive_entry_limit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Import should fail when archive entry count exceeds configured safety limit."""
+    proj = tmp_path / "proj"
+    create_project(proj)
+    exported = tmp_path / "export.chronicle"
+    with ChronicleSession(proj) as session:
+        _, inv_uid = session.create_investigation("Archive limit", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Bytes",
+            "text/plain",
+            original_filename="bytes.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
+        session.export_investigation(inv_uid, exported)
+
+    monkeypatch.setattr(export_import_mod, "MAX_IMPORT_ARCHIVE_ENTRIES", 1)
+    target = tmp_path / "target"
+    target.mkdir(parents=True)
+    with pytest.raises(ValueError, match="too many entries"):
+        import_investigation(exported, target)
 
 
 def test_import_investigation_blocks_merge_when_existing_evidence_differs(tmp_path: Path) -> None:

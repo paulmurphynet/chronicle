@@ -6,11 +6,12 @@ No Chronicle package required — recipients can "verify it yourself".
 
 import hashlib
 import json
+import os
 import sqlite3
 import sys
 import tempfile
 import zipfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 # Manifest required keys (Spec evidence.md 4.1.1, export_import.py)
 MANIFEST_REQUIRED_KEYS = ("format_version", "investigation_uid")
@@ -18,6 +19,126 @@ MIN_FORMAT_VERSION = 1
 
 # Minimal DB tables that must exist
 REQUIRED_TABLES = ("events", "schema_version", "investigation", "claim", "evidence_item")
+ARCHIVE_REQUIRED_FILES = frozenset({"manifest.json", "chronicle.db"})
+EVIDENCE_DIR = "evidence"
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = (os.environ.get(name) or "").strip()
+    if not raw:
+        return default
+    try:
+        val = int(raw)
+    except ValueError:
+        return default
+    return val if val > 0 else default
+
+
+MAX_IMPORT_ARCHIVE_ENTRIES = _env_int("CHRONICLE_MAX_IMPORT_ARCHIVE_ENTRIES", 5000)
+MAX_IMPORT_ARCHIVE_UNCOMPRESSED_BYTES = _env_int(
+    "CHRONICLE_MAX_IMPORT_ARCHIVE_UNCOMPRESSED_BYTES",
+    2 * 1024 * 1024 * 1024,
+)
+MAX_IMPORT_ARCHIVE_MEMBER_BYTES = _env_int(
+    "CHRONICLE_MAX_IMPORT_ARCHIVE_MEMBER_BYTES",
+    512 * 1024 * 1024,
+)
+MAX_IMPORT_ARCHIVE_COMPRESSION_RATIO = _env_int(
+    "CHRONICLE_MAX_IMPORT_ARCHIVE_COMPRESSION_RATIO",
+    200,
+)
+
+
+def _validate_archive_member_name(name: str) -> PurePosixPath:
+    raw = (name or "").strip()
+    if not raw:
+        raise ValueError("empty archive member name")
+    if raw.startswith("/") or raw.startswith("\\") or "\\" in raw:
+        raise ValueError(f"unsafe archive member path {name!r}")
+    member = PurePosixPath(raw)
+    parts = member.parts
+    if not parts or any(part in ("", ".", "..") for part in parts):
+        raise ValueError(f"unsafe archive member path {name!r}")
+    if ":" in parts[0]:
+        raise ValueError(f"unsafe archive member path {name!r}")
+    return member
+
+
+def _is_allowed_archive_member(member: PurePosixPath) -> bool:
+    normalized = member.as_posix()
+    if normalized in ARCHIVE_REQUIRED_FILES:
+        return True
+    if normalized == EVIDENCE_DIR:
+        return True
+    return normalized.startswith(f"{EVIDENCE_DIR}/")
+
+
+def _build_archive_file_index(zf: zipfile.ZipFile) -> dict[str, zipfile.ZipInfo]:
+    infos = zf.infolist()
+    if len(infos) > MAX_IMPORT_ARCHIVE_ENTRIES:
+        raise ValueError(
+            "archive has too many entries "
+            f"({len(infos)} > {MAX_IMPORT_ARCHIVE_ENTRIES})"
+        )
+    total_uncompressed = 0
+    unexpected_entries: list[str] = []
+    files_by_name: dict[str, zipfile.ZipInfo] = {}
+    for info in infos:
+        member = _validate_archive_member_name(info.filename)
+        if info.flag_bits & 0x1:
+            raise ValueError(f"encrypted archive member not allowed ({member.as_posix()})")
+        if info.file_size > MAX_IMPORT_ARCHIVE_MEMBER_BYTES:
+            raise ValueError(
+                "archive member exceeds max uncompressed size "
+                f"({member.as_posix()}: {info.file_size} > {MAX_IMPORT_ARCHIVE_MEMBER_BYTES})"
+            )
+        total_uncompressed += info.file_size
+        if total_uncompressed > MAX_IMPORT_ARCHIVE_UNCOMPRESSED_BYTES:
+            raise ValueError(
+                "archive exceeds max uncompressed size "
+                f"({total_uncompressed} > {MAX_IMPORT_ARCHIVE_UNCOMPRESSED_BYTES})"
+            )
+        if info.compress_size > 0 and (
+            info.file_size > info.compress_size * MAX_IMPORT_ARCHIVE_COMPRESSION_RATIO
+        ):
+            raise ValueError(f"suspicious compression ratio for {member.as_posix()}")
+        if not _is_allowed_archive_member(member):
+            unexpected_entries.append(member.as_posix())
+        if not info.is_dir():
+            files_by_name[member.as_posix()] = info
+    if unexpected_entries:
+        detail = ", ".join(unexpected_entries[:5])
+        if len(unexpected_entries) > 5:
+            detail = f"{detail}, ..."
+        raise ValueError(f"unexpected archive entries ({detail})")
+    return files_by_name
+
+
+def _stream_sha256_zip_member(zf: zipfile.ZipFile, info: zipfile.ZipInfo) -> str:
+    h = hashlib.sha256()
+    read_bytes = 0
+    with zf.open(info, "r") as member_file:
+        while True:
+            chunk = member_file.read(1024 * 1024)
+            if not chunk:
+                break
+            read_bytes += len(chunk)
+            if read_bytes > MAX_IMPORT_ARCHIVE_MEMBER_BYTES:
+                raise ValueError(
+                    f"archive member exceeds max uncompressed size ({info.filename})"
+                )
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _copy_zip_member_to_path(zf: zipfile.ZipFile, info: zipfile.ZipInfo, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with zf.open(info, "r") as src, dest.open("wb") as out:
+        while True:
+            chunk = src.read(1024 * 1024)
+            if not chunk:
+                break
+            out.write(chunk)
 
 
 def _report(name: str, passed: bool, detail: str, results: list) -> None:
@@ -67,7 +188,12 @@ def verify_db_schema(conn: sqlite3.Connection, results: list) -> None:
         _report("schema_tables", True, "all required tables present", results)
 
 
-def verify_evidence_hashes(zf: zipfile.ZipFile, conn: sqlite3.Connection, results: list) -> None:
+def verify_evidence_hashes(
+    zf: zipfile.ZipFile,
+    files_by_name: dict[str, zipfile.ZipInfo],
+    conn: sqlite3.Connection,
+    results: list,
+) -> None:
     """Validate each evidence file in the ZIP matches content_hash in DB."""
     try:
         cur = conn.execute("SELECT evidence_uid, uri, content_hash FROM evidence_item")
@@ -85,12 +211,15 @@ def verify_evidence_hashes(zf: zipfile.ZipFile, conn: sqlite3.Connection, result
         if not uri or ".." in uri or uri.startswith("/"):
             failed.append(f"{evidence_uid}: invalid uri")
             continue
-        try:
-            data = zf.read(uri)
-        except KeyError:
+        info = files_by_name.get(uri)
+        if info is None:
             failed.append(f"{evidence_uid}: file missing in ZIP ({uri})")
             continue
-        digest = hashlib.sha256(data).hexdigest()
+        try:
+            digest = _stream_sha256_zip_member(zf, info)
+        except ValueError as exc:
+            failed.append(f"{evidence_uid}: {exc}")
+            continue
         if digest != content_hash:
             failed.append(f"{evidence_uid}: hash mismatch")
 
@@ -173,18 +302,22 @@ def verify_chronicle_file(
         return results
 
     with zf:
-        names = zf.namelist()
-        if "manifest.json" not in names:
+        try:
+            files_by_name = _build_archive_file_index(zf)
+        except ValueError as exc:
+            _report("zip", False, str(exc), results)
+            return results
+        if "manifest.json" not in files_by_name:
             _report("zip", False, "missing manifest.json", results)
             return results
-        if "chronicle.db" not in names:
+        if "chronicle.db" not in files_by_name:
             _report("zip", False, "missing chronicle.db", results)
             return results
 
         _report("zip", True, "valid ZIP with manifest and DB", results)
 
         try:
-            manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
+            manifest = json.loads(zf.read(files_by_name["manifest.json"].filename).decode("utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
             _report("manifest", False, str(e), results)
             return results
@@ -193,11 +326,11 @@ def verify_chronicle_file(
 
         with tempfile.TemporaryDirectory(prefix="chronicle_verify_") as tmp:
             db_path = Path(tmp) / "chronicle.db"
-            db_path.write_bytes(zf.read("chronicle.db"))
+            _copy_zip_member_to_path(zf, files_by_name["chronicle.db"], db_path)
             conn = sqlite3.connect(str(db_path))
             try:
                 verify_db_schema(conn, results)
-                verify_evidence_hashes(zf, conn, results)
+                verify_evidence_hashes(zf, files_by_name, conn, results)
                 if run_invariants:
                     verify_append_only_ledger(conn, results)
             finally:

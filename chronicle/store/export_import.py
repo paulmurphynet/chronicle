@@ -7,7 +7,7 @@ import sqlite3
 import tempfile
 import zipfile
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from chronicle import log
@@ -16,6 +16,12 @@ from chronicle.core.policy import (
     POLICY_FILENAME,
     get_policy_publication_summary,
     load_policy_profile,
+)
+from chronicle.core.validation import (
+    MAX_IMPORT_ARCHIVE_COMPRESSION_RATIO,
+    MAX_IMPORT_ARCHIVE_ENTRIES,
+    MAX_IMPORT_ARCHIVE_MEMBER_BYTES,
+    MAX_IMPORT_ARCHIVE_UNCOMPRESSED_BYTES,
 )
 from chronicle.store.evidence_store import EVIDENCE_DIR
 from chronicle.store.project import CHRONICLE_DB
@@ -33,6 +39,7 @@ SIGNED_BUNDLE_FORMAT_VERSION = 1
 SIGNED_BUNDLE_EXT = ".signed.zip"
 SIGNED_BUNDLE_MANIFEST = "signature_manifest.json"
 SIGNED_BUNDLE_ARCHIVE_PATH = "payload/investigation.chronicle"
+_ARCHIVE_REQUIRED_FILES = frozenset({"manifest.json", CHRONICLE_DB})
 
 
 def _sha256_file(path: Path) -> str:
@@ -50,6 +57,85 @@ def _sha256_file(path: Path) -> str:
 def _sha256_bytes(payload: bytes) -> str:
     """Return SHA-256 digest for raw bytes."""
     return hashlib.sha256(payload).hexdigest()
+
+
+def _validate_archive_member_name(name: str) -> PurePosixPath:
+    raw = (name or "").strip()
+    if not raw:
+        raise ValueError("Invalid .chronicle: empty archive member name")
+    if raw.startswith("/") or raw.startswith("\\") or "\\" in raw:
+        raise ValueError(f"Invalid .chronicle: unsafe archive member path {name!r}")
+    member = PurePosixPath(raw)
+    parts = member.parts
+    if not parts or any(part in ("", ".", "..") for part in parts):
+        raise ValueError(f"Invalid .chronicle: unsafe archive member path {name!r}")
+    if ":" in parts[0]:
+        raise ValueError(f"Invalid .chronicle: unsafe archive member path {name!r}")
+    return member
+
+
+def _is_allowed_archive_member(member: PurePosixPath) -> bool:
+    normalized = member.as_posix()
+    if normalized in _ARCHIVE_REQUIRED_FILES:
+        return True
+    if normalized == EVIDENCE_DIR:
+        return True
+    return normalized.startswith(f"{EVIDENCE_DIR}/")
+
+
+def _validate_archive_members(
+    zf: zipfile.ZipFile,
+    *,
+    strict_contract: bool,
+) -> list[zipfile.ZipInfo]:
+    infos = zf.infolist()
+    if len(infos) > MAX_IMPORT_ARCHIVE_ENTRIES:
+        raise ValueError(
+            "Invalid .chronicle: archive has too many entries "
+            f"({len(infos)} > {MAX_IMPORT_ARCHIVE_ENTRIES})"
+        )
+
+    total_uncompressed = 0
+    unexpected_entries: list[str] = []
+    for info in infos:
+        member = _validate_archive_member_name(info.filename)
+        if info.flag_bits & 0x1:
+            raise ValueError(
+                f"Invalid .chronicle: encrypted archive member not allowed ({member.as_posix()})"
+            )
+        if info.file_size > MAX_IMPORT_ARCHIVE_MEMBER_BYTES:
+            raise ValueError(
+                "Invalid .chronicle: archive member exceeds max uncompressed size "
+                f"({member.as_posix()}: {info.file_size} > {MAX_IMPORT_ARCHIVE_MEMBER_BYTES})"
+            )
+        total_uncompressed += info.file_size
+        if total_uncompressed > MAX_IMPORT_ARCHIVE_UNCOMPRESSED_BYTES:
+            raise ValueError(
+                "Invalid .chronicle: archive exceeds max uncompressed size "
+                f"({total_uncompressed} > {MAX_IMPORT_ARCHIVE_UNCOMPRESSED_BYTES})"
+            )
+        if info.compress_size > 0 and (
+            info.file_size > info.compress_size * MAX_IMPORT_ARCHIVE_COMPRESSION_RATIO
+        ):
+            raise ValueError(
+                "Invalid .chronicle: suspicious compression ratio for archive member "
+                f"({member.as_posix()})"
+            )
+        if strict_contract and not _is_allowed_archive_member(member):
+            unexpected_entries.append(member.as_posix())
+
+    if strict_contract and unexpected_entries:
+        detail = ", ".join(unexpected_entries[:5])
+        if len(unexpected_entries) > 5:
+            detail = f"{detail}, ..."
+        raise ValueError(f"Invalid .chronicle: unexpected archive entries ({detail})")
+    return infos
+
+
+def _write_zip_member_to_path(zf: zipfile.ZipFile, info: zipfile.ZipInfo, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with zf.open(info, "r") as src, dest.open("wb") as out:
+        shutil.copyfileobj(src, out, length=1024 * 1024)
 
 
 def _verify_importable_archive(chronicle_path: Path) -> None:
@@ -514,61 +600,55 @@ def import_investigation(chronicle_path: Path, target_dir: Path) -> None:
     _verify_importable_archive(chronicle_path)
 
     with zipfile.ZipFile(chronicle_path, "r") as zf:
-        names = zf.namelist()
-        if "manifest.json" not in names:
+        infos = _validate_archive_members(zf, strict_contract=True)
+        files_by_name: dict[str, zipfile.ZipInfo] = {}
+        for info in infos:
+            member = _validate_archive_member_name(info.filename)
+            if not info.is_dir():
+                files_by_name[member.as_posix()] = info
+        if "manifest.json" not in files_by_name:
             raise ValueError("Invalid .chronicle: missing manifest.json")
-        manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
+        if CHRONICLE_DB not in files_by_name:
+            raise ValueError(f"Invalid .chronicle: missing {CHRONICLE_DB}")
+        manifest = json.loads(zf.read(files_by_name["manifest.json"].filename).decode("utf-8"))
         inv_uid = manifest.get("investigation_uid")
         if not inv_uid:
             raise ValueError("Invalid manifest: missing investigation_uid")
 
         if not target_db.exists():
-            # Fresh import: extract all (reject absolute and path-traversal names)
+            # Fresh import: extract only contract members.
             target_resolved = target_dir.resolve()
-            for name in names:
-                if (
-                    name.startswith("__")
-                    or ".." in name
-                    or name.startswith("/")
-                    or (name.startswith("\\") and len(name) > 1)
-                ):
+            for info in infos:
+                if info.is_dir():
                     continue
-                dest = (target_dir / name).resolve()
+                member = _validate_archive_member_name(info.filename)
+                dest = (target_dir / member.as_posix()).resolve()
                 try:
                     dest.relative_to(target_resolved)
                 except ValueError:
-                    continue
-                if name.endswith("/"):
-                    dest.mkdir(parents=True, exist_ok=True)
-                else:
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    dest.write_bytes(zf.read(name))
+                    raise ValueError(
+                        f"Invalid .chronicle: archive member escapes target path ({member.as_posix()})"
+                    ) from None
+                _write_zip_member_to_path(zf, info, dest)
             return
 
         # Merge: extract to temp, replay events into target, copy evidence
-        import tempfile
-
         with tempfile.TemporaryDirectory(prefix="chronicle_import_") as tmp:
             tmp_path = Path(tmp)
             tmp_resolved = tmp_path.resolve()
-            for name in names:
-                if (
-                    name.startswith("__")
-                    or ".." in name
-                    or name.startswith("/")
-                    or (name.startswith("\\") and len(name) > 1)
-                ):
+            for info in infos:
+                if info.is_dir():
                     continue
-                dest = (tmp_path / name).resolve()
+                member = _validate_archive_member_name(info.filename)
+                dest = (tmp_path / member.as_posix()).resolve()
                 try:
                     dest.relative_to(tmp_resolved)
                 except ValueError:
-                    continue
-                if name.endswith("/"):
-                    dest.mkdir(parents=True, exist_ok=True)
-                else:
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    dest.write_bytes(zf.read(name))
+                    raise ValueError(
+                        "Invalid .chronicle: archive member escapes temporary import path "
+                        f"({member.as_posix()})"
+                    ) from None
+                _write_zip_member_to_path(zf, info, dest)
 
             source_db = tmp_path / CHRONICLE_DB
             if not source_db.is_file():

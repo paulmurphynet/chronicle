@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from importlib import import_module
 from pathlib import Path
@@ -150,3 +151,65 @@ def test_onboarding_optional_command_rejects_empty_command() -> None:
     except ValueError:
         raised = True
     assert raised is True
+
+
+def test_onboarding_main_does_not_mutate_process_env(
+    tmp_path: Path, monkeypatch
+) -> None:
+    env_file = tmp_path / ".env.postgres.local"
+    env_file.write_text(
+        "\n".join(
+            [
+                "CHRONICLE_EVENT_STORE=postgres",
+                "CHRONICLE_POSTGRES_URL=postgresql://env_file_user:secret@127.0.0.1:5432/chronicle",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    output = tmp_path / "onboarding.json"
+    monkeypatch.delenv("CHRONICLE_EVENT_STORE", raising=False)
+    monkeypatch.delenv("CHRONICLE_POSTGRES_URL", raising=False)
+
+    def _ok_step(
+        command: list[str],
+        *,
+        timeout_seconds: int,
+        database_url: str,
+        redacted_database_url: str,
+    ) -> dict[str, object]:
+        assert database_url.startswith("postgresql://env_file_user:")
+        assert "secret" not in redacted_database_url
+        return {
+            "command": command,
+            "return_code": 0,
+            "duration_seconds": 0.01,
+            "stdout": "ok",
+            "stderr": "",
+        }
+
+    monkeypatch.setattr(onboarding_module, "_run_step", _ok_step)
+    rc = onboarding_module.main(["--env-file", str(env_file), "--output", str(output)])
+    assert rc == 0
+    assert "CHRONICLE_EVENT_STORE" not in os.environ
+    assert "CHRONICLE_POSTGRES_URL" not in os.environ
+
+
+def test_parity_env_file_resolution_is_process_isolated(tmp_path: Path, monkeypatch) -> None:
+    env_file = tmp_path / ".env.postgres.local"
+    env_file.write_text(
+        "\n".join(
+            [
+                "CHRONICLE_EVENT_STORE=postgres",
+                "CHRONICLE_POSTGRES_URL=postgresql://env_file_user:secret@127.0.0.1:5432/chronicle",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("CHRONICLE_EVENT_STORE", raising=False)
+    monkeypatch.delenv("CHRONICLE_POSTGRES_URL", raising=False)
+
+    values = parity_module._load_env_file(env_file)
+    url = parity_module._resolve_database_url(None, values)
+    assert url.startswith("postgresql://env_file_user:secret@127.0.0.1:5432/chronicle")
+    assert "CHRONICLE_EVENT_STORE" not in os.environ
+    assert "CHRONICLE_POSTGRES_URL" not in os.environ

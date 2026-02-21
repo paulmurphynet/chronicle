@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -35,19 +36,24 @@ def _normalize_backend(value: str | None) -> str:
     return raw
 
 
-def build_postgres_url(*, explicit_url: str | None = None) -> str:
+def build_postgres_url(
+    *,
+    explicit_url: str | None = None,
+    env: Mapping[str, str] | None = None,
+) -> str:
     """Build Postgres URL from explicit URL or CHRONICLE_POSTGRES_* environment vars."""
     if explicit_url is not None and explicit_url.strip():
         return explicit_url.strip()
-    env_url = (os.environ.get("CHRONICLE_POSTGRES_URL") or "").strip()
+    env_source: Mapping[str, str] = env if env is not None else os.environ
+    env_url = (env_source.get("CHRONICLE_POSTGRES_URL") or "").strip()
     if env_url:
         return env_url
-    host = (os.environ.get("CHRONICLE_POSTGRES_HOST") or "127.0.0.1").strip()
-    port = (os.environ.get("CHRONICLE_POSTGRES_PORT") or "5432").strip()
-    db = (os.environ.get("CHRONICLE_POSTGRES_DB") or "chronicle").strip()
-    user = quote_plus((os.environ.get("CHRONICLE_POSTGRES_USER") or "chronicle").strip())
+    host = (env_source.get("CHRONICLE_POSTGRES_HOST") or "127.0.0.1").strip()
+    port = (env_source.get("CHRONICLE_POSTGRES_PORT") or "5432").strip()
+    db = (env_source.get("CHRONICLE_POSTGRES_DB") or "chronicle").strip()
+    user = quote_plus((env_source.get("CHRONICLE_POSTGRES_USER") or "chronicle").strip())
     password = quote_plus(
-        (os.environ.get("CHRONICLE_POSTGRES_PASSWORD") or "chronicle_dev_password").strip()
+        (env_source.get("CHRONICLE_POSTGRES_PASSWORD") or "chronicle_dev_password").strip()
     )
     return f"postgresql://{user}:{password}@{host}:{port}/{db}"
 

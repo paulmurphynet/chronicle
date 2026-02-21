@@ -176,6 +176,26 @@ async def _read_upload_file_limited(file: UploadFile, max_bytes: int) -> bytes:
     return bytes(buf)
 
 
+async def _write_upload_file_limited(file: UploadFile, max_bytes: int) -> Path:
+    """Stream UploadFile to temp file and abort if payload exceeds max_bytes."""
+    total = 0
+    with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:
+        temp_path = Path(f.name)
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > max_bytes:
+                temp_path.unlink(missing_ok=True)
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File exceeds max size ({max_bytes} bytes)",
+                )
+            f.write(chunk)
+    return temp_path
+
+
 def _encode_cursor(created_at: str, uid: str) -> str:
     raw = json.dumps({"created_at": created_at, "uid": uid}, separators=(",", ":")).encode("utf-8")
     return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
@@ -1277,10 +1297,7 @@ async def import_chronicle(request: Request, file: Annotated[UploadFile, File()]
             detail=f"File exceeds max size ({MAX_IMPORT_BYTES} bytes)",
         )
     path = _get_project_path()
-    content = await _read_upload_file_limited(file, MAX_IMPORT_BYTES)
-    with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:
-        f.write(content)
-        chronicle_path = Path(f.name)
+    chronicle_path = await _write_upload_file_limited(file, MAX_IMPORT_BYTES)
     try:
         try:
             export_import_mod.import_investigation(chronicle_path, path)

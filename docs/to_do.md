@@ -204,6 +204,11 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 
 ## Recently completed
 
+- **Security + reliability hardening batch completed (2026-02-21)**:
+  - removed process-wide environment mutation from Postgres helper scripts (`scripts/postgres_backend_parity.py`, `scripts/postgres_onboarding_timed_check.py`, `scripts/postgres_smoke.py`, `scripts/postgres_doctor.py`) to keep backend selection hermetic.
+  - restricted `.chronicle` import to contract paths only (`manifest.json`, `chronicle.db`, `evidence/**`) and reject unexpected archive entries.
+  - added ZIP safety budgets (entry count, total/member uncompressed bytes, suspicious compression ratio checks) and streaming ZIP member reads/writes in import/verification paths.
+  - added CI guard tests for env isolation and archive hardening regressions (`tests/test_postgres_convergence_scripts.py`, `tests/test_phase5_coverage.py`, `tests/test_verifier.py`).
 - **Neo4j best-in-class batch (non-CI-dependent) completed**: added projection benchmark harness and tests (`scripts/benchmark_data/run_neo4j_projection_benchmark.py`, `tests/test_neo4j_projection_benchmark.py`), cross-mode parity tests (`tests/test_neo4j_projection_parity.py`), failure-mode tests and missing-driver diagnostics (`tests/test_neo4j_sync_failures.py`, `chronicle/store/neo4j_sync.py`), and published operations/query docs (`docs/neo4j-operations-runbook.md`, `docs/neo4j-query-pack.md`) with support-policy compatibility details.
 - **Neo4j live large-run evidence completed**: executed live Neo4j integration tests (`tests/test_neo4j_live_integration.py`, 2 passed) and captured thresholded sync benchmark evidence (`docs/benchmarks/neo4j_projection_sync_baseline_v0.9.0.json` + `.md`) against local `neo4j:5`.
 - **Post-public closure playbook completed**: added `docs/post-public-finalization-checklist.md` to execute the remaining public/CI/external tasks in one pass.

@@ -69,9 +69,10 @@ def _quote_sqlite_ident(name: str, *, allowed: set[str] | frozenset[str] | None 
     return '"' + name.replace('"', '""') + '"'
 
 
-def _load_env_file(path: Path) -> None:
+def _load_env_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
     if not path.is_file():
-        return
+        return values
     for raw in path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
@@ -79,14 +80,17 @@ def _load_env_file(path: Path) -> None:
         key, value = line.split("=", 1)
         key = key.strip()
         value = value.strip().strip('"').strip("'")
-        if key and key not in os.environ:
-            os.environ[key] = value
+        if key and key not in values:
+            values[key] = value
+    return values
 
 
-def _resolve_database_url(explicit: str | None) -> str:
+def _resolve_database_url(explicit: str | None, env_values: dict[str, str]) -> str:
     if explicit and explicit.strip():
         return explicit.strip()
-    return build_postgres_url()
+    merged_env = dict(env_values)
+    merged_env.update(os.environ)
+    return build_postgres_url(env=merged_env)
 
 
 def _redact_database_url(database_url: str) -> str:
@@ -475,8 +479,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    _load_env_file(Path(args.env_file))
-    database_url = _resolve_database_url(args.database_url)
+    env_values = _load_env_file(Path(args.env_file))
+    database_url = _resolve_database_url(args.database_url, env_values)
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
