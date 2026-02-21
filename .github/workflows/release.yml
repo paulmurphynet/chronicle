@@ -26,11 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a
         env:
-          POSTGRES_DB: chronicle
-          POSTGRES_USER: chronicle
-          POSTGRES_PASSWORD: chronicle_dev_password
+          POSTGRESQL_DATABASE: chronicle
+          POSTGRESQL_USERNAME: chronicle
+          POSTGRESQL_PASSWORD: chronicle_dev_password
         ports:
           - 5432:5432
         options: >-
@@ -150,13 +150,13 @@ jobs:
           severity: HIGH,CRITICAL
           scan-ref: .
 
-      - name: Trivy base image scan (postgres:16)
+      - name: Trivy pinned Postgres image scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: image
-          image-ref: postgres:16
+          image-ref: bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a
           format: json
-          output: reports/trivy-postgres16.json
+          output: reports/trivy-postgres-bitnami.json
           ignore-unfixed: true
           severity: HIGH,CRITICAL
 
@@ -164,7 +164,7 @@ jobs:
         run: |
           python3 scripts/container_security_gate.py \
             --report reports/trivy-fs.json \
-            --report reports/trivy-postgres16.json \
+            --report reports/trivy-postgres-bitnami.json \
             --max-high 0 \
             --max-critical 0
 

@@ -113,11 +113,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a
         env:
-          POSTGRES_DB: chronicle
-          POSTGRES_USER: chronicle
-          POSTGRES_PASSWORD: chronicle_dev_password
+          POSTGRESQL_DATABASE: chronicle
+          POSTGRESQL_USERNAME: chronicle
+          POSTGRESQL_PASSWORD: chronicle_dev_password
         ports:
           - 5432:5432
         options: >-

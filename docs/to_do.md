@@ -2,7 +2,7 @@
 
 Single source of truth for pending work.
 
-Last refreshed: **2026-02-20**
+Last refreshed: **2026-02-21**
 
 ## Product stance
 
@@ -265,6 +265,7 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 - **Release-criteria automation expanded**: added deterministic backend parity gate (`scripts/postgres_backend_parity.py`) and timed onboarding gate (`scripts/postgres_onboarding_timed_check.py`), then wired both into CI/release Postgres jobs with JSON artifacts.
 - **Local Postgres convergence validation completed**: confirmed `make postgres-parity` and `make postgres-onboarding-check` pass against local Docker Postgres after smoke payload parity fix.
 - **Security release criteria expanded**: added Trivy-based container vulnerability gating (`scripts/container_security_gate.py`) and wired supply-chain/release workflows to enforce container HIGH/CRITICAL thresholds alongside dependency scans.
+- **Postgres image security baseline completed**: switched local/CI/release Postgres baseline to a pinned Bitnami Postgres digest (`bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a`) after validating Chronicle doctor/smoke compatibility and verifying Trivy HIGH/CRITICAL clean image scans.
 - **Docs release-criteria check completed**: reran docs link and docs currency gates (`scripts/check_doc_links.py`, `scripts/check_docs_currency.py`) and confirmed pass.
 - **Branch-protection rollout automation completed**: added GitHub API verifier script (`scripts/check_branch_protection_rollout.py`), fixture-based regression tests (`tests/test_branch_protection_rollout.py`), make target (`branch-protection-rollout-check`), and release-evidence doc path (`docs/branch-protection-rollout-verification.md`).
 
@@ -309,6 +310,7 @@ Priority implementation items accepted on 2026-02-20 for immediate execution:
 Keep this section for longer-horizon items that are intentionally deferred. Current deferred item:
 
 - Postgres read model parity (explicitly out of scope until SQLite baseline remains stable and maintainable).
+- Frontend lint-toolchain advisory follow-up: `eslint` currently depends on `ajv@6` (Trivy medium `CVE-2025-69873`) with no compatible upstream fix in current stable ESLint line; track upstream remediation before re-enabling strict MEDIUM=0 container policy.
 
 ## Done criteria
 

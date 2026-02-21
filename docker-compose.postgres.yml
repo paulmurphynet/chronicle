@@ -1,14 +1,14 @@
 services:
   postgres:
-    image: postgres:16
+    image: bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a
     container_name: chronicle-postgres
     restart: unless-stopped
     ports:
       - "${CHRONICLE_POSTGRES_PORT:-5432}:5432"
     environment:
-      POSTGRES_DB: "${CHRONICLE_POSTGRES_DB:-chronicle}"
-      POSTGRES_USER: "${CHRONICLE_POSTGRES_USER:-chronicle}"
-      POSTGRES_PASSWORD: "${CHRONICLE_POSTGRES_PASSWORD:-chronicle_dev_password}"
+      POSTGRESQL_DATABASE: "${CHRONICLE_POSTGRES_DB:-chronicle}"
+      POSTGRESQL_USERNAME: "${CHRONICLE_POSTGRES_USER:-chronicle}"
+      POSTGRESQL_PASSWORD: "${CHRONICLE_POSTGRES_PASSWORD:-chronicle_dev_password}"
     volumes:
       - chronicle_postgres_data:/var/lib/postgresql/data
     healthcheck:

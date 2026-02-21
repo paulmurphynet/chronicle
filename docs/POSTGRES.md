@@ -28,7 +28,7 @@ make postgres-smoke
 What these do:
 
 - `make postgres-env` creates `.env.postgres.local` from `.env.postgres.example` (if missing).
-- `make postgres-up` starts Postgres via `docker-compose.postgres.yml`.
+- `make postgres-up` starts Chronicle's pinned local Postgres image via `docker-compose.postgres.yml`.
 - `make postgres-doctor` verifies dependency + connectivity.
 - `make postgres-smoke` performs a minimal Chronicle event-store append/read/idempotency-key smoke test.
 
@@ -105,3 +105,7 @@ Operational references:
 
 - Backup/restore + disaster recovery: [Postgres operations runbook](postgres-operations-runbook.md)
 - Managed environment security posture: [Managed Postgres hardening](postgres-hardening.md)
+
+## Local image security baseline
+
+Local Docker bootstrap uses a pinned Bitnami Postgres image digest (`bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a`). This is the image scanned by release/supply-chain security gates.

@@ -72,13 +72,13 @@ jobs:
           severity: HIGH,CRITICAL
           scan-ref: .
 
-      - name: Run Trivy base image scan (postgres:16)
+      - name: Run Trivy pinned Postgres image scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: image
-          image-ref: postgres:16
+          image-ref: bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a
           format: json
-          output: reports/trivy-postgres16.json
+          output: reports/trivy-postgres-bitnami.json
           ignore-unfixed: true
           severity: HIGH,CRITICAL
 
@@ -92,7 +92,7 @@ jobs:
             --max-critical "${{ inputs.max_critical }}"
           python3 scripts/container_security_gate.py \
             --report reports/trivy-fs.json \
-            --report reports/trivy-postgres16.json \
+            --report reports/trivy-postgres-bitnami.json \
             --max-high "${{ inputs.max_container_high }}" \
             --max-critical "${{ inputs.max_container_critical }}"
 
