@@ -4,7 +4,7 @@ MYPY ?= ./.venv/bin/mypy
 PYTEST ?= ./.venv/bin/pytest
 POSTGRES_ENV_FILE ?= .env.postgres.local
 
-.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test neo4j-benchmark adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
+.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test neo4j-benchmark adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check release-0.9-preflight postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
 
 help:
 	@echo "Targets:"
@@ -24,6 +24,7 @@ help:
 	@echo "  branch-protection-rollout-check - Query GitHub API for branch protection + required CI green evidence (requires token)"
 	@echo "  deterministic-check - Verify repeated scorer runs produce stable defensibility metrics"
 	@echo "  reference-workflows - Run reference workflow suite and write report under /tmp"
+	@echo "  release-0.9-preflight - One-command local preflight before public v0.9 launch"
 	@echo "  postgres-env - Create $(POSTGRES_ENV_FILE) from .env.postgres.example if missing"
 	@echo "  postgres-up  - Start local Postgres via docker compose"
 	@echo "  postgres-down - Stop local Postgres via docker compose"
@@ -86,6 +87,10 @@ reference-workflows:
 	$(PYTHON) scripts/run_reference_workflows.py --output-dir /tmp/chronicle_reference_workflows_check
 
 check: lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check deterministic-check reference-workflows
+
+release-0.9-preflight: check
+	PYTHONPATH=. $(PYTHON) scripts/verticals/journalism/generate_sample.py --output /tmp/release_gate_sample.chronicle
+	PYTHONPATH=. $(PYTHON) scripts/run_conformance.py /tmp/release_gate_sample.chronicle
 
 postgres-env:
 	@if [ -f "$(POSTGRES_ENV_FILE)" ]; then \

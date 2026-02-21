@@ -127,6 +127,7 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [PostgreSQL backend](docs/POSTGRES.md) | Postgres convergence track: local bootstrap (`make postgres-up`), doctor/smoke checks, and current scope. |
 | [Support policy](docs/support-policy.md) | Support tiers (Lite/Team/Managed), GA/Beta/Experimental status, compatibility guarantees, and deprecation timeline policy. |
 | [Production readiness checklist](docs/production-readiness-checklist.md) | Objective go/no-go criteria for trust gates, backend checks, CI branch protection, security, and docs. |
+| [v0.9 public launch runbook](docs/v0.9-public-launch.md) | Exact step-by-step for repo visibility flip, enabling Actions, branch protection, and rollout verification evidence. |
 | [CI branch protection checklist](docs/ci-branch-protection.md) | Exact required CI checks to enforce before merge on protected branches. |
 | [Branch protection rollout verification](docs/branch-protection-rollout-verification.md) | API-driven verification workflow and evidence artifact for final CI/branch-protection release gating. |
 | [Post-public finalization checklist](docs/post-public-finalization-checklist.md) | One pass to close post-public CI/branch-protection/Neo4j-live/standards-dispatch gating items. |

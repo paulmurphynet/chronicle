@@ -2,6 +2,14 @@
 
 Use this checklist immediately after the repository is public and CI is enabled.
 
+## 0. Public visibility and Actions confirmed
+
+1. Confirm repository visibility is `Public`.
+2. Confirm GitHub Actions are enabled for this repository.
+3. Confirm `.github/workflows/ci.yml` triggers on both `push` and `pull_request`.
+
+Reference: `docs/v0.9-public-launch.md`
+
 ## 1. CI required checks green on push/PR
 
 1. Open a no-op PR (or docs-only PR) against `main`.

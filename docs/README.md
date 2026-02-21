@@ -69,6 +69,7 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [PostgreSQL backend](POSTGRES.md) | Convergence quickstart for local/managed Postgres, doctor/smoke checks, and current backend scope. |
 | [Support policy](support-policy.md) | Support tiers plus GA/Beta/Experimental status, compatibility policy, and deprecation timeline format. |
 | [Production readiness checklist](production-readiness-checklist.md) | Objective pass/fail release criteria across trust, backend, CI, security, and docs. |
+| [v0.9 public launch runbook](v0.9-public-launch.md) | Exact execution path for making the repo public, enabling Actions, enforcing branch protection, and producing rollout evidence. |
 | [CI branch protection checklist](ci-branch-protection.md) | Exact required checks to configure in branch protection rules. |
 | [Branch protection rollout verification](branch-protection-rollout-verification.md) | Scripted verification/evidence workflow for branch-protection and required CI checks. |
 | [Post-public finalization checklist](post-public-finalization-checklist.md) | One pass to close post-public CI/branch-protection/Neo4j-live/standards-dispatch gating items. |
