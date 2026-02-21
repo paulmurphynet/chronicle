@@ -97,7 +97,7 @@ Fixed queries, recorded defensibility scores: `PYTHONPATH=. python3 scripts/benc
 - **chronicle-verify** — CLI to verify a .chronicle (ZIP) manifest, schema, and evidence hashes. Stdlib only; no Chronicle package needed for verification.
 - **Chronicle package** — Event store, read model, defensibility computation, session API for ingest → claim → link support → get defensibility. Used by the scorer and by integrations.
 - **Optional:** HTTP API (`pip install -e ".[api]"`) and Neo4j sync (`.[neo4j]`) for project-based and graph workflows; see [API](docs/api.md) and [Neo4j](docs/neo4j.md).
-- **Frontend** — The [Reference UI](frontend/README.md) (human-in-the-loop) lives in `frontend/` in this repo. It will consume only the API; see [Reference UI plan](docs/reference-ui-plan.md) for the same-repo strategy and what we'll bring from V1.
+- **Frontend** — The [Reference UI](frontend/README.md) (human-in-the-loop) lives in `frontend/` in this repo. It will consume only the API; see [Reference UI plan](docs/reference-ui-plan.md) for the same-repo strategy and what we'll bring from V1. For local dev, run both servers together with `make web-dev`.
 
 The **.chronicle** format is “show your work”: export your investigation and anyone can verify it with `chronicle-verify`. We encourage tooling that consumes .chronicle (dashboards, fact-checking UIs, or other pipelines); see [Consuming .chronicle](docs/consuming-chronicle.md) and [Claim–evidence–metrics export](docs/claim-evidence-metrics-export.md).
 

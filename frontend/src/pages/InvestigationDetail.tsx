@@ -313,23 +313,25 @@ export function InvestigationDetail() {
       {tab === 'links' && (
         <section>
           <h3>Link evidence to claim (support or challenge)</h3>
-          <label>Span <select value={linkSpan} onChange={(e) => setLinkSpan(e.target.value)}>
-            <option value="">—</option>
-            {allSpans.map((s) => (
-              <option key={s.span_uid} value={s.span_uid}>{s.label} (span)</option>
-            ))}
-          </select></label>
-          <label>Claim <select value={linkClaim} onChange={(e) => setLinkClaim(e.target.value)}>
-            <option value="">—</option>
-            {claims.map((c) => (
-              <option key={c.claim_uid} value={c.claim_uid}>{c.claim_text.slice(0, 60)}…</option>
-            ))}
-          </select></label>
-          <label>Kind <select value={linkKind} onChange={(e) => setLinkKind(e.target.value as 'support' | 'challenge')}>
-            <option value="support">Support</option>
-            <option value="challenge">Challenge</option>
-          </select></label>
-          <button type="button" onClick={doLink} disabled={actionLoading || !linkSpan || !linkClaim}>Add link</button>
+          <div className="control-row">
+            <label>Span <select value={linkSpan} onChange={(e) => setLinkSpan(e.target.value)}>
+              <option value="">—</option>
+              {allSpans.map((s) => (
+                <option key={s.span_uid} value={s.span_uid}>{s.label} (span)</option>
+              ))}
+            </select></label>
+            <label>Claim <select value={linkClaim} onChange={(e) => setLinkClaim(e.target.value)}>
+              <option value="">—</option>
+              {claims.map((c) => (
+                <option key={c.claim_uid} value={c.claim_uid}>{c.claim_text.slice(0, 60)}…</option>
+              ))}
+            </select></label>
+            <label>Kind <select value={linkKind} onChange={(e) => setLinkKind(e.target.value as 'support' | 'challenge')}>
+              <option value="support">Support</option>
+              <option value="challenge">Challenge</option>
+            </select></label>
+            <button type="button" onClick={doLink} disabled={actionLoading || !linkSpan || !linkClaim}>Add link</button>
+          </div>
         </section>
       )}
 
@@ -416,24 +418,28 @@ export function InvestigationDetail() {
         <section>
           <h3>Reading (evidence → select → link)</h3>
           <p className="muted">Open evidence content, select text, then link the selection to a claim as support or challenge.</p>
-          <label>Evidence: <select value={readingEvidenceUid} onChange={(e) => loadReadingContent(e.target.value)}>
-            <option value="">—</option>
-            {evidence.map((ev) => (
-              <option key={ev.evidence_uid} value={ev.evidence_uid}>{ev.original_filename}</option>
-            ))}
-          </select></label>
+          <div className="control-row">
+            <label>Evidence: <select value={readingEvidenceUid} onChange={(e) => loadReadingContent(e.target.value)}>
+              <option value="">—</option>
+              {evidence.map((ev) => (
+                <option key={ev.evidence_uid} value={ev.evidence_uid}>{ev.original_filename}</option>
+              ))}
+            </select></label>
+          </div>
           {readingEvidenceUid && (
             <>
-              <label>Link to claim: <select value={readingLinkClaim} onChange={(e) => setReadingLinkClaim(e.target.value)}>
-                <option value="">—</option>
-                {claims.map((c) => (
-                  <option key={c.claim_uid} value={c.claim_uid}>{c.claim_text.slice(0, 50)}…</option>
-                ))}
-              </select></label>
-              <label>As: <select value={readingLinkKind} onChange={(e) => setReadingLinkKind(e.target.value as 'support' | 'challenge')}>
-                <option value="support">Support</option>
-                <option value="challenge">Challenge</option>
-              </select></label>
+              <div className="control-row">
+                <label>Link to claim: <select value={readingLinkClaim} onChange={(e) => setReadingLinkClaim(e.target.value)}>
+                  <option value="">—</option>
+                  {claims.map((c) => (
+                    <option key={c.claim_uid} value={c.claim_uid}>{c.claim_text.slice(0, 50)}…</option>
+                  ))}
+                </select></label>
+                <label>As: <select value={readingLinkKind} onChange={(e) => setReadingLinkKind(e.target.value as 'support' | 'challenge')}>
+                  <option value="support">Support</option>
+                  <option value="challenge">Challenge</option>
+                </select></label>
+              </div>
               <div className="reading-content-wrap">
                 <pre
                   className="reading-content"
@@ -499,16 +505,18 @@ export function InvestigationDetail() {
           </ul>
           <h3>Compatibility preflight</h3>
           <p className="muted">Compare built-under policy to a viewing policy before checkpoint/export/submission.</p>
-          <label>Viewing profile: <select value={policyViewingId} onChange={(e) => setPolicyViewingId(e.target.value)}>
-            <option value="policy_legal">policy_legal</option>
-            <option value="policy_compliance">policy_compliance</option>
-            <option value="policy_history_research">policy_history_research</option>
-            <option value="policy_investigative_journalism">policy_investigative_journalism</option>
-          </select></label>
-          <label>Built-under override (optional): <input type="text" placeholder="policy_investigative_journalism" value={policyBuiltUnderOverride} onChange={(e) => setPolicyBuiltUnderOverride(e.target.value)} /></label>
-          <button type="button" onClick={doPolicyPreflight} disabled={policyCompatLoading}>
-            {policyCompatLoading ? 'Running preflight…' : 'Run compatibility preflight'}
-          </button>
+          <div className="control-row">
+            <label>Viewing profile: <select value={policyViewingId} onChange={(e) => setPolicyViewingId(e.target.value)}>
+              <option value="policy_legal">policy_legal</option>
+              <option value="policy_compliance">policy_compliance</option>
+              <option value="policy_history_research">policy_history_research</option>
+              <option value="policy_investigative_journalism">policy_investigative_journalism</option>
+            </select></label>
+            <label>Built-under override (optional): <input type="text" placeholder="policy_investigative_journalism" value={policyBuiltUnderOverride} onChange={(e) => setPolicyBuiltUnderOverride(e.target.value)} /></label>
+            <button type="button" onClick={doPolicyPreflight} disabled={policyCompatLoading}>
+              {policyCompatLoading ? 'Running preflight…' : 'Run compatibility preflight'}
+            </button>
+          </div>
           {policyCompat && (
             <>
               <p className="meta">

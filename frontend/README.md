@@ -4,7 +4,25 @@ This directory is the home for the **Chronicle Reference UI**: the official huma
 
 **Current state:** Full first version: **Home** (Try sample), **Investigations** list and detail (overview, tier + tier history, evidence, claims, links, defensibility, tensions, tension suggestions with confirm/dismiss, export .chronicle and submission package), **Learn** (step-by-step guides per vertical from `public/guides.json`). Static assets (e.g. `public/sample.chronicle`) live here for demos.
 
-**Run the UI:** From this directory: `npm ci` then `npm run dev`. Open http://localhost:5173. Configure the API base URL via env `VITE_API_BASE_URL` (default: use proxy `/api` → http://127.0.0.1:8000 when running dev).
+**Run the UI:** From this directory: `npm ci` then `npm run dev`. Open http://localhost:5173.
+
+**Recommended (run full web stack together):** from repo root use:
+
+```bash
+make web-dev
+```
+
+This starts:
+
+- API at `http://127.0.0.1:8000`
+- UI at `http://127.0.0.1:5173`
+
+The UI talks to the API via Vite proxy (`/api` -> `http://127.0.0.1:8000`).
+
+Optional env vars:
+
+- `VITE_API_BASE_URL` (default `/api`)
+- `VITE_API_DOCS_URL` (default `http://127.0.0.1:8000/docs`)
 
 **Quality checks:**
 

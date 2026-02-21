@@ -111,9 +111,51 @@ a:hover {
   color: #0f172a;
   font-weight: 600;
 }
+.api-status {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+}
+.api-status .dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+.api-status.online .dot {
+  background: #22c55e;
+}
+.api-status.offline .dot {
+  background: #ef4444;
+}
+.api-status button {
+  border: none;
+  background: transparent;
+  color: #1d4ed8;
+  font-size: 0.8125rem;
+  padding: 0;
+  cursor: pointer;
+}
+.api-status button:hover {
+  text-decoration: underline;
+}
 
 /* Pages */
 .page-home .actions { margin: 1.5rem 0; }
+.page-home .actions,
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.625rem;
+  align-items: center;
+}
 .page-home button {
   padding: 0.5rem 1rem;
   font-size: 1rem;
@@ -157,6 +199,9 @@ a:hover {
   border-radius: 0.375rem;
   color: #0f172a;
   background: #fff;
+}
+.button-row > * {
+  margin: 0;
 }
 .page-home .button-link:hover {
   text-decoration: none;
@@ -215,12 +260,31 @@ a:hover {
 .page-investigation-detail .list { list-style: none; padding: 0; margin: 0.5rem 0; }
 .page-investigation-detail .list li { padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.9375rem; }
 .page-investigation-detail textarea { display: block; width: 100%; max-width: 32rem; margin: 0.5rem 0; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; font-family: inherit; }
-.page-investigation-detail input[type="text"] { padding: 0.35rem 0.5rem; margin-right: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; width: 16rem; }
-.page-investigation-detail select { padding: 0.35rem 0.5rem; margin: 0 0.5rem 0.5rem 0; border: 1px solid #cbd5e1; border-radius: 0.25rem; }
-.page-investigation-detail button { padding: 0.35rem 0.75rem; font-size: 0.875rem; cursor: pointer; background: #334155; color: #fff; border: none; border-radius: 0.25rem; margin-right: 0.5rem; margin-bottom: 0.5rem; }
+.page-investigation-detail input[type="text"] { padding: 0.35rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; width: 16rem; max-width: 100%; }
+.page-investigation-detail select { padding: 0.35rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.25rem; }
+.page-investigation-detail button { padding: 0.35rem 0.75rem; font-size: 0.875rem; cursor: pointer; background: #334155; color: #fff; border: none; border-radius: 0.25rem; }
 .page-investigation-detail button:hover:not(:disabled) { background: #1e293b; }
 .page-investigation-detail button:disabled { opacity: 0.7; cursor: not-allowed; }
 .page-investigation-detail .button-row { margin: 0.5rem 0; }
+.page-investigation-detail .control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.625rem;
+  margin: 0.5rem 0;
+}
+.page-investigation-detail .control-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+.page-investigation-detail .control-row select {
+  min-width: 12rem;
+}
+.page-investigation-detail .control-row input[type="text"] {
+  width: min(22rem, 100%);
+}
 .page-investigation-detail .defensibility-json { font-size: 0.75rem; background: #f1f5f9; padding: 0.75rem; border-radius: 0.25rem; overflow-x: auto; max-height: 12rem; overflow-y: auto; }
 .page-investigation-detail .error { color: #b91c1c; }
 .page-investigation-detail .writing-area { min-height: 10rem; }
@@ -252,3 +316,41 @@ a:hover {
 .page-learn .learn-steps { padding-left: 1.5rem; }
 .page-learn .learn-steps li { margin-bottom: 1rem; }
 .page-learn .learn-steps li p { margin: 0.25rem 0 0 0; font-size: 0.9375rem; color: #475569; }
+
+@media (max-width: 640px) {
+  .app {
+    padding: 1.25rem 0.75rem;
+  }
+  .page-home .actions > * {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .page-home .button-link {
+    width: 100%;
+  }
+  .api-status {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .page-investigation-detail .tabs button {
+    padding: 0.45rem 0.6rem;
+  }
+  .page-investigation-detail .control-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .page-investigation-detail .control-row label {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .page-investigation-detail .control-row select,
+  .page-investigation-detail .control-row input[type="text"],
+  .page-investigation-detail .control-row button {
+    width: 100%;
+  }
+  .page-learn .learn-content {
+    min-width: 0;
+  }
+}

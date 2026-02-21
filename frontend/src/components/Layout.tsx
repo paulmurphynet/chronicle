@@ -1,7 +1,36 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
 export function Layout() {
   const loc = useLocation()
+  const apiBase = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '') || '/api'
+  const apiDocsUrl =
+    (import.meta.env.VITE_API_DOCS_URL ?? '').replace(/\/$/, '') ||
+    'http://127.0.0.1:8000/docs'
+  const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking')
+
+  const healthUrl = useMemo(() => {
+    if (apiBase.startsWith('http://') || apiBase.startsWith('https://')) {
+      return `${apiBase}/health`
+    }
+    return `${apiBase}/health`
+  }, [apiBase])
+
+  const checkApi = useCallback(async () => {
+    try {
+      const response = await fetch(healthUrl, { method: 'GET' })
+      setApiStatus(response.ok ? 'online' : 'offline')
+    } catch {
+      setApiStatus('offline')
+    }
+  }, [healthUrl])
+
+  useEffect(() => {
+    checkApi()
+    const interval = window.setInterval(checkApi, 15000)
+    return () => window.clearInterval(interval)
+  }, [checkApi])
+
   return (
     <div className="app">
       <header className="header">
@@ -13,8 +42,13 @@ export function Layout() {
           <Link to="/" className={loc.pathname === '/' ? 'active' : ''}>Home</Link>
           <Link to="/investigations" className={loc.pathname.startsWith('/investigations') ? 'active' : ''}>Investigations</Link>
           <Link to="/learn" className={loc.pathname === '/learn' ? 'active' : ''}>Learn</Link>
-          <a href={`${(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '') || '/api'}/docs`} target="_blank" rel="noreferrer">API docs</a>
+          <a href={apiDocsUrl} target="_blank" rel="noreferrer">API docs</a>
         </nav>
+        <div className={`api-status ${apiStatus}`}>
+          <span className="dot" />
+          <span>API: {apiStatus}</span>
+          <button type="button" onClick={checkApi}>recheck</button>
+        </div>
       </header>
       <main className="main">
         <Outlet />

@@ -4,7 +4,7 @@ MYPY ?= ./.venv/bin/mypy
 PYTEST ?= ./.venv/bin/pytest
 POSTGRES_ENV_FILE ?= .env.postgres.local
 
-.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test neo4j-benchmark adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows check release-0.9-preflight postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
+.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test neo4j-benchmark adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows web-dev check release-0.9-preflight postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
 
 help:
 	@echo "Targets:"
@@ -24,6 +24,7 @@ help:
 	@echo "  branch-protection-rollout-check - Query GitHub API for branch protection + required CI green evidence (requires token)"
 	@echo "  deterministic-check - Verify repeated scorer runs produce stable defensibility metrics"
 	@echo "  reference-workflows - Run reference workflow suite and write report under /tmp"
+	@echo "  web-dev      - Run API and frontend dev servers together (http://127.0.0.1:8000 + http://127.0.0.1:5173)"
 	@echo "  release-0.9-preflight - One-command local preflight before public v0.9 launch"
 	@echo "  postgres-env - Create $(POSTGRES_ENV_FILE) from .env.postgres.example if missing"
 	@echo "  postgres-up  - Start local Postgres via docker compose"
@@ -85,6 +86,9 @@ deterministic-check:
 
 reference-workflows:
 	$(PYTHON) scripts/run_reference_workflows.py --output-dir /tmp/chronicle_reference_workflows_check
+
+web-dev:
+	PYTHONPATH=. $(PYTHON) scripts/dev_web_stack.py
 
 check: lint format-check typecheck test docs-check docs-currency neo4j-check adapter-check integration-export-contract-check deterministic-check reference-workflows
 
