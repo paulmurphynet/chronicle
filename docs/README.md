@@ -78,6 +78,8 @@ This folder and the repo hold all documentation. **On GitHub:** use the links be
 | [Backend migration/versioning policy](backend-migration-versioning-policy.md) | Versioning/migration policy for event and read-model schemas across SQLite and Postgres. |
 | [Supply-chain automation](security-automation.md) | Manual dependency scan workflow (`pip-audit`, `npm audit`) and threshold gating guidance. |
 | [Trust metrics](trust-metrics.md) | KPI definitions and scripts for tracking unsupported-claim reduction over time. |
+| [Structured logging](structured-logging.md) | JSON-safe logging contract, RFC 5424 severity mapping, and transport config for API/runtime logs. |
+| [Notebook examples](../notebooks/README.md) | Jupyter walkthroughs for scorer and session workflows (tutorial artifacts, not a separate UI surface). |
 | [Rejected feature decisions](rejected-feature-decisions.md) | Explicit log of intentionally rejected feature directions with rationale and tradeoffs. |
 | [Adversarial and failure-mode examples](adversarial-failure-modes.md) | Concrete safe-failure/uncertainty-disclosure scenarios and expected Chronicle behavior. |
 | [Lizzie Borden case study](case-study-lizzie-borden.md) | Why we use the inquest transcript as a trust benchmark and how to evaluate responsibly without sensational framing. |

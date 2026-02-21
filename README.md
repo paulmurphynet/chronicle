@@ -1,12 +1,17 @@
 # Chronicle
 
+[![CI](https://github.com/paulmurphynet/chronicle/actions/workflows/ci.yml/badge.svg)](https://github.com/paulmurphynet/chronicle/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/chronicle-standard?label=PyPI)](https://pypi.org/project/chronicle-standard/)
+[![Frontend npm](https://img.shields.io/github/package-json/v/paulmurphynet/chronicle?filename=frontend%2Fpackage.json&label=frontend%20npm)](frontend/package.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 In the age of AI, generating answers is easy; deciding what to trust is hard. Systems can sound confident even when evidence is weak, missing, or contradictory. Chronicle does not try to define truth. Instead, it provides tools to examine and judge the quality of supporting evidence: link claims to evidence, surface support and challenge structure, score defensibility (provenance, corroboration, contradictions), and package the result in a portable **.chronicle** file that others can verify.
 
 ## New here?
 
 Chronicle answers: *How well is this answer supported by evidence?* It’s for RAG evaluation, audits, fact-checking, and anyone who needs a portable, verifiable record of claims and their evidence.
 
-**Prerequisites:** Python 3.11+; we recommend a virtual environment (e.g. `python3 -m venv .venv` then `source .venv/bin/activate` on Linux/macOS). Install the project with `pip install -e .` so the `chronicle` and `chronicle-verify` commands work.
+**Prerequisites:** Python 3.11+; we recommend a virtual environment (e.g. `python3 -m venv .venv` then `source .venv/bin/activate` on Linux/macOS). Install from PyPI with `pip install chronicle-standard` (or from source with `pip install -e .`) so the `chronicle` and `chronicle-verify` commands work.
 
 **Two paths:**
 
@@ -23,6 +28,12 @@ Chronicle answers: *How well is this answer supported by evidence?* It’s for R
 **1. Install and run the defensibility scorer**
 
 The scorer takes one (query, answer, evidence) run and returns a defensibility scorecard. No API or database required—ideal for pipelines and eval harnesses.
+
+```bash
+pip install chronicle-standard
+```
+
+For local development from source:
 
 ```bash
 pip install -e .
@@ -112,6 +123,8 @@ The **.chronicle** format is “show your work”: export your investigation and
 | [Defensibility metrics schema](docs/defensibility-metrics-schema.md) | Field semantics for the scorer output. |
 | [Eval and benchmarking](docs/eval-and-benchmarking.md) | How to run pipelines and report Chronicle defensibility. |
 | [Trust metrics](docs/trust-metrics.md) | North-star KPI definitions and baseline comparison workflow for benchmark outputs. |
+| [Structured logging](docs/structured-logging.md) | JSON-safe logging contract, RFC 5424 severity mapping, and transport configuration. |
+| [Notebook examples](notebooks/README.md) | Jupyter-first walkthroughs for scorer and session workflows (examples, not a separate UI). |
 | [Rejected feature decisions](docs/rejected-feature-decisions.md) | Intentional "no" decisions with rationale/tradeoffs to preserve trust boundaries. |
 | [Adversarial and failure-mode examples](docs/adversarial-failure-modes.md) | Safe-failure scenarios and uncertainty-disclosure expectations for defensibility workflows. |
 | [HTTP API](docs/api.md) | Optional minimal API: `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH`, run uvicorn. Write/read/export/import. |

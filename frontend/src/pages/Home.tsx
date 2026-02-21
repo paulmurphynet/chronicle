@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 
 export function Home() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [healthChecking, setHealthChecking] = useState(false)
+  const [healthStatus, setHealthStatus] = useState<'unknown' | 'ok' | 'error'>('unknown')
+  const [healthMessage, setHealthMessage] = useState<string>('')
 
   async function trySample() {
     setLoading(true)
@@ -37,21 +40,52 @@ export function Home() {
     }
   }
 
+  async function checkApi() {
+    setHealthChecking(true)
+    setHealthMessage('')
+    try {
+      const result = await api.health()
+      setHealthStatus('ok')
+      setHealthMessage(`API healthy: ${result.status}`)
+    } catch (e) {
+      setHealthStatus('error')
+      setHealthMessage(e instanceof Error ? e.message : String(e))
+    } finally {
+      setHealthChecking(false)
+    }
+  }
+
   return (
     <div className="page-home">
       <h2>Welcome</h2>
       <p>
         This is the <strong>Reference UI</strong> for Chronicle: an API-only client for investigations, evidence, claims, links, defensibility, and tensions.
       </p>
-      <p>
-        <strong>Try sample</strong> creates a minimal investigation (one evidence, one claim, one support link) and opens it so you can see defensibility and export.
-      </p>
-      <div className="actions">
-        <button type="button" onClick={trySample} disabled={loading}>
-          {loading ? 'Creating sample…' : 'Try sample'}
-        </button>
+      <div className="home-card home-card-flow">
+        <h3>Recommended first run</h3>
+        <ol className="home-steps">
+          <li>Check API connectivity.</li>
+          <li>Create a sample investigation.</li>
+          <li>Open Defensibility and Export tabs to inspect outputs.</li>
+        </ol>
+        <div className="actions">
+          <button type="button" onClick={checkApi} disabled={healthChecking}>
+            {healthChecking ? 'Checking API…' : 'Check API'}
+          </button>
+          <button type="button" onClick={trySample} disabled={loading}>
+            {loading ? 'Creating sample…' : 'Try sample'}
+          </button>
+          <Link to="/investigations" className="button-link">Open investigations</Link>
+        </div>
+        {healthStatus === 'ok' && <p className="ok">{healthMessage}</p>}
+        {healthStatus === 'error' && <p className="error">API check failed: {healthMessage}</p>}
       </div>
       {error && <p className="error">{error}</p>}
+      <div className="home-card">
+        <h3>Next after sample</h3>
+        <p className="muted">Use the Learn page for vertical workflows and checklist-style guides.</p>
+        <Link to="/learn">Go to Learn</Link>
+      </div>
       <p className="muted">
         Ensure the API is running: <code>pip install -e ".[api]"</code>, set <code>CHRONICLE_PROJECT_PATH</code>, then <code>uvicorn chronicle.api.app:app --reload</code>. Default: <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noreferrer">http://127.0.0.1:8000/docs</a>.
       </p>

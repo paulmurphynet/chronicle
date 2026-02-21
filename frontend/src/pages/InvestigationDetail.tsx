@@ -217,6 +217,8 @@ export function InvestigationDetail() {
   }, [tab, invId])
 
   const allSpans = evidence.flatMap((ev) => (spansByEvidence[ev.evidence_uid] ?? []).map((s) => ({ ...s, evidence_uid: ev.evidence_uid, label: ev.original_filename })))
+  const openTensionCount = tensions.filter((t) => t.status === 'OPEN' || t.status === 'DISPUTED').length
+  const publicationReady = claims.length > 0 && openTensionCount === 0 && inv?.current_tier !== 'spark'
 
   if (loading && !inv) return <p>Loading…</p>
   if (error && !inv) return <p className="error">{error}</p>
@@ -227,9 +229,30 @@ export function InvestigationDetail() {
   return (
     <div className="page-investigation-detail">
       <h2>{inv.title || inv.investigation_uid}</h2>
-      {fromTrySample && <p className="banner">Sample created. Add more evidence/claims or view defensibility below.</p>}
+      {fromTrySample && (
+        <div className="banner">
+          <p><strong>Sample created.</strong> Run this quick tour to understand the workflow:</p>
+          <ol>
+            <li>Open <strong>Evidence</strong> and add one more source.</li>
+            <li>Open <strong>Claims</strong> and add or refine a claim.</li>
+            <li>Open <strong>Defensibility</strong> to inspect score output.</li>
+            <li>Open <strong>Export</strong> to download `.chronicle` and submission package.</li>
+          </ol>
+          <div className="button-row">
+            <button type="button" onClick={() => setTab('evidence')}>Go to Evidence</button>
+            <button type="button" onClick={() => setTab('defensibility')}>Go to Defensibility</button>
+            <button type="button" onClick={() => setTab('export')}>Go to Export</button>
+          </div>
+        </div>
+      )}
       {inv.description && <p className="muted">{inv.description}</p>}
       <p className="meta">Tier: <strong>{inv.current_tier}</strong> · Created {inv.created_at}</p>
+      <div className="summary-grid">
+        <div><span>Evidence</span><strong>{evidence.length}</strong></div>
+        <div><span>Claims</span><strong>{claims.length}</strong></div>
+        <div><span>Tensions</span><strong>{tensions.length}</strong></div>
+        <div><span>Open/Disputed</span><strong>{openTensionCount}</strong></div>
+      </div>
 
       <nav className="tabs">
         {tabs.map((t) => (
@@ -258,11 +281,15 @@ export function InvestigationDetail() {
           <h3>Evidence ({evidence.length})</h3>
           <textarea placeholder="Paste or type content…" value={newEvidence} onChange={(e) => setNewEvidence(e.target.value)} rows={3} />
           <button type="button" onClick={doAddEvidence} disabled={actionLoading || !newEvidence.trim()}>Add evidence</button>
-          <ul className="list">
-            {evidence.map((ev) => (
-              <li key={ev.evidence_uid}><strong>{ev.original_filename}</strong> · {ev.media_type} · {(ev.file_size_bytes / 1024).toFixed(1)} KB · {ev.created_at}</li>
-            ))}
-          </ul>
+          {evidence.length === 0 ? (
+            <p className="muted">No evidence yet. Add at least one source to unlock useful defensibility output.</p>
+          ) : (
+            <ul className="list">
+              {evidence.map((ev) => (
+                <li key={ev.evidence_uid}><strong>{ev.original_filename}</strong> · {ev.media_type} · {(ev.file_size_bytes / 1024).toFixed(1)} KB · {ev.created_at}</li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
 
@@ -271,11 +298,15 @@ export function InvestigationDetail() {
           <h3>Claims ({claims.length})</h3>
           <textarea placeholder="Claim text…" value={newClaim} onChange={(e) => setNewClaim(e.target.value)} rows={2} />
           <button type="button" onClick={doAddClaim} disabled={actionLoading || !newClaim.trim()}>Add claim</button>
-          <ul className="list">
-            {claims.map((c) => (
-              <li key={c.claim_uid}><strong>{c.claim_text}</strong> · {c.current_status} · {c.claim_type ?? '—'}</li>
-            ))}
-          </ul>
+          {claims.length === 0 ? (
+            <p className="muted">No claims yet. Add at least one claim, then link evidence in the Links tab.</p>
+          ) : (
+            <ul className="list">
+              {claims.map((c) => (
+                <li key={c.claim_uid}><strong>{c.claim_text}</strong> · {c.current_status} · {c.claim_type ?? '—'}</li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
 
@@ -325,11 +356,15 @@ export function InvestigationDetail() {
       {tab === 'tensions' && (
         <section>
           <h3>Tensions ({tensions.length})</h3>
-          <ul className="list">
-            {tensions.map((t) => (
-              <li key={t.tension_uid}>{t.claim_a_uid} ↔ {t.claim_b_uid} · {t.tension_kind ?? 'contradiction'} · {t.status}</li>
-            ))}
-          </ul>
+          {tensions.length === 0 ? (
+            <p className="muted">No tensions recorded yet.</p>
+          ) : (
+            <ul className="list">
+              {tensions.map((t) => (
+                <li key={t.tension_uid}>{t.claim_a_uid} ↔ {t.claim_b_uid} · {t.tension_kind ?? 'contradiction'} · {t.status}</li>
+              ))}
+            </ul>
+          )}
           <p className="muted">Declare a tension from the Suggestions tab (confirm) or via API with claim_a_uid and claim_b_uid.</p>
         </section>
       )}
@@ -432,12 +467,15 @@ export function InvestigationDetail() {
       {tab === 'publication' && (
         <section>
           <h3>Publication readiness</h3>
+          <p className={`status-chip ${publicationReady ? 'ready' : 'not-ready'}`}>
+            {publicationReady ? 'Ready for package export' : 'Not ready yet'}
+          </p>
           <ul className="list">
             <li>Claims: <strong>{claims.length}</strong></li>
-            <li>Tensions: <strong>{tensions.length}</strong> ({tensions.filter((t) => t.status === 'OPEN' || t.status === 'DISPUTED').length} open/disputed)</li>
+            <li>Tensions: <strong>{tensions.length}</strong> ({openTensionCount} open/disputed)</li>
             <li>Tier: <strong>{inv.current_tier}</strong></li>
           </ul>
-          <p className="muted">Resolve open tensions and advance tier as needed before export.</p>
+          <p className="muted">Guideline: keep open/disputed tensions at 0 and advance beyond Spark before final release export.</p>
           <div className="button-row">
             <button type="button" onClick={doExportSubmission}>Download submission package</button>
           </div>

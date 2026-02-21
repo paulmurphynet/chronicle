@@ -37,6 +37,7 @@ from chronicle.core.errors import (
     ChronicleUserError,
 )
 from chronicle.core.identity import get_effective_actor_from_request
+from chronicle.core.logging import configure_chronicle_logging, log_event
 from chronicle.core.validation import MAX_EVIDENCE_BYTES, MAX_IMPORT_BYTES, MAX_LIST_LIMIT
 from chronicle.scorer_contract import run_scorer_contract
 from chronicle.store import export_import as export_import_mod
@@ -47,6 +48,7 @@ from chronicle.store.session import ChronicleSession
 # Project path from env; None if not set
 PROJECT_PATH_ENV = "CHRONICLE_PROJECT_PATH"
 REQUEST_ID_HEADER = "X-Request-Id"
+configure_chronicle_logging()
 log = logging.getLogger("chronicle.api")
 
 
@@ -236,33 +238,30 @@ async def request_context_and_logging(
         response = await call_next(request)
     except Exception:
         elapsed_ms = round((time.perf_counter() - started) * 1000.0, 2)
-        log.exception(
-            json.dumps(
-                {
-                    "event": "request_failed",
-                    "request_id": _request_id_for(request),
-                    "method": request.method,
-                    "path": request.url.path,
-                    "client_ip": request.client.host if request.client else None,
-                    "duration_ms": elapsed_ms,
-                }
-            )
+        log_event(
+            log,
+            logging.ERROR,
+            "request_failed",
+            request_id=_request_id_for(request),
+            method=request.method,
+            path=request.url.path,
+            client_ip=request.client.host if request.client else None,
+            duration_ms=elapsed_ms,
+            exc_info=True,
         )
         raise
     elapsed_ms = round((time.perf_counter() - started) * 1000.0, 2)
     response.headers[REQUEST_ID_HEADER] = _request_id_for(request)
-    log.info(
-        json.dumps(
-            {
-                "event": "request_completed",
-                "request_id": _request_id_for(request),
-                "method": request.method,
-                "path": request.url.path,
-                "status_code": response.status_code,
-                "client_ip": request.client.host if request.client else None,
-                "duration_ms": elapsed_ms,
-            }
-        )
+    log_event(
+        log,
+        logging.INFO,
+        "request_completed",
+        request_id=_request_id_for(request),
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        client_ip=request.client.host if request.client else None,
+        duration_ms=elapsed_ms,
     )
     return response
 
@@ -300,8 +299,14 @@ def handle_http_error(request: Request, exc: HTTPException) -> JSONResponse:
 @app.exception_handler(Exception)
 def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
     """Return a generic 500 with request_id while logging traceback server-side."""
-    log.exception(
-        "Unhandled Chronicle API exception request_id=%s", _request_id_for(request), exc_info=exc
+    log_event(
+        log,
+        logging.ERROR,
+        "unhandled_api_exception",
+        request_id=_request_id_for(request),
+        path=request.url.path,
+        method=request.method,
+        exc_info=exc,
     )
     return JSONResponse(status_code=500, content=_error_content(request, "Internal server error"))
 
