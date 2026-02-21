@@ -77,8 +77,7 @@ def _build_archive_file_index(zf: zipfile.ZipFile) -> dict[str, zipfile.ZipInfo]
     infos = zf.infolist()
     if len(infos) > MAX_IMPORT_ARCHIVE_ENTRIES:
         raise ValueError(
-            "archive has too many entries "
-            f"({len(infos)} > {MAX_IMPORT_ARCHIVE_ENTRIES})"
+            f"archive has too many entries ({len(infos)} > {MAX_IMPORT_ARCHIVE_ENTRIES})"
         )
     total_uncompressed = 0
     unexpected_entries: list[str] = []
@@ -124,9 +123,7 @@ def _stream_sha256_zip_member(zf: zipfile.ZipFile, info: zipfile.ZipInfo) -> str
                 break
             read_bytes += len(chunk)
             if read_bytes > MAX_IMPORT_ARCHIVE_MEMBER_BYTES:
-                raise ValueError(
-                    f"archive member exceeds max uncompressed size ({info.filename})"
-                )
+                raise ValueError(f"archive member exceeds max uncompressed size ({info.filename})")
             h.update(chunk)
     return h.hexdigest()
 

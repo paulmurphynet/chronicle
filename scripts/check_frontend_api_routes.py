@@ -8,7 +8,8 @@ import importlib.util
 import tempfile
 from pathlib import Path
 
-TARGET = Path("frontend/src/lib/generated/routes.ts")
+REPO_ROOT = Path(__file__).resolve().parent.parent
+TARGET = REPO_ROOT / "frontend/src/lib/generated/routes.ts"
 
 _GENERATOR_PATH = Path(__file__).resolve().parent / "generate_frontend_api_routes.py"
 _SPEC = importlib.util.spec_from_file_location("generate_frontend_api_routes", _GENERATOR_PATH)
@@ -30,7 +31,7 @@ def main() -> int:
         expected = tmp_out.read_text(encoding="utf-8")
 
     if not TARGET.exists():
-        print(f"Missing generated file: {TARGET}")
+        print(f"Missing generated file: {TARGET.relative_to(REPO_ROOT)}")
         return 1
     actual = TARGET.read_text(encoding="utf-8")
     if actual == expected:

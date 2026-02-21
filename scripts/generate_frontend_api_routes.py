@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
 
 def _ts_key(operation_id: str) -> str:
     # Keep generator stable and readable in TS object keys.
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("frontend/src/lib/generated/routes.ts"),
+        default=REPO_ROOT / "frontend/src/lib/generated/routes.ts",
         help="Output TypeScript file",
     )
     args = parser.parse_args()
