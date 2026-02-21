@@ -8,7 +8,7 @@ Machine-readable source of truth:
 
 ## Current citation
 
-Current revision: **v0.3** (published 2026-02-20)
+Current revision: v0.3 (published 2026-02-20)
 
 APA-style:
 

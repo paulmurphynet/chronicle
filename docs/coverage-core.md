@@ -1,10 +1,10 @@
 # Core test coverage
 
-Coverage is measured over the **chronicle** package with certain paths omitted (API, Neo4j, integrations, optional tools). See `pyproject.toml` → `[tool.coverage.run]` for `omit`.
+Coverage is measured over the chronicle package with certain paths omitted (API, Neo4j, integrations, optional tools). See `pyproject.toml` → `[tool.coverage.run]` for `omit`.
 
-**Target:** 75% statement coverage for the included (core) code. We raise `fail_under` as coverage improves so CI keeps the bar meaningful. Getting back to 75% is advisable; phased action items are in [to_do](to_do.md).
+Target: 75% statement coverage for the included (core) code. We raise `fail_under` as coverage improves so CI keeps the bar meaningful. Getting back to 75% is advisable; phased action items are in [to_do](to_do.md).
 
-**Current:** `fail_under` is set to 60%. CI runs `pytest tests/ ... --cov-fail-under=60` and uploads coverage artifacts (htmlcov/, coverage.xml). We raise the value as the test suite grows (target 75%). The suite focuses on session flow (including multi-evidence and eval-contract metrics), standalone scorer, verifier, attestation, identity, and CLI actor.
+Current: `fail_under` is set to 60%. CI runs `pytest tests/ ... --cov-fail-under=60` and uploads coverage artifacts (htmlcov/, coverage.xml). We raise the value as the test suite grows (target 75%). The suite focuses on session flow (including multi-evidence and eval-contract metrics), standalone scorer, verifier, attestation, identity, and CLI actor.
 
 **Running coverage:**
 
@@ -21,7 +21,7 @@ pytest tests/ --cov=chronicle --cov-report=term-missing --cov-fail-under=60
 
 ## What is omitted and why
 
-The following paths are excluded from coverage so that the **core** defensibility path (event store, read model, session, commands, scorer, verifier) is what we measure. Optional or integration-heavy code is omitted; cover it with integration or optional test runs when needed.
+The following paths are excluded from coverage so that the core defensibility path (event store, read model, session, commands, scorer, verifier) is what we measure. Optional or integration-heavy code is omitted; cover it with integration or optional test runs when needed.
 
 | Omitted path | Reason |
 |--------------|--------|

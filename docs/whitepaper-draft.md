@@ -1,7 +1,7 @@
 # Chronicle Standards Whitepaper (Working Draft)
 
-Status: **working draft (v0.3)**  
-Last updated: **2026-02-20**  
+Status: working draft (v0.3)  
+Last updated: 2026-02-20  
 Citation and revision metadata: [Whitepaper citation and publication metadata](whitepaper-citation.md)
 
 ## Title
@@ -98,7 +98,7 @@ PYTHONPATH=. python3 scripts/whitepaper/build_evidence_pack.py \
   --output-dir whitepaper_evidence_runs/v0_3_example
 ```
 
-Observed output from a local run on **2026-02-20**:
+Observed output from a local run on 2026-02-20:
 
 1. Manifest summary: 2 components requested, 2 passed, 0 failed
 2. Standards component summary:

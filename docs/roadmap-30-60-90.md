@@ -2,7 +2,7 @@
 
 This roadmap translates Chronicle's north star into near-term execution for an open-source release.
 
-Start date: **February 19, 2026**
+Start date: February 19, 2026
 
 ## Outcome we optimize for
 
@@ -10,7 +10,7 @@ Improve practical trust signals for AI-generated claims by reducing unsupported 
 
 ## North-star metric (operational)
 
-Primary KPI: **effective unsupported rate** from benchmark runs.
+Primary KPI: effective unsupported rate from benchmark runs.
 
 Definition and command workflow: [Trust metrics](trust-metrics.md).
 

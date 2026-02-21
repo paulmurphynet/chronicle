@@ -1,6 +1,6 @@
 # Chronicle user manual
 
-Short how-to and reference manual. Each chapter links to the main topic-based docs for full detail. **On GitHub:** use the table below; each chapter has **← Previous | Index | Next →** at the bottom.
+Short how-to and reference manual. Each chapter links to the main topic-based docs for full detail. On GitHub: use the table below; each chapter has ← Previous | Index | Next → at the bottom.
 
 ---
 
@@ -19,6 +19,6 @@ Short how-to and reference manual. Each chapter links to the main topic-based do
 
 ## Where to go for more
 
-- **Quick start:** [Getting started](../getting-started.md).
-- **Integration one-pager:** [Integration quick reference](../integration-quick-reference.md).
-- **Full doc index:** [Docs README](../README.md) and main [README — Docs](../../README.md#docs).
+- Quick start: [Getting started](../getting-started.md).
+- Integration one-pager: [Integration quick reference](../integration-quick-reference.md).
+- Full doc index: [Docs README](../README.md) and main [README — Docs](../../README.md#docs).

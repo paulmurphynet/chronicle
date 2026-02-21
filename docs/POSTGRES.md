@@ -1,6 +1,6 @@
 # PostgreSQL backend (convergence track)
 
-Chronicle includes a PostgreSQL **event-store** implementation today and is actively converging toward broader backend parity.
+Chronicle includes a PostgreSQL event-store implementation today and is actively converging toward broader backend parity.
 
 Current scope:
 

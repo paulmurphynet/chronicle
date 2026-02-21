@@ -6,7 +6,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## `chronicle: command not found` or `chronicle-verify: command not found`
 
-**Cause:** The project isn’t installed in the current environment, or the virtual environment isn’t activated.
+Cause: The project isn’t installed in the current environment, or the virtual environment isn’t activated.
 
 **Fix:**
 
@@ -30,7 +30,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## `make: command not found` or `make check` fails immediately
 
-**Cause:** `make` is not installed, or the venv tool paths in the `Makefile` do not exist yet.
+Cause: `make` is not installed, or the venv tool paths in the `Makefile` do not exist yet.
 
 **Fix:**
 
@@ -53,7 +53,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## No network / DNS issues during development
 
-**Cause:** Local environment cannot resolve hosts or reach package registries.
+Cause: Local environment cannot resolve hosts or reach package registries.
 
 **Fix:**
 
@@ -68,7 +68,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## `NEO4J_URI is not set`
 
-**Cause:** You’re running `chronicle neo4j-sync` but Neo4j credentials aren’t in the environment.
+Cause: You’re running `chronicle neo4j-sync` but Neo4j credentials aren’t in the environment.
 
 **Fix:**
 
@@ -77,13 +77,13 @@ Common issues when running Chronicle for the first time or in a new environment.
   - `NEO4J_PASSWORD`
   - Optionally `NEO4J_USER` (default `neo4j`)
 - Or export them in the shell before running: `export NEO4J_URI=... NEO4J_PASSWORD=...`
-- Use **no spaces around `=`** in `.env`; quote values that contain `#` or spaces.
+- Use no spaces around `=` in `.env`; quote values that contain `#` or spaces.
 
 ---
 
 ## Scorer: invalid JSON or "missing query/answer/evidence"
 
-**Cause:** The scorer expects a single JSON object on stdin with `query`, `answer`, and `evidence` (array of strings or objects with `text`).
+Cause: The scorer expects a single JSON object on stdin with `query`, `answer`, and `evidence` (array of strings or objects with `text`).
 
 **Fix:**
 
@@ -98,7 +98,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## Verifier: "Not a .chronicle" or "missing manifest.json"
 
-**Cause:** The file isn’t a valid .chronicle (ZIP with `manifest.json` and `chronicle.db` inside).
+Cause: The file isn’t a valid .chronicle (ZIP with `manifest.json` and `chronicle.db` inside).
 
 **Fix:**
 
@@ -108,7 +108,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## API import fails with "verification failed"
 
-**Cause:** `POST /import` now verifies the `.chronicle` archive before merge. Invalid manifest/schema, missing DB, or evidence hash mismatches are rejected.
+Cause: `POST /import` now verifies the `.chronicle` archive before merge. Invalid manifest/schema, missing DB, or evidence hash mismatches are rejected.
 
 **Fix:**
 
@@ -120,7 +120,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## API returns 413 on evidence or import upload
 
-**Cause:** Upload exceeds configured size limits.
+Cause: Upload exceeds configured size limits.
 
 **Fix:**
 
@@ -133,7 +133,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## Postgres bootstrap: "docker: command not found" or Docker daemon unavailable
 
-**Cause:** Local Postgres bootstrap (`make postgres-up`) depends on Docker + `docker compose`.
+Cause: Local Postgres bootstrap (`make postgres-up`) depends on Docker + `docker compose`.
 
 **Fix:**
 
@@ -147,7 +147,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## `ModuleNotFoundError: No module named 'chronicle'` when running a script
 
-**Cause:** The script imports `chronicle` or `tools` but the repo root isn’t on `PYTHONPATH`.
+Cause: The script imports `chronicle` or `tools` but the repo root isn’t on `PYTHONPATH`.
 
 **Fix:**
 
@@ -161,7 +161,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## CLI shows "Error: ..." and exits with code 1
 
-**Cause:** The command hit a user-fixable condition (e.g. not a Chronicle project, investigation not found, validation failure). The CLI prints the message and exits 1 without a traceback.
+Cause: The command hit a user-fixable condition (e.g. not a Chronicle project, investigation not found, validation failure). The CLI prints the message and exits 1 without a traceback.
 
 **Fix:**
 
@@ -171,7 +171,7 @@ Common issues when running Chronicle for the first time or in a new environment.
 
 ## Python version errors
 
-**Cause:** Chronicle requires Python 3.11+.
+Cause: Chronicle requires Python 3.11+.
 
 **Fix:**
 

@@ -1,12 +1,12 @@
 # Using Ollama locally for Chronicle (free AI)
 
-Chronicle’s LLM-backed tools (tension suggestion, claim decomposition, type/scope inference) can use **Ollama** with no API key. Your local `qwen2.5:7b` (or any Ollama model) is enough.
+Chronicle’s LLM-backed tools (tension suggestion, claim decomposition, type/scope inference) can use Ollama with no API key. Your local `qwen2.5:7b` (or any Ollama model) is enough.
 
 ---
 
 ## 1. Enable the LLM and point at Ollama
 
-Defaults are already set for Ollama; you only need to turn the LLM **on**:
+Defaults are already set for Ollama; you only need to turn the LLM on:
 
 ```bash
 export CHRONICLE_LLM_ENABLED=1
@@ -62,5 +62,5 @@ See `scripts/suggest_tensions_with_llm.py --help` for all options. For very larg
 
 ## 4. Summary
 
-- **Yes, you can use Ollama to do this work for free:** set `CHRONICLE_LLM_ENABLED=1`, leave provider/model at defaults (or set `CHRONICLE_LLM_MODEL=qwen2.5:7b`), and run the scripts or session commands that use the LLM.
+- Yes, you can use Ollama to do this work for free: set `CHRONICLE_LLM_ENABLED=1`, leave provider/model at defaults (or set `CHRONICLE_LLM_MODEL=qwen2.5:7b`), and run the scripts or session commands that use the LLM.
 - No API key required for Ollama; ensure `ollama serve` is running and the model is pulled (e.g. `ollama run qwen2.5:7b` once).

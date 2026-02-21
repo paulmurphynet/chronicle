@@ -1,15 +1,15 @@
 # Chronicle lessons
 
-Step-by-step annotated lessons that walk through **every important area of the Chronicle codebase**. Designed for new and junior engineers: each lesson references real source code in this repo so you can read the code as you go.
+Step-by-step annotated lessons that walk through every important area of the Chronicle codebase. Designed for new and junior engineers: each lesson references real source code in this repo so you can read the code as you go.
 
 ## How to use these lessons
 
-1. **Work in order.** Lessons build on each other. Start with [Lesson 00: How to use these lessons](00-how-to-use-these-lessons.md), then follow the numbered sequence.
-2. **Open the code.** Every lesson points to real files and (where useful) line ranges. Open those files in your editor and read along.
-3. **Run the code when possible.** Many lessons suggest commands to run (e.g. the scorer, the verifier). Run them so the behavior is concrete.
-4. **Take the quiz.** After each lesson, do the matching quiz in [quizzes/](quizzes/). Quizzes check understanding and point you back to the code if something was missed.
+1. Work in order. Lessons build on each other. Start with [Lesson 00: How to use these lessons](00-how-to-use-these-lessons.md), then follow the numbered sequence.
+2. Open the code. Every lesson points to real files and (where useful) line ranges. Open those files in your editor and read along.
+3. Run the code when possible. Many lessons suggest commands to run (e.g. the scorer, the verifier). Run them so the behavior is concrete.
+4. Take the quiz. After each lesson, do the matching quiz in [quizzes/](quizzes/). Quizzes check understanding and point you back to the code if something was missed.
 
-**On GitHub:** Use the learning path table above. At the bottom of each lesson you'll see **← Previous | Index | Next →** so you can move without returning to this README.
+On GitHub: Use the learning path table above. At the bottom of each lesson you'll see ← Previous | Index | Next → so you can move without returning to this README.
 
 ## Learning path (lesson order)
 
@@ -30,7 +30,7 @@ Step-by-step annotated lessons that walk through **every important area of the C
 | [12](12-chronicle-file-format-and-schema.md) | The .chronicle file format and data schema | ZIP layout, manifest, chronicle.db (events + read model), evidence/; full schema reference |
 | [13](13-release-readiness-security-and-standards.md) | Release readiness, security gates, and standards operations | `Makefile`, CI/release workflows, security gates, branch protection rollout, standards review cycle |
 
-The full path from 00 to 13 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, interop/API/tests, the **complete .chronicle file format and data schema** (manifest, DB tables, evidence layout), and release readiness (security/CI/standards operations).
+The full path from 00 to 13 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, interop/API/tests, the complete .chronicle file format and data schema (manifest, DB tables, evidence layout), and release readiness (security/CI/standards operations).
 
 ## Lesson format
 
@@ -45,9 +45,9 @@ Each lesson includes:
 
 ## Recommended study tracks
 
-- **Fast onboarding (2-3 hours):** 01, 02, 03, 05, 11, 12
-- **Integrator path (API + adapters):** 01, 02, 05, 07, 10, 11, 13
-- **Trust and release path (maintainers):** 03, 06, 10, 11, 12, 13
+- Fast onboarding (2-3 hours): 01, 02, 03, 05, 11, 12
+- Integrator path (API + adapters): 01, 02, 05, 07, 10, 11, 13
+- Trust and release path (maintainers): 03, 06, 10, 11, 12, 13
 
 If you are new to Chronicle, still start with 00 and 01 before choosing a track.
 
@@ -68,8 +68,8 @@ For more, see [Epistemology scope](../docs/epistemology-scope.md), the [Technica
 
 ## For maintainers
 
-- **Lessons must be kept up to date with all functionality of the app.** When you add or change features, update the relevant lesson(s) and this README. Include "Update lessons for X" in [To-do](../docs/to_do.md) when a change affects the walkthrough.
+- Lessons must be kept up to date with all functionality of the app. When you add or change features, update the relevant lesson(s) and this README. Include "Update lessons for X" in [To-do](../docs/to_do.md) when a change affects the walkthrough.
 - Add new lessons in number order; update this README and the learning path table.
-- Keep **Key files** and code references accurate when refactoring.
+- Keep Key files and code references accurate when refactoring.
 - Each lesson should have a corresponding quiz in `lessons/quizzes/` (e.g. `quiz-01-codebase-map.md`).
-- Keep the **← Previous | Index | Next →** navigation at the bottom of each lesson correct when reordering or adding lessons.
+- Keep the ← Previous | Index | Next → navigation at the bottom of each lesson correct when reordering or adding lessons.

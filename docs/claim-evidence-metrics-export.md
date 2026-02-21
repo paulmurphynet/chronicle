@@ -1,8 +1,8 @@
 # Claim–evidence–metrics export (for fact-checking UIs and dashboards)
 
-This doc defines a **stable JSON shape** for “one claim + evidence references + support/challenge counts + defensibility metrics” so fact-checking UIs, dashboards, or pipelines can ingest Chronicle data without depending on the full .chronicle or generic export layout.
+This doc defines a stable JSON shape for “one claim + evidence references + support/challenge counts + defensibility metrics” so fact-checking UIs, dashboards, or pipelines can ingest Chronicle data without depending on the full .chronicle or generic export layout.
 
-**Related:** [Generic export](GENERIC_EXPORT.md) (full investigation JSON/CSV), [Defensibility metrics schema](defensibility-metrics-schema.md) (field semantics), [Eval contract](eval_contract.md) (scorer I/O).
+Related: [Generic export](GENERIC_EXPORT.md) (full investigation JSON/CSV), [Defensibility metrics schema](defensibility-metrics-schema.md) (field semantics), [Eval contract](eval_contract.md) (scorer I/O).
 
 ---
 
@@ -12,13 +12,13 @@ This doc defines a **stable JSON shape** for “one claim + evidence references 
 - **Dashboards** — Per-claim rows with evidence counts and provenance_quality.
 - **Pipelines** — Ingest “claim + evidence refs + metrics” from Chronicle (or from an adapter that emits this shape).
 
-Consumers can treat this as the **canonical slice** for “one claim and its defensibility context.”
+Consumers can treat this as the canonical slice for “one claim and its defensibility context.”
 
 ---
 
 ## 2. Per-claim export shape (stable)
 
-Each item in the export is one claim with evidence references and defensibility. Schema version: **1**.
+Each item in the export is one claim with evidence references and defensibility. Schema version: 1.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -30,7 +30,7 @@ Each item in the export is one claim with evidence references and defensibility.
 | `challenge_count` | int | Number of challenge links. |
 | `defensibility` | object | Defensibility scorecard (see [Defensibility metrics schema](defensibility-metrics-schema.md)). At least: `provenance_quality`, `corroboration`, `contradiction_status`. May include `link_assurance_level` and `link_assurance_caveat` to contextualize link provenance, and `sources_backing_claim` (sources backing the claim with optional `independence_notes`, `reliability_notes`). |
 
-**evidence_refs** entry:
+evidence_refs entry:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -73,12 +73,12 @@ A full export for one investigation can be a single JSON object:
 }
 ```
 
-This is a **thin wrapper**: you build it from the same data as [generic export](GENERIC_EXPORT.md) plus evidence_link and `get_defensibility_score`. Use the helper **`build_claim_evidence_metrics_export`** in `chronicle.store.commands.generic_export`: pass the read model, a callable that returns a defensibility scorecard for a claim (e.g. session’s `get_defensibility_score`), and the investigation UID; it returns the JSON object above.
+This is a thin wrapper: you build it from the same data as [generic export](GENERIC_EXPORT.md) plus evidence_link and `get_defensibility_score`. Use the helper `build_claim_evidence_metrics_export` in `chronicle.store.commands.generic_export`: pass the read model, a callable that returns a defensibility scorecard for a claim (e.g. session’s `get_defensibility_score`), and the investigation UID; it returns the JSON object above.
 
 ---
 
 ## 4. Consumers can ingest this
 
-- **Fact-checking UIs:** Use `claim_uid`, `claim_text`, `evidence_refs`, and `defensibility.provenance_quality` (and optionally `defensibility.contradiction_status`) to render a card or row. Resolve evidence content from the project or .chronicle by `uri` / `evidence_uid`.
-- **Dashboards:** Aggregate by `provenance_quality`, `support_count`, `challenge_count`; filter by `investigation_uid`.
-- **Adapters out:** Any adapter that exports “Chronicle → fact-checking format” should emit at least claim + evidence refs + support/challenge counts + defensibility; this doc is the reference shape.
+- Fact-checking UIs: Use `claim_uid`, `claim_text`, `evidence_refs`, and `defensibility.provenance_quality` (and optionally `defensibility.contradiction_status`) to render a card or row. Resolve evidence content from the project or .chronicle by `uri` / `evidence_uid`.
+- Dashboards: Aggregate by `provenance_quality`, `support_count`, `challenge_count`; filter by `investigation_uid`.
+- Adapters out: Any adapter that exports “Chronicle → fact-checking format” should emit at least claim + evidence refs + support/challenge counts + defensibility; this doc is the reference shape.

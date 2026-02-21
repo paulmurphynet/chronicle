@@ -1,6 +1,6 @@
 # Consuming a .chronicle file without the Chronicle Python package
 
-This doc describes how to **read** a `.chronicle` file (ZIP) and extract investigations, claims, evidence, and links **without** installing the Chronicle Python package. Use this when you're building a downstream tool (e.g. fact-checking UI, dashboard, or converter) that only needs to consume the data.
+This doc describes how to read a `.chronicle` file (ZIP) and extract investigations, claims, evidence, and links without installing the Chronicle Python package. Use this when you're building a downstream tool (e.g. fact-checking UI, dashboard, or converter) that only needs to consume the data.
 
 ---
 
@@ -10,9 +10,9 @@ A `.chronicle` file is a ZIP containing:
 
 | Entry | Description |
 |-------|-------------|
-| **manifest.json** | JSON: `format_version`, `investigation_uid`, `title`, `exported_at`, optional `content_hash_manifest` (evidence_uid → SHA-256 hex). |
-| **chronicle.db** | SQLite 3 database: event log + read model tables. |
-| **evidence/** | Directory of files; each file is one evidence item’s raw content. Path = `evidence_item.uri` in the DB. |
+| manifest.json | JSON: `format_version`, `investigation_uid`, `title`, `exported_at`, optional `content_hash_manifest` (evidence_uid → SHA-256 hex). |
+| chronicle.db | SQLite 3 database: event log + read model tables. |
+| evidence/ | Directory of files; each file is one evidence item’s raw content. Path = `evidence_item.uri` in the DB. |
 
 See [Chronicle file format](chronicle-file-format.md) for the full layout and semantics.
 
@@ -58,7 +58,7 @@ Table and column names follow the Chronicle read model. Key tables:
 - **claim** — `claim_uid` (PK), `investigation_uid`, `claim_text`, `current_status`, `claim_type`, `decomposition_status`, `temporal_json`, etc.
 - **evidence_item** — `evidence_uid` (PK), `investigation_uid`, `uri`, `content_hash`, `media_type`, etc.
 - **evidence_span** — `span_uid` (PK), `evidence_uid`, `anchor_type`, `anchor_start`, `anchor_end`, `quote`, etc.
-- **evidence_link** — `link_uid` (PK), `span_uid`, `claim_uid`, `link_type` (SUPPORT | CHALLENGE), optional `strength`, optional `rationale` (warrant: why this evidence supports/challenges this claim). Check for **evidence_link_retraction** table: if a link_uid appears there, treat as retracted.
+- **evidence_link** — `link_uid` (PK), `span_uid`, `claim_uid`, `link_type` (SUPPORT | CHALLENGE), optional `strength`, optional `rationale` (warrant: why this evidence supports/challenges this claim). Check for evidence_link_retraction table: if a link_uid appears there, treat as retracted.
 - **tension** — `tension_uid` (PK), `claim_a_uid`, `claim_b_uid`, `status` (OPEN, ACK, RESOLVED), `tension_kind`, `notes`.
 
 For full schema (column list and types), inspect the DB with `sqlite3 chronicle.db ".schema"` after extracting, or see the Chronicle source: `chronicle/store/schema.py` (read model section).
@@ -68,10 +68,10 @@ For full schema (column list and types), inspect the DB with `sqlite3 chronicle.
 ## 5. Integrity (optional)
 
 - **Manifest** — `content_hash_manifest` maps evidence_uid to SHA-256 (hex) of the file at `evidence_item.uri`. After reading each evidence file from the ZIP, hash the bytes and compare to the manifest (or to `evidence_item.content_hash` in the DB).
-- **Verifier** — To validate the whole package (manifest, DB schema, evidence hashes, append-only ledger), use the official verifier: `chronicle-verify path/to/file.chronicle`. See [Verifier](verifier.md). This doc is for **consuming** the content; verification is a separate step.
+- **Verifier** — To validate the whole package (manifest, DB schema, evidence hashes, append-only ledger), use the official verifier: `chronicle-verify path/to/file.chronicle`. See [Verifier](verifier.md). This doc is for consuming the content; verification is a separate step.
 
 ---
 
 ## 6. Summary
 
-You can consume a .chronicle with any stack: open the ZIP, read **manifest.json**, open **chronicle.db** with SQLite, query the read model tables, and read evidence files from the ZIP by **uri**. No Chronicle Python package required. For full format and schema details, see [Chronicle file format](chronicle-file-format.md).
+You can consume a .chronicle with any stack: open the ZIP, read manifest.json, open chronicle.db with SQLite, query the read model tables, and read evidence files from the ZIP by uri. No Chronicle Python package required. For full format and schema details, see [Chronicle file format](chronicle-file-format.md).

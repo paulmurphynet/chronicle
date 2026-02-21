@@ -1,21 +1,21 @@
 # Quizzes
 
-Quizzes for the [Chronicle lessons](../README.md). Do the quiz for a lesson **after** reading that lesson and (when suggested) running the code.
+Quizzes for the [Chronicle lessons](../README.md). Do the quiz for a lesson after reading that lesson and (when suggested) running the code.
 
 ## How quizzes work
 
 - Each quiz is a Markdown file: `quiz-NN-topic.md`.
 - Questions can be short-answer, multiple choice, or “where in the code…”.
-- Answers are provided in an **Answer key** section at the bottom of each quiz (or in a separate `quiz-NN-topic-answers.md` if you prefer to test without spoilers).
+- Answers are provided in an Answer key section at the bottom of each quiz (or in a separate `quiz-NN-topic-answers.md` if you prefer to test without spoilers).
 - If you get something wrong, re-read the relevant part of the lesson and the referenced code.
 
 ## Self-grading rubric
 
 Use this quick rubric after each quiz:
 
-- **90-100%:** You can explain behavior and find the implementation quickly.
-- **70-89%:** You understand the flow but should re-open one or two key files.
-- **Below 70%:** Re-read the lesson and run its “Try it” steps before continuing.
+- 90-100%: You can explain behavior and find the implementation quickly.
+- 70-89%: You understand the flow but should re-open one or two key files.
+- Below 70%: Re-read the lesson and run its “Try it” steps before continuing.
 
 For stronger retention, answer first in your own notes, then compare with the key.
 

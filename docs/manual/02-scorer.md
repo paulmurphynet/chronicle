@@ -1,6 +1,6 @@
 # Chapter 02: Scorer
 
-**Contents:** Score one (query, answer, evidence) run; eval contract; stdin and CLI.
+Contents: Score one (query, answer, evidence) run; eval contract; stdin and CLI.
 
 ---
 
@@ -17,10 +17,10 @@ echo '{"query": "What was revenue?", "answer": "Revenue was $1.2M.", "evidence":
 
 ## Contract and schema
 
-- **Input:** `query` (string), `answer` (string), `evidence` (array of strings or objects with `text`/`path`/`url`).
-- **Output:** `contract_version`, `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, and more. See [Eval contract](../eval_contract.md) and [Defensibility metrics schema](../defensibility-metrics-schema.md).
+- Input: `query` (string), `answer` (string), `evidence` (array of strings or objects with `text`/`path`/`url`).
+- Output: `contract_version`, `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, and more. See [Eval contract](../eval_contract.md) and [Defensibility metrics schema](../defensibility-metrics-schema.md).
 
-**Important:** The default scorer links *every* evidence chunk as support for the single claim. It does *not* validate that evidence actually supports the claim. For higher assurance (e.g. human-curated or NLI-validated links), record links via the session or API after validation; see the caveat in [Eval contract](../eval_contract.md).
+Important: The default scorer links *every* evidence chunk as support for the single claim. It does *not* validate that evidence actually supports the claim. For higher assurance (e.g. human-curated or NLI-validated links), record links via the session or API after validation; see the caveat in [Eval contract](../eval_contract.md).
 
 ---
 
@@ -30,4 +30,4 @@ You can pass `--query`, `--answer`, and `--evidence` instead of stdin. See [Eval
 
 ---
 
-**← Previous:** [01 — Install](01-install.md) | **Index:** [Manual](README.md) | **Next →:** [03 — Verifier](03-verifier.md)
+← Previous: [01 — Install](01-install.md) | Index: [Manual](README.md) | Next →: [03 — Verifier](03-verifier.md)

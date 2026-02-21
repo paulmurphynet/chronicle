@@ -1,6 +1,6 @@
 # Chronicle standards profile
 
-Last updated: **2026-02-20**
+Last updated: 2026-02-20
 
 This document defines Chronicle's standards posture so integrations remain compatible with existing ecosystems while Chronicle's own model matures.
 
@@ -8,11 +8,11 @@ This document defines Chronicle's standards posture so integrations remain compa
 
 Chronicle adopts a layered standards strategy:
 
-1. **Semantic interoperability baseline:** JSON-LD 1.1 + PROV family (PROV-O / PROV-DM concepts)
-2. **Cryptographic provenance compatibility (media/content):** C2PA
-3. **Cryptographic attestation compatibility (identity/claims):** W3C VC Data Model 2.0 + VC Data Integrity 1.0 (DID Core optional by deployment)
-4. **Research/data-packaging interoperability:** RO-Crate 1.2 profile
-5. **Fact-checking ecosystem compatibility:** schema.org ClaimReview mapping
+1. Semantic interoperability baseline: JSON-LD 1.1 + PROV family (PROV-O / PROV-DM concepts)
+2. Cryptographic provenance compatibility (media/content): C2PA
+3. Cryptographic attestation compatibility (identity/claims): W3C VC Data Model 2.0 + VC Data Integrity 1.0 (DID Core optional by deployment)
+4. Research/data-packaging interoperability: RO-Crate 1.2 profile
+5. Fact-checking ecosystem compatibility: schema.org ClaimReview mapping
 
 Chronicle remains the canonical internal model and storage format (`.chronicle`, event/read model, verifier). Standards mappings are interoperability profiles, not replacements for core data structures.
 
@@ -27,23 +27,23 @@ Chronicle remains the canonical internal model and storage format (`.chronicle`,
 
 ### Tier 1: required interoperability targets
 
-- **JSON-LD export profile** for investigations, claims, evidence, links, tensions, and source relations.
-- **PROV-compatible representation** of Chronicle provenance concepts:
+- JSON-LD export profile for investigations, claims, evidence, links, tensions, and source relations.
+- PROV-compatible representation of Chronicle provenance concepts:
   - Evidence as entities
   - Sources/actors as agents
   - Ingest/link/assert actions as activities or qualified relations
   - Claim evidence relationships modeled with explicit relation typing
-- **Versioned context policy** for JSON-LD so clients can pin behavior.
+- Versioned context policy for JSON-LD so clients can pin behavior.
 
 ### Tier 2: required compatibility adapters
 
-- **C2PA adapter path** for recording and exporting C2PA assertion references now; verification integration path staged as optional capability.
-- **VC/Data Integrity adapter path** for attestations over Chronicle artifacts/claims/checkpoints.
-- **ClaimReview export profile** for fact-checking distribution compatibility.
+- C2PA adapter path for recording and exporting C2PA assertion references now; verification integration path staged as optional capability.
+- VC/Data Integrity adapter path for attestations over Chronicle artifacts/claims/checkpoints.
+- ClaimReview export profile for fact-checking distribution compatibility.
 
 ### Tier 3: planned packaging and ecosystem profiles
 
-- **RO-Crate export profile** for investigation package interchange.
+- RO-Crate export profile for investigation package interchange.
 - Clear mapping guidance for adjacent ecosystems (OpenLineage, in-toto, SLSA) as complementary, non-replacing layers.
 
 ## Chronicle-to-standards mapping (initial model)
@@ -64,9 +64,9 @@ Chronicle-specific fields that have no direct PROV term stay namespaced under th
 
 ## Non-goals and boundaries
 
-- Chronicle does **not** claim that PROV semantics alone prove authenticity.
-- Chronicle does **not** claim C2PA/VC verification unless verification has actually been executed and recorded.
-- Chronicle does **not** replace data pipeline lineage systems (OpenLineage) or software supply-chain attestation systems (in-toto/SLSA).
+- Chronicle does not claim that PROV semantics alone prove authenticity.
+- Chronicle does not claim C2PA/VC verification unless verification has actually been executed and recorded.
+- Chronicle does not replace data pipeline lineage systems (OpenLineage) or software supply-chain attestation systems (in-toto/SLSA).
 
 ## Implementation and governance
 

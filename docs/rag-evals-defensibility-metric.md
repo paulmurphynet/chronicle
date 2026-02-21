@@ -1,19 +1,19 @@
 # RAG evals: Chronicle defensibility metric
 
-Use **Chronicle defensibility** in your RAG eval harness as a defensibility metric: one (query, answer, evidence) in → one defensibility score out. No API server required; pipe JSON to the scorer and read JSON back.
+Use Chronicle defensibility in your RAG eval harness as a defensibility metric: one (query, answer, evidence) in → one defensibility score out. No API server required; pipe JSON to the scorer and read JSON back.
 
-**Important:** The default scorer links every evidence chunk as support for the single claim and does **not** validate that evidence actually supports the answer. For higher assurance, validate or curate evidence–claim links (e.g. human or NLI) then record; see [Eval contract](eval_contract.md#important-what-the-default-scorer-does-and-does-not-do).
+Important: The default scorer links every evidence chunk as support for the single claim and does not validate that evidence actually supports the answer. For higher assurance, validate or curate evidence–claim links (e.g. human or NLI) then record; see [Eval contract](eval_contract.md#important-what-the-default-scorer-does-and-does-not-do).
 
 ---
 
 ## 1. Contract and schema
 
-- **Input:** One JSON object: `query` (string), `answer` (string), `evidence` (array of strings or objects with `text`/`path`/`url`). See [Eval contract](eval_contract.md).
-- **Output:** One JSON object: defensibility metrics (`contract_version`, `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, optional `knowability`) or an error object with `error` and `message`.
-- **Machine-readable:** [eval_contract_schema.json](eval_contract_schema.json) — validate input with `$defs/Input`, output with `$defs/OutputSuccess` or `$defs/OutputError`.
-- **Field semantics:** [Defensibility metrics schema](defensibility-metrics-schema.md).
+- Input: One JSON object: `query` (string), `answer` (string), `evidence` (array of strings or objects with `text`/`path`/`url`). See [Eval contract](eval_contract.md).
+- Output: One JSON object: defensibility metrics (`contract_version`, `claim_uid`, `provenance_quality`, `corroboration`, `contradiction_status`, optional `knowability`) or an error object with `error` and `message`.
+- Machine-readable: [eval_contract_schema.json](eval_contract_schema.json) — validate input with `$defs/Input`, output with `$defs/OutputSuccess` or `$defs/OutputError`.
+- Field semantics: [Defensibility metrics schema](defensibility-metrics-schema.md).
 
-**Contract version:** 1.0. Breaking changes will be rare and announced.
+Contract version: 1.0. Breaking changes will be rare and announced.
 
 ---
 
@@ -27,7 +27,7 @@ echo '{"query": "What was revenue?", "answer": "Revenue was $1.2M.", "evidence":
   | PYTHONPATH=. python3 scripts/standalone_defensibility_scorer.py
 ```
 
-**After install:** `pip install -e .` (or `chronicle-standard` when on PyPI). Then run the scorer script from the repo:
+After install: `pip install -e .` (or `chronicle-standard` when on PyPI). Then run the scorer script from the repo:
 
 ```bash
 echo '{"query": "...", "answer": "...", "evidence": ["..."]}' \
@@ -67,7 +67,7 @@ python3 scripts/standalone_defensibility_scorer.py \
 3. Parse the output: if `error` is present, treat as failed eval or invalid input; otherwise use `provenance_quality`, `corroboration`, `contradiction_status` as your defensibility metrics.
 4. Aggregate across runs (e.g. % strong, average support_count) as you do for other RAG metrics.
 
-**Adapter:** If your harness speaks a different format (e.g. a custom JSON per run), add a thin adapter that maps your format → contract input, runs the scorer, and maps output → your format. See [Integrating with Chronicle](integrating-with-chronicle.md) and [Eval and benchmarking](eval-and-benchmarking.md).
+Adapter: If your harness speaks a different format (e.g. a custom JSON per run), add a thin adapter that maps your format → contract input, runs the scorer, and maps output → your format. See [Integrating with Chronicle](integrating-with-chronicle.md) and [Eval and benchmarking](eval-and-benchmarking.md).
 
 ---
 
@@ -87,5 +87,5 @@ Use this page as the entry point for integrating Chronicle defensibility into RA
 When using the standalone scorer only (no session/API):
 
 - **All evidence is linked as support** — Every evidence chunk is recorded as supporting the single claim (the answer). This is a structural convention for evals, not a check that each chunk actually supports the answer. See [Evidence–claim linking](../critical_areas/04-evidence-claim-linking.md).
-- **No source registration** — Evidence is not linked to distinct sources, so `independent_sources_count` is typically **0** in the output. See [Defensibility metrics schema](defensibility-metrics-schema.md).
+- **No source registration** — Evidence is not linked to distinct sources, so `independent_sources_count` is typically 0 in the output. See [Defensibility metrics schema](defensibility-metrics-schema.md).
 - **URL evidence** — The scorer fetches `url` evidence with SSRF safeguards; failed or skipped URLs do not add a chunk (you still need at least one successful chunk).

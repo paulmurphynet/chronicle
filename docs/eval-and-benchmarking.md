@@ -1,14 +1,14 @@
 # Using Chronicle in RAG evaluation
 
-> **Purpose:** Explain how to use Chronicle as the **provenance backend** for RAG evaluation: run your pipeline with a Chronicle handler or writer, extract defensibility metrics for each answer, and compare runs or configs. No full benchmark required; this doc focuses on the pattern and interfaces.
+> Purpose: Explain how to use Chronicle as the provenance backend for RAG evaluation: run your pipeline with a Chronicle handler or writer, extract defensibility metrics for each answer, and compare runs or configs. No full benchmark required; this doc focuses on the pattern and interfaces.
 
-**Companion:** [Eval contract (input/output)](eval_contract.md), [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Trust metrics](trust-metrics.md), [Integrating with Chronicle](integrating-with-chronicle.md).
+Companion: [Eval contract (input/output)](eval_contract.md), [Defensibility metrics schema](defensibility-metrics-schema.md), [Benchmark](benchmark.md), [Trust metrics](trust-metrics.md), [Integrating with Chronicle](integrating-with-chronicle.md).
 
 ---
 
 ## 1. Why use Chronicle for RAG evals
 
-RAG evaluation often measures retrieval quality, answer correctness, or citation faithfulness. Chronicle adds **defensibility** as an additional metric: provenance quality, corroboration (support/challenge counts, independent sources), contradiction status, and optional knowability. For the minimal **input/output contract** (query, answer, evidence in; metrics or error out) that eval frameworks can depend on, see [Eval contract](eval_contract.md). By running your RAG pipeline with Chronicle attached, every answer becomes a **claim** linked to **evidence** in the ledger; you then read the **defensibility scorecard** for that claim and use it in your eval harness.
+RAG evaluation often measures retrieval quality, answer correctness, or citation faithfulness. Chronicle adds defensibility as an additional metric: provenance quality, corroboration (support/challenge counts, independent sources), contradiction status, and optional knowability. For the minimal input/output contract (query, answer, evidence in; metrics or error out) that eval frameworks can depend on, see [Eval contract](eval_contract.md). By running your RAG pipeline with Chronicle attached, every answer becomes a claim linked to evidence in the ledger; you then read the defensibility scorecard for that claim and use it in your eval harness.
 
 Benefits:
 
@@ -20,11 +20,11 @@ Benefits:
 
 ## 2. Run the pipeline with a Chronicle integration
 
-Attach a Chronicle **handler** or **writer** to your RAG pipeline so that retrieval and generation are recorded as evidence and claims.
+Attach a Chronicle handler or writer to your RAG pipeline so that retrieval and generation are recorded as evidence and claims.
 
 1. **Choose an integration** — Use the handler for your framework so that documents and the final answer are written to Chronicle:
-   - **LangChain, LlamaIndex, Haystack:** Demo scripts (e.g. `scripts/langchain_rag_chronicle.py`, `scripts/cross_framework_rag_chronicle.py`) and integration docs when present in the repo.
-   - **Custom:** Use the session API or HTTP API to create an investigation, ingest evidence, propose a claim, and link support/challenge. See [Integrating with Chronicle](integrating-with-chronicle.md).
+   - LangChain, LlamaIndex, Haystack: Demo scripts (e.g. `scripts/langchain_rag_chronicle.py`, `scripts/cross_framework_rag_chronicle.py`) and integration docs when present in the repo.
+   - Custom: Use the session API or HTTP API to create an investigation, ingest evidence, propose a claim, and link support/challenge. See [Integrating with Chronicle](integrating-with-chronicle.md).
 
 2. **One investigation per eval run (or per query)** — By default, each run creates a new investigation. For evals you can:
    - **One investigation per run** — Keep default; each run has one investigation and one (or more) claims. Simple and isolated.
@@ -36,7 +36,7 @@ Attach a Chronicle **handler** or **writer** to your RAG pipeline so that retrie
 
 ## 3. Extract defensibility metrics
 
-After each RAG run, get the **claim UID** for the answer (e.g. the last claim in the investigation) and the **defensibility scorecard**. The scorecard is available as a stable **metrics dict** suitable for eval harnesses.
+After each RAG run, get the claim UID for the answer (e.g. the last claim in the investigation) and the defensibility scorecard. The scorecard is available as a stable metrics dict suitable for eval harnesses.
 
 **Option A: Standalone defensibility scorer (no RAG stack)**
 
@@ -95,7 +95,7 @@ If your pipeline uses the Chronicle HTTP API, after proposing the claim and link
 
 ## 5. Fixed-query benchmark run
 
-A **fixed set of queries** can be run through the same Chronicle-backed benchmark pipeline and defensibility recorded per answer. The script `scripts/benchmark_data/run_defensibility_benchmark.py` runs three queries, writes one investigation per query, and outputs a JSON file (or stdout) with `query_id`, `query`, `claim_uid`, and `metrics` for each. **How to reproduce:** From repo root, `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py --mode session` (optional `--mode langchain`, `--output results.json`, or `--stdout`). See [Benchmark](benchmark.md) Section 1.3 for the full description and output shape.
+A fixed set of queries can be run through the same Chronicle-backed benchmark pipeline and defensibility recorded per answer. The script `scripts/benchmark_data/run_defensibility_benchmark.py` runs three queries, writes one investigation per query, and outputs a JSON file (or stdout) with `query_id`, `query`, `claim_uid`, and `metrics` for each. How to reproduce: From repo root, `PYTHONPATH=. python3 scripts/benchmark_data/run_defensibility_benchmark.py --mode session` (optional `--mode langchain`, `--output results.json`, or `--stdout`). See [Benchmark](benchmark.md) Section 1.3 for the full description and output shape.
 
 ---
 
@@ -103,9 +103,9 @@ A **fixed set of queries** can be run through the same Chronicle-backed benchmar
 
 | Step | What to do |
 |------|------------|
-| Run pipeline | **No pipeline:** use `scripts/standalone_defensibility_scorer.py` (stdin JSON). Or attach Chronicle handler (LangChain, LlamaIndex, Haystack) or use session/API; one investigation per run or per key. |
+| Run pipeline | No pipeline: use `scripts/standalone_defensibility_scorer.py` (stdin JSON). Or attach Chronicle handler (LangChain, LlamaIndex, Haystack) or use session/API; one investigation per run or per key. |
 | Get claim | From handler: session + investigation UID, then list claims and take the claim UID for the answer. (Standalone scorer returns metrics directly.) |
-| Get metrics | **Standalone:** `scripts/standalone_defensibility_scorer.py` (stdin JSON, stdout metrics). Script: `scripts/eval_harness_adapter.py` (stdout JSON). Python: `defensibility_metrics_for_claim(session, claim_uid)`. API: `GET /claims/{claim_uid}/defensibility`. |
+| Get metrics | Standalone: `scripts/standalone_defensibility_scorer.py` (stdin JSON, stdout metrics). Script: `scripts/eval_harness_adapter.py` (stdout JSON). Python: `defensibility_metrics_for_claim(session, claim_uid)`. API: `GET /claims/{claim_uid}/defensibility`. |
 | Compare | Record metrics per (run, config); compare provenance_quality, corroboration, contradiction_status across configs. |
 
 For the canonical metrics fields and examples, see [Defensibility metrics schema](defensibility-metrics-schema.md). For benchmark datasets and the fixed-query defensibility run, see [Benchmark](benchmark.md).
@@ -114,11 +114,11 @@ For the canonical metrics fields and examples, see [Defensibility metrics schema
 
 ## 7. Reporting Chronicle defensibility in papers
 
-To use **Chronicle defensibility** as a reported measure in research papers (e.g. RAG evaluation, citation faithfulness, or defensible reasoning):
+To use Chronicle defensibility as a reported measure in research papers (e.g. RAG evaluation, citation faithfulness, or defensible reasoning):
 
 1. **Run your RAG pipeline with Chronicle** — Use the [standalone defensibility scorer](eval_contract.md#3-current-implementations) (`scripts/standalone_defensibility_scorer.py`) when you have (query, answer, evidence) and want metrics without a RAG stack; the [eval harness adapter](defensibility-metrics-schema.md#5-eval-harness-adapter-script-and-python-api) (`scripts/eval_harness_adapter.py`) for a single built-in RAG run; or [run_defensibility_benchmark](benchmark.md#13-fixed-query-defensibility-benchmark-rag-run) (`scripts/benchmark_data/run_defensibility_benchmark.py --mode session`) for a fixed set of queries. For custom pipelines, attach a Chronicle handler (LangChain, LlamaIndex, Haystack) or use the [minimum integration](integrating-with-chronicle.md#minimum-integration-rag-pipeline-query-answer-retrieved-docs); then call `defensibility_metrics_for_claim(session, claim_uid)` or `GET /claims/{claim_uid}/defensibility`.
 
-2. **Record the metrics per answer** — The stable fields for reporting are: **provenance_quality** (strong | medium | weak | challenged), **corroboration** (support_count, challenge_count, independent_sources_count), **contradiction_status** (none | open | acknowledged | resolved), and optionally **knowability**. Same shape from the script stdout, Python API, or HTTP API. See [Defensibility metrics schema](defensibility-metrics-schema.md).
+2. **Record the metrics per answer** — The stable fields for reporting are: provenance_quality (strong | medium | weak | challenged), corroboration (support_count, challenge_count, independent_sources_count), contradiction_status (none | open | acknowledged | resolved), and optionally knowability. Same shape from the script stdout, Python API, or HTTP API. See [Defensibility metrics schema](defensibility-metrics-schema.md).
 
 3. **Report in your results** — You can report e.g. "Chronicle defensibility (provenance_quality) per query," "mean support_count across runs," or "fraction of claims with contradiction_status = none." For reproducibility, state which script or integration you used (eval_harness_adapter, run_defensibility_benchmark, or custom) and the metrics subset you report.
 

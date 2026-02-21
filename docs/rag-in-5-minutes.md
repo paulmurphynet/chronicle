@@ -2,7 +2,7 @@
 
 Get from "Chronicle installed" to "my RAG run wrote evidence and a claim to Chronicle and I see defensibility" in under 5 minutes.
 
-**Already have (query, answer, evidence)?** Use the [standalone defensibility scorer](eval_contract.md) for one-shot metrics JSON with no project. **Building a pipeline?** See [Integrating with Chronicle](integrating-with-chronicle.md) for the session API and minimum integration.
+Already have (query, answer, evidence)? Use the [standalone defensibility scorer](eval_contract.md) for one-shot metrics JSON with no project. Building a pipeline? See [Integrating with Chronicle](integrating-with-chronicle.md) for the session API and minimum integration.
 
 ---
 
@@ -29,7 +29,7 @@ Defensibility: medium
 View reasoning brief: chronicle reasoning-brief claim_... --path /tmp/chronicle_rag_xxxxx --format html > brief.html
 ```
 
-**Keep the project** (e.g. for later inspection):
+Keep the project (e.g. for later inspection):
 
 ```bash
 chronicle quickstart-rag --path /path/to/my_project

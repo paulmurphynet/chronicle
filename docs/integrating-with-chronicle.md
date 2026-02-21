@@ -1,6 +1,6 @@
 # Integrating with Chronicle
 
-This doc describes the **minimum integration** for RAG pipelines (or other systems) that want to record evidence and claims in Chronicle and read defensibility.
+This doc describes the minimum integration for RAG pipelines (or other systems) that want to record evidence and claims in Chronicle and read defensibility.
 
 ---
 
@@ -12,9 +12,9 @@ This doc describes the **minimum integration** for RAG pipelines (or other syste
 4. **Link support** — For each evidence span that supports the answer, call `session.link_support(inv_uid, span_uid, claim_uid)`.
 5. **Read defensibility** — `session.get_defensibility_score(claim_uid)` or the equivalent API returns the scorecard (provenance_quality, corroboration, contradiction_status, etc.). See [Defensibility metrics schema](defensibility-metrics-schema.md).
 
-No RAG framework is required: the [standalone defensibility scorer](eval_contract.md#3-current-implementations) (`scripts/standalone_defensibility_scorer.py`) does exactly this in-process for a single (query, answer, evidence) input and outputs the metrics JSON. **Your RAG harness → our scorer** is the recommended path: see [RAG evals: defensibility metric](rag-evals-defensibility-metric.md) for the contract, schema, and a Python example; an optional copy-paste adapter template is in [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py).
+No RAG framework is required: the [standalone defensibility scorer](eval_contract.md#3-current-implementations) (`scripts/standalone_defensibility_scorer.py`) does exactly this in-process for a single (query, answer, evidence) input and outputs the metrics JSON. Your RAG harness → our scorer is the recommended path: see [RAG evals: defensibility metric](rag-evals-defensibility-metric.md) for the contract, schema, and a Python example; an optional copy-paste adapter template is in [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py).
 
-**Limits of the standalone scorer:** In that path, every evidence chunk is linked as support (no entailment check); evidence is not linked to sources, so `independent_sources_count` is typically 0; and evidence can be strings or objects with `text`, `path`, or `url` (URLs fetched with SSRF safeguards). See [RAG evals Section 5](rag-evals-defensibility-metric.md#5-limits-of-the-standalone-scorer) and [Critical areas](../critical_areas/README.md).
+Limits of the standalone scorer: In that path, every evidence chunk is linked as support (no entailment check); evidence is not linked to sources, so `independent_sources_count` is typically 0; and evidence can be strings or objects with `text`, `path`, or `url` (URLs fetched with SSRF safeguards). See [RAG evals Section 5](rag-evals-defensibility-metric.md#5-limits-of-the-standalone-scorer) and [Critical areas](../critical_areas/README.md).
 
 ---
 
@@ -24,10 +24,10 @@ Each integration follows the same pattern: create project/investigation, ingest 
 
 | Framework | Script | Happy path |
 |-----------|--------|------------|
-| **LangChain** | `scripts/langchain_rag_chronicle.py` | Install `chronicle-standard` and `langchain-core` (or `langchain`). Add `ChronicleRagCallbackHandler(project_path=..., investigation_title=...)` to your chain's `callbacks`. On retriever end, docs are ingested as evidence; on chain end, the answer is proposed as a claim and linked to that evidence. Run the script for a minimal example. |
-| **LlamaIndex** | `scripts/llamaindex_rag_chronicle.py` | Install `chronicle-standard` and `llama-index-core` (or `llama-index`). Attach a Chronicle callback to the query engine's callback manager. RETRIEVE events → evidence; SYNTHESIZE end → claim + support links. Run the script for a minimal example. |
-| **Haystack** | `scripts/haystack_rag_chronicle.py` | Install `chronicle-standard` and `haystack-ai`. Add `ChronicleEvidenceWriter` to your pipeline after the retriever/generator; connect documents and (optionally) claim output. Run the script for a minimal example. |
-| **Cross-framework** | `scripts/cross_framework_rag_chronicle.py` | Same flow across frameworks; use when you want one demo that compares or switches. |
+| LangChain | `scripts/langchain_rag_chronicle.py` | Install `chronicle-standard` and `langchain-core` (or `langchain`). Add `ChronicleRagCallbackHandler(project_path=..., investigation_title=...)` to your chain's `callbacks`. On retriever end, docs are ingested as evidence; on chain end, the answer is proposed as a claim and linked to that evidence. Run the script for a minimal example. |
+| LlamaIndex | `scripts/llamaindex_rag_chronicle.py` | Install `chronicle-standard` and `llama-index-core` (or `llama-index`). Attach a Chronicle callback to the query engine's callback manager. RETRIEVE events → evidence; SYNTHESIZE end → claim + support links. Run the script for a minimal example. |
+| Haystack | `scripts/haystack_rag_chronicle.py` | Install `chronicle-standard` and `haystack-ai`. Add `ChronicleEvidenceWriter` to your pipeline after the retriever/generator; connect documents and (optionally) claim output. Run the script for a minimal example. |
+| Cross-framework | `scripts/cross_framework_rag_chronicle.py` | Same flow across frameworks; use when you want one demo that compares or switches. |
 
 Integration modules live in `chronicle/integrations/` (langchain.py, llamaindex.py, haystack.py). Each module docstring describes required packages and usage.
 
@@ -35,15 +35,15 @@ Integration modules live in `chronicle/integrations/` (langchain.py, llamaindex.
 
 ## Adding defensibility to an eval harness
 
-To add Chronicle defensibility as a **metric** in a RAG eval framework (e.g. RAGAS, Trulens, LangSmith evals, or a custom harness):
+To add Chronicle defensibility as a metric in a RAG eval framework (e.g. RAGAS, Trulens, LangSmith evals, or a custom harness):
 
-1. **Contract:** One run = one (query, answer, evidence) in → one defensibility metrics object out. See [Eval contract](eval_contract.md) and [eval_contract_schema.json](eval_contract_schema.json).
-2. **Invoke the scorer:** Pipe JSON to `scripts/standalone_defensibility_scorer.py` or call `defensibility_metrics_for_claim(session, claim_uid)` after building the session (ingest → propose claim → link support). The output shape is stable (claim_uid, provenance_quality, corroboration, contradiction_status, optional knowability).
-3. **Adapter:** Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py) as a copy-paste template: read (query, answer, evidence) from your harness (stdin or file), call the scorer, print metrics JSON. Your harness then parses the JSON and records the metric per run.
+1. Contract: One run = one (query, answer, evidence) in → one defensibility metrics object out. See [Eval contract](eval_contract.md) and [eval_contract_schema.json](eval_contract_schema.json).
+2. Invoke the scorer: Pipe JSON to `scripts/standalone_defensibility_scorer.py` or call `defensibility_metrics_for_claim(session, claim_uid)` after building the session (ingest → propose claim → link support). The output shape is stable (claim_uid, provenance_quality, corroboration, contradiction_status, optional knowability).
+3. Adapter: Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py) as a copy-paste template: read (query, answer, evidence) from your harness (stdin or file), call the scorer, print metrics JSON. Your harness then parses the JSON and records the metric per run.
 
 No Chronicle-specific server is required; the scorer runs in-process. For benchmarks and reporting, see [Eval and benchmarking](eval-and-benchmarking.md) and [Defensibility benchmark](benchmark.md).
 
-**Framework-specific (RAGAS, Trulens, LangSmith):** These frameworks let you add custom metrics. Add a metric that, per run, takes (query, answer, contexts), invokes the Chronicle scorer (stdin → `standalone_defensibility_scorer.py` or in-process `defensibility_metrics_for_claim`), and records the result (e.g. `provenance_quality`, `corroboration.support_count`). Example pattern:
+Framework-specific (RAGAS, Trulens, LangSmith): These frameworks let you add custom metrics. Add a metric that, per run, takes (query, answer, contexts), invokes the Chronicle scorer (stdin → `standalone_defensibility_scorer.py` or in-process `defensibility_metrics_for_claim`), and records the result (e.g. `provenance_quality`, `corroboration.support_count`). Example pattern:
 
 ```python
 # Pseudocode: one run → one defensibility metric
@@ -61,21 +61,21 @@ Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_
 
 One-page checklist for agent/RAG builders: idempotency, actor and tool provenance, and defensibility reads.
 
-- **Idempotency** — Use **investigation_key** when creating investigations so the same scenario (e.g. query id) reuses the same investigation across runs. The backend can create or look up by key; the event store supports idempotency keys where applicable. See [Eval and benchmarking](eval-and-benchmarking.md) for stable keys per scenario.
-- **Actor and tool provenance** — Every write records **actor_id** and **actor_type** (`human` | `tool` | `system`). Set `X-Actor-Id` and `X-Actor-Type` (API) or `CHRONICLE_ACTOR_ID` / `CHRONICLE_ACTOR_TYPE` (CLI) so the ledger attributes ingest, claims, and links to your agent or pipeline. Use `actor_type=tool` for automated runs and `human` when a human is curating.
-- **Defensibility reads** — After building an investigation (evidence + claim + links), read defensibility via **session:** `session.get_defensibility_score(claim_uid)`; **API:** `GET /claims/{claim_uid}/defensibility`; **reasoning brief:** `GET /claims/{claim_uid}/reasoning-brief` for the full shareable artifact. Same scorecard shape as the [eval contract](eval_contract.md) and [defensibility metrics schema](defensibility-metrics-schema.md).
+- **Idempotency** — Use investigation_key when creating investigations so the same scenario (e.g. query id) reuses the same investigation across runs. The backend can create or look up by key; the event store supports idempotency keys where applicable. See [Eval and benchmarking](eval-and-benchmarking.md) for stable keys per scenario.
+- **Actor and tool provenance** — Every write records actor_id and actor_type (`human` | `tool` | `system`). Set `X-Actor-Id` and `X-Actor-Type` (API) or `CHRONICLE_ACTOR_ID` / `CHRONICLE_ACTOR_TYPE` (CLI) so the ledger attributes ingest, claims, and links to your agent or pipeline. Use `actor_type=tool` for automated runs and `human` when a human is curating.
+- **Defensibility reads** — After building an investigation (evidence + claim + links), read defensibility via session: `session.get_defensibility_score(claim_uid)`; API: `GET /claims/{claim_uid}/defensibility`; reasoning brief: `GET /claims/{claim_uid}/reasoning-brief` for the full shareable artifact. Same scorecard shape as the [eval contract](eval_contract.md) and [defensibility metrics schema](defensibility-metrics-schema.md).
 
 ---
 
 ## Idempotency for agents and pipelines
 
-When the same scenario (e.g. query id or scenario id) is run multiple times, you can reuse the same investigation by passing an **investigation_key** (or equivalent) so that the backend creates or looks up the investigation by that key. That way "same question, different config" can be compared in one place. Implementation details depend on your API or session wrapper; the event store supports idempotency keys for commands where applicable.
+When the same scenario (e.g. query id or scenario id) is run multiple times, you can reuse the same investigation by passing an investigation_key (or equivalent) so that the backend creates or looks up the investigation by that key. That way "same question, different config" can be compared in one place. Implementation details depend on your API or session wrapper; the event store supports idempotency keys for commands where applicable.
 
 ---
 
 ## Human-curated data and attestation
 
-When a human (or tool) curates evidence and claims—e.g. transcript ingestion, manual link confirmation—you can attribute every write to an actor. Use **CLI:** set `CHRONICLE_ACTOR_ID` and optionally `CHRONICLE_ACTOR_TYPE` (or pass `--actor-id` / `--actor-type` on write commands). Use **HTTP API:** set headers `X-Actor-Id` and `X-Actor-Type` on each write request. The ledger records who did what; with an IdP you can optionally persist verification level. See [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md) for the full workflow (identity, human_confirm/human_override, export for verification).
+When a human (or tool) curates evidence and claims—e.g. transcript ingestion, manual link confirmation—you can attribute every write to an actor. Use CLI: set `CHRONICLE_ACTOR_ID` and optionally `CHRONICLE_ACTOR_TYPE` (or pass `--actor-id` / `--actor-type` on write commands). Use HTTP API: set headers `X-Actor-Id` and `X-Actor-Type` on each write request. The ledger records who did what; with an IdP you can optionally persist verification level. See [Human-in-the-loop and attestation](human-in-the-loop-and-attestation.md) for the full workflow (identity, human_confirm/human_override, export for verification).
 
 ---
 

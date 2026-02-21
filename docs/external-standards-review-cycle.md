@@ -1,6 +1,6 @@
 # External standards review cycle tracker
 
-Last updated: **2026-02-20**
+Last updated: 2026-02-20
 
 This tracker records execution state for whitepaper external review (`W-07`) and preserves the accepted/rejected feedback trail needed for revisioned publication.
 

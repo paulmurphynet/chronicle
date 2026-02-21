@@ -2,15 +2,15 @@
 
 Single source of truth for pending work.
 
-Last refreshed: **2026-02-21**
+Last refreshed: 2026-02-21
 
 ## Product stance
 
 Chronicle should optimize for:
 
-1. **Trust in core artifacts** (`.chronicle`, verifier, event/read-model correctness)
-2. **Contract stability** (scorer contract, API/client parity, reproducible behavior)
-3. **Reference surfaces as adapters** (CLI/API/UI/integrations can evolve without breaking core trust)
+1. Trust in core artifacts (`.chronicle`, verifier, event/read-model correctness)
+2. Contract stability (scorer contract, API/client parity, reproducible behavior)
+3. Reference surfaces as adapters (CLI/API/UI/integrations can evolve without breaking core trust)
 
 ## Active convergence program (public + CI + Postgres)
 
@@ -93,51 +93,51 @@ Goal: raise Neo4j from "contract-correct optional projection" to a production-gr
 
 ### N. Core engineering upgrades
 
-- [x] **N-01** Replace full-table `fetchall()` paths with streaming/chunked export for `neo4j-export`.
+- [x] N-01 Replace full-table `fetchall()` paths with streaming/chunked export for `neo4j-export`.
   - Move CSV export reads to cursor/`fetchmany()` loops.
   - Keep deterministic row ordering per CSV.
-- [x] **N-02** Replace full-table in-memory row materialization in `neo4j-sync` with streaming/chunked sync.
+- [x] N-02 Replace full-table in-memory row materialization in `neo4j-sync` with streaming/chunked sync.
   - Bound memory for large investigations.
   - Keep idempotent MERGE semantics unchanged.
-- [x] **N-03** Harden relationship identity semantics to avoid accidental edge coalescing for multi-link cases.
+- [x] N-03 Harden relationship identity semantics to avoid accidental edge coalescing for multi-link cases.
   - Preserve distinct support/challenge links when same span/claim pair has multiple link_uids.
   - Add explicit regression tests for repeated span-claim links.
-- [x] **N-04** Add Neo4j runtime hardening controls.
+- [x] N-04 Add Neo4j runtime hardening controls.
   - CLI/config support for Neo4j database selection.
   - Retry/backoff and timeout controls for transient failures.
   - Clear user-facing diagnostics on connectivity/auth/db errors.
-- [x] **N-05** Add sync/export observability outputs.
+- [x] N-05 Add sync/export observability outputs.
   - Structured progress logs (table/phase, row counts, batch counts, elapsed time).
   - Optional JSON report artifact for sync/export runs (for release evidence).
 
 ### N. Quality and verification upgrades
 
-- [x] **N-06** Add live Neo4j integration tests (service-container) beyond static contract parity checks.
+- [x] N-06 Add live Neo4j integration tests (service-container) beyond static contract parity checks.
   - Validate end-to-end sync behavior against real Neo4j (not only fixture/text checks).
   - Include dedupe and non-dedupe mode assertions.
   - Added `tests/test_neo4j_live_integration.py` and wired CI/release service-container jobs.
   - First public CI run still required to record external `status=passed` evidence.
-- [x] **N-07** Add performance benchmark harness for graph projection paths.
+- [x] N-07 Add performance benchmark harness for graph projection paths.
   - Generate medium/large fixture datasets.
   - Track export/sync throughput and memory ceilings.
   - Add non-regression thresholds to release evidence.
-- [x] **N-08** Add cross-mode parity tests for graph semantics.
+- [x] N-08 Add cross-mode parity tests for graph semantics.
   - Validate expected equivalence/differences between rebuild CSV path and direct sync path.
   - Validate lineage semantics in dedupe mode (`CONTAINS_CLAIM`, `CONTAINS_EVIDENCE`).
-- [x] **N-09** Expand failure-mode tests for Neo4j operations.
+- [x] N-09 Expand failure-mode tests for Neo4j operations.
   - Network interruption, partial failure, rerun-idempotency behavior.
   - Misconfiguration cases (`NEO4J_URI`, credentials, db name, driver unavailable).
 
 ### N. Docs and operations upgrades
 
-- [x] **N-10** Publish Neo4j production operations runbook.
+- [x] N-10 Publish Neo4j production operations runbook.
   - Backup/restore guidance for graph data lifecycle.
   - Sync cadence strategy, drift handling, and re-sync procedures.
   - Capacity and cost guardrails for Aura/self-hosted Neo4j.
-- [x] **N-11** Publish query-pack and indexing guidance for common Chronicle graph workflows.
+- [x] N-11 Publish query-pack and indexing guidance for common Chronicle graph workflows.
   - "Top unresolved tension clusters", "support/challenge balance", "source concentration", lineage traversals.
   - Recommend index/constraint posture per query class.
-- [x] **N-12** Add explicit support-level statement for Neo4j surface (GA/Beta/Experimental) in support policy.
+- [x] N-12 Add explicit support-level statement for Neo4j surface (GA/Beta/Experimental) in support policy.
   - Define SLA expectations and compatibility guarantees for graph schema evolution.
 
 ### Neo4j best-in-class done criteria
@@ -159,44 +159,44 @@ Goal: make Chronicle standards-compatible without destabilizing core contracts, 
 
 ### S. Interoperability profile implementation
 
-- [x] **S-01** Define and publish Chronicle standards profile v0.1 (scope, compatibility tiers, non-goals).
+- [x] S-01 Define and publish Chronicle standards profile v0.1 (scope, compatibility tiers, non-goals).
   - Track canonical stance in docs and ADRs.
   - Keep `.chronicle` and verifier as canonical trust artifacts.
-- [x] **S-02** Implement JSON-LD export profile for investigation-level data.
+- [x] S-02 Implement JSON-LD export profile for investigation-level data.
   - Include claims, evidence, support/challenge links, tensions, sources.
   - Add versioned JSON-LD context and fixture tests.
-- [x] **S-03** Implement PROV-compatible mapping profile and validation fixtures.
+- [x] S-03 Implement PROV-compatible mapping profile and validation fixtures.
   - Provide deterministic mapping rules from Chronicle entities/events.
   - Add regression tests for required PROV-aligned fields.
-- [x] **S-04** Add ClaimReview export adapter/profile.
+- [x] S-04 Add ClaimReview export adapter/profile.
   - Map Chronicle claim/review outputs to schema.org `ClaimReview`.
   - Document caveats for fields that are optional or unavailable.
-- [x] **S-05** Add RO-Crate export profile for package interoperability.
+- [x] S-05 Add RO-Crate export profile for package interoperability.
   - Include metadata and pointers to Chronicle artifacts.
   - Add sample crate fixtures and compatibility checks.
-- [x] **S-06** Add C2PA compatibility path.
+- [x] S-06 Add C2PA compatibility path.
   - Record/import C2PA assertion references in evidence metadata.
   - Export explicit verification semantics (`disabled` or `metadata_only`) without claiming cryptographic verification.
-- [x] **S-07** Add VC/Data Integrity compatibility path.
+- [x] S-07 Add VC/Data Integrity compatibility path.
   - Define attestation envelope for claims/checkpoints/artifacts.
   - Add verification-status fields and explicit non-verified behavior (`disabled` vs `metadata_only`).
-- [x] **S-08** Publish adjacent standards guidance.
+- [x] S-08 Publish adjacent standards guidance.
   - Document integration boundaries for OpenLineage, in-toto, and SLSA.
   - Explicitly state these are complementary layers, not Chronicle replacements.
 
 ### W. Whitepaper and publication track
 
-- [x] **W-01** Publish working whitepaper draft and editorial workflow.
-- [x] **W-02** Build a reproducible evidence pack for whitepaper claims.
+- [x] W-01 Publish working whitepaper draft and editorial workflow.
+- [x] W-02 Build a reproducible evidence pack for whitepaper claims.
   - Mapping fixtures, benchmark commands, verifier outputs, profile examples.
-- [x] **W-03** Add versioned citation and publication metadata for whitepaper revisions.
-- [x] **W-04** Run internal technical review and capture accepted/rejected edits.
-- [x] **W-05** Prepare standards-submission package and outreach notes for relevant communities.
-- [x] **W-06** Raise whitepaper draft to publication-grade structure and conformance reporting (v0.3).
-- [ ] **W-07** Run external standards review cycle (JSON-LD/PROV/VC, C2PA, applied research) and log accepted/rejected deltas.
+- [x] W-03 Add versioned citation and publication metadata for whitepaper revisions.
+- [x] W-04 Run internal technical review and capture accepted/rejected edits.
+- [x] W-05 Prepare standards-submission package and outreach notes for relevant communities.
+- [x] W-06 Raise whitepaper draft to publication-grade structure and conformance reporting (v0.3).
+- [ ] W-07 Run external standards review cycle (JSON-LD/PROV/VC, C2PA, applied research) and log accepted/rejected deltas.
   - [x] Prepared review-cycle tracker and send-ready venue bundles/snapshots (`reports/standards_submissions/v0.3/`).
   - [ ] Dispatch to external reviewers once repo is public; then record accepted/rejected/follow-up deltas.
-- [x] **W-08** Produce venue-specific publication bundles (formatting, submission checklists, and archive snapshots).
+- [x] W-08 Produce venue-specific publication bundles (formatting, submission checklists, and archive snapshots).
 
 ## On hold by design
 

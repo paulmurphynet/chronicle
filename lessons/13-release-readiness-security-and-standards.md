@@ -1,6 +1,6 @@
 # Lesson 13: Release readiness, security gates, and standards operations
 
-**Objectives:** You will understand how Chronicle moves from “code that works” to “release that can be defended”: objective quality gates, supply-chain security checks, branch-protection rollout evidence, and standards/whitepaper review operations.
+Objectives: You will understand how Chronicle moves from “code that works” to “release that can be defended”: objective quality gates, supply-chain security checks, branch-protection rollout evidence, and standards/whitepaper review operations.
 
 **Key files:**
 
@@ -26,10 +26,10 @@
 
 Chronicle treats release readiness as an explicit contract:
 
-- **Core trust** must pass: verifier, invariants, conformance.
-- **Backend confidence** must pass: SQLite baseline and Postgres smoke/parity/onboarding.
-- **Operational confidence** must pass: supply-chain and container thresholds.
-- **Governance confidence** must pass: branch protection and required CI checks.
+- Core trust must pass: verifier, invariants, conformance.
+- Backend confidence must pass: SQLite baseline and Postgres smoke/parity/onboarding.
+- Operational confidence must pass: supply-chain and container thresholds.
+- Governance confidence must pass: branch protection and required CI checks.
 
 The canonical checklist is [docs/production-readiness-checklist.md](../docs/production-readiness-checklist.md). Use this file as your release decision surface, not ad-hoc judgment.
 
@@ -154,6 +154,6 @@ The key rule: unresolved items must stay visible in `docs/to_do.md` until object
 
 ---
 
-**← Previous:** [Lesson 12: The .chronicle file format and data schema](12-chronicle-file-format-and-schema.md) | **Index:** [Lessons](README.md) | **End of lessons**
+← Previous: [Lesson 12: The .chronicle file format and data schema](12-chronicle-file-format-and-schema.md) | Index: [Lessons](README.md) | End of lessons
 
-**Quiz:** [quizzes/quiz-13-release-readiness-security-and-standards.md](quizzes/quiz-13-release-readiness-security-and-standards.md)
+Quiz: [quizzes/quiz-13-release-readiness-security-and-standards.md](quizzes/quiz-13-release-readiness-security-and-standards.md)

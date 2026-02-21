@@ -1,6 +1,6 @@
 # Whitepaper and standards submission plan
 
-Last updated: **2026-02-20**
+Last updated: 2026-02-20
 
 This plan defines how Chronicle should produce a publication-quality whitepaper and engage standards bodies responsibly.
 
@@ -12,10 +12,10 @@ This plan defines how Chronicle should produce a publication-quality whitepaper 
 
 ## Deliverables
 
-1. **Position whitepaper draft** (problem, model, standards mappings, trust boundaries, threat model).
-2. **Interoperability annex** (JSON-LD context, PROV mapping rules, ClaimReview/RO-Crate/C2PA/VC profile details).
-3. **Conformance evidence pack** (verifier results, reproducible workflows, example artifacts, mapping test fixtures).
-4. **Submission package** for standards/community review (PDF/Markdown draft, references, reproducibility instructions).
+1. Position whitepaper draft (problem, model, standards mappings, trust boundaries, threat model).
+2. Interoperability annex (JSON-LD context, PROV mapping rules, ClaimReview/RO-Crate/C2PA/VC profile details).
+3. Conformance evidence pack (verifier results, reproducible workflows, example artifacts, mapping test fixtures).
+4. Submission package for standards/community review (PDF/Markdown draft, references, reproducibility instructions).
 
 Implementation reference: [Whitepaper evidence pack](whitepaper-evidence-pack.md), [Whitepaper citation and publication metadata](whitepaper-citation.md), [Whitepaper internal review log](whitepaper-internal-review-log.md), [Standards submission package](standards-submission-package.md), and `scripts/whitepaper/build_evidence_pack.py`.
 
@@ -68,9 +68,9 @@ Whitepaper submission should require:
 
 ## Ownership model
 
-- **Editor:** coordinates narrative coherence and publication timeline.
-- **Technical owners:** maintain mapping correctness per standard profile.
-- **Verification owner:** validates reproducibility artifacts and conformance evidence.
-- **Release owner:** manages versioned publication and citation updates.
+- Editor: coordinates narrative coherence and publication timeline.
+- Technical owners: maintain mapping correctness per standard profile.
+- Verification owner: validates reproducibility artifacts and conformance evidence.
+- Release owner: manages versioned publication and citation updates.
 
 Track concrete implementation and publication tasks in [Implementation To-Do](to_do.md).

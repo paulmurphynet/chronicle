@@ -1,12 +1,12 @@
 # Identity providers (IdP)
 
-Chronicle supports pluggable **identity providers** so the server can bind the acting identity to a request (or CLI run) and optionally store a **verification level**. This doc describes the built-in adapters and how to implement additional ones (e.g. gov_id, did, zk).
+Chronicle supports pluggable identity providers so the server can bind the acting identity to a request (or CLI run) and optionally store a verification level. This doc describes the built-in adapters and how to implement additional ones (e.g. gov_id, did, zk).
 
 ---
 
 ## Configured IdP
 
-Set **`CHRONICLE_IDENTITY_PROVIDER`** to one of:
+Set `CHRONICLE_IDENTITY_PROVIDER` to one of:
 
 | Value | Behavior |
 |-------|----------|
@@ -18,13 +18,13 @@ Set **`CHRONICLE_IDENTITY_PROVIDER`** to one of:
 
 When `CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH` is set and the IdP returns a bound principal from auth middleware (`request.state`), the server uses that as `actor_id` and stores account-level verification.
 
-If no auth-bound principal is present and headers are used (`X-Actor-Id`), identity is treated as **claimed** (self-asserted), not account-verified.
+If no auth-bound principal is present and headers are used (`X-Actor-Id`), identity is treated as claimed (self-asserted), not account-verified.
 
 ---
 
 ## Implementing a custom IdP (gov_id, did, zk)
 
-1. **Implement the protocol** — In `chronicle.core.identity`, the IdP must implement the **IdentityProvider** protocol: a `resolve(request) -> PrincipalInfo` method. `PrincipalInfo` has `principal_id`, `actor_type`, `verification_level`, and optional `attestations`.
+1. **Implement the protocol** — In `chronicle.core.identity`, the IdP must implement the IdentityProvider protocol: a `resolve(request) -> PrincipalInfo` method. `PrincipalInfo` has `principal_id`, `actor_type`, `verification_level`, and optional `attestations`.
 
 2. **Return a bound principal** — When the IdP can authenticate the request (e.g. verify a government ID, resolve a DID, or verify a zero-knowledge proof), return a non-empty `principal_id` and the appropriate `verification_level` (e.g. `verified_credential`, `decentralized`, `zk_attested` from the constants in `chronicle.core.identity`).
 

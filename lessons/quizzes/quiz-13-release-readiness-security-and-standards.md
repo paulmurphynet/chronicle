@@ -1,6 +1,6 @@
 # Quiz 13: Release readiness, security gates, and standards operations
 
-**Lesson:** [13-release-readiness-security-and-standards.md](../13-release-readiness-security-and-standards.md)
+Lesson: [13-release-readiness-security-and-standards.md](../13-release-readiness-security-and-standards.md)
 
 Answer these after reading the lesson and opening the linked workflow/docs files. Try not to peek at the answer key until you've written your answers.
 
@@ -57,4 +57,4 @@ Answer these after reading the lesson and opening the linked workflow/docs files
 
 ---
 
-**← Previous:** [quiz-12-chronicle-file-format-and-schema](quiz-12-chronicle-file-format-and-schema.md) | **Index:** [Quizzes](README.md) | **End of quizzes**
+← Previous: [quiz-12-chronicle-file-format-and-schema](quiz-12-chronicle-file-format-and-schema.md) | Index: [Quizzes](README.md) | End of quizzes

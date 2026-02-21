@@ -1,6 +1,6 @@
 # Generic export (JSON and CSV ZIP)
 
-Chronicle can export a single investigation’s **read model** as generic JSON or as a ZIP of CSV files. Use this when you need to feed Chronicle data into BI tools, fact-checking pipelines, dashboards, or other systems that don’t consume the full .chronicle format.
+Chronicle can export a single investigation’s read model as generic JSON or as a ZIP of CSV files. Use this when you need to feed Chronicle data into BI tools, fact-checking pipelines, dashboards, or other systems that don’t consume the full .chronicle format.
 
 For standards-oriented interoperability output, see [Standards JSON-LD export](standards-jsonld-export.md).
 
@@ -8,9 +8,9 @@ For standards-oriented interoperability output, see [Standards JSON-LD export](s
 
 ## 1. JSON export
 
-**API:** `chronicle.store.commands.generic_export.build_generic_export_json(read_model, investigation_uid)`
+API: `chronicle.store.commands.generic_export.build_generic_export_json(read_model, investigation_uid)`
 
-**Returns:** A single dict with:
+Returns: A single dict with:
 
 | Key | Content |
 |-----|---------|
@@ -21,9 +21,9 @@ For standards-oriented interoperability output, see [Standards JSON-LD export](s
 | `evidence` | List of evidence_item objects (evidence_uid, investigation_uid, uri, content_hash, media_type, etc.). |
 | `tensions` | List of tension objects (tension_uid, claim_a_uid, claim_b_uid, status, notes, etc.). |
 
-Field names and types follow the Chronicle read model (dataclass attribute names; values are serialized for JSON). No evidence **content** is included—only metadata. To get content, use the project’s evidence store or a .chronicle file (see [Consuming .chronicle](consuming-chronicle.md)).
+Field names and types follow the Chronicle read model (dataclass attribute names; values are serialized for JSON). No evidence content is included—only metadata. To get content, use the project’s evidence store or a .chronicle file (see [Consuming .chronicle](consuming-chronicle.md)).
 
-**Example use:** Export from a session after opening a project:
+Example use: Export from a session after opening a project:
 
 ```python
 from chronicle.store.session import ChronicleSession
@@ -38,9 +38,9 @@ with ChronicleSession(project_path) as session:
 
 ## 2. CSV ZIP export
 
-**API:** `chronicle.store.commands.generic_export.build_generic_export_csv_zip(read_model, investigation_uid)`
+API: `chronicle.store.commands.generic_export.build_generic_export_csv_zip(read_model, investigation_uid)`
 
-**Returns:** Bytes of a ZIP file containing:
+Returns: Bytes of a ZIP file containing:
 
 | File inside ZIP | Content |
 |-----------------|---------|
@@ -66,10 +66,10 @@ with ChronicleSession(project_path) as session:
 ## 3. What’s not included
 
 - **Evidence blobs** — Generic export does not include the raw content of evidence items. Use the project’s evidence store (by `evidence_item.uri`) or extract from a .chronicle ZIP.
-- **Evidence links** — The JSON and CSV export include claims, evidence items, and tensions but not the **evidence_link** table (span → claim, SUPPORT/CHALLENGE). For link data, query the read model directly or use a .chronicle and open chronicle.db (see [Consuming .chronicle](consuming-chronicle.md)).
+- **Evidence links** — The JSON and CSV export include claims, evidence items, and tensions but not the evidence_link table (span → claim, SUPPORT/CHALLENGE). For link data, query the read model directly or use a .chronicle and open chronicle.db (see [Consuming .chronicle](consuming-chronicle.md)).
 - **Events** — Only the read model (current state) is exported, not the event log.
 
-For full fidelity (events, links, evidence content), use **export_investigation** to produce a .chronicle file.
+For full fidelity (events, links, evidence content), use export_investigation to produce a .chronicle file.
 
 ---
 
@@ -83,4 +83,4 @@ For full fidelity (events, links, evidence content), use **export_investigation*
 
 ## 5. Schema version
 
-`schema_version` is currently **1**. If the shape or field set of the export changes in a breaking way, the version will be incremented and noted here. Consumers should check `schema_version` and handle unknown versions gracefully.
+`schema_version` is currently 1. If the shape or field set of the export changes in a breaking way, the version will be incremented and noted here. Consumers should check `schema_version` and handle unknown versions gracefully.

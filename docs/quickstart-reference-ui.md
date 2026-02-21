@@ -1,6 +1,6 @@
 # Quickstart: Reference UI (Try sample, highlight to link, defensibility update)
 
-This path is for users who run the **Reference UI** (frontend) and want to see defensibility change in a few minutes.
+This path is for users who run the Reference UI (frontend) and want to see defensibility change in a few minutes.
 
 ---
 

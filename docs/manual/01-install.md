@@ -1,6 +1,6 @@
 # Chapter 01: Install
 
-**Contents:** Prerequisites, core install, optional API and Neo4j.
+Contents: Prerequisites, core install, optional API and Neo4j.
 
 ---
 
@@ -49,4 +49,4 @@ See [Neo4j](../neo4j.md) and [Aura graph pipeline](../aura-graph-pipeline.md).
 
 ---
 
-**← Previous:** — (start) | **Index:** [Manual](README.md) | **Next →:** [02 — Scorer](02-scorer.md)
+**← Previous:** — (start) | Index: [Manual](README.md) | Next →: [02 — Scorer](02-scorer.md)

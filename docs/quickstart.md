@@ -1,12 +1,12 @@
 # Quickstart: first investigation in ~15 minutes
 
-Get from zero to a verified record of a claim and its evidence using the Chronicle API or CLI. When the [Reference UI](reference-ui-plan.md) is available, you can do the same flow in the browser with a **Try sample** path (load a sample investigation, highlight → link, see defensibility update).
+Get from zero to a verified record of a claim and its evidence using the Chronicle API or CLI. When the [Reference UI](reference-ui-plan.md) is available, you can do the same flow in the browser with a Try sample path (load a sample investigation, highlight → link, see defensibility update).
 
 ---
 
 ## Option A: API (recommended for automation)
 
-**Prerequisites:** Python 3.11+, `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH` to a directory (e.g. `./my_project`), run `uvicorn chronicle.api.app:app --reload`.
+Prerequisites: Python 3.11+, `pip install -e ".[api]"`, set `CHRONICLE_PROJECT_PATH` to a directory (e.g. `./my_project`), run `uvicorn chronicle.api.app:app --reload`.
 
 1. **Create an investigation**
    ```http
@@ -73,14 +73,14 @@ See [Getting started](getting-started.md) and [Verifier](verifier.md) for detail
 
 ## Try sample (no typing)
 
-To **verify** a .chronicle file without building one yourself:
+To verify a .chronicle file without building one yourself:
 
 ```bash
 PYTHONPATH=. python3 scripts/generate_sample_chronicle.py
 chronicle-verify path/to/generated.chronicle
 ```
 
-Or open the **web verifier** at http://localhost:8000/verifier (with the API running) and drag-and-drop a `.chronicle` file. No data is uploaded; verification runs in the browser.
+Or open the web verifier at http://localhost:8000/verifier (with the API running) and drag-and-drop a `.chronicle` file. No data is uploaded; verification runs in the browser.
 
 ---
 

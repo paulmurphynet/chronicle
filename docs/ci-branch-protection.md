@@ -6,7 +6,7 @@ Use this checklist when enabling branch protection for `main`/`master`.
 
 You can enforce this checklist while the repository is still private.
 
-As of **February 20, 2026**, GitHub docs state:
+As of February 20, 2026, GitHub docs state:
 
 - Protected branches are available for private repositories on GitHub Pro, Team, and Enterprise plans.
 - GitHub Actions can run on private repositories.
