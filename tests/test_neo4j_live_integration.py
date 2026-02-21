@@ -10,8 +10,13 @@ from chronicle.store.neo4j_sync import sync_project_to_neo4j
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
 
-pytest.importorskip("neo4j")
-from neo4j import GraphDatabase  # type: ignore[import-not-found]
+try:
+    from neo4j import GraphDatabase  # type: ignore[import-not-found]
+except ImportError:
+    pytest.skip(
+        "neo4j Python driver not installed. Install with -e '.[neo4j]' to run live Neo4j tests.",
+        allow_module_level=True,
+    )
 
 pytestmark = pytest.mark.neo4j_live
 
