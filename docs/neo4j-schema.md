@@ -6,13 +6,13 @@ When you export or sync a Chronicle project to Neo4j (see [Neo4j](neo4j.md)), th
 
 | Label | Primary key | Key properties |
 |-------|-------------|----------------|
-| Investigation | `uid` (= investigation_uid) | title, description, is_archived, created_at, updated_at |
-| Source | `uid` (= source_uid) | display_name, source_type, alias, investigation_uid |
-| Claim | `uid` (= claim_uid) | claim_text, claim_type, current_status, decomposition_status, parent_claim_uid, investigation_uid, created_at, updated_at |
-| EvidenceItem | `uid` (= evidence_uid) | uri, content_hash, media_type, provenance_type, created_at |
-| EvidenceSpan | `uid` (= span_uid) | anchor_type, anchor_json, created_at |
-| Actor | `uid` (= actor_uid) | display_name, actor_type |
-| Tension | `uid` (= tension_uid) | kind, status, created_at |
+| **Investigation** | `uid` (= investigation_uid) | title, description, is_archived, created_at, updated_at |
+| **Source** | `uid` (= source_uid) | display_name, source_type, alias, investigation_uid |
+| **Claim** | `uid` (= claim_uid) | claim_text, claim_type, current_status, decomposition_status, parent_claim_uid, investigation_uid, created_at, updated_at |
+| **EvidenceItem** | `uid` (= evidence_uid) | uri, content_hash, media_type, provenance_type, created_at |
+| **EvidenceSpan** | `uid` (= span_uid) | anchor_type, anchor_json, created_at |
+| **Actor** | `uid` (= actor_uid) | display_name, actor_type |
+| **Tension** | `uid` (= tension_uid) | kind, status, created_at |
 
 All nodes have at least `uid` and typically `display_name` and `created_at` (where applicable).
 
@@ -20,17 +20,17 @@ All nodes have at least `uid` and typically `display_name` and `created_at` (whe
 
 | Relationship | From → To | Meaning |
 |--------------|-----------|---------|
-| CONTAINS | Investigation → Claim | Investigation contains this claim. |
-| CONTAINS_CLAIM | Investigation → Claim | Dedupe sync mode lineage edge; relationship stores original `claim_uid`. |
-| CONTAINS_EVIDENCE | Investigation → EvidenceItem | Dedupe sync mode lineage edge; relationship stores original `evidence_uid`. |
-| IN | EvidenceSpan → EvidenceItem | Span is a segment within this evidence item. |
-| SUPPORTS | EvidenceSpan → Claim | This span supports the claim (`link_uid`, optional `rationale`, optional `retracted_at` on rel). |
-| CHALLENGES | EvidenceSpan → Claim | This span challenges the claim (`link_uid`, optional `rationale`, optional `retracted_at` on rel). |
-| ASSERTS | Actor → Claim | Actor asserted this claim (asserted_at, mode, confidence on rel). |
-| BETWEEN | Tension → Claim | Tension is between two claims (one Tension has two BETWEEN edges). |
-| SUPERSEDES | EvidenceItem → EvidenceItem | New evidence supersedes prior (type, reason on rel). |
-| DECOMPOSES_TO | Claim → Claim | Parent claim decomposes to child claim. |
-| PROVIDED_BY | EvidenceItem → Source | Evidence was provided by this source. |
+| **CONTAINS** | Investigation → Claim | Investigation contains this claim. |
+| **CONTAINS_CLAIM** | Investigation → Claim | Dedupe sync mode lineage edge; relationship stores original `claim_uid`. |
+| **CONTAINS_EVIDENCE** | Investigation → EvidenceItem | Dedupe sync mode lineage edge; relationship stores original `evidence_uid`. |
+| **IN** | EvidenceSpan → EvidenceItem | Span is a segment within this evidence item. |
+| **SUPPORTS** | EvidenceSpan → Claim | This span supports the claim (`link_uid`, optional `rationale`, optional `retracted_at` on rel). |
+| **CHALLENGES** | EvidenceSpan → Claim | This span challenges the claim (`link_uid`, optional `rationale`, optional `retracted_at` on rel). |
+| **ASSERTS** | Actor → Claim | Actor asserted this claim (asserted_at, mode, confidence on rel). |
+| **BETWEEN** | Tension → Claim | Tension is between two claims (one Tension has two BETWEEN edges). |
+| **SUPERSEDES** | EvidenceItem → EvidenceItem | New evidence supersedes prior (type, reason on rel). |
+| **DECOMPOSES_TO** | Claim → Claim | Parent claim decomposes to child claim. |
+| **PROVIDED_BY** | EvidenceItem → Source | Evidence was provided by this source. |
 
 Relationships usually carry `source_event_id` for traceability; `SUPPORTS`/`CHALLENGES` also have `link_uid` for retraction handling. In dedupe sync mode, lineage relationships (`CONTAINS_CLAIM`, `CONTAINS_EVIDENCE`) are keyed by original UIDs and do not currently carry `source_event_id`.
 
