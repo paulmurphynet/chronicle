@@ -439,7 +439,9 @@ def _run_pipeline(batch: dict[str, Any], project_path: Path, output_dir: Path) -
             review_packet,
             exported,
         ) = _run_over_uvicorn()
-    except PermissionError:
+    except Exception:
+        # Example script should remain usable even when uvicorn/bootstrap networking
+        # is unavailable in constrained environments (e.g., CI sandboxes).
         (
             investigation_uid,
             claim_uid,
