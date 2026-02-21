@@ -1,7 +1,7 @@
 # Chronicle
 
 [![CI](https://github.com/paulmurphynet/chronicle/actions/workflows/ci.yml/badge.svg)](https://github.com/paulmurphynet/chronicle/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/chronicle-standard?label=PyPI)](https://pypi.org/project/chronicle-standard/)
+[![PyPI](https://img.shields.io/pypi/v/chronicle-standard.svg?label=PyPI&cacheSeconds=300)](https://pypi.org/project/chronicle-standard/)
 [![Frontend npm](https://img.shields.io/github/package-json/v/paulmurphynet/chronicle?filename=frontend%2Fpackage.json&label=frontend%20npm)](frontend/package.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
