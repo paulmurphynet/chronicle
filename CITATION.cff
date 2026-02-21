@@ -3,14 +3,14 @@
 cff-version: 1.2.0
 message: "If you use this software or the defensibility definition and schema, please cite it as below."
 title: "chronicle-standard"
-version: "0.1.0"
+version: "0.9.0"
 authors:
   - name: "Chronicle"
 type: software
 description: "Defensibility scoring for RAG and evals. Event-sourced evidence, claims, and defensibility; standalone scorer and .chronicle verifier. Includes technical report defining defensibility and core schema."
 license: MIT
-repository-code: "https://github.com/chronicle-standard/chronicle-standard"
-url: "https://github.com/chronicle-standard/chronicle-standard"
+repository-code: "https://github.com/paulmurphynet/chronicle"
+url: "https://github.com/paulmurphynet/chronicle"
 keywords:
   - defensibility
   - RAG

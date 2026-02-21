@@ -12,7 +12,7 @@ Current revision: v0.3 (published 2026-02-20)
 
 APA-style:
 
-`Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.3). GitHub. https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md`
+`Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.3). GitHub. https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md`
 
 BibTeX:
 
@@ -22,7 +22,7 @@ BibTeX:
   title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},
   year         = {2026},
   note         = {Working draft v0.3},
-  howpublished = {\url{https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md}}
+  howpublished = {\url{https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md}}
 }
 ```
 

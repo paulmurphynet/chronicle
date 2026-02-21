@@ -18,8 +18,8 @@
         "Aligned appendices and artifact inventory with current generated evidence-pack layout."
       ],
       "citation": {
-        "apa": "Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.3). GitHub. https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md",
-        "bibtex": "@misc{chronicle_whitepaper_v0_3_2026,\n  author       = {Chronicle},\n  title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},\n  year         = {2026},\n  note         = {Working draft v0.3},\n  howpublished = {\\url{https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md}}\n}"
+        "apa": "Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.3). GitHub. https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md",
+        "bibtex": "@misc{chronicle_whitepaper_v0_3_2026,\n  author       = {Chronicle},\n  title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},\n  year         = {2026},\n  note         = {Working draft v0.3},\n  howpublished = {\\url{https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md}}\n}"
       }
     },
     {
@@ -34,8 +34,8 @@
         "Added explicit guarantees/non-guarantees matrix tied to verifier and defensibility scorecard documentation."
       ],
       "citation": {
-        "apa": "Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.2). GitHub. https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md",
-        "bibtex": "@misc{chronicle_whitepaper_v0_2_2026,\n  author       = {Chronicle},\n  title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},\n  year         = {2026},\n  note         = {Working draft v0.2},\n  howpublished = {\\url{https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md}}\n}"
+        "apa": "Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.2). GitHub. https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md",
+        "bibtex": "@misc{chronicle_whitepaper_v0_2_2026,\n  author       = {Chronicle},\n  title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},\n  year         = {2026},\n  note         = {Working draft v0.2},\n  howpublished = {\\url{https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md}}\n}"
       }
     },
     {
@@ -50,8 +50,8 @@
         "Interoperability scope includes JSON-LD/PROV baseline and staged C2PA/VC/RO-Crate/ClaimReview compatibility."
       ],
       "citation": {
-        "apa": "Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.1). GitHub. https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md",
-        "bibtex": "@misc{chronicle_whitepaper_v0_1_2026,\n  author       = {Chronicle},\n  title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},\n  year         = {2026},\n  note         = {Working draft v0.1},\n  howpublished = {\\url{https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/whitepaper-draft.md}}\n}"
+        "apa": "Chronicle. (2026). Chronicle: A defensibility-centered provenance model with standards-compatible interoperability (Working draft v0.1). GitHub. https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md",
+        "bibtex": "@misc{chronicle_whitepaper_v0_1_2026,\n  author       = {Chronicle},\n  title        = {Chronicle: A Defensibility-Centered Provenance Model with Standards-Compatible Interoperability},\n  year         = {2026},\n  note         = {Working draft v0.1},\n  howpublished = {\\url{https://github.com/paulmurphynet/chronicle/blob/main/docs/whitepaper-draft.md}}\n}"
       }
     }
   ]

@@ -58,6 +58,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Integrations** — LangChain, LlamaIndex, Haystack (optional callbacks/components).
 - **Docs** — Eval contract, verifier, technical report, story, critical areas, lessons 00–11, troubleshooting, errors.
 
-[0.9.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.9.0
-[0.2.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.2.0
-[0.1.0]: https://github.com/chronicle-standard/chronicle-standard/releases/tag/v0.1.0
+[0.9.0]: https://github.com/paulmurphynet/chronicle/releases/tag/v0.9.0
+[0.2.0]: https://github.com/paulmurphynet/chronicle/releases/tag/v0.2.0
+[0.1.0]: https://github.com/paulmurphynet/chronicle/releases/tag/v0.1.0

@@ -120,7 +120,7 @@ To cite this technical report or Chronicle in research:
     author       = {Chronicle},
     year         = {2025},
     howpublished = {Technical report. chronicle-standard repository},
-    url          = {https://github.com/chronicle-standard/chronicle-standard/blob/main/docs/technical-report.md},
+    url          = {https://github.com/paulmurphynet/chronicle/blob/main/docs/technical-report.md},
     note         = {Defensibility definition, core schema, and use for RAG/reasoning evaluation.}
   }
   ```
@@ -129,7 +129,7 @@ To cite this technical report or Chronicle in research:
 
 - Preprint / standards paper: For publication workflow (drafting, evidence pack, review, standards outreach), see [Whitepaper plan](whitepaper-plan.md) and current [Whitepaper draft](whitepaper-draft.md). Once a preprint exists, add it here with standard citation format (e.g. arXiv ID, author, title, year). Placeholder: *When a preprint is available, insert the reference in this section.*
 
-- Reference implementation: chronicle-standard (Chronicle reference implementation). https://github.com/chronicle-standard/chronicle-standard (or the canonical repo URL). For machine-readable citation, see the repository root [CITATION.cff](../CITATION.cff).
+- Reference implementation: chronicle-standard (Chronicle reference implementation). https://github.com/paulmurphynet/chronicle (or the canonical repo URL). For machine-readable citation, see the repository root [CITATION.cff](../CITATION.cff).
 
 ---
 

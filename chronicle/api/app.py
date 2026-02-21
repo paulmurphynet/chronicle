@@ -31,6 +31,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from chronicle import __version__
 from chronicle.core.errors import (
     ChronicleIdempotencyCapacityError,
     ChronicleProjectNotFoundError,
@@ -121,7 +122,7 @@ class ScoreBody(BaseModel):
 app = FastAPI(
     title="Chronicle API",
     description="Minimal HTTP API for evidence, claims, defensibility, and export/import. Same shapes as eval contract and defensibility schema.",
-    version="0.1.0",
+    version=__version__,
 )
 
 # Static files (e.g. web verifier)
