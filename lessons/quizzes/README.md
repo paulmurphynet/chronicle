@@ -19,6 +19,17 @@ Use this quick rubric after each quiz:
 
 For stronger retention, answer first in your own notes, then compare with the key.
 
+Mastery mode (recommended for maintainers/integrators):
+
+- Answer every question with a file path and, when possible, the function or command name that proves your answer.
+- Re-run one command from the lesson and include one observed output fact.
+- If you miss a question, re-open code first, then update your answer from evidence.
+
+## Cumulative review cadence
+
+- After quizzes 04, 08, and 11, do a 10-minute cumulative review of prior wrong answers.
+- After quiz 14, run a full-system pass: answer one question per lesson from memory, then verify each answer in code.
+
 ## Index
 
 | Quiz | Lesson | Topic |
@@ -36,6 +47,7 @@ For stronger retention, answer first in your own notes, then compare with the ke
 | [quiz-11-interoperability-api-and-tests.md](quiz-11-interoperability-api-and-tests.md) | 11 | Interoperability, API, and tests |
 | [quiz-12-chronicle-file-format-and-schema.md](quiz-12-chronicle-file-format-and-schema.md) | 12 | The .chronicle file format and data schema |
 | [quiz-13-release-readiness-security-and-standards.md](quiz-13-release-readiness-security-and-standards.md) | 13 | Release readiness, security gates, and standards operations |
+| [quiz-14-mcp-agent-integration.md](quiz-14-mcp-agent-integration.md) | 14 | MCP agent integration |
 
 ## For maintainers
 

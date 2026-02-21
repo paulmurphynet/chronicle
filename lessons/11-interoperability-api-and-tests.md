@@ -1,6 +1,6 @@
 # Lesson 11: Interoperability, API, and tests
 
-Objectives: You’ll know how Chronicle fits into the wider ecosystem: terminology for interop, external IDs, provenance recording, claim–evidence export shapes, the optional HTTP API, and how tests and CI keep the codebase stable.
+Objectives: You’ll know how Chronicle fits into the wider ecosystem: terminology for interop, external IDs, provenance recording, claim–evidence export shapes, optional HTTP and MCP integration surfaces, and how tests and CI keep the codebase stable.
 
 **Key files:**
 
@@ -16,8 +16,11 @@ Objectives: You’ll know how Chronicle fits into the wider ecosystem: terminolo
 - [docs/branch-protection-rollout-verification.md](../docs/branch-protection-rollout-verification.md) — scripted release-evidence check for branch protection + required CI jobs
 - [docs/rag-evals-defensibility-metric.md](../docs/rag-evals-defensibility-metric.md) — RAG evals: contract, schema, running the scorer in your harness
 - [docs/api.md](../docs/api.md) — Optional HTTP API: install, config, endpoints, request identity
+- [docs/mcp.md](../docs/mcp.md) — Optional MCP server: install, transports, and client wiring
 - [docs/human-in-the-loop-and-attestation.md](../docs/human-in-the-loop-and-attestation.md) — Human curation, actor identity, verification level, curation UI
 - [chronicle/api/app.py](../chronicle/api/app.py) — FastAPI app (write/read/export, tier, evidence/claims/tensions lists, spans, tension suggestions, submission package)
+- [chronicle/mcp/server.py](../chronicle/mcp/server.py) — FastMCP server and Chronicle tool registrations
+- [chronicle/mcp/service.py](../chronicle/mcp/service.py) — MCP service adapter to Chronicle session operations
 - [chronicle/core/identity.py](../chronicle/core/identity.py) — IdP abstraction, get_effective_actor_from_request
 - [frontend/](../frontend/) — Reference UI (React + Vite): Try sample, investigations, evidence/claims/links, defensibility, tensions, suggestions, export, Learn guides; [frontend/README.md](../frontend/README.md), [frontend/public/guides.json](../frontend/public/guides.json)
 - [tests/](../tests/) — scorer/session/verifier/API/interop tests (including integration export contract and branch-protection rollout fixture checks)
@@ -80,6 +83,19 @@ Every write request records an actor (who did it). The API resolves the actor fr
 
 When the IdP (or headers) provide a verification level, the API stores it in the event payload as \_verification_level (and optionally \_attestation_ref). That way “attested with verified credential” is queryable. See [docs/human-in-the-loop-and-attestation.md](../docs/human-in-the-loop-and-attestation.md) and [docs/api.md#request-identity-and-attestation](../docs/api.md).
 
+## Optional MCP server
+
+docs/mcp.md and chronicle/mcp/server.py describe and implement the optional MCP server (`pip install -e ".[mcp]"`).
+
+The MCP surface exposes Chronicle operations as tools so assistants can call them directly. Tool coverage includes create/list investigations, ingest evidence text (with auto-span), propose/list claims, support/challenge links, defensibility, reasoning brief, and investigation export.
+
+MCP is complementary to HTTP API:
+
+- HTTP API: request/response integration for UIs/services.
+- MCP: tool-calling integration for assistant runtimes.
+
+Both map to the same session/event operations and trust model.
+
 ### Reference UI (frontend/)
 
 The Reference UI lives in frontend/ in this repo: a React + Vite + TypeScript app that talks only to the HTTP API (no private backend). Run it from frontend/ with `npm ci` then `npm run dev` (default http://localhost:5173). It provides: Home with Try sample (creates a minimal investigation: one evidence, one claim, one support link, then opens the investigation); Investigations list and Investigation detail (overview, tier + tier history, evidence, claims, links, defensibility, tensions, tension suggestions—confirm by declaring the tension, dismiss via the dismiss endpoint—export .chronicle and submission package); Learn (step-by-step guides per vertical: journalism, legal, compliance) from frontend/public/guides.json. See [docs/reference-ui-plan.md](../docs/reference-ui-plan.md) and [frontend/README.md](../frontend/README.md). The API can also be used with the minimal curation UI at /static/curation.html (e.g. `http://127.0.0.1:8000/static/curation.html`) for quick actor-attributed writes.
@@ -97,6 +113,7 @@ tests/ contains:
 - **test_identity.py** — Identity module: NoneIdP, get_effective_actor_from_request (headers, default), get_identity_provider.
 - **test_cli_actor.py** — CLI actor identity: _actor_from_args (args, env, default), create-investigation with --actor-id records actor on event.
 - **test_api_contract.py** — API contract behavior (docs flow, import/export, identity headers, error mapping, pagination).
+- **test_mcp_service.py** — MCP service lifecycle behavior (investigation, evidence/span, claim, link, defensibility, brief, export) and validation failures.
 - test_generic_export_contracts.py + test_integration_export_contracts.py — end-to-end interoperability contract tests for JSON/CSV/Markdown/`.chronicle`/signed-bundle surfaces.
 - **test_branch_protection_rollout.py** — fixture-based rollout checks for branch-protection and required-job evidence logic.
 
@@ -118,6 +135,7 @@ That keeps scorer/session/verifier behavior, interoperability contracts, fronten
 2. Open docs/external-ids.md and find where evidence metadata is documented. Confirm that fact_check_id (or similar) can be stored there.
 3. Open tests/test_standalone_scorer.py and run pytest tests/test_standalone_scorer.py -v. Confirm at least one “valid input” and one “invalid input” test pass.
 4. (Optional) Install `.[api]`, set CHRONICLE_PROJECT_PATH, run uvicorn chronicle.api.app:app, and call GET /health and POST /investigations with a JSON body {"title": "Test"}. Add header X-Actor-Id: your_name on the POST and confirm the investigation is attributed to you. Run the Reference UI from frontend/ (`npm run dev`) and use Try sample on the home page, then explore the investigation (evidence, claims, defensibility, export). Or open /static/curation.html for the minimal curation UI.
+5. (Optional) Install `.[mcp]`, run `chronicle-mcp --project-path /tmp/chronicle_lesson11_mcp`, and complete one MCP lifecycle: create investigation, ingest evidence text, propose claim, then link support.
 
 ---
 
@@ -126,8 +144,9 @@ That keeps scorer/session/verifier behavior, interoperability contracts, fronten
 - Terminology (glossary) and external IDs (evidence metadata) help fact-checkers and provenance tools align with Chronicle.
 - Provenance recording and claim–evidence–metrics docs describe what we store and what shape we can emit; RAG evals doc is the entry point for adding defensibility to your harness.
 - Optional HTTP API (chronicle/api/, install `.[api]`) exposes write/read/export over HTTP with the same shapes as the eval contract. It also exposes tier (set + history) for friction tiers (spark → forge → vault), evidence/claims/tensions lists per investigation, evidence spans (for linking), tension suggestions (list + dismiss; confirm by declaring the tension), and submission package (ZIP). Request identity is set via X-Actor-Id / X-Actor-Type (or IdP); verification_level can be stored in event payloads. The Reference UI (frontend/, React + Vite) is an API-only client: Try sample, investigations, evidence/claims/links, defensibility, tensions, suggestions (Propose–Confirm), export, and Learn guides per vertical. Minimal curation UI at /static/curation.html is also available.
+- Optional MCP server (chronicle/mcp/, install `.[mcp]`) exposes equivalent Chronicle lifecycle operations as assistant-callable tools over `stdio`, `sse`, or `streamable-http`.
 - Interoperability profiles and hardening add standards mappings (JSON-LD/PROV, ClaimReview, RO-Crate, C2PA/VC compatibility) and release-oriented export/import contract checks.
-- Tests (scorer, session, verifier, API contract, interoperability contract, attestation, identity, CLI actor, branch-protection rollout checks) and CI (push/PR/manual with core/frontend/Postgres gates) keep behavior stable.
+- Tests (scorer, session, verifier, API contract, MCP service, interoperability contract, attestation, identity, CLI actor, branch-protection rollout checks) and CI (push/PR/manual with core/frontend/Postgres gates) keep behavior stable.
 
 ← Previous: [Lesson 10: Export, import, and Neo4j](10-export-import-neo4j.md) | Index: [Lessons](README.md) | Next →: [Lesson 12: The .chronicle file format and data schema](12-chronicle-file-format-and-schema.md)
 

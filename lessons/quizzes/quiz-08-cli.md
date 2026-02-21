@@ -22,6 +22,8 @@ Answer these after reading the lesson and the CLI main. Try not to peek at the a
 
 7. How do you attribute a CLI write (e.g. create-investigation) to yourself so the ledger records you as the actor?
 
+8. What is the difference between `chronicle` and `chronicle-mcp` entry points, and where is `chronicle-mcp` wired?
+
 ---
 
 ## Answer key
@@ -41,6 +43,8 @@ Answer these after reading the lesson and the CLI main. Try not to peek at the a
 6. chronicle get-defensibility &lt;claim_uid&gt; --path /path/to/project (claim_uid is a positional argument). Returns the defensibility scorecard for that claim.
 
 7. Set CHRONICLE_ACTOR_ID (and optionally CHRONICLE_ACTOR_TYPE) in the environment, or pass --actor-id and --actor-type on the command (e.g. `chronicle --actor-id jane_doe create-investigation "My run" --path /path/to/project`). See docs/human-in-the-loop-and-attestation.md.
+
+8. `chronicle` is the human/operator CLI with explicit subcommands. `chronicle-mcp` is a protocol server for MCP tool-calling by assistants. `chronicle-mcp` is wired in `pyproject.toml` as `chronicle.mcp.server:main` (optional `.[mcp]` extra).
 
 ---
 

@@ -29,8 +29,9 @@ On GitHub: Use the learning path table above. At the bottom of each lesson you'l
 | [11](11-interoperability-api-and-tests.md) | Interoperability, API, and tests | Terminology, external IDs, provenance, HTTP API, tests, CI |
 | [12](12-chronicle-file-format-and-schema.md) | The .chronicle file format and data schema | ZIP layout, manifest, chronicle.db (events + read model), evidence/; full schema reference |
 | [13](13-release-readiness-security-and-standards.md) | Release readiness, security gates, and standards operations | `Makefile`, CI/release workflows, security gates, branch protection rollout, standards review cycle |
+| [14](14-mcp-agent-integration.md) | MCP agent integration | `chronicle/mcp/`, `docs/mcp.md`, MCP transports/tool-calling boundaries |
 
-The full path from 00 to 13 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, interop/API/tests, the complete .chronicle file format and data schema (manifest, DB tables, evidence layout), and release readiness (security/CI/standards operations).
+The full path from 00 to 14 covers the codebase: map, scorer, verifier, events, store/session, defensibility, integrations/scripts, CLI (including quickstart-rag and actor identity), epistemic tools, export/import/Neo4j, interop/API/tests, the complete .chronicle file format and data schema (manifest, DB tables, evidence layout), release readiness (security/CI/standards operations), and MCP tool-calling integration for AI assistants.
 
 ## Lesson format
 
@@ -47,9 +48,24 @@ Each lesson includes:
 
 - Fast onboarding (2-3 hours): 01, 02, 03, 05, 11, 12
 - Integrator path (API + adapters): 01, 02, 05, 07, 10, 11, 13
+- Agent tooling path (MCP + API): 01, 05, 07, 08, 11, 14
 - Trust and release path (maintainers): 03, 06, 10, 11, 12, 13
 
 If you are new to Chronicle, still start with 00 and 01 before choosing a track.
+
+## Project capstone (recommended after Lesson 14)
+
+Use this as a whole-project integration drill:
+
+1. Create a fresh project and investigation (`chronicle init`, `chronicle create-investigation`).
+2. Ingest evidence + claim + support link via one surface (CLI or API).
+3. Repeat the same lifecycle via a second surface (API or MCP) to confirm model parity.
+4. Compute defensibility and generate a reasoning brief.
+5. Export `.chronicle`, then verify with `chronicle-verify`.
+6. (Optional) Run Neo4j export/sync checks.
+7. Run `make check` and review release-readiness docs (`docs/production-readiness-checklist.md`, `docs/to_do.md`).
+
+If you can complete this without guessing at undocumented behavior, you have working command of the full Chronicle system.
 
 ## Glossary
 

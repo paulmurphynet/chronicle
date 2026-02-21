@@ -28,6 +28,8 @@ Answer these after reading the lesson and opening the linked workflow/docs files
 
 10. Why does Chronicle separate release-gated core lint scope from optional broader lint scope?
 
+11. If your release includes MCP usage over network transport, what additional operational evidence should be part of release readiness besides core CI pass?
+
 ---
 
 ## Answer key
@@ -55,6 +57,8 @@ Answer these after reading the lesson and opening the linked workflow/docs files
 
 10. To keep release gates stable and trust-surface-focused while still allowing staged cleanup of non-core surfaces (`scripts/`, `tests/`) without destabilizing near-term release readiness.
 
+11. Evidence that MCP deployment controls are in place for the chosen transport (for example auth/network boundary verification) plus at least one MCP lifecycle smoke run (create → ingest → claim → link) in release prep notes.
+
 ---
 
-← Previous: [quiz-12-chronicle-file-format-and-schema](quiz-12-chronicle-file-format-and-schema.md) | Index: [Quizzes](README.md) | End of quizzes
+← Previous: [quiz-12-chronicle-file-format-and-schema](quiz-12-chronicle-file-format-and-schema.md) | Index: [Quizzes](README.md) | Next →: [quiz-14-mcp-agent-integration](quiz-14-mcp-agent-integration.md)

@@ -39,7 +39,7 @@ Each quiz has questions (and, in the same file or a separate key, answers) so yo
 
 ## What “100% of the codebase” means
 
-We don’t mean every single line. We mean every important area: the scorer, the verifier, the event model, the store, the session API, defensibility computation, integrations, and the main scripts. After the full lesson set, you’ll have seen and understood the role of each major part.
+We don’t mean every single line. We mean every important area: the scorer, the verifier, the event model, the store, the session API, defensibility computation, integrations, API/MCP surfaces, and the main scripts. After the full lesson set, you’ll have seen and understood the role of each major part.
 
 ## Next step
 

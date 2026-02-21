@@ -19,6 +19,7 @@ Objectives: You will understand how Chronicle moves from “code that works” t
 - [docs/whitepaper-plan.md](../docs/whitepaper-plan.md) — whitepaper workflow and standards-facing publication track
 - [docs/standards-submission-package.md](../docs/standards-submission-package.md) — venue-specific submission checklist
 - [docs/external-standards-review-cycle.md](../docs/external-standards-review-cycle.md) — accepted/rejected deltas from external reviewers
+- [docs/mcp.md](../docs/mcp.md) — MCP deployment surface and transport security notes
 
 ---
 
@@ -129,6 +130,18 @@ The key rule: unresolved items must stay visible in `docs/to_do.md` until object
 
 ---
 
+## 7. Optional integration surfaces still need operational discipline
+
+Chronicle has optional extras (`.[api]`, `.[mcp]`, `.[neo4j]`) so teams can adopt surfaces incrementally. Optional does not mean unmanaged:
+
+- If MCP is part of your deployment, include a local smoke check in release prep (server starts, one create/ingest/claim/link flow succeeds).
+- For network MCP transports, include auth/network boundary verification in your runbook.
+- Keep core trust artifacts stable regardless of integration surface: `.chronicle` verifier output and reproducible defensibility behavior remain canonical.
+
+Release readiness decisions should explicitly say which optional surfaces are in-scope for this release.
+
+---
+
 ## Try it
 
 1. Run local release gates:
@@ -141,6 +154,7 @@ The key rule: unresolved items must stay visible in `docs/to_do.md` until object
 4. Read `docs/to_do.md` and list the currently open release blockers in one sentence each.
 5. (When repo is public and token is available) run rollout verification:
    - `PYTHONPATH=. python3 scripts/check_branch_protection_rollout.py --repo owner/repo --branch main --output reports/branch_protection_rollout_report.json --stdout-json`
+6. If MCP is enabled for your release target, run `chronicle-mcp --project-path /tmp/chronicle_release_mcp_smoke --transport stdio` and complete one tool-call lifecycle (create investigation → ingest evidence → propose claim → link support).
 
 ---
 
@@ -151,9 +165,10 @@ The key rule: unresolved items must stay visible in `docs/to_do.md` until object
 - Security scans are threshold-enforced and fail-closed.
 - Branch protection is validated by script and captured as a machine-readable release artifact.
 - Standards and whitepaper progress are tracked as an operational review cycle with explicit deltas.
+- Optional surfaces (including MCP) should be explicitly in/out of scope per release with matching smoke/runbook evidence.
 
 ---
 
-← Previous: [Lesson 12: The .chronicle file format and data schema](12-chronicle-file-format-and-schema.md) | Index: [Lessons](README.md) | End of lessons
+← Previous: [Lesson 12: The .chronicle file format and data schema](12-chronicle-file-format-and-schema.md) | Index: [Lessons](README.md) | Next →: [Lesson 14: MCP agent integration](14-mcp-agent-integration.md)
 
 Quiz: [quizzes/quiz-13-release-readiness-security-and-standards.md](quizzes/quiz-13-release-readiness-security-and-standards.md)

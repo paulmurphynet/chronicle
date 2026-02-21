@@ -1,6 +1,6 @@
 # Lesson 07: Integrations and scripts
 
-Objectives: You’ll know where RAG and framework integrations live, what the main scripts do (benchmark, eval harness adapter, starter packs, API ingestion pipeline, integration contract harnesses), and how they plug into the Chronicle session.
+Objectives: You’ll know where RAG and framework integrations live, what the main scripts and protocol adapters do (benchmark, eval harness adapter, starter packs, API ingestion pipeline, integration contract harnesses, MCP server), and how they plug into the Chronicle session.
 
 **Key files:**
 
@@ -19,6 +19,8 @@ Objectives: You’ll know where RAG and framework integrations live, what the ma
 - [docs/api-ingestion-pipeline-example.md](../docs/api-ingestion-pipeline-example.md) — deterministic API pipeline walkthrough
 - [docs/integration-export-hardening.md](../docs/integration-export-hardening.md) — hardened interoperability contract for export/import surfaces
 - [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) — professional framing for the transcript benchmark dataset
+- [docs/mcp.md](../docs/mcp.md) — MCP server integration for agent tool-calling
+- [chronicle/mcp/](../chronicle/mcp/) — MCP server/service implementation
 
 ---
 
@@ -44,6 +46,7 @@ Open scripts/README.md and find the “First-class scripts” table. These are t
 - **starter_packs/bootstrap.py** — Create a clean workspace from opinionated vertical defaults (journalism/legal/audit), including deterministic fixture import and report/export artifacts.
 - **api_ingestion_pipeline_example.py** — Run an end-to-end API write/read/export flow from one batch input.
 - **check_integration_export_contracts.py** — Validate adapter/API-facing import/export contracts for JSON, CSV ZIP, Markdown reasoning brief, `.chronicle`, and signed bundle flows.
+- **chronicle-mcp** — Run Chronicle as an MCP server so AI assistants can execute Chronicle investigation/evidence/claim/defensibility/export tools.
 - **export_for_ml.py** — Export investigation data for ML/training.
 - **rag_path_demo.py** — Minimal RAG path (session: ingest, claim, link).
 - **\*_rag_chronicle.py** — LangChain, LlamaIndex, Haystack, cross-framework demos.
@@ -72,6 +75,16 @@ uvicorn chronicle.api.app:app --reload
 ```
 
 It exposes write (investigations, evidence, claims, links, tensions), read (claim, defensibility, reasoning brief), and export/import (.chronicle). Response shapes match the eval contract and defensibility schema. No auth in this minimal version; see [docs/api.md](../docs/api.md). Useful for fact-checking or provenance UIs that call Chronicle over HTTP.
+
+## Optional MCP server
+
+If you install the `[mcp]` extra (`pip install -e ".[mcp]"`), you can expose Chronicle tools to MCP-capable assistants:
+
+```bash
+chronicle-mcp --project-path /path/to/project
+```
+
+This is usually paired with local `stdio` transport for agent integrations. Chronicle MCP tools mirror session operations (create investigation, ingest evidence text, propose claim, link support/challenge, get defensibility/reasoning brief, export). See [docs/mcp.md](../docs/mcp.md).
 
 ## Other scripts (layout)
 
@@ -115,12 +128,14 @@ So scripts are thin orchestration; the engine is the store and commands.
 6. (Optional) Install `.[api]`, set CHRONICLE_PROJECT_PATH, run uvicorn chronicle.api.app:app, and open http://127.0.0.1:8000/docs to try the API.
 7. Open scripts/ingest_transcript_csv.py and find where it calls session.ingest_evidence, session.propose_claim, and session.link_support. Confirm it follows the same pattern as the scorer (without the temp project).
 8. Read [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) and note the two non-goals: no sensational framing and no claim to establish legal truth.
+9. (Optional) Install `.[mcp]`, run `chronicle-mcp --project-path /tmp/chronicle_lesson7_mcp`, and from an MCP client call create-investigation and ingest-evidence-text once.
 
 ## Summary
 
 - First-class scripts and CLI (scripts/README.md, CLI): chronicle quickstart-rag for a one-command RAG flow; scorer, verifier, benchmark, eval harness adapter, export_for_ml, RAG demos. Use them to plug Chronicle into pipelines.
 - **Onboarding and contract harnesses**: starter packs reduce first-project ambiguity; API ingestion and integration export contract scripts provide deterministic interoperability baselines.
 - Adapters (scripts/adapters/): RAG→scorer example, fact-checker→Chronicle, provenance→Chronicle. Copy-paste templates for interop.
+- MCP server (`chronicle-mcp`, `chronicle/mcp/`) is the assistant protocol surface for the same Chronicle session operations.
 - Optional HTTP API (chronicle/api/, install `.[api]`): write/read/export over HTTP; same shapes as eval contract and defensibility schema.
 - Integrations (chronicle/integrations/) wire RAG frameworks to ChronicleSession so that runs record evidence and claims.
 - All rely on the same session API and event store; they differ only in input source and output (JSON, .chronicle, Neo4j).

@@ -28,6 +28,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 
 10. Which script validates the hardened interoperability export/import contract across JSON, CSV ZIP, Markdown reasoning brief, `.chronicle`, and signed bundle flows?
 
+11. Which command starts Chronicle’s MCP server, and what optional dependency extra must be installed first?
+
 ---
 
 ## Answer key
@@ -51,6 +53,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 9. Frame it as an evidence-quality and trust-evaluation benchmark (claim-evidence linkage, support/challenge, temporal consistency), grounded in a bounded transcript corpus. An explicit non-goal is sensational retelling or claiming Chronicle establishes legal truth.
 
 10. `scripts/check_integration_export_contracts.py`.
+
+11. Command: `chronicle-mcp --project-path /path/to/project` (or with transport flags). Install extra: `pip install -e ".[mcp]"` (or package install with `[mcp]`).
 
 ---
 

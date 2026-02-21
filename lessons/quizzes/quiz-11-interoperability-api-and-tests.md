@@ -32,6 +32,10 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 12. Which script generates a machine-readable report for branch-protection rollout and required CI job evidence?
 
+13. What is the MCP integration surface in Chronicle, and which two files define its server and service layers?
+
+14. Which test file validates MCP lifecycle behavior?
+
 ---
 
 ## Answer key
@@ -59,6 +63,10 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 11. You confirm by declaring the tension: POST declare_tension with the same claim_a_uid and claim_b_uid. The backend then marks the matching suggestion as confirmed. There is no separate “confirm” endpoint; dismiss is the only dedicated tension-suggestion endpoint (POST …/tension-suggestions/{id}/dismiss).
 
 12. `scripts/check_branch_protection_rollout.py`.
+
+13. Chronicle ships an optional MCP server for assistant tool-calling. The server layer is in `chronicle/mcp/server.py`; the Chronicle operation adapter layer is in `chronicle/mcp/service.py`. Setup and transport guidance are in `docs/mcp.md`.
+
+14. `tests/test_mcp_service.py`.
 
 ---
 
