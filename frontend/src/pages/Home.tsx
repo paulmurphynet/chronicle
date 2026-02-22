@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
+import { getWebAppTestCase, seedWebAppTestCase, WEB_APP_TEST_CASES } from '../lib/testCases'
 
 export function Home() {
   const navigate = useNavigate()
@@ -9,6 +10,10 @@ export function Home() {
   const [healthChecking, setHealthChecking] = useState(false)
   const [healthStatus, setHealthStatus] = useState<'unknown' | 'ok' | 'error'>('unknown')
   const [healthMessage, setHealthMessage] = useState<string>('')
+  const [seedLoading, setSeedLoading] = useState(false)
+  const [selectedCaseId, setSelectedCaseId] = useState<string>(WEB_APP_TEST_CASES[0]?.id ?? '')
+
+  const selectedCase = getWebAppTestCase(selectedCaseId)
 
   async function trySample() {
     setLoading(true)
@@ -55,6 +60,20 @@ export function Home() {
     }
   }
 
+  async function createRealisticCase() {
+    if (!selectedCaseId) return
+    setSeedLoading(true)
+    setError(null)
+    try {
+      const seeded = await seedWebAppTestCase(selectedCaseId)
+      navigate(`/investigations/${seeded.investigation_uid}`, { state: { fromSeedCase: seeded.case_name } })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    } finally {
+      setSeedLoading(false)
+    }
+  }
+
   return (
     <div className="page-home">
       <h2>Welcome</h2>
@@ -81,6 +100,30 @@ export function Home() {
         {healthStatus === 'error' && <p className="error">API check failed: {healthMessage}</p>}
       </div>
       {error && <p className="error">{error}</p>}
+      <div className="home-card">
+        <h3>Realistic fictional test cases</h3>
+        <p className="muted">
+          Seed complete synthetic investigations for QA, demos, and training. All entities in these cases are fictional.
+        </p>
+        <label>
+          Scenario
+          <select value={selectedCaseId} onChange={(e) => setSelectedCaseId(e.target.value)}>
+            {WEB_APP_TEST_CASES.map((scenario) => (
+              <option key={scenario.id} value={scenario.id}>{scenario.name}</option>
+            ))}
+          </select>
+        </label>
+        {selectedCase && (
+          <p className="muted">
+            {selectedCase.blurb} Includes {selectedCase.evidence.length} evidence items, {selectedCase.claims.length} claims, and {selectedCase.tensions.length} tensions. Target tier: {selectedCase.target_tier}.
+          </p>
+        )}
+        <div className="actions">
+          <button type="button" onClick={createRealisticCase} disabled={seedLoading || !selectedCaseId}>
+            {seedLoading ? 'Creating scenario…' : 'Create realistic case'}
+          </button>
+        </div>
+      </div>
       <div className="home-card">
         <h3>Next after sample</h3>
         <p className="muted">Use the Learn page for vertical workflows and checklist-style guides.</p>

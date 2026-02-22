@@ -15,7 +15,9 @@ type Tab = 'overview' | 'evidence' | 'claims' | 'links' | 'defensibility' | 'ten
 export function InvestigationDetail() {
   const { id } = useParams<{ id: string }>()
   const location = useLocation()
-  const fromTrySample = (location.state as { fromTrySample?: boolean })?.fromTrySample ?? false
+  const navState = (location.state as { fromTrySample?: boolean; fromSeedCase?: string } | undefined) ?? {}
+  const fromTrySample = navState.fromTrySample ?? false
+  const fromSeedCase = navState.fromSeedCase ?? null
 
   const [inv, setInv] = useState<Investigation | null>(null)
   const [evidence, setEvidence] = useState<EvidenceItem[]>([])
@@ -242,6 +244,24 @@ export function InvestigationDetail() {
             <button type="button" onClick={() => setTab('evidence')}>Go to Evidence</button>
             <button type="button" onClick={() => setTab('defensibility')}>Go to Defensibility</button>
             <button type="button" onClick={() => setTab('export')}>Go to Export</button>
+          </div>
+        </div>
+      )}
+      {fromSeedCase && (
+        <div className="banner">
+          <p>
+            <strong>Scenario seeded.</strong> Loaded <strong>{fromSeedCase}</strong> (fictional training case).
+          </p>
+          <ol>
+            <li>Review support/challenge links in <strong>Links</strong>.</li>
+            <li>Check contradictions in <strong>Tensions</strong> and <strong>Suggestions</strong>.</li>
+            <li>Inspect score deltas in <strong>Defensibility</strong>.</li>
+            <li>Run policy readiness checks in <strong>Policy</strong>.</li>
+          </ol>
+          <div className="button-row">
+            <button type="button" onClick={() => setTab('links')}>Go to Links</button>
+            <button type="button" onClick={() => setTab('tensions')}>Go to Tensions</button>
+            <button type="button" onClick={() => setTab('defensibility')}>Go to Defensibility</button>
           </div>
         </div>
       )}

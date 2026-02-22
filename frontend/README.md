@@ -2,7 +2,7 @@
 
 This directory is the home for the **Chronicle Reference UI**: the official human-in-the-loop frontend that talks only to the Chronicle HTTP API. We keep it in the **same repo** as the core so that docs and API/UI changes stay in sync and one PR can touch both when needed.
 
-**Current state:** Full first version: **Home** (Try sample), **Investigations** list and detail (overview, tier + tier history, evidence, claims, links, defensibility, tensions, tension suggestions with confirm/dismiss, export .chronicle and submission package), **Learn** (step-by-step guides per vertical from `public/guides.json`). Static assets (e.g. `public/sample.chronicle`) live here for demos.
+**Current state:** Full first version: **Home** (Try sample + one-click fictional realistic case seeds), **Investigations** list and detail (overview, tier + tier history, evidence, claims, links, defensibility, tensions, tension suggestions with confirm/dismiss, export .chronicle and submission package), **Learn** (step-by-step guides per vertical from `public/guides.json`). Static assets (e.g. `public/sample.chronicle`) live here for demos.
 
 **Run the UI:** From this directory: `npm ci` then `npm run dev`. Open http://localhost:5173.
 
