@@ -42,7 +42,8 @@ python3 scripts/supply_chain_gate.py \
 
 # Optional: container scan gate (requires Trivy installed)
 # Scan the same pinned Postgres image digest used in local/runtime + release gates.
-trivy fs --format json --output reports/trivy-fs.json .
+# Exclude local virtualenv to avoid package-metadata false positives/noise.
+trivy fs --skip-dirs .venv --format json --output reports/trivy-fs.json .
 trivy image --format json --output reports/trivy-postgres-bitnami.json bitnami/postgresql@sha256:9a4d4d644f36fa01715066c769e0c480a4bdd528f6b4880fa8e32d9fd715ec8a
 python3 scripts/container_security_gate.py \
   --report reports/trivy-fs.json \
