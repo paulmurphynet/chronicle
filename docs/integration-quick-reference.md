@@ -35,6 +35,7 @@ Exit 0 = structurally valid (manifest, schema, evidence hashes). See [Verifier](
 - In your eval loop: for each run, build the input JSON, call the scorer (stdin or in-process), record `provenance_quality`, `corroboration`, `contradiction_status`, etc.
 - RAG evals (full guide): [RAG evals: defensibility metric](rag-evals-defensibility-metric.md) — contract, schema, and how to run the scorer in your RAG harness.
 - Frameworks: RAGAS, Trulens, LangSmith (and custom harnesses) can add a custom metric that invokes the scorer; see [Integrating with Chronicle](integrating-with-chronicle.md).
+- RAGAS quick adapter: `PYTHONPATH=. python3 scripts/adapters/ragas_batch_to_chronicle.py --input runs_ragas.jsonl --output scored_ragas.jsonl`.
 
 ---
 

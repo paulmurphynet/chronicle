@@ -36,6 +36,8 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 
 14. Which test file validates MCP lifecycle behavior?
 
+15. For a RAGAS dataset with `question`, `answer`, and `contexts`, which adapter provides direct batch Chronicle scoring?
+
 ---
 
 ## Answer key
@@ -67,6 +69,8 @@ Answer these after reading the lesson and the linked docs. Try not to peek at th
 13. Chronicle ships an optional MCP server for assistant tool-calling. The server layer is in `chronicle/mcp/server.py`; the Chronicle operation adapter layer is in `chronicle/mcp/service.py`. Setup and transport guidance are in `docs/mcp.md`.
 
 14. `tests/test_mcp_service.py`.
+
+15. `scripts/adapters/ragas_batch_to_chronicle.py`.
 
 ---
 

@@ -40,6 +40,7 @@ To add Chronicle defensibility as a metric in a RAG eval framework (e.g. RAGAS, 
 1. Contract: One run = one (query, answer, evidence) in → one defensibility metrics object out. See [Eval contract](eval_contract.md) and [eval_contract_schema.json](eval_contract_schema.json).
 2. Invoke the scorer: Pipe JSON to `scripts/standalone_defensibility_scorer.py` or call `defensibility_metrics_for_claim(session, claim_uid)` after building the session (ingest → propose claim → link support). The output shape is stable (claim_uid, provenance_quality, corroboration, contradiction_status, optional knowability).
 3. Adapter: Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py) as a copy-paste template: read (query, answer, evidence) from your harness (stdin or file), call the scorer, print metrics JSON. Your harness then parses the JSON and records the metric per run.
+4. RAGAS-ready batch path: Use [scripts/adapters/ragas_batch_to_chronicle.py](../scripts/adapters/ragas_batch_to_chronicle.py) when your rows already look like RAGAS (`question`, `answer`, `contexts`/`retrieved_contexts`). It auto-maps common keys and emits one scored JSONL row per input row.
 
 No Chronicle-specific server is required; the scorer runs in-process. For benchmarks and reporting, see [Eval and benchmarking](eval-and-benchmarking.md) and [Defensibility benchmark](benchmark.md).
 
@@ -54,6 +55,14 @@ def defensibility_metric(run: Run) -> float | dict:
 ```
 
 Use [scripts/adapters/example_rag_to_scorer.py](../scripts/adapters/example_rag_to_scorer.py) as the scorer bridge; your framework then calls it per run and aggregates.
+
+RAGAS batch adapter quick run:
+
+```bash
+PYTHONPATH=. python3 scripts/adapters/ragas_batch_to_chronicle.py \
+  --input runs_ragas.jsonl \
+  --output scored_ragas.jsonl
+```
 
 ---
 

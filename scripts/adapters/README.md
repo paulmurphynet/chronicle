@@ -6,6 +6,7 @@ Minimal adapters that map external formats or harnesses to Chronicle (scorer, se
 |--------|---------|
 | **example_rag_to_scorer.py** | Copy-paste template: read JSON (query, answer, evidence) from stdin or file, call the defensibility scorer, print metrics JSON. Use when your RAG harness outputs the same shape as the [eval contract](../../docs/eval_contract.md). |
 | **starter_batch_to_scorer.py** | Production-ready starter: read harness JSONL rows, map fields/paths to eval contract, run scorer, emit one JSONL output row per run with `chronicle` payload. Supports nested-path mapping via `--profile`. |
+| **ragas_batch_to_chronicle.py** | RAGAS-first batch adapter: auto-maps common RAGAS keys (`question`, `answer`, `contexts` / `retrieved_contexts`) to Chronicle eval contract and emits scored JSONL rows with mapping metadata. |
 | **validate_adapter_outputs.py** | Validate adapter output rows against eval contract success/error shapes (defaults to `chronicle` wrapper key). |
 | **fact_checker_to_chronicle.py** | Fact-checker output → Chronicle: claim + verdict + sources (JSON) → evidence items, propose_claim, support/challenge links. Expected format: `claim`, `verdict` (true/false/mixed), `sources` (array with snippet, stance). See script docstring. |
 | **provenance_to_chronicle.py** | Provenance assertions → Chronicle: register sources, ingest evidence, link_evidence_to_source. We record; we do not verify. Expected format: `assertions` array with source_display_name, evidence_content, etc. See [Provenance recording](../../docs/provenance-recording.md). Requires `--path` to an existing project. |
@@ -34,6 +35,11 @@ PYTHONPATH=. python3 scripts/adapters/starter_batch_to_scorer.py \
   --profile scripts/adapters/examples/mapping_profile_nested.json \
   --input scripts/adapters/examples/harness_runs_nested.jsonl \
   --output scored_nested.jsonl
+
+# RAGAS-like rows (JSONL or JSON array)
+PYTHONPATH=. python3 scripts/adapters/ragas_batch_to_chronicle.py \
+  --input runs_ragas.jsonl \
+  --output scored_ragas.jsonl
 ```
 
 ### Included examples

@@ -30,6 +30,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 
 11. Which command starts Chronicle’s MCP server, and what optional dependency extra must be installed first?
 
+12. You have RAGAS-style rows with keys `question`, `answer`, and `contexts`. Which Chronicle adapter is the direct batch path?
+
 ---
 
 ## Answer key
@@ -55,6 +57,8 @@ Answer these after reading the lesson and the scripts/README. Try not to peek at
 10. `scripts/check_integration_export_contracts.py`.
 
 11. Command: `chronicle-mcp --project-path /path/to/project` (or with transport flags). Install extra: `pip install -e ".[mcp]"` (or package install with `[mcp]`).
+
+12. `scripts/adapters/ragas_batch_to_chronicle.py`.
 
 ---
 

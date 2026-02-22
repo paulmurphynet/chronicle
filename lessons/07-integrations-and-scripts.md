@@ -59,6 +59,7 @@ Open scripts/adapters/README.md. Adapters map external formats into Chronicle (o
 
 - **example_rag_to_scorer.py** — Minimal copy-paste template: read JSON (query, answer, evidence) from stdin or file, call the scorer, print metrics.
 - **starter_batch_to_scorer.py** — Batch-ready template: JSONL harness rows in, scored JSONL rows out; supports mapping profiles for nested key paths.
+- **ragas_batch_to_chronicle.py** — RAGAS-first adapter: auto-maps common RAGAS fields (`question`, `answer`, `contexts` / `retrieved_contexts`) to Chronicle eval contract rows and emits scored JSONL.
 - **validate_adapter_outputs.py** — Validates adapter output rows against the eval contract shape (success/error payload).
 - **fact_checker_to_chronicle.py** — Fact-checker output (claim + verdict + sources) → evidence items, propose_claim, support/challenge links. Expected JSON: `claim`, `verdict`, `sources` (with snippet, stance).
 - **provenance_to_chronicle.py** — Provenance assertions (“this evidence from this source”) → register_source, ingest_evidence, link_evidence_to_source. We record; we don’t verify. Requires `--path` to a project.
@@ -124,10 +125,11 @@ So scripts are thin orchestration; the engine is the store and commands.
 2. List the contents of scripts/ and scripts/adapters/. Match the first-class scripts in scripts/README.md to their paths.
 3. Open scripts/adapters/example_rag_to_scorer.py and see how it reads JSON and calls the scorer logic. Run it with a one-line JSON input (query, answer, evidence) from stdin.
 4. Run `PYTHONPATH=. python3 scripts/adapters/check_examples.py` and verify adapter examples + validation flow pass.
-5. Run `PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_lesson7_contract_project --output-dir /tmp/chronicle_lesson7_contract_out` and inspect the generated contract report/artifacts.
-6. (Optional) Install `.[api]`, set CHRONICLE_PROJECT_PATH, run uvicorn chronicle.api.app:app, and open http://127.0.0.1:8000/docs to try the API.
-7. Open scripts/ingest_transcript_csv.py and find where it calls session.ingest_evidence, session.propose_claim, and session.link_support. Confirm it follows the same pattern as the scorer (without the temp project).
-8. Read [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) and note the two non-goals: no sensational framing and no claim to establish legal truth.
+5. Create a small RAGAS-style JSONL (`question`, `answer`, `contexts`) and run `PYTHONPATH=. python3 scripts/adapters/ragas_batch_to_chronicle.py --input runs_ragas.jsonl --output scored_ragas.jsonl`, then validate with `PYTHONPATH=. python3 scripts/adapters/validate_adapter_outputs.py --input scored_ragas.jsonl`.
+6. Run `PYTHONPATH=. python3 scripts/check_integration_export_contracts.py --project-path /tmp/chronicle_lesson7_contract_project --output-dir /tmp/chronicle_lesson7_contract_out` and inspect the generated contract report/artifacts.
+7. (Optional) Install `.[api]`, set CHRONICLE_PROJECT_PATH, run uvicorn chronicle.api.app:app, and open http://127.0.0.1:8000/docs to try the API.
+8. Open scripts/ingest_transcript_csv.py and find where it calls session.ingest_evidence, session.propose_claim, and session.link_support. Confirm it follows the same pattern as the scorer (without the temp project).
+9. Read [docs/case-study-lizzie-borden.md](../docs/case-study-lizzie-borden.md) and note the two non-goals: no sensational framing and no claim to establish legal truth.
 9. (Optional) Install `.[mcp]`, run `chronicle-mcp --project-path /tmp/chronicle_lesson7_mcp`, and from an MCP client call create-investigation and ingest-evidence-text once.
 
 ## Summary

@@ -15,6 +15,7 @@ Objectives: You’ll know how Chronicle fits into the wider ecosystem: terminolo
 - [docs/integration-export-hardening.md](../docs/integration-export-hardening.md) — hardened contract surface for JSON/CSV/Markdown/signed-bundle flows
 - [docs/branch-protection-rollout-verification.md](../docs/branch-protection-rollout-verification.md) — scripted release-evidence check for branch protection + required CI jobs
 - [docs/rag-evals-defensibility-metric.md](../docs/rag-evals-defensibility-metric.md) — RAG evals: contract, schema, running the scorer in your harness
+- [scripts/adapters/ragas_batch_to_chronicle.py](../scripts/adapters/ragas_batch_to_chronicle.py) — RAGAS-first batch adapter (common key auto-mapping to Chronicle eval contract)
 - [docs/api.md](../docs/api.md) — Optional HTTP API: install, config, endpoints, request identity
 - [docs/mcp.md](../docs/mcp.md) — Optional MCP server: install, transports, and client wiring
 - [docs/human-in-the-loop-and-attestation.md](../docs/human-in-the-loop-and-attestation.md) — Human curation, actor identity, verification level, curation UI
@@ -60,6 +61,8 @@ Provenance recording (docs/provenance-recording.md): We can store source and evi
 Claim–evidence–metrics export (docs/claim-evidence-metrics-export.md): Defines a stable JSON shape for “one claim + evidence refs + support/challenge counts + defensibility” so fact-checking UIs or dashboards can ingest it. Use build_claim_evidence_metrics_export (chronicle.store.commands.generic_export) with the read model and a defensibility getter (e.g. session.get_defensibility_score) to get the full wrapper; the doc describes the schema.
 
 RAG evals (docs/rag-evals-defensibility-metric.md): One page that ties everything together for RAG pipelines: the contract (input/output), the schema, and how to run the scorer in your harness (stdin, CLI flags, or in-process Python). Use it as the entry point for adding Chronicle defensibility to RAG evals.
+
+RAGAS path: if your eval rows already use `question`, `answer`, and `contexts` (or `retrieved_contexts`), use `scripts/adapters/ragas_batch_to_chronicle.py` for direct batch scoring output. It emits one JSONL row per input row with Chronicle metrics payload and mapping metadata, which can then be validated with `scripts/adapters/validate_adapter_outputs.py`.
 
 Standards interoperability profile (docs/standards-profile.md): Chronicle now publishes a standards profile with first-class mappings for JSON-LD/PROV, ClaimReview, RO-Crate, and compatibility paths for C2PA and VC/Data Integrity. These profiles are adapter/export layers; `.chronicle` and verifier remain the canonical trust artifacts.
 
