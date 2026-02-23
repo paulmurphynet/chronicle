@@ -37,10 +37,19 @@ Done condition:
 
 ## 3. CI evidence for live Neo4j integration gate
 
-1. Trigger CI on public repo.
-2. Confirm live Neo4j job passes in CI/release workflows:
-   - `tests/test_neo4j_live_integration.py`
-3. Archive CI links in release notes/evidence pack.
+Run:
+
+```bash
+PYTHONPATH=. ./.venv/bin/python scripts/check_neo4j_ci_rollout.py \
+  --repo "$GITHUB_REPOSITORY" \
+  --branch "${CHRONICLE_PROTECTED_BRANCH:-main}" \
+  --output reports/neo4j_live_ci_report.json \
+  --stdout-json
+```
+
+Done condition:
+
+- `reports/neo4j_live_ci_report.json` has `status = "passed"`.
 
 ## 4. External standards review cycle dispatch (W-07)
 
@@ -56,8 +65,23 @@ Actions:
 2. Record each submission and response in the tracker.
 3. Log accepted/rejected deltas and follow-up actions.
 
+Machine-readable log:
+
+- Bootstrap if missing:
+  - `cp docs/external-review-dispatch-log.template.json reports/standards_submissions/v0.3/external_review_dispatch_log.json`
+- Update `reports/standards_submissions/v0.3/external_review_dispatch_log.json`
+  with each send/response event.
+
 ## 5. Close remaining TODO checkboxes
 
 After items 1-4 are complete, update:
 
 - `docs/to_do.md` remaining unchecked items.
+
+Optional one-shot aggregate gate:
+
+```bash
+PYTHONPATH=. ./.venv/bin/python scripts/check_post_public_finalization.py \
+  --output reports/post_public_finalization_report.json \
+  --stdout-json
+```

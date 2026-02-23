@@ -4,7 +4,7 @@ MYPY ?= ./.venv/bin/mypy
 PYTEST ?= ./.venv/bin/pytest
 POSTGRES_ENV_FILE ?= .env.postgres.local
 
-.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test neo4j-benchmark adapter-check integration-export-contract-check branch-protection-rollout-check deterministic-check reference-workflows web-dev check release-0.9-preflight postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
+.PHONY: help lint lint-all format-check format-check-all typecheck test docs-check docs-currency neo4j-check neo4j-live-test neo4j-benchmark neo4j-live-ci-rollout-check adapter-check integration-export-contract-check branch-protection-rollout-check post-public-finalization-check deterministic-check reference-workflows web-dev check release-0.9-preflight postgres-env postgres-up postgres-down postgres-logs postgres-doctor postgres-smoke postgres-parity postgres-onboarding-check
 
 help:
 	@echo "Targets:"
@@ -19,9 +19,11 @@ help:
 	@echo "  neo4j-check  - Neo4j export/sync/docs/rebuild contract parity checks"
 	@echo "  neo4j-live-test - Run live Neo4j integration tests (requires CHRONICLE_RUN_NEO4J_LIVE_TESTS=1 and NEO4J_* env vars)"
 	@echo "  neo4j-benchmark - Run Neo4j projection benchmark harness and write report under /tmp"
+	@echo "  neo4j-live-ci-rollout-check - Query GitHub API for push/PR CI evidence of neo4j-live-integration job"
 	@echo "  adapter-check - Validate adapter examples and contract validation flow"
 	@echo "  integration-export-contract-check - Validate JSON/CSV/Markdown/signed-bundle integration export/import contracts"
 	@echo "  branch-protection-rollout-check - Query GitHub API for branch protection + required CI green evidence (requires token)"
+	@echo "  post-public-finalization-check - Aggregate branch protection + Neo4j CI + standards dispatch evidence into one report"
 	@echo "  deterministic-check - Verify repeated scorer runs produce stable defensibility metrics"
 	@echo "  reference-workflows - Run reference workflow suite and write report under /tmp"
 	@echo "  web-dev      - Run API and frontend dev servers together (http://127.0.0.1:8000 + http://127.0.0.1:5173)"
@@ -72,6 +74,9 @@ neo4j-live-test:
 neo4j-benchmark:
 	PYTHONPATH=. $(PYTHON) scripts/benchmark_data/run_neo4j_projection_benchmark.py --output /tmp/chronicle_neo4j_projection_benchmark.json
 
+neo4j-live-ci-rollout-check:
+	PYTHONPATH=. $(PYTHON) scripts/check_neo4j_ci_rollout.py --repo "$${GITHUB_REPOSITORY:?set GITHUB_REPOSITORY=owner/name}" --branch "$${CHRONICLE_PROTECTED_BRANCH:-main}" --output reports/neo4j_live_ci_report.json --stdout-json
+
 adapter-check:
 	$(PYTHON) scripts/adapters/check_examples.py
 
@@ -80,6 +85,9 @@ integration-export-contract-check:
 
 branch-protection-rollout-check:
 	PYTHONPATH=. $(PYTHON) scripts/check_branch_protection_rollout.py --repo "$${GITHUB_REPOSITORY:?set GITHUB_REPOSITORY=owner/name}" --branch "$${CHRONICLE_PROTECTED_BRANCH:-main}" --output reports/branch_protection_rollout_report.json --stdout-json
+
+post-public-finalization-check:
+	PYTHONPATH=. $(PYTHON) scripts/check_post_public_finalization.py --output reports/post_public_finalization_report.json --stdout-json
 
 deterministic-check:
 	$(PYTHON) scripts/check_deterministic_defensibility.py --rounds 3 --output /tmp/chronicle_deterministic_defensibility_check.json

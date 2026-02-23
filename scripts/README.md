@@ -64,6 +64,8 @@ Scripts for repo and doc maintenance. Not needed for normal eval or integration 
 | **check_docs_currency.py** | Check key README/docs/lessons/quizzes references against current workflow commands. |
 | **check_deterministic_defensibility.py** | Ensure repeated scorer runs with identical input produce stable normalized defensibility outputs; useful as CI/release gate. |
 | **check_branch_protection_rollout.py** | Verify branch-protection settings and required CI check evidence via GitHub API; emits a release-evidence JSON report. |
+| **check_neo4j_ci_rollout.py** | Verify push/PR CI evidence for the `neo4j-live-integration` job via GitHub API; emits `reports/neo4j_live_ci_report.json`. |
+| **check_post_public_finalization.py** | Aggregate post-public evidence artifacts (branch protection report, Neo4j CI report, standards dispatch log) into one gate report. |
 | **check_neo4j_contract.py** | Check Neo4j schema/integration parity across sync, export, rebuild Cypher, and docs. |
 | **adapters/check_examples.py** | Validate checked-in adapter examples and starter-to-validator flow. |
 | **generate_agent_tools.py** | Regenerate `docs/agent-tools.json` (API operations in function-calling format for agents). |

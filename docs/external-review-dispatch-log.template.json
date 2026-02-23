@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "cycle_revision": "v0.3",
+  "outreach_status": "prepared_pending_public_repo",
+  "updated_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "venues": [
+    {
+      "venue": "w3c_linked_data",
+      "bundle": "w3c_linked_data_v0.3.zip",
+      "status": "prepared",
+      "sent_at": "pending",
+      "contact": "pending-public",
+      "tracking_link": "",
+      "notes": "Waiting for public repo and outbound contact list."
+    },
+    {
+      "venue": "c2pa_ecosystem",
+      "bundle": "c2pa_ecosystem_v0.3.zip",
+      "status": "prepared",
+      "sent_at": "pending",
+      "contact": "pending-public",
+      "tracking_link": "",
+      "notes": "Waiting for public repo and outbound contact list."
+    },
+    {
+      "venue": "applied_research",
+      "bundle": "applied_research_v0.3.zip",
+      "status": "prepared",
+      "sent_at": "pending",
+      "contact": "pending-public",
+      "tracking_link": "",
+      "notes": "Waiting for public repo and outbound contact list."
+    }
+  ],
+  "feedback": []
+}

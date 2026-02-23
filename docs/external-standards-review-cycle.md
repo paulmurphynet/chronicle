@@ -1,6 +1,6 @@
 # External standards review cycle tracker
 
-Last updated: 2026-02-20
+Last updated: 2026-02-23
 
 This tracker records execution state for whitepaper external review (`W-07`) and preserves the accepted/rejected feedback trail needed for revisioned publication.
 
@@ -28,6 +28,7 @@ Prepared artifacts:
    - `reports/standards_submissions/v0.3/bundles/c2pa_ecosystem_v0.3.zip`
    - `reports/standards_submissions/v0.3/bundles/applied_research_v0.3.zip`
 3. Evidence pack snapshot and manifest under `reports/standards_submissions/v0.3/evidence_pack/`
+4. Dispatch tracker template: `docs/external-review-dispatch-log.template.json`
 
 ## Outreach execution checklist
 
@@ -48,6 +49,27 @@ When receiving feedback:
 1. Add each item using the response schema.
 2. Classify: `accepted`, `rejected`, or `needs_followup`.
 3. Link resulting change or rationale in review logs.
+
+## Machine-readable tracker
+
+Maintain:
+
+- `reports/standards_submissions/v0.3/external_review_dispatch_log.json`
+
+Bootstrap from template if missing:
+
+```bash
+cp docs/external-review-dispatch-log.template.json \
+  reports/standards_submissions/v0.3/external_review_dispatch_log.json
+```
+
+Per-venue `status` values:
+
+- `prepared`
+- `sent`
+- `acknowledged`
+- `feedback_received`
+- `closed`
 
 ## Send log
 

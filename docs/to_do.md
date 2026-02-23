@@ -19,6 +19,13 @@ Chronicle should optimize for:
 - [x] Align tier-gated tension behavior across API contract tests and docs (`POST /investigations/{id}/tensions` requires `forge`/`vault`).
 - [ ] Close post-public release gates tracked in this file (CI green with branch protection active, branch-protection rollout `status=passed`, live Neo4j CI evidence, W-07 external standards dispatch).
 
+## Post-public gate automation batch (2026-02-23)
+
+- [x] Add scripted Neo4j live CI evidence checker (`scripts/check_neo4j_ci_rollout.py`) and regression tests.
+- [x] Add aggregate post-public finalization gate report (`scripts/check_post_public_finalization.py`) plus Make targets and checklist docs wiring.
+- [x] Add machine-readable external standards dispatch tracker template (`docs/external-review-dispatch-log.template.json`) and wire runtime log path (`reports/standards_submissions/v0.3/external_review_dispatch_log.json`) in docs/checklists.
+- [ ] Execute the new post-public checks against live public repo settings and update artifacts to `status=passed`.
+
 ## Active convergence program (public + CI + Postgres)
 
 Target: converge to a production-first architecture while keeping SQLite accessible for low-friction local use.

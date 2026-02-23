@@ -34,9 +34,13 @@ This checklist defines objective pass/fail criteria before Chronicle is treated 
   - `frontend-checks`
   - `postgres-event-store-smoke`
   - Note: `postgres-event-store-smoke` includes doctor + smoke + backend parity + timed onboarding gates.
+- [ ] Neo4j live CI evidence gate passes on both `push` and `pull_request`:
+  - `PYTHONPATH=. python3 scripts/check_neo4j_ci_rollout.py --repo "$GITHUB_REPOSITORY" --branch main --output reports/neo4j_live_ci_report.json`
 - [ ] Branch protection requires these checks before merge.
 - [ ] Branch protection rollout report status is `passed`:
   - `PYTHONPATH=. python3 scripts/check_branch_protection_rollout.py --repo "$GITHUB_REPOSITORY" --branch main --output reports/branch_protection_rollout_report.json`
+- [ ] Aggregate post-public finalization report status is `passed`:
+  - `PYTHONPATH=. python3 scripts/check_post_public_finalization.py --output reports/post_public_finalization_report.json`
 
 References:
 
