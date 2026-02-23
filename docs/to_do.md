@@ -2,7 +2,7 @@
 
 Single source of truth for pending work.
 
-Last refreshed: 2026-02-21
+Last refreshed: 2026-02-23
 
 ## Product stance
 
@@ -11,6 +11,13 @@ Chronicle should optimize for:
 1. Trust in core artifacts (`.chronicle`, verifier, event/read-model correctness)
 2. Contract stability (scorer contract, API/client parity, reproducible behavior)
 3. Reference surfaces as adapters (CLI/API/UI/integrations can evolve without breaking core trust)
+
+## API contract hardening batch (2026-02-23)
+
+- [x] Fix multipart evidence ingestion path to accept FastAPI/Starlette upload objects and preserve 413 behavior for oversized files.
+- [x] Fix `GET /investigations/{id}/policy-sensitivity` to treat repeated `profile_id` as query params (not request body) and honor explicit profile selection.
+- [x] Align tier-gated tension behavior across API contract tests and docs (`POST /investigations/{id}/tensions` requires `forge`/`vault`).
+- [ ] Close post-public release gates tracked in this file (CI green with branch protection active, branch-protection rollout `status=passed`, live Neo4j CI evidence, W-07 external standards dispatch).
 
 ## Active convergence program (public + CI + Postgres)
 

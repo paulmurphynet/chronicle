@@ -26,10 +26,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any
 
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.datastructures import UploadFile as StarletteUploadFile
 
 from chronicle import __version__
 from chronicle.core.errors import (
@@ -450,7 +451,7 @@ def get_policy_compatibility_preflight(
 @app.get("/investigations/{investigation_uid}/policy-sensitivity")
 def get_policy_sensitivity_report(
     investigation_uid: str,
-    profile_id: list[str] | None = None,
+    profile_id: Annotated[list[str] | None, Query()] = None,
     built_under_profile_id: str | None = None,
     built_under_policy_version: str | None = None,
     limit_claims: int = 200,
@@ -981,7 +982,7 @@ async def ingest_evidence(request: Request, investigation_uid: str) -> dict[str,
             )
         form = await request.form()
         file = form.get("file")
-        if file and isinstance(file, UploadFile) and file.filename:
+        if file and isinstance(file, (UploadFile, StarletteUploadFile)) and file.filename:
             blob = await _read_upload_file_limited(file, MAX_EVIDENCE_BYTES)
             original_filename = file.filename
             media_type = file.content_type or "application/octet-stream"

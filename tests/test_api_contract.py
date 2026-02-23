@@ -168,6 +168,27 @@ def test_api_evidence_upload_rejects_oversized_file(
     assert response.status_code == 413
 
 
+def test_api_evidence_upload_accepts_multipart_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Evidence ingest endpoint accepts a valid multipart upload."""
+    project_path = tmp_path / "api-evidence-multipart"
+    monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
+
+    with TestClient(app) as client:
+        inv_uid, _ = _create_investigation(client)
+        response = client.post(
+            f"/investigations/{inv_uid}/evidence",
+            files={"file": ("ok.txt", b"hello multipart", "text/plain")},
+            headers={"X-Actor-Id": "api_tester", "X-Actor-Type": "tool"},
+        )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert isinstance(body.get("event_id"), str) and body["event_id"]
+    assert isinstance(body.get("evidence_uid"), str) and body["evidence_uid"]
+    assert isinstance(body.get("span_uid"), str) and body["span_uid"]
+
+
 def test_api_import_returns_400_for_tampered_archive(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -494,6 +515,14 @@ def test_api_policy_sensitivity_report(
         assert isinstance(body.get("practical_review_implications"), list)
 
 
+def test_api_policy_sensitivity_profile_id_is_query_param() -> None:
+    """OpenAPI advertises profile_id as query param, not GET request body."""
+    op = app.openapi()["paths"]["/investigations/{investigation_uid}/policy-sensitivity"]["get"]
+    assert "requestBody" not in op
+    parameter_names = {param["name"] for param in op.get("parameters", [])}
+    assert "profile_id" in parameter_names
+
+
 def test_api_reviewer_decision_ledger(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -520,6 +549,25 @@ def test_api_reviewer_decision_ledger(
         assert claim_b.status_code == 200, claim_b.text
         claim_b_uid = claim_b.json()["claim_uid"]
 
+        spark_tension = client.post(
+            f"/investigations/{inv_uid}/tensions",
+            json={
+                "claim_a_uid": claim_a_uid,
+                "claim_b_uid": claim_b_uid,
+                "tension_kind": "contradiction",
+            },
+            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
+        )
+        assert spark_tension.status_code == 400
+        assert "requires Forge or Vault workspace" in spark_tension.text
+
+        tier = client.post(
+            f"/investigations/{inv_uid}/tier",
+            json={"tier": "forge", "reason": "Escalate to review"},
+            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
+        )
+        assert tier.status_code == 200, tier.text
+
         tension = client.post(
             f"/investigations/{inv_uid}/tensions",
             json={
@@ -530,13 +578,6 @@ def test_api_reviewer_decision_ledger(
             headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
         )
         assert tension.status_code == 200, tension.text
-
-        tier = client.post(
-            f"/investigations/{inv_uid}/tier",
-            json={"tier": "forge", "reason": "Escalate to review"},
-            headers={"X-Actor-Id": "api_reviewer", "X-Actor-Type": "human"},
-        )
-        assert tier.status_code == 200, tier.text
 
         ledger = client.get(
             f"/investigations/{inv_uid}/reviewer-decision-ledger",

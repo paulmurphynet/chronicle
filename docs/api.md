@@ -77,7 +77,7 @@ For graph edges, use `edge_limit` and `edge_cursor`; response includes `edges_pa
 | POST | `/investigations/{id}/links/support` | Link span as support. Body: `{ "span_uid", "claim_uid", "rationale"? }`. Returns `event_id`, `link_uid`. |
 | POST | `/investigations/{id}/links/challenge` | Link span as challenge. Body: `{ "span_uid", "claim_uid", "rationale?", "defeater_kind?" }`. Optional rationale (warrant), defeater_kind (e.g. rebutting, undercutting). |
 | POST | `/investigations/{id}/tier` | Set investigation tier (spark → forge → vault). Body: `{ "tier", "reason?" }`. Returns `event_id`. 400 if transition not allowed. |
-| POST | `/investigations/{id}/tensions` | Declare tension. Body: `{ "claim_a_uid", "claim_b_uid", "tension_kind?", "defeater_kind?" }`. To confirm a tension suggestion, call this with the suggestion's claim pair; the suggestion is then marked confirmed. Returns `event_id`, `tension_uid`. |
+| POST | `/investigations/{id}/tensions` | Declare tension. Body: `{ "claim_a_uid", "claim_b_uid", "tension_kind?", "defeater_kind?" }`. Requires investigation tier `forge` or `vault` (400 in `spark`). To confirm a tension suggestion, call this with the suggestion's claim pair; the suggestion is then marked confirmed. Returns `event_id`, `tension_uid`. |
 | POST | `/investigations/{id}/tension-suggestions/{suggestion_uid}/dismiss` | Dismiss a tension suggestion. Returns `event_id`. 400 if suggestion not pending. |
 
 ### Read
