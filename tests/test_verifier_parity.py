@@ -19,7 +19,9 @@ def _build_sample_chronicle(tmp_path: Path) -> Path:
     create_project(project)
     blob = b"Evidence chunk for verifier parity."
     with ChronicleSession(project) as session:
-        _, inv_uid = session.create_investigation("Verifier parity", actor_id="test", actor_type="tool")
+        _, inv_uid = session.create_investigation(
+            "Verifier parity", actor_id="test", actor_type="tool"
+        )
         _, ev_uid = session.ingest_evidence(
             inv_uid,
             blob,

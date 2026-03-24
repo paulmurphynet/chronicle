@@ -57,7 +57,9 @@ def build_graph(session, investigation_uid: str, claim_uid: str | None):
     edges: list[tuple[str, str, str]] = []
 
     for c in claims:
-        for link in rm.get_support_for_claim(c.claim_uid) + rm.get_challenges_for_claim(c.claim_uid):
+        for link in rm.get_support_for_claim(c.claim_uid) + rm.get_challenges_for_claim(
+            c.claim_uid
+        ):
             span = rm.get_evidence_span(link.span_uid)
             if span:
                 evidence_uids.add(span.evidence_uid)

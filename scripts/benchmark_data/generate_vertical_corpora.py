@@ -18,8 +18,8 @@ from __future__ import annotations
 import argparse
 import shutil
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "benchmark" / "vertical_corpora"
@@ -29,6 +29,7 @@ PROFILE_SOURCE = REPO_ROOT / "docs" / "spec" / "profiles" / "policy_investigativ
 def _j_date(run: int) -> str:
     """Vary date for journalism (2024-01-01 + run days)."""
     from datetime import datetime, timedelta
+
     d = datetime(2024, 1, 1) + timedelta(days=run)
     return d.strftime("%Y-%m-%d")
 
@@ -40,6 +41,7 @@ def _j_id(run: int) -> str:
 
 # ---- Journalism builders (one claim, two supports; parameterized by run 0..N-1) ----
 
+
 def journalism_board_decision(session, inv_uid: str, run: int) -> None:
     """Board/council decision with two source lines."""
     d = _j_date(run)
@@ -50,8 +52,13 @@ def journalism_board_decision(session, inv_uid: str, run: int) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev1, ev2 = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, f"The board approved the budget on {d}.")
-    for ev_uid, start, end in [(ev1, 20, 20 + len(f"the board approved the budget")), (ev2, 24, 24 + len(f"budget approval completed {d}"))]:
-        _, span_uid = session.anchor_span(inv_uid, ev_uid, "text_offset", {"start_char": start, "end_char": end}, quote="")
+    for ev_uid, start, end in [
+        (ev1, 20, 20 + len("the board approved the budget")),
+        (ev2, 24, 24 + len(f"budget approval completed {d}")),
+    ]:
+        _, span_uid = session.anchor_span(
+            inv_uid, ev_uid, "text_offset", {"start_char": start, "end_char": end}, quote=""
+        )
         session.link_support(inv_uid, span_uid, c_uid)
 
 
@@ -63,7 +70,13 @@ def journalism_witness_sighting(session, inv_uid: str, run: int) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev = evidence[0].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, f"The subject was at the venue on {d} at 14:00.")
-    _, span_uid = session.anchor_span(inv_uid, ev, "text_offset", {"start_char": 28, "end_char": 28 + len("the subject was seen at the venue at 14:00")}, quote="")
+    _, span_uid = session.anchor_span(
+        inv_uid,
+        ev,
+        "text_offset",
+        {"start_char": 28, "end_char": 28 + len("the subject was seen at the venue at 14:00")},
+        quote="",
+    )
     session.link_support(inv_uid, span_uid, c_uid)
 
 
@@ -77,8 +90,20 @@ def journalism_two_source_claim(session, inv_uid: str, run: int) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev1, ev2 = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, f"The event took place on {d}.")
-    _, s1 = session.anchor_span(inv_uid, ev1, "text_offset", {"start_char": 18, "end_char": 18 + len(f"the event took place on {d}")}, quote="")
-    _, s2 = session.anchor_span(inv_uid, ev2, "text_offset", {"start_char": 15, "end_char": 15 + len(f"event date {d}")}, quote="")
+    _, s1 = session.anchor_span(
+        inv_uid,
+        ev1,
+        "text_offset",
+        {"start_char": 18, "end_char": 18 + len(f"the event took place on {d}")},
+        quote="",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        ev2,
+        "text_offset",
+        {"start_char": 15, "end_char": 15 + len(f"event date {d}")},
+        quote="",
+    )
     session.link_support(inv_uid, s1, c_uid)
     session.link_support(inv_uid, s2, c_uid)
 
@@ -94,12 +119,24 @@ def journalism_correction(session, inv_uid: str, run: int) -> None:
     ev1, ev2 = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c1 = session.propose_claim(inv_uid, "Attendance was 500.")
     _, c2 = session.propose_claim(inv_uid, "Attendance was restated to 480.")
-    _, s1 = session.anchor_span(inv_uid, ev1, "text_offset", {"start_char": 20, "end_char": 35}, quote="attendance was 500")
-    _, s2 = session.anchor_span(inv_uid, ev2, "text_offset", {"start_char": 32, "end_char": 55}, quote="attendance restated to 480")
+    _, s1 = session.anchor_span(
+        inv_uid, ev1, "text_offset", {"start_char": 20, "end_char": 35}, quote="attendance was 500"
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        ev2,
+        "text_offset",
+        {"start_char": 32, "end_char": 55},
+        quote="attendance restated to 480",
+    )
     session.link_support(inv_uid, s1, c1)
     session.link_support(inv_uid, s2, c2)
-    _, t_uid = session.declare_tension(inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge")
-    session.update_tension_status(t_uid, "RESOLVED", reason="Recount supersedes initial figure.", workspace="forge")
+    _, t_uid = session.declare_tension(
+        inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge"
+    )
+    session.update_tension_status(
+        t_uid, "RESOLVED", reason="Recount supersedes initial figure.", workspace="forge"
+    )
 
 
 def journalism_three_sources(session, inv_uid: str, run: int) -> None:
@@ -117,8 +154,14 @@ def journalism_three_sources(session, inv_uid: str, run: int) -> None:
     q1 = "the announcement was made on " + d + " at 10:00"
     q2 = "announcement on " + d + " at 10:00"
     q3 = "announcement " + d + " 10:00"
-    for ev_uid, start, end in [(ev1, 11, 11 + len(q1)), (ev2, 14, 14 + len(q2)), (ev3, 18, 18 + len(q3))]:
-        _, span_uid = session.anchor_span(inv_uid, ev_uid, "text_offset", {"start_char": start, "end_char": end}, quote="")
+    for ev_uid, start, end in [
+        (ev1, 11, 11 + len(q1)),
+        (ev2, 14, 14 + len(q2)),
+        (ev3, 18, 18 + len(q3)),
+    ]:
+        _, span_uid = session.anchor_span(
+            inv_uid, ev_uid, "text_offset", {"start_char": start, "end_char": end}, quote=""
+        )
         session.link_support(inv_uid, span_uid, c_uid)
 
 
@@ -133,8 +176,10 @@ JOURNALISM_BUILDERS: list[Callable[..., None]] = [
 
 # ---- Legal builders ----
 
+
 def _l_date(run: int) -> str:
     from datetime import datetime, timedelta
+
     return (datetime(2024, 2, 1) + timedelta(days=run)).strftime("%Y-%m-%d")
 
 
@@ -148,8 +193,20 @@ def legal_contract_clause(session, inv_uid: str, run: int) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev1, ev2 = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, "Payment is due within 30 days of delivery.")
-    _, s1 = session.anchor_span(inv_uid, ev1, "text_offset", {"start_char": 22, "end_char": 22 + len("Payment is due within 30 days of delivery")}, quote="")
-    _, s2 = session.anchor_span(inv_uid, ev2, "text_offset", {"start_char": 18, "end_char": 18 + len("payment terms 30 days from delivery")}, quote="")
+    _, s1 = session.anchor_span(
+        inv_uid,
+        ev1,
+        "text_offset",
+        {"start_char": 22, "end_char": 22 + len("Payment is due within 30 days of delivery")},
+        quote="",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        ev2,
+        "text_offset",
+        {"start_char": 18, "end_char": 18 + len("payment terms 30 days from delivery")},
+        quote="",
+    )
     session.link_support(inv_uid, s1, c_uid)
     session.link_support(inv_uid, s2, c_uid)
 
@@ -162,7 +219,13 @@ def legal_deposition_excerpt(session, inv_uid: str, run: int) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev = evidence[0].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, "The meeting occurred as recorded.")
-    _, span_uid = session.anchor_span(inv_uid, ev, "text_offset", {"start_char": 35, "end_char": 35 + len("the meeting occurred as recorded")}, quote="")
+    _, span_uid = session.anchor_span(
+        inv_uid,
+        ev,
+        "text_offset",
+        {"start_char": 35, "end_char": 35 + len("the meeting occurred as recorded")},
+        quote="",
+    )
     session.link_support(inv_uid, span_uid, c_uid)
 
 
@@ -176,8 +239,20 @@ def legal_notification_assertion(session, inv_uid: str, run: int) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev1, ev2 = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, f"Notice was sent to the counterparty on {d}.")
-    _, s1 = session.anchor_span(inv_uid, ev1, "text_offset", {"start_char": 15, "end_char": 15 + len(f"Notice was sent to the counterparty on {d}")}, quote="")
-    _, s2 = session.anchor_span(inv_uid, ev2, "text_offset", {"start_char": 22, "end_char": 22 + len(f"notification sent {d}")}, quote="")
+    _, s1 = session.anchor_span(
+        inv_uid,
+        ev1,
+        "text_offset",
+        {"start_char": 15, "end_char": 15 + len(f"Notice was sent to the counterparty on {d}")},
+        quote="",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        ev2,
+        "text_offset",
+        {"start_char": 22, "end_char": 22 + len(f"notification sent {d}")},
+        quote="",
+    )
     session.link_support(inv_uid, s1, c_uid)
     session.link_support(inv_uid, s2, c_uid)
 
@@ -192,13 +267,31 @@ def legal_dispute_resolved(session, inv_uid: str, run: int) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev1, ev2 = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c1 = session.propose_claim(inv_uid, f"The obligation was fulfilled on {d}.")
-    _, c2 = session.propose_claim(inv_uid, "Parties agree the obligation was fulfilled; no further claim.")
-    _, s1 = session.anchor_span(inv_uid, ev1, "text_offset", {"start_char": 14, "end_char": 14 + len(f"The obligation was fulfilled on {d}")}, quote="")
-    _, s2 = session.anchor_span(inv_uid, ev2, "text_offset", {"start_char": 28, "end_char": 28 + len("obligation was fulfilled")}, quote="")
+    _, c2 = session.propose_claim(
+        inv_uid, "Parties agree the obligation was fulfilled; no further claim."
+    )
+    _, s1 = session.anchor_span(
+        inv_uid,
+        ev1,
+        "text_offset",
+        {"start_char": 14, "end_char": 14 + len(f"The obligation was fulfilled on {d}")},
+        quote="",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        ev2,
+        "text_offset",
+        {"start_char": 28, "end_char": 28 + len("obligation was fulfilled")},
+        quote="",
+    )
     session.link_support(inv_uid, s1, c1)
     session.link_support(inv_uid, s2, c2)
-    _, t_uid = session.declare_tension(inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge")
-    session.update_tension_status(t_uid, "RESOLVED", reason="Settlement agreement.", workspace="forge")
+    _, t_uid = session.declare_tension(
+        inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge"
+    )
+    session.update_tension_status(
+        t_uid, "RESOLVED", reason="Settlement agreement.", workspace="forge"
+    )
 
 
 def legal_three_exhibits(session, inv_uid: str, run: int) -> None:
@@ -217,8 +310,14 @@ def legal_three_exhibits(session, inv_uid: str, run: int) -> None:
     off1 = len(f"Exhibit {run}.1: ")
     off2 = len(f"Exhibit {run}.2: ")
     off3 = len(f"Exhibit {run}.3: ") + len("Payment of ")
-    for ev_uid, start, end in [(ev1, off1, off1 + len("The amount was $10,000")), (ev2, off2, off2 + len("Amount $10,000")), (ev3, off3, off3 + len("$10,000"))]:
-        _, span_uid = session.anchor_span(inv_uid, ev_uid, "text_offset", {"start_char": start, "end_char": end}, quote="")
+    for ev_uid, start, end in [
+        (ev1, off1, off1 + len("The amount was $10,000")),
+        (ev2, off2, off2 + len("Amount $10,000")),
+        (ev3, off3, off3 + len("$10,000")),
+    ]:
+        _, span_uid = session.anchor_span(
+            inv_uid, ev_uid, "text_offset", {"start_char": start, "end_char": end}, quote=""
+        )
         session.link_support(inv_uid, span_uid, c_uid)
 
 
@@ -236,8 +335,12 @@ def main() -> int:
     from chronicle.store.project import create_project
     from chronicle.store.session import ChronicleSession
 
-    parser = argparse.ArgumentParser(description="Generate vertical-tagged seed corpora (journalism + legal).")
-    parser.add_argument("--journalism", type=int, default=50, help="Number of journalism investigations")
+    parser = argparse.ArgumentParser(
+        description="Generate vertical-tagged seed corpora (journalism + legal)."
+    )
+    parser.add_argument(
+        "--journalism", type=int, default=50, help="Number of journalism investigations"
+    )
     parser.add_argument("--legal", type=int, default=50, help="Number of legal investigations")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Output base directory")
     args = parser.parse_args()

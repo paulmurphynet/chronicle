@@ -56,10 +56,16 @@ def _build_input_from_args(args: argparse.Namespace) -> tuple[bool, str | dict]:
     try:
         evidence_parsed = json.loads(args.evidence)
     except json.JSONDecodeError as e:
-        return (False, {"error": "invalid_input", "message": f"--evidence must be a JSON array: {e}"})
+        return (
+            False,
+            {"error": "invalid_input", "message": f"--evidence must be a JSON array: {e}"},
+        )
     if not isinstance(evidence_parsed, list):
         return (False, {"error": "invalid_input", "message": "--evidence must be a JSON array"})
-    return (True, json.dumps({"query": args.query, "answer": args.answer, "evidence": evidence_parsed}))
+    return (
+        True,
+        json.dumps({"query": args.query, "answer": args.answer, "evidence": evidence_parsed}),
+    )
 
 
 def main() -> int:
@@ -68,7 +74,9 @@ def main() -> int:
     )
     parser.add_argument("--query", type=str, help="User question or prompt")
     parser.add_argument("--answer", type=str, help="Model answer (claim text)")
-    parser.add_argument("--evidence", type=str, help='JSON array of evidence chunks, e.g. \'["chunk1", "chunk2"]\'')
+    parser.add_argument(
+        "--evidence", type=str, help='JSON array of evidence chunks, e.g. \'["chunk1", "chunk2"]\''
+    )
     args = parser.parse_args()
 
     use_args, payload = _build_input_from_args(args)

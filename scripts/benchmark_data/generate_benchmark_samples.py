@@ -36,7 +36,9 @@ EVIDENCE_WEAK = "Internal note 2024-03-10: the contract was signed. No other cor
 
 # Scenario 4: challenged — one claim, one support + one challenge
 EVIDENCE_SUPPORT = "Press release: the product launched on 2024-04-01. Available in all regions."
-EVIDENCE_CHALLENGE = "Support ticket log: regional rollout delayed; EU availability from 2024-04-15 only."
+EVIDENCE_CHALLENGE = (
+    "Support ticket log: regional rollout delayed; EU availability from 2024-04-15 only."
+)
 
 # Scenario 5: resolved tension — two claims, tension then resolved with rationale
 EVIDENCE_R1 = "Q1 report: revenue was $2M. Audited figures."
@@ -57,15 +59,21 @@ def make_conflict_sample(session, inv_uid: str, out_path: Path) -> None:
     ev1_uid, ev2_uid = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c1_uid = session.propose_claim(inv_uid, "Subject was in London on 2024-01-15.")
     _, c2_uid = session.propose_claim(inv_uid, "Subject was in Paris on 2024-01-15.")
-    session.propose_claim(inv_uid, "Conflicting location reports must be resolved before publication.")
+    session.propose_claim(
+        inv_uid, "Conflicting location reports must be resolved before publication."
+    )
     _, span1_uid = session.anchor_span(
-        inv_uid, ev1_uid, "text_offset",
+        inv_uid,
+        ev1_uid,
+        "text_offset",
         {"start_char": 28, "end_char": 58},
         quote="the subject was seen in London",
     )
     session.link_support(inv_uid, span1_uid, c1_uid)
     _, span2_uid = session.anchor_span(
-        inv_uid, ev2_uid, "text_offset",
+        inv_uid,
+        ev2_uid,
+        "text_offset",
         {"start_char": 24, "end_char": 52},
         quote="booking to Paris on 2024-01-15",
     )
@@ -82,13 +90,17 @@ def make_single_claim_sample(session, inv_uid: str, out_path: Path) -> None:
     ev1_uid, ev2_uid = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, "The board approved the budget on 2024-02-01.")
     _, span1_uid = session.anchor_span(
-        inv_uid, ev1_uid, "text_offset",
+        inv_uid,
+        ev1_uid,
+        "text_offset",
         {"start_char": 27, "end_char": 58},
         quote="the board approved the budget on 2024-02-01",
     )
     session.link_support(inv_uid, span1_uid, c_uid)
     _, span2_uid = session.anchor_span(
-        inv_uid, ev2_uid, "text_offset",
+        inv_uid,
+        ev2_uid,
+        "text_offset",
         {"start_char": 24, "end_char": 54},
         quote="budget approval completed 2024-02-01",
     )
@@ -103,7 +115,9 @@ def make_weak_single_source_sample(session, inv_uid: str, out_path: Path) -> Non
     ev_uid = evidence[0].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, "The contract was signed on or before 2024-03-10.")
     _, span_uid = session.anchor_span(
-        inv_uid, ev_uid, "text_offset",
+        inv_uid,
+        ev_uid,
+        "text_offset",
         {"start_char": 28, "end_char": 52},
         quote="the contract was signed",
     )
@@ -119,12 +133,16 @@ def make_challenged_sample(session, inv_uid: str, out_path: Path) -> None:
     ev_sup_uid, ev_ch_uid = evidence[0].evidence_uid, evidence[1].evidence_uid
     _, c_uid = session.propose_claim(inv_uid, "The product launched in all regions on 2024-04-01.")
     _, span_sup = session.anchor_span(
-        inv_uid, ev_sup_uid, "text_offset",
+        inv_uid,
+        ev_sup_uid,
+        "text_offset",
         {"start_char": 22, "end_char": 58},
         quote="the product launched on 2024-04-01. Available in all regions",
     )
     _, span_ch = session.anchor_span(
-        inv_uid, ev_ch_uid, "text_offset",
+        inv_uid,
+        ev_ch_uid,
+        "text_offset",
         {"start_char": 24, "end_char": 68},
         quote="EU availability from 2024-04-15 only",
     )
@@ -142,24 +160,31 @@ def make_resolved_tension_sample(session, inv_uid: str, out_path: Path) -> None:
     _, c1_uid = session.propose_claim(inv_uid, "Q1 revenue was $2M.")
     _, c2_uid = session.propose_claim(inv_uid, "Q1 revenue was restated to $1.8M.")
     _, span1 = session.anchor_span(
-        inv_uid, ev1_uid, "text_offset",
+        inv_uid,
+        ev1_uid,
+        "text_offset",
         {"start_char": 14, "end_char": 28},
         quote="revenue was $2M",
     )
     _, span2 = session.anchor_span(
-        inv_uid, ev2_uid, "text_offset",
+        inv_uid,
+        ev2_uid,
+        "text_offset",
         {"start_char": 38, "end_char": 62},
         quote="Q1 revenue restated to $1.8M",
     )
     session.link_support(inv_uid, span1, c1_uid)
     session.link_support(inv_uid, span2, c2_uid)
     _, tension_uid = session.declare_tension(
-        inv_uid, c1_uid, c2_uid,
+        inv_uid,
+        c1_uid,
+        c2_uid,
         tension_kind="source_conflict_unadjudicated",
         workspace="forge",
     )
     session.update_tension_status(
-        tension_uid, "RESOLVED",
+        tension_uid,
+        "RESOLVED",
         reason="Restatement supersedes initial figure; $1.8M is the audited final figure.",
         workspace="forge",
     )
@@ -172,7 +197,11 @@ def make_strong_three_sources_sample(session, inv_uid: str, out_path: Path) -> N
     session.ingest_evidence(inv_uid, EVIDENCE_S2.encode("utf-8"), "text/plain")
     session.ingest_evidence(inv_uid, EVIDENCE_S3.encode("utf-8"), "text/plain")
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
-    ev1_uid, ev2_uid, ev3_uid = evidence[0].evidence_uid, evidence[1].evidence_uid, evidence[2].evidence_uid
+    ev1_uid, ev2_uid, ev3_uid = (
+        evidence[0].evidence_uid,
+        evidence[1].evidence_uid,
+        evidence[2].evidence_uid,
+    )
     _, c_uid = session.propose_claim(inv_uid, "The meeting took place at 10:00 on 2024-06-01.")
     for ev_uid, start, end, quote in [
         (ev1_uid, 24, 52, "the meeting took place at 10:00 on 2024-06-01"),
@@ -180,7 +209,9 @@ def make_strong_three_sources_sample(session, inv_uid: str, out_path: Path) -> N
         (ev3_uid, 22, 50, "meeting scheduled 2024-06-01 10:00"),
     ]:
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset",
+            inv_uid,
+            ev_uid,
+            "text_offset",
             {"start_char": start, "end_char": end},
             quote=quote,
         )
@@ -197,11 +228,31 @@ def main() -> None:
 
     samples = [
         ("Benchmark sample: conflicting claims", make_conflict_sample, "sample_conflict.chronicle"),
-        ("Benchmark sample: single claim, two supports", make_single_claim_sample, "sample_single_claim.chronicle"),
-        ("Benchmark sample: weak single source", make_weak_single_source_sample, "sample_weak_single_source.chronicle"),
-        ("Benchmark sample: challenged (support + challenge)", make_challenged_sample, "sample_challenged.chronicle"),
-        ("Benchmark sample: resolved tension", make_resolved_tension_sample, "sample_resolved_tension.chronicle"),
-        ("Benchmark sample: strong three sources", make_strong_three_sources_sample, "sample_strong_three_sources.chronicle"),
+        (
+            "Benchmark sample: single claim, two supports",
+            make_single_claim_sample,
+            "sample_single_claim.chronicle",
+        ),
+        (
+            "Benchmark sample: weak single source",
+            make_weak_single_source_sample,
+            "sample_weak_single_source.chronicle",
+        ),
+        (
+            "Benchmark sample: challenged (support + challenge)",
+            make_challenged_sample,
+            "sample_challenged.chronicle",
+        ),
+        (
+            "Benchmark sample: resolved tension",
+            make_resolved_tension_sample,
+            "sample_resolved_tension.chronicle",
+        ),
+        (
+            "Benchmark sample: strong three sources",
+            make_strong_three_sources_sample,
+            "sample_strong_three_sources.chronicle",
+        ),
     ]
 
     with tempfile.TemporaryDirectory(prefix="chronicle_benchmark_") as tmp:

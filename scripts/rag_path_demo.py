@@ -31,9 +31,7 @@ def main() -> None:
             _, ev_uid = session.ingest_evidence(inv_uid, text, "text/plain")
 
             # 3. Optional extraction: propose claim and link support
-            _, claim_uid = session.propose_claim(
-                inv_uid, "Revenue in Q1 2024 was $1.2M."
-            )
+            _, claim_uid = session.propose_claim(inv_uid, "Revenue in Q1 2024 was $1.2M.")
             _, span_uid = session.anchor_span(
                 inv_uid,
                 ev_uid,
@@ -52,7 +50,10 @@ def main() -> None:
 
             # 5. Query reasoning trail
             trail = session.get_reasoning_trail_claim(claim_uid, limit=20)
-            print("Reasoning trail events:", len(trail["events"]) if trail and trail.get("events") else 0)
+            print(
+                "Reasoning trail events:",
+                len(trail["events"]) if trail and trail.get("events") else 0,
+            )
 
             # Optional: reasoning brief (one artifact)
             brief = session.get_reasoning_brief(claim_uid, limit=20)

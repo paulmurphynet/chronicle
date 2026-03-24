@@ -33,21 +33,21 @@ QUESTIONS = [
 def main() -> None:
     try:
         from langchain_core.documents import Document
+        from langchain_core.language_models import BaseChatModel
+        from langchain_core.messages import AIMessage
         from langchain_core.output_parsers import StrOutputParser
+        from langchain_core.outputs import ChatGeneration, ChatResult
         from langchain_core.prompts import ChatPromptTemplate
         from langchain_core.retrievers import BaseRetriever
         from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-        from langchain_core.language_models import BaseChatModel
-        from langchain_core.messages import AIMessage
-        from langchain_core.outputs import ChatGeneration, ChatResult
         from pydantic import ConfigDict
     except ImportError as e:
         raise SystemExit(
             "This example requires langchain-core. Install with: pip install langchain-core"
         ) from e
 
-    from chronicle.store.project import create_project
     from chronicle.integrations.langchain import ChronicleCallbackHandler
+    from chronicle.store.project import create_project
 
     class MockRetriever(BaseRetriever):
         docs: list[Document]
@@ -68,9 +68,7 @@ def main() -> None:
             return ChatResult(
                 generations=[
                     ChatGeneration(
-                        message=AIMessage(
-                            content="Answer based on the retrieved context (mock)."
-                        )
+                        message=AIMessage(content="Answer based on the retrieved context (mock).")
                     )
                 ]
             )
@@ -142,7 +140,9 @@ def main() -> None:
                 f"  Claim {i + 1}: {c.claim_uid} | defensibility: {sc.provenance_quality if sc else 'N/A'} | support links: {len(support)}"
             )
 
-    print("\nDone. See docs/integrations (Appending to an existing investigation) and integrating-with-chronicle.md (One project, many stacks).")
+    print(
+        "\nDone. See docs/integrations (Appending to an existing investigation) and integrating-with-chronicle.md (One project, many stacks)."
+    )
 
 
 if __name__ == "__main__":

@@ -2,13 +2,8 @@
 
 from __future__ import annotations
 
-import sys
 import zipfile
 from pathlib import Path
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
 import tools.verify_chronicle.verify_chronicle as verify_mod
 from chronicle.store.project import create_project
@@ -22,9 +17,16 @@ def test_verify_chronicle_file_on_export(tmp_path: Path) -> None:
     text = b"Evidence chunk for verification."
     chronicle_path = tmp_path / "out.chronicle"
     with ChronicleSession(tmp_path) as session:
-        _, inv_uid = session.create_investigation("Verifier test", actor_id="test", actor_type="tool")
+        _, inv_uid = session.create_investigation(
+            "Verifier test", actor_id="test", actor_type="tool"
+        )
         _, ev_uid = session.ingest_evidence(
-            inv_uid, text, "text/plain", original_filename="doc.txt", actor_id="test", actor_type="tool"
+            inv_uid,
+            text,
+            "text/plain",
+            original_filename="doc.txt",
+            actor_id="test",
+            actor_type="tool",
         )
         _, span_uid = session.anchor_span(
             inv_uid,
@@ -35,7 +37,9 @@ def test_verify_chronicle_file_on_export(tmp_path: Path) -> None:
             actor_id="test",
             actor_type="tool",
         )
-        _, claim_uid = session.propose_claim(inv_uid, "A claim.", actor_id="test", actor_type="tool")
+        _, claim_uid = session.propose_claim(
+            inv_uid, "A claim.", actor_id="test", actor_type="tool"
+        )
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="test", actor_type="tool")
         session.export_investigation(inv_uid, chronicle_path)
     assert chronicle_path.is_file()
@@ -64,7 +68,9 @@ def test_verify_chronicle_file_rejects_unexpected_archive_entries(tmp_path: Path
     create_project(tmp_path)
     chronicle_path = tmp_path / "out.chronicle"
     with ChronicleSession(tmp_path) as session:
-        _, inv_uid = session.create_investigation("Verifier extra", actor_id="test", actor_type="tool")
+        _, inv_uid = session.create_investigation(
+            "Verifier extra", actor_id="test", actor_type="tool"
+        )
         session.ingest_evidence(
             inv_uid,
             b"Evidence",
@@ -76,9 +82,10 @@ def test_verify_chronicle_file_rejects_unexpected_archive_entries(tmp_path: Path
         session.export_investigation(inv_uid, chronicle_path)
 
     with_extra = tmp_path / "with-extra.chronicle"
-    with zipfile.ZipFile(chronicle_path, "r") as zin, zipfile.ZipFile(
-        with_extra, "w", zipfile.ZIP_DEFLATED
-    ) as zout:
+    with (
+        zipfile.ZipFile(chronicle_path, "r") as zin,
+        zipfile.ZipFile(with_extra, "w", zipfile.ZIP_DEFLATED) as zout,
+    ):
         for name in zin.namelist():
             zout.writestr(name, zin.read(name))
         zout.writestr("extras/unexpected.txt", b"unexpected")
@@ -90,14 +97,14 @@ def test_verify_chronicle_file_rejects_unexpected_archive_entries(tmp_path: Path
     )
 
 
-def test_verify_chronicle_file_enforces_archive_entry_limit(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_verify_chronicle_file_enforces_archive_entry_limit(tmp_path: Path, monkeypatch) -> None:
     """Verifier should fail when entry-count safety budget is exceeded."""
     create_project(tmp_path)
     chronicle_path = tmp_path / "out.chronicle"
     with ChronicleSession(tmp_path) as session:
-        _, inv_uid = session.create_investigation("Verifier limits", actor_id="test", actor_type="tool")
+        _, inv_uid = session.create_investigation(
+            "Verifier limits", actor_id="test", actor_type="tool"
+        )
         session.ingest_evidence(
             inv_uid,
             b"Evidence",

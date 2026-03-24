@@ -16,7 +16,9 @@ from chronicle.store.session import ChronicleSession
 
 def _seed_investigation(project_path: Path) -> tuple[str, str]:
     with ChronicleSession(project_path) as session:
-        _, inv_uid = session.create_investigation("Generic export contract", actor_id="t", actor_type="tool")
+        _, inv_uid = session.create_investigation(
+            "Generic export contract", actor_id="t", actor_type="tool"
+        )
         _, ev_uid = session.ingest_evidence(
             inv_uid,
             b"Contract evidence text.",
@@ -34,7 +36,9 @@ def _seed_investigation(project_path: Path) -> tuple[str, str]:
             actor_id="t",
             actor_type="tool",
         )
-        _, claim_uid = session.propose_claim(inv_uid, "Contract claim.", actor_id="t", actor_type="tool")
+        _, claim_uid = session.propose_claim(
+            inv_uid, "Contract claim.", actor_id="t", actor_type="tool"
+        )
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
     return inv_uid, claim_uid
 

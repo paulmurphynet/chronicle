@@ -72,9 +72,7 @@ def _get_request_body_schema(request_body: dict | None) -> dict | None:
     return json_media.get("schema")
 
 
-def _merge_body_into_params(
-    params_schema: dict, body_schema: dict | None, path: str
-) -> dict:
+def _merge_body_into_params(params_schema: dict, body_schema: dict | None, path: str) -> dict:
     """Merge request body schema into params. If body has properties, add as top-level or under 'body'."""
     if not body_schema:
         return params_schema
@@ -111,14 +109,16 @@ def build_tools() -> list[dict]:
             params_schema = _merge_body_into_params(params_schema, body_schema, path)
             if not (params_schema.get("properties")):
                 params_schema = {"type": "object", "properties": {}, "required": []}
-            tools.append({
-                "type": "function",
-                "function": {
-                    "name": name,
-                    "description": description,
-                    "parameters": params_schema,
-                },
-            })
+            tools.append(
+                {
+                    "type": "function",
+                    "function": {
+                        "name": name,
+                        "description": description,
+                        "parameters": params_schema,
+                    },
+                }
+            )
     return tools
 
 

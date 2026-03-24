@@ -19,7 +19,13 @@ def test_session_get_defensibility_as_of_by_event_id(tmp_path: Path) -> None:
             inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="E",
+            actor_id="t",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(inv_uid, "Claim.", actor_id="t", actor_type="tool")
         events = session.store.read_all(limit=10)
@@ -41,7 +47,9 @@ def test_session_get_defensibility_as_of_by_date(tmp_path: Path) -> None:
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("AsOfDate", actor_id="t", actor_type="tool")
         session.propose_claim(inv_uid, "C.", actor_id="t", actor_type="tool")
-        claims = session.store.get_read_model().list_claims_by_type(investigation_uid=inv_uid, limit=1)
+        claims = session.store.get_read_model().list_claims_by_type(
+            investigation_uid=inv_uid, limit=1
+        )
         assert claims
         created_at = claims[0].created_at
 
@@ -75,7 +83,13 @@ def test_session_export_minimal_for_claim(tmp_path: Path) -> None:
             inv_uid, b"X", "text/plain", original_filename="x.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="X", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="X",
+            actor_id="t",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(inv_uid, "Answer.", actor_id="t", actor_type="tool")
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
@@ -114,7 +128,13 @@ def test_session_get_accountability_chain(tmp_path: Path) -> None:
             inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="E",
+            actor_id="t",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(inv_uid, "Claim.", actor_id="t", actor_type="tool")
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
@@ -148,9 +168,7 @@ def test_session_get_audit_export_bundle_with_as_of_event_id(tmp_path: Path) -> 
         events = session.store.read_all(limit=5)
         first_id = events[0].event_id
         session.propose_claim(inv_uid, "C.", actor_id="t", actor_type="tool")
-        bundle = session.get_audit_export_bundle(
-            inv_uid, as_of_event_id=first_id, limit_claims=10
-        )
+        bundle = session.get_audit_export_bundle(inv_uid, as_of_event_id=first_id, limit_claims=10)
     assert bundle["investigation_uid"] == inv_uid
     assert bundle.get("defensibility_as_of") == first_id
     assert "defensibility_snapshot" in bundle
@@ -159,8 +177,9 @@ def test_session_get_audit_export_bundle_with_as_of_event_id(tmp_path: Path) -> 
 def test_session_get_audit_export_bundle_investigation_not_found(tmp_path: Path) -> None:
     """get_audit_export_bundle raises when investigation does not exist."""
     create_project(tmp_path)
-    with ChronicleSession(tmp_path) as session, pytest.raises(
-        ChronicleUserError, match="Investigation not found"
+    with (
+        ChronicleSession(tmp_path) as session,
+        pytest.raises(ChronicleUserError, match="Investigation not found"),
     ):
         session.get_audit_export_bundle("nonexistent-inv-uid")
 
@@ -174,7 +193,13 @@ def test_session_get_reasoning_brief_with_as_of_date(tmp_path: Path) -> None:
             inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="E",
+            actor_id="t",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(inv_uid, "C.", actor_id="t", actor_type="tool")
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
@@ -268,7 +293,9 @@ def test_session_get_review_packet(tmp_path: Path) -> None:
     create_project(tmp_path)
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("ReviewPacket", actor_id="t", actor_type="tool")
-        _, claim_uid = session.propose_claim(inv_uid, "Packet claim", actor_id="t", actor_type="tool")
+        _, claim_uid = session.propose_claim(
+            inv_uid, "Packet claim", actor_id="t", actor_type="tool"
+        )
         session.set_tier(inv_uid, "forge", actor_id="t", actor_type="human")
 
         packet = session.get_review_packet(
@@ -318,7 +345,9 @@ def test_session_get_defensibility_as_of_event_id_not_found(tmp_path: Path) -> N
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("AsOfErr", actor_id="t", actor_type="tool")
         session.propose_claim(inv_uid, "C.", actor_id="t", actor_type="tool")
-        with pytest.raises(ChronicleUserError, match="as_of_event_id .* not found in investigation stream"):
+        with pytest.raises(
+            ChronicleUserError, match="as_of_event_id .* not found in investigation stream"
+        ):
             session.get_defensibility_as_of(inv_uid, as_of_event_id="nonexistent-event-id")
 
 
@@ -331,7 +360,13 @@ def test_session_get_reasoning_brief_with_as_of_event_id(tmp_path: Path) -> None
             inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="E",
+            actor_id="t",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(inv_uid, "C.", actor_id="t", actor_type="tool")
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
@@ -351,8 +386,14 @@ def test_session_get_reasoning_brief_with_tension(tmp_path: Path) -> None:
         _, claim_a = session.propose_claim(inv_uid, "Claim A.", actor_id="t", actor_type="tool")
         _, claim_b = session.propose_claim(inv_uid, "Claim B.", actor_id="t", actor_type="tool")
         session.declare_tension(
-            inv_uid, claim_a, claim_b,
-            tension_kind="contradiction", notes="Test", actor_id="t", actor_type="tool", workspace="forge"
+            inv_uid,
+            claim_a,
+            claim_b,
+            tension_kind="contradiction",
+            notes="Test",
+            actor_id="t",
+            actor_type="tool",
+            workspace="forge",
         )
         brief = session.get_reasoning_brief(claim_a)
     assert brief is not None

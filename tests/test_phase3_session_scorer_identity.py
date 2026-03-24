@@ -5,12 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from chronicle.scorer_contract import run_scorer_contract
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
-
 
 # ---- Session: export, import, get_reasoning_brief ----
 
@@ -26,7 +23,12 @@ def test_session_export_then_import_investigation(tmp_path: Path) -> None:
     with ChronicleSession(proj_a) as session:
         _, inv_uid = session.create_investigation("Export me", actor_id="t", actor_type="tool")
         session.ingest_evidence(
-            inv_uid, b"Evidence", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
+            inv_uid,
+            b"Evidence",
+            "text/plain",
+            original_filename="e.txt",
+            actor_id="t",
+            actor_type="tool",
         )
         out = session.export_investigation(inv_uid, chronicle_file)
     assert out.is_file()
@@ -48,7 +50,13 @@ def test_session_get_reasoning_brief(tmp_path: Path) -> None:
             inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="E",
+            actor_id="t",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(inv_uid, "Claim.", actor_id="t", actor_type="tool")
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")

@@ -65,7 +65,9 @@ def _seed_claim_flow(client: TestClient, investigation_uid: str) -> tuple[str, s
     return span_uid, claim_uid
 
 
-def test_api_example_flow_and_identity_headers(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_api_example_flow_and_identity_headers(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Covers docs/api.md example flow and verifies write actor identity persistence."""
     project_path = tmp_path / "api-project"
     monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
@@ -94,7 +96,9 @@ def test_api_example_flow_and_identity_headers(tmp_path: Path, monkeypatch: pyte
 
         listed = client.get("/investigations", params={"limit": 10, "is_archived": False})
         assert listed.status_code == 200
-        assert any(i["investigation_uid"] == investigation_uid for i in listed.json()["investigations"])
+        assert any(
+            i["investigation_uid"] == investigation_uid for i in listed.json()["investigations"]
+        )
 
     db_path = project_path / CHRONICLE_DB
     conn = sqlite3.connect(str(db_path))
@@ -136,7 +140,9 @@ def test_api_export_import_roundtrip(tmp_path: Path, monkeypatch: pytest.MonkeyP
         assert len(listed.json()["investigations"]) >= 1
 
 
-def test_api_import_rejects_oversized_upload(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_api_import_rejects_oversized_upload(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Import endpoint returns 413 when upload exceeds MAX_IMPORT_BYTES."""
     project_path = tmp_path / "api-import-size"
     monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
@@ -246,7 +252,9 @@ def _seed_project_for_archive(project_path: Path) -> tuple[str, bytes]:
             actor_id="t",
             actor_type="tool",
         )
-        _, claim_uid = session.propose_claim(inv_uid, "Archive claim.", actor_id="t", actor_type="tool")
+        _, claim_uid = session.propose_claim(
+            inv_uid, "Archive claim.", actor_id="t", actor_type="tool"
+        )
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
         out = project_path / "archive.chronicle"
         session.export_investigation(inv_uid, out)
@@ -469,9 +477,7 @@ def test_api_policy_compatibility_preflight(
         assert any("min_independent_sources" in d.get("rule", "") for d in body["deltas"])
 
 
-def test_api_policy_sensitivity_report(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_api_policy_sensitivity_report(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Policy sensitivity endpoint returns profile and pairwise comparison deltas."""
     project_path = tmp_path / "api-policy-sensitivity"
     monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
@@ -523,9 +529,7 @@ def test_api_policy_sensitivity_profile_id_is_query_param() -> None:
     assert "profile_id" in parameter_names
 
 
-def test_api_reviewer_decision_ledger(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_api_reviewer_decision_ledger(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Reviewer decision ledger endpoint returns decisions summary and unresolved tensions."""
     project_path = tmp_path / "api-reviewer-ledger"
     monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))
@@ -593,9 +597,7 @@ def test_api_reviewer_decision_ledger(
         assert body["summary"]["unresolved_tensions_count"] >= 1
 
 
-def test_api_review_packet(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_api_review_packet(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Unified review packet endpoint returns combined packet sections."""
     project_path = tmp_path / "api-review-packet"
     monkeypatch.setenv("CHRONICLE_PROJECT_PATH", str(project_path))

@@ -47,6 +47,8 @@ from chronicle.store.commands.reasoning_brief import reasoning_brief_to_html
 from chronicle.store.project import create_project, project_exists
 from chronicle.store.session import ChronicleSession
 
+UploadFileLike = UploadFile | StarletteUploadFile
+
 # Project path from env; None if not set
 PROJECT_PATH_ENV = "CHRONICLE_PROJECT_PATH"
 REQUEST_ID_HEADER = "X-Request-Id"
@@ -165,7 +167,7 @@ def _max_json_payload_bytes(max_blob_bytes: int) -> int:
     return int(max_blob_bytes * 4 / 3) + 16 * 1024
 
 
-async def _read_upload_file_limited(file: UploadFile, max_bytes: int) -> bytes:
+async def _read_upload_file_limited(file: UploadFileLike, max_bytes: int) -> bytes:
     """Read UploadFile in chunks and abort if payload exceeds max_bytes."""
     buf = bytearray()
     while True:
@@ -180,7 +182,7 @@ async def _read_upload_file_limited(file: UploadFile, max_bytes: int) -> bytes:
     return bytes(buf)
 
 
-async def _write_upload_file_limited(file: UploadFile, max_bytes: int) -> Path:
+async def _write_upload_file_limited(file: UploadFileLike, max_bytes: int) -> Path:
     """Stream UploadFile to temp file and abort if payload exceeds max_bytes."""
     total = 0
     with tempfile.NamedTemporaryFile(suffix=".chronicle", delete=False) as f:

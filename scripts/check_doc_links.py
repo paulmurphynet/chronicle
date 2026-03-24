@@ -66,7 +66,9 @@ def check_doc_links(root: Path) -> list[tuple[Path, str, str | None, str]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("path", nargs="?", default="docs", help="Directory to check (default: docs)")
+    parser.add_argument(
+        "path", nargs="?", default="docs", help="Directory to check (default: docs)"
+    )
     args = parser.parse_args()
     root = Path(args.path)
     if not root.exists():

@@ -41,7 +41,11 @@ def make_acme_revenue(session, inv_uid: str, out_path: Path) -> None:
     _, c_uid = session.propose_claim(inv_uid, "Acme Corp Q3 2024 revenue was $12.4M.")
     for ev_uid, start, end in [(e1, 45, 63), (e2, 28, 46), (e3, 58, 76)]:
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": start, "end_char": end}, quote="Q3 revenue was $12.4M"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": start, "end_char": end},
+            quote="Q3 revenue was $12.4M",
         )
         session.link_support(inv_uid, span_uid, c_uid)
     session.export_investigation(inv_uid, out_path)
@@ -57,14 +61,22 @@ def make_nexus_outage(session, inv_uid: str, out_path: Path) -> None:
     session.ingest_evidence(inv_uid, E2_SUP.encode("utf-8"), "text/plain")
     session.ingest_evidence(inv_uid, E2_CH.encode("utf-8"), "text/plain")
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
-    _, c_uid = session.propose_claim(inv_uid, "Nexus API outage was resolved by 14:00 UTC on 2024-10-15.")
+    _, c_uid = session.propose_claim(
+        inv_uid, "Nexus API outage was resolved by 14:00 UTC on 2024-10-15."
+    )
     _, span_sup = session.anchor_span(
-        inv_uid, evidence[0].evidence_uid, "text_offset",
-        {"start_char": 45, "end_char": 78}, quote="outage resolved at 14:00 UTC",
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 45, "end_char": 78},
+        quote="outage resolved at 14:00 UTC",
     )
     _, span_ch = session.anchor_span(
-        inv_uid, evidence[1].evidence_uid, "text_offset",
-        {"start_char": 42, "end_char": 65}, quote="Full recovery confirmed 14:32 UTC",
+        inv_uid,
+        evidence[1].evidence_uid,
+        "text_offset",
+        {"start_char": 42, "end_char": 65},
+        quote="Full recovery confirmed 14:32 UTC",
     )
     session.link_support(inv_uid, span_sup, c_uid)
     session.link_challenge(inv_uid, span_ch, c_uid)
@@ -83,12 +95,31 @@ def make_meridian_merger(session, inv_uid: str, out_path: Path) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     _, c1 = session.propose_claim(inv_uid, "Meridian target revenue was $50M.")
     _, c2 = session.propose_claim(inv_uid, "Meridian target revenue was $48M after adjustments.")
-    _, s1 = session.anchor_span(inv_uid, evidence[0].evidence_uid, "text_offset", {"start_char": 28, "end_char": 52}, quote="target FY2024 revenue $50M")
-    _, s2 = session.anchor_span(inv_uid, evidence[1].evidence_uid, "text_offset", {"start_char": 38, "end_char": 62}, quote="target revenue $48M")
+    _, s1 = session.anchor_span(
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 28, "end_char": 52},
+        quote="target FY2024 revenue $50M",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        evidence[1].evidence_uid,
+        "text_offset",
+        {"start_char": 38, "end_char": 62},
+        quote="target revenue $48M",
+    )
     session.link_support(inv_uid, s1, c1)
     session.link_support(inv_uid, s2, c2)
-    _, t_uid = session.declare_tension(inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge")
-    session.update_tension_status(t_uid, "RESOLVED", reason="Adjusted DD supersedes; $48M is the closing figure.", workspace="forge")
+    _, t_uid = session.declare_tension(
+        inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge"
+    )
+    session.update_tension_status(
+        t_uid,
+        "RESOLVED",
+        reason="Adjusted DD supersedes; $48M is the closing figure.",
+        workspace="forge",
+    )
     session.export_investigation(inv_uid, out_path)
 
 
@@ -102,8 +133,11 @@ def make_product_z_launch(session, inv_uid: str, out_path: Path) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     _, c_uid = session.propose_claim(inv_uid, "Product Z will launch in US and EU in Q1 2025.")
     _, span_uid = session.anchor_span(
-        inv_uid, evidence[0].evidence_uid, "text_offset",
-        {"start_char": 38, "end_char": 72}, quote="Product Z launch in US and EU in Q1 2025",
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 38, "end_char": 72},
+        quote="Product Z launch in US and EU in Q1 2025",
     )
     session.link_support(inv_uid, span_uid, c_uid)
     session.export_investigation(inv_uid, out_path)
@@ -119,14 +153,22 @@ def make_escalation_8841(session, inv_uid: str, out_path: Path) -> None:
     session.ingest_evidence(inv_uid, E5_SUP.encode("utf-8"), "text/plain")
     session.ingest_evidence(inv_uid, E5_CH.encode("utf-8"), "text/plain")
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
-    _, c_uid = session.propose_claim(inv_uid, "Refund for escalation 8841 was issued within 5 business days.")
+    _, c_uid = session.propose_claim(
+        inv_uid, "Refund for escalation 8841 was issued within 5 business days."
+    )
     _, span_sup = session.anchor_span(
-        inv_uid, evidence[0].evidence_uid, "text_offset",
-        {"start_char": 28, "end_char": 75}, quote="Refund processed 2024-10-10. Customer notified. 5 business days",
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 28, "end_char": 75},
+        quote="Refund processed 2024-10-10. Customer notified. 5 business days",
     )
     _, span_ch = session.anchor_span(
-        inv_uid, evidence[1].evidence_uid, "text_offset",
-        {"start_char": 25, "end_char": 52}, quote="Still no refund. Request was 2024-10-01",
+        inv_uid,
+        evidence[1].evidence_uid,
+        "text_offset",
+        {"start_char": 25, "end_char": 52},
+        quote="Still no refund. Request was 2024-10-01",
     )
     session.link_support(inv_uid, span_sup, c_uid)
     session.link_challenge(inv_uid, span_ch, c_uid)
@@ -146,7 +188,11 @@ def make_rag_founding(session, inv_uid: str, out_path: Path) -> None:
     _, c_uid = session.propose_claim(inv_uid, "TechFlow Inc was founded in 1987.")
     for ev, start, end in [(evidence[0], 22, 42), (evidence[1], 28, 48)]:
         _, span_uid = session.anchor_span(
-            inv_uid, ev.evidence_uid, "text_offset", {"start_char": start, "end_char": end}, quote="founded in 1987"
+            inv_uid,
+            ev.evidence_uid,
+            "text_offset",
+            {"start_char": start, "end_char": end},
+            quote="founded in 1987",
         )
         session.link_support(inv_uid, span_uid, c_uid)
     session.export_investigation(inv_uid, out_path)
@@ -164,12 +210,31 @@ def make_compliance_72(session, inv_uid: str, out_path: Path) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     _, c1 = session.propose_claim(inv_uid, "Control 7.2 was effective as of end of Q2 2024.")
     _, c2 = session.propose_claim(inv_uid, "Control 7.2 had an exception until July 2024.")
-    _, s1 = session.anchor_span(inv_uid, evidence[0].evidence_uid, "text_offset", {"start_char": 28, "end_char": 62}, quote="Control 7.2 effective as of 2024-06-30")
-    _, s2 = session.anchor_span(inv_uid, evidence[1].evidence_uid, "text_offset", {"start_char": 22, "end_char": 58}, quote="Control 7.2 had exception until 2024-07-15")
+    _, s1 = session.anchor_span(
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 28, "end_char": 62},
+        quote="Control 7.2 effective as of 2024-06-30",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        evidence[1].evidence_uid,
+        "text_offset",
+        {"start_char": 22, "end_char": 58},
+        quote="Control 7.2 had exception until 2024-07-15",
+    )
     session.link_support(inv_uid, s1, c1)
     session.link_support(inv_uid, s2, c2)
-    _, t_uid = session.declare_tension(inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge")
-    session.update_tension_status(t_uid, "RESOLVED", reason="Exception log is authoritative; control effective from 2024-07-15.", workspace="forge")
+    _, t_uid = session.declare_tension(
+        inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge"
+    )
+    session.update_tension_status(
+        t_uid,
+        "RESOLVED",
+        reason="Exception log is authoritative; control effective from 2024-07-15.",
+        workspace="forge",
+    )
     session.export_investigation(inv_uid, out_path)
 
 
@@ -183,9 +248,23 @@ def make_competitor_pricing(session, inv_uid: str, out_path: Path) -> None:
     session.ingest_evidence(inv_uid, E8_A.encode("utf-8"), "text/plain")
     session.ingest_evidence(inv_uid, E8_B.encode("utf-8"), "text/plain")
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
-    _, c_uid = session.propose_claim(inv_uid, "Vendor X Enterprise tier list price is $499 per user per month.")
-    _, s1 = session.anchor_span(inv_uid, evidence[0].evidence_uid, "text_offset", {"start_char": 52, "end_char": 88}, quote="Enterprise tier is $499/user/month")
-    _, s2 = session.anchor_span(inv_uid, evidence[1].evidence_uid, "text_offset", {"start_char": 48, "end_char": 72}, quote="Enterprise tier $499/user/mo")
+    _, c_uid = session.propose_claim(
+        inv_uid, "Vendor X Enterprise tier list price is $499 per user per month."
+    )
+    _, s1 = session.anchor_span(
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 52, "end_char": 88},
+        quote="Enterprise tier is $499/user/month",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        evidence[1].evidence_uid,
+        "text_offset",
+        {"start_char": 48, "end_char": 72},
+        quote="Enterprise tier $499/user/mo",
+    )
     session.link_support(inv_uid, s1, c_uid)
     session.link_support(inv_uid, s2, c_uid)
     session.export_investigation(inv_uid, out_path)
@@ -203,11 +282,25 @@ def make_witness_conflict(session, inv_uid: str, out_path: Path) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     _, c1 = session.propose_claim(inv_uid, "The handoff meeting was in Building A, room 301.")
     _, c2 = session.propose_claim(inv_uid, "The handoff meeting was in Building B, lobby.")
-    _, s1 = session.anchor_span(inv_uid, evidence[0].evidence_uid, "text_offset", {"start_char": 32, "end_char": 62}, quote="handoff meeting was in Building A, room 301")
-    _, s2 = session.anchor_span(inv_uid, evidence[1].evidence_uid, "text_offset", {"start_char": 28, "end_char": 54}, quote="handoff was in Building B, lobby")
+    _, s1 = session.anchor_span(
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 32, "end_char": 62},
+        quote="handoff meeting was in Building A, room 301",
+    )
+    _, s2 = session.anchor_span(
+        inv_uid,
+        evidence[1].evidence_uid,
+        "text_offset",
+        {"start_char": 28, "end_char": 54},
+        quote="handoff was in Building B, lobby",
+    )
     session.link_support(inv_uid, s1, c1)
     session.link_support(inv_uid, s2, c2)
-    session.declare_tension(inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge")
+    session.declare_tension(
+        inv_uid, c1, c2, tension_kind="source_conflict_unadjudicated", workspace="forge"
+    )
     session.export_investigation(inv_uid, out_path)
 
 
@@ -221,8 +314,11 @@ def make_rag_availability(session, inv_uid: str, out_path: Path) -> None:
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     _, c_uid = session.propose_claim(inv_uid, "Product Y is available in the EU as of 2024-08.")
     _, span_uid = session.anchor_span(
-        inv_uid, evidence[0].evidence_uid, "text_offset",
-        {"start_char": 18, "end_char": 58}, quote="Yes, as of 2024-08. Check your region",
+        inv_uid,
+        evidence[0].evidence_uid,
+        "text_offset",
+        {"start_char": 18, "end_char": 58},
+        quote="Yes, as of 2024-08. Check your region",
     )
     session.link_support(inv_uid, span_uid, c_uid)
     session.export_investigation(inv_uid, out_path)

@@ -53,12 +53,16 @@ def verify_conformance(chronicle_path: Path) -> tuple[bool, list[dict]]:
 def run_rubric(chronicle_path: Path, rubric: dict) -> tuple[bool, list[dict]]:
     """Open the .chronicle ZIP, query the DB for rubric checks. Returns (all_passed, list of {name, passed, detail})."""
     if not chronicle_path.is_file() or chronicle_path.suffix != ".chronicle":
-        return False, [{"name": "file", "passed": False, "detail": f"Not a .chronicle file: {chronicle_path}"}]
+        return False, [
+            {"name": "file", "passed": False, "detail": f"Not a .chronicle file: {chronicle_path}"}
+        ]
 
     try:
         with zipfile.ZipFile(chronicle_path, "r") as zf:
             if "chronicle.db" not in zf.namelist():
-                return False, [{"name": "rubric_db", "passed": False, "detail": "ZIP missing chronicle.db"}]
+                return False, [
+                    {"name": "rubric_db", "passed": False, "detail": "ZIP missing chronicle.db"}
+                ]
             with tempfile.TemporaryDirectory(prefix="chronicle_score_") as tmp:
                 db_path = Path(tmp) / "chronicle.db"
                 db_path.write_bytes(zf.read("chronicle.db"))
@@ -83,33 +87,57 @@ def run_rubric(chronicle_path: Path, rubric: dict) -> tuple[bool, list[dict]]:
     all_passed = True
     min_inv = rubric.get("min_investigations", 1)
     if n_inv >= min_inv:
-        results.append({"name": "investigations", "passed": True, "detail": f">= {min_inv}: {n_inv}"})
+        results.append(
+            {"name": "investigations", "passed": True, "detail": f">= {min_inv}: {n_inv}"}
+        )
     else:
-        results.append({"name": "investigations", "passed": False, "detail": f"got {n_inv}, need >= {min_inv}"})
+        results.append(
+            {"name": "investigations", "passed": False, "detail": f"got {n_inv}, need >= {min_inv}"}
+        )
         all_passed = False
 
     min_claims = rubric.get("min_claims", 2)
     if n_claims >= min_claims:
         results.append({"name": "claims", "passed": True, "detail": f">= {min_claims}: {n_claims}"})
     else:
-        results.append({"name": "claims", "passed": False, "detail": f"got {n_claims}, need >= {min_claims}"})
+        results.append(
+            {"name": "claims", "passed": False, "detail": f"got {n_claims}, need >= {min_claims}"}
+        )
         all_passed = False
 
     min_support = rubric.get("min_support_links", 1)
     if n_support >= min_support:
-        results.append({"name": "support_links", "passed": True, "detail": f">= {min_support}: {n_support}"})
+        results.append(
+            {"name": "support_links", "passed": True, "detail": f">= {min_support}: {n_support}"}
+        )
     else:
-        results.append({"name": "support_links", "passed": False, "detail": f"got {n_support}, need >= {min_support}"})
+        results.append(
+            {
+                "name": "support_links",
+                "passed": False,
+                "detail": f"got {n_support}, need >= {min_support}",
+            }
+        )
         all_passed = False
 
     if rubric.get("require_tension", True):
         if n_tensions >= 1:
-            results.append({"name": "tension", "passed": True, "detail": f"at least one: {n_tensions}"})
+            results.append(
+                {"name": "tension", "passed": True, "detail": f"at least one: {n_tensions}"}
+            )
         else:
-            results.append({"name": "tension", "passed": False, "detail": "got 0; conflict scenario requires at least one tension"})
+            results.append(
+                {
+                    "name": "tension",
+                    "passed": False,
+                    "detail": "got 0; conflict scenario requires at least one tension",
+                }
+            )
             all_passed = False
     else:
-        results.append({"name": "tension", "passed": True, "detail": f"{n_tensions} (not required)"})
+        results.append(
+            {"name": "tension", "passed": True, "detail": f"{n_tensions} (not required)"}
+        )
 
     return all_passed, results
 
@@ -131,9 +159,7 @@ def _summary_and_suggestion(
         part = "Rubric failed: " + "; ".join(r["name"] + ": " + r["detail"] for r in failed)
         parts.append(part)
     summary = " ".join(parts)
-    suggestion = (
-        f"Scenario validation: {scenario_id} — {summary} Add to docs/to_do.md or fix app/playbook/scenario as needed."
-    )
+    suggestion = f"Scenario validation: {scenario_id} — {summary} Add to docs/to_do.md or fix app/playbook/scenario as needed."
     return summary, suggestion
 
 
@@ -223,7 +249,8 @@ def main() -> int:
         err_msg = f"File not found: {path}"
         print(err_msg, file=sys.stderr)
         print(
-            "Run: PYTHONPATH=. python3 scripts/ai_validation/run_agent.py --scenario " + args.scenario,
+            "Run: PYTHONPATH=. python3 scripts/ai_validation/run_agent.py --scenario "
+            + args.scenario,
             file=sys.stderr,
         )
         if not args.no_report:
@@ -236,7 +263,10 @@ def main() -> int:
                 rubric_results=[],
                 error=err_msg,
             )
-            print(f"Failure report written to {REPORTS_DIR / 'last_run.json'} and last_run.md", file=sys.stderr)
+            print(
+                f"Failure report written to {REPORTS_DIR / 'last_run.json'} and last_run.md",
+                file=sys.stderr,
+            )
         return 2
 
     rubric = load_scenario_rubric(args.scenario)
@@ -258,7 +288,10 @@ def main() -> int:
                 rubric_ok=rubric_ok,
                 rubric_results=rubric_results,
             )
-            print(f"Failure report written to {REPORTS_DIR / 'last_run.json'} and last_run.md", file=sys.stderr)
+            print(
+                f"Failure report written to {REPORTS_DIR / 'last_run.json'} and last_run.md",
+                file=sys.stderr,
+            )
         return 1
 
     print("Rubric:")
@@ -277,7 +310,10 @@ def main() -> int:
                 rubric_ok=False,
                 rubric_results=rubric_results,
             )
-            print(f"Failure report written to {REPORTS_DIR / 'last_run.json'} and last_run.md", file=sys.stderr)
+            print(
+                f"Failure report written to {REPORTS_DIR / 'last_run.json'} and last_run.md",
+                file=sys.stderr,
+            )
         return 1
 
     print("All checks passed.")

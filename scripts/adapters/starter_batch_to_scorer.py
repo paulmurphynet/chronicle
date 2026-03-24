@@ -36,8 +36,12 @@ _run_scorer = import_module("scripts.standalone_defensibility_scorer")._run_scor
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Batch adapter: harness JSONL -> Chronicle scorer JSONL")
-    parser.add_argument("--input", type=Path, default=None, help="Input JSONL file (default: stdin)")
+    parser = argparse.ArgumentParser(
+        description="Batch adapter: harness JSONL -> Chronicle scorer JSONL"
+    )
+    parser.add_argument(
+        "--input", type=Path, default=None, help="Input JSONL file (default: stdin)"
+    )
     parser.add_argument(
         "--output",
         type=Path,
@@ -50,12 +54,18 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Optional mapping profile JSON (keys/paths and defaults)",
     )
-    parser.add_argument("--query-key", default=None, help="Query key/path (dot-separated supported)")
-    parser.add_argument("--answer-key", default=None, help="Answer key/path (dot-separated supported)")
+    parser.add_argument(
+        "--query-key", default=None, help="Query key/path (dot-separated supported)"
+    )
+    parser.add_argument(
+        "--answer-key", default=None, help="Answer key/path (dot-separated supported)"
+    )
     parser.add_argument(
         "--evidence-key", default=None, help="Evidence key/path (dot-separated supported)"
     )
-    parser.add_argument("--run-id-key", default=None, help="Run id key/path (dot-separated supported)")
+    parser.add_argument(
+        "--run-id-key", default=None, help="Run id key/path (dot-separated supported)"
+    )
     parser.add_argument(
         "--fail-fast",
         action="store_true",
@@ -272,7 +282,11 @@ def main(argv: list[str] | None = None) -> int:
             "run_id": None,
             "ok": False,
             "input_error": "no_input",
-            "chronicle": {"contract_version": "1.0", "error": "invalid_input", "message": "empty input"},
+            "chronicle": {
+                "contract_version": "1.0",
+                "error": "invalid_input",
+                "message": "empty input",
+            },
         }
         _write_outputs([out], args.output)
         return 1

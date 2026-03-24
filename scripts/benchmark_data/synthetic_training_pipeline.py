@@ -22,7 +22,6 @@ See docs/chronicle-as-training-data.md and docs/benchmark.md Section 2.3.
 from __future__ import annotations
 
 import argparse
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -35,7 +34,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Synthetic training pipeline: generate -> Chronicle -> export JSONL (experimental)."
     )
-    parser.add_argument("--journalism", type=int, default=500, help="Number of journalism investigations")
+    parser.add_argument(
+        "--journalism", type=int, default=500, help="Number of journalism investigations"
+    )
     parser.add_argument("--legal", type=int, default=500, help="Number of legal investigations")
     parser.add_argument("--output", type=Path, required=True, help="Output JSONL path")
     parser.add_argument(
@@ -100,7 +101,9 @@ def main() -> int:
         for i, cf in enumerate(chronicle_files):
             import_investigation(cf, project_path)
             if (i + 1) % 200 == 0:
-                print(f"Imported {i + 1}/{len(chronicle_files)} .chronicle files...", file=sys.stderr)
+                print(
+                    f"Imported {i + 1}/{len(chronicle_files)} .chronicle files...", file=sys.stderr
+                )
 
         # Step 3: export to JSONL
         args.output.parent.mkdir(parents=True, exist_ok=True)

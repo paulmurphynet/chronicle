@@ -59,7 +59,9 @@ def _find_free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def _http_json(base_url: str, method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+def _http_json(
+    base_url: str, method: str, path: str, payload: dict[str, Any] | None = None
+) -> dict[str, Any]:
     url = ensure_safe_http_url(f"{base_url}{path}", block_private_hosts=False)
     data = None
     headers = {}
@@ -254,9 +256,7 @@ def _run_pipeline(batch: dict[str, Any], project_path: Path, output_dir: Path) -
 
         defensibility = json_request("GET", f"/claims/{claim_uid}/defensibility")
         reasoning_brief = json_request("GET", f"/claims/{claim_uid}/reasoning-brief")
-        review_packet = json_request(
-            "GET", f"/investigations/{investigation_uid}/review-packet"
-        )
+        review_packet = json_request("GET", f"/investigations/{investigation_uid}/review-packet")
         exported = bytes_request("POST", f"/investigations/{investigation_uid}/export")
         return (
             investigation_uid,

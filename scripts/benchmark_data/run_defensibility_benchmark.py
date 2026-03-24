@@ -88,7 +88,9 @@ def _run_with_langchain(path: Path) -> list[dict[str, Any]]:
 
     chain = (
         RunnablePassthrough.assign(context=lambda x: retriever.invoke(x["question"]))
-        | RunnableLambda(lambda x: {"context": format_docs(x["context"]), "question": x["question"]})
+        | RunnableLambda(
+            lambda x: {"context": format_docs(x["context"]), "question": x["question"]}
+        )
         | prompt
         | llm
         | StrOutputParser()

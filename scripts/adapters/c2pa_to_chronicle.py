@@ -105,7 +105,9 @@ def _transform_payload(obj: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def run_one(obj: dict[str, Any], project_path: Path, actor_id: str = "c2pa-adapter") -> dict[str, Any]:
+def run_one(
+    obj: dict[str, Any], project_path: Path, actor_id: str = "c2pa-adapter"
+) -> dict[str, Any]:
     """Run one C2PA import payload and return summary result."""
     transformed = _transform_payload(obj)
     result = run_provenance_one(transformed, project_path, actor_id=actor_id)
@@ -144,7 +146,9 @@ def main(argv: list[str] | None = None) -> int:
             exit_code = 1
             continue
         if not isinstance(obj, dict):
-            print(json.dumps({"error": "invalid_input", "message": "top-level JSON must be object"}))
+            print(
+                json.dumps({"error": "invalid_input", "message": "top-level JSON must be object"})
+            )
             exit_code = 1
             continue
         result = run_one(obj, args.path, actor_id=args.actor_id)

@@ -35,17 +35,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
 from chronicle.store.project import create_project
 from chronicle.store.session import ChronicleSession
 
 
 def run_one(obj: dict, project_path: Path, actor_id: str = "fact-checker-adapter") -> dict:
     claim_text = obj.get("claim") or ""
-    verdict = (obj.get("verdict") or "true").lower().strip()
     sources = obj.get("sources") or []
     external_id = obj.get("external_id")
 
@@ -110,7 +105,9 @@ def run_one(obj: dict, project_path: Path, actor_id: str = "fact-checker-adapter
         for span_uid in span_uids_support:
             session.link_support(inv_uid, span_uid, claim_uid, actor_id=actor_id, actor_type="tool")
         for span_uid in span_uids_challenge:
-            session.link_challenge(inv_uid, span_uid, claim_uid, actor_id=actor_id, actor_type="tool")
+            session.link_challenge(
+                inv_uid, span_uid, claim_uid, actor_id=actor_id, actor_type="tool"
+            )
 
         scorecard = session.get_defensibility_score(claim_uid)
         out: dict = {
@@ -128,15 +125,14 @@ def run_one(obj: dict, project_path: Path, actor_id: str = "fact-checker-adapter
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Fact-checker output → Chronicle (evidence, claim, support/challenge).")
+    parser = argparse.ArgumentParser(
+        description="Fact-checker output → Chronicle (evidence, claim, support/challenge)."
+    )
     parser.add_argument("input", nargs="?", help="JSON file (default: stdin)")
     parser.add_argument("--path", type=Path, help="Project path (default: temp dir)")
     parser.add_argument("--actor-id", default="fact-checker-adapter", help="Actor id for events")
     args = parser.parse_args()
-    if args.input:
-        raw = Path(args.input).read_text()
-    else:
-        raw = sys.stdin.read()
+    raw = Path(args.input).read_text() if args.input else sys.stdin.read()
     lines = [ln.strip() for ln in raw.strip().splitlines() if ln.strip()]
     if not lines:
         print(json.dumps({"error": "no_input", "message": "empty input"}))

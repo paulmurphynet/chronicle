@@ -141,7 +141,7 @@ def main() -> int:
                     inv_uid,
                     text.encode("utf-8"),
                     "text/plain",
-                    original_filename=f"row_{i+1}",
+                    original_filename=f"row_{i + 1}",
                     actor_id=actor_id,
                     actor_type="human",
                 )

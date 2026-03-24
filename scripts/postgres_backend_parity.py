@@ -305,7 +305,9 @@ def _insert_sqlite_rows(conn: sqlite3.Connection, table: str, rows: list[dict[st
     columns = list(rows[0].keys())
     if not columns:
         return
-    allowed_columns = {str(r[1]) for r in conn.execute(f"PRAGMA table_info({table_sql})").fetchall()}  # nosec B608
+    allowed_columns = {
+        str(r[1]) for r in conn.execute(f"PRAGMA table_info({table_sql})").fetchall()
+    }  # nosec B608
     if not all(isinstance(col, str) and col in allowed_columns for col in columns):
         raise ValueError(f"Unexpected columns for table {table!r}")
     placeholders = ", ".join("?" for _ in columns)
@@ -319,13 +321,17 @@ def _fetch_postgres_rows(
 ) -> list[dict[str, Any]]:
     cur = pg_conn.cursor()
     if table == "investigation":
-        cur.execute("SELECT * FROM investigation WHERE investigation_uid = %s", (investigation_uid,))
+        cur.execute(
+            "SELECT * FROM investigation WHERE investigation_uid = %s", (investigation_uid,)
+        )
     elif table == "tier_history":
         cur.execute("SELECT * FROM tier_history WHERE investigation_uid = %s", (investigation_uid,))
     elif table == "claim":
         cur.execute("SELECT * FROM claim WHERE investigation_uid = %s", (investigation_uid,))
     elif table == "evidence_item":
-        cur.execute("SELECT * FROM evidence_item WHERE investigation_uid = %s", (investigation_uid,))
+        cur.execute(
+            "SELECT * FROM evidence_item WHERE investigation_uid = %s", (investigation_uid,)
+        )
     elif table == "source":
         cur.execute("SELECT * FROM source WHERE investigation_uid = %s", (investigation_uid,))
     elif table == "tension":
@@ -554,7 +560,9 @@ def main(argv: list[str] | None = None) -> int:
     output_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     if report["ok"]:
         print("[PASS] Backend parity check passed (SQLite vs Postgres defensibility)")
-        print(f"       claims={len(report['scenario']['claim_uids'])} events={report['scenario']['event_count']}")
+        print(
+            f"       claims={len(report['scenario']['claim_uids'])} events={report['scenario']['event_count']}"
+        )
         print(f"       report={output_path}")
         return 0
 

@@ -3,13 +3,7 @@
 from __future__ import annotations
 
 import os
-import sys
-from pathlib import Path
 from typing import Any
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
 from chronicle.core.identity import (
     CHRONICLE_IDENTITY_PROVIDER_ENV,
@@ -17,19 +11,21 @@ from chronicle.core.identity import (
     VERIFICATION_ACCOUNT,
     VERIFICATION_CLAIMED,
     VERIFICATION_NONE,
-    get_effective_actor_from_request,
-    get_identity_provider,
     NoneIdP,
     PrincipalInfo,
     TraditionalIdP,
+    get_effective_actor_from_request,
+    get_identity_provider,
 )
 
 
 def _make_request(headers: dict[str, str] | None = None, state: Any = None) -> Any:
     """Minimal request-like object with headers and optional state."""
     h = headers or {}
+
     class Req:
         pass
+
     req = Req()
     req.headers = h
     req.request_state = state
@@ -159,10 +155,12 @@ def test_get_identity_provider_stub_for_gov_id_did_zk() -> None:
 def test_traditional_idp_with_state_override() -> None:
     """TraditionalIdP with override and request.state.actor_id returns VERIFICATION_ACCOUNT."""
     req = _make_request({"X-Actor-Id": "header_actor"}, state=None)
+
     # Add state with actor_id (TraditionalIdP reads getattr(state, "actor_id", None))
     class State:
         actor_id = "auth_principal"
         actor_type = "human"
+
     req.state = State()
     prev_override = os.environ.get(CHRONICLE_OVERRIDE_ACTOR_FROM_AUTH_ENV)
     prev_idp = os.environ.get(CHRONICLE_IDENTITY_PROVIDER_ENV)

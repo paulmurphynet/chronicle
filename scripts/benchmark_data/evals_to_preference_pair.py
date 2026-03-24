@@ -75,7 +75,9 @@ def main() -> int:
     )
     parser.add_argument("run1", nargs="?", type=Path, help="Path to first run JSON")
     parser.add_argument("run2", nargs="?", type=Path, help="Path to second run JSON")
-    parser.add_argument("--stdin", action="store_true", help="Read two JSON lines from stdin instead of run1/run2")
+    parser.add_argument(
+        "--stdin", action="store_true", help="Read two JSON lines from stdin instead of run1/run2"
+    )
     parser.add_argument(
         "--prompt-with-evidence",
         action="store_true",

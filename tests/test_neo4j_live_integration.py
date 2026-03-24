@@ -134,10 +134,14 @@ def _seed_project(project_path: Path) -> None:
             actor_id="test",
             actor_type="tool",
         )
-        _, support_a1 = session.link_support(inv_a, span_a, claim_a, actor_id="test", actor_type="tool")
+        _, support_a1 = session.link_support(
+            inv_a, span_a, claim_a, actor_id="test", actor_type="tool"
+        )
         session.link_support(inv_a, span_a, claim_a, actor_id="test", actor_type="tool")
         session.link_challenge(inv_a, span_a, claim_a, actor_id="test", actor_type="tool")
-        session.retract_support(support_a1, actor_id="test", actor_type="tool", rationale="Live test")
+        session.retract_support(
+            support_a1, actor_id="test", actor_type="tool", rationale="Live test"
+        )
 
         _, inv_b = session.create_investigation("Neo4j live B", actor_id="test", actor_type="tool")
         _, ev_b = session.ingest_evidence(
@@ -184,9 +188,7 @@ def _snapshot_counts(cfg: Neo4jConfig) -> dict[str, int]:
 @pytest.fixture(scope="module")
 def neo4j_live_config() -> Neo4jConfig:
     if not _truthy(os.environ.get("CHRONICLE_RUN_NEO4J_LIVE_TESTS", "")):
-        pytest.skip(
-            "Neo4j live tests disabled. Set CHRONICLE_RUN_NEO4J_LIVE_TESTS=1 to run."
-        )
+        pytest.skip("Neo4j live tests disabled. Set CHRONICLE_RUN_NEO4J_LIVE_TESTS=1 to run.")
     uri = os.environ.get("NEO4J_URI", "").strip()
     user = (os.environ.get("NEO4J_USER", "neo4j") or "neo4j").strip()
     password = os.environ.get("NEO4J_PASSWORD", "")

@@ -72,7 +72,13 @@ def test_get_defensibility_score_with_policy_profile_none(tmp_path: Path) -> Non
             inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="E",
+            actor_id="t",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(inv_uid, "C.", actor_id="t", actor_type="tool")
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
@@ -106,9 +112,17 @@ def test_get_defensibility_score_with_policy_mes(tmp_path: Path) -> None:
             inv_uid, b"E", "text/plain", original_filename="e.txt", actor_id="t", actor_type="tool"
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": 1}, quote="E", actor_id="t", actor_type="tool"
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": 1},
+            quote="E",
+            actor_id="t",
+            actor_type="tool",
         )
-        _, claim_uid = session.propose_claim(inv_uid, "C.", initial_type="SEF", actor_id="t", actor_type="tool")
+        _, claim_uid = session.propose_claim(
+            inv_uid, "C.", initial_type="SEF", actor_id="t", actor_type="tool"
+        )
         session.link_support(inv_uid, span_uid, claim_uid, actor_id="t", actor_type="tool")
         read_model = session.store.get_read_model()
         profile = PolicyProfile(profile_id="test", display_name="Test")
@@ -126,7 +140,14 @@ def test_import_investigation_merge_into_existing(tmp_path: Path) -> None:
     chronicle_file = tmp_path / "export.chronicle"
     with ChronicleSession(proj_a) as session:
         _, inv_uid = session.create_investigation("Export", actor_id="t", actor_type="tool")
-        session.ingest_evidence(inv_uid, b"Content", "text/plain", original_filename="c.txt", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"Content",
+            "text/plain",
+            original_filename="c.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
         session.export_investigation(inv_uid, chronicle_file)
     with ChronicleSession(proj_b) as session:
         session.create_investigation("Existing", actor_id="t", actor_type="tool")
@@ -215,7 +236,9 @@ def test_import_investigation_rejects_unexpected_archive_entries(tmp_path: Path)
     exported = tmp_path / "export.chronicle"
     with_extra = tmp_path / "with-extra.chronicle"
     with ChronicleSession(proj) as session:
-        _, inv_uid = session.create_investigation("Unexpected entry", actor_id="t", actor_type="tool")
+        _, inv_uid = session.create_investigation(
+            "Unexpected entry", actor_id="t", actor_type="tool"
+        )
         session.ingest_evidence(
             inv_uid,
             b"Bytes",
@@ -226,7 +249,10 @@ def test_import_investigation_rejects_unexpected_archive_entries(tmp_path: Path)
         )
         session.export_investigation(inv_uid, exported)
 
-    with zipfile.ZipFile(exported, "r") as zin, zipfile.ZipFile(with_extra, "w", zipfile.ZIP_DEFLATED) as zout:
+    with (
+        zipfile.ZipFile(exported, "r") as zin,
+        zipfile.ZipFile(with_extra, "w", zipfile.ZIP_DEFLATED) as zout,
+    ):
         for name in zin.namelist():
             zout.writestr(name, zin.read(name))
         zout.writestr("extras/unexpected.txt", b"unexpected")

@@ -3,15 +3,7 @@
 from __future__ import annotations
 
 import json
-import sys
-from pathlib import Path
 
-# Run from repo root so scripts/ and chronicle are importable
-REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-# Import after path fix
 from scripts.standalone_defensibility_scorer import _run_scorer, main
 
 
@@ -21,11 +13,13 @@ def _run(input_obj: dict) -> dict:
 
 def test_valid_input_returns_metrics():
     """Valid query/answer/evidence produces defensibility metrics (no error key)."""
-    out = _run({
-        "query": "What was revenue?",
-        "answer": "Revenue was $1.2M.",
-        "evidence": ["The company reported revenue of $1.2M in Q1 2024."],
-    })
+    out = _run(
+        {
+            "query": "What was revenue?",
+            "answer": "Revenue was $1.2M.",
+            "evidence": ["The company reported revenue of $1.2M in Q1 2024."],
+        }
+    )
     assert "error" not in out
     assert out.get("contract_version") == "1.0"
     assert "claim_uid" in out
@@ -76,31 +70,39 @@ def test_empty_evidence_returns_error():
     """Empty evidence array yields invalid_input."""
     out = _run({"query": "Q?", "answer": "A.", "evidence": []})
     assert out.get("error") == "invalid_input"
-    assert "at least one" in out.get("message", "").lower() or "non-empty" in out.get("message", "").lower()
+    assert (
+        "at least one" in out.get("message", "").lower()
+        or "non-empty" in out.get("message", "").lower()
+    )
 
 
 def test_evidence_objects_with_text_accepted():
     """Evidence as list of objects with 'text' is accepted."""
-    out = _run({
-        "query": "What happened?",
-        "answer": "It happened in 2024.",
-        "evidence": [{"text": "The event occurred in 2024."}],
-    })
+    out = _run(
+        {
+            "query": "What happened?",
+            "answer": "It happened in 2024.",
+            "evidence": [{"text": "The event occurred in 2024."}],
+        }
+    )
     assert "error" not in out
     assert "claim_uid" in out
 
 
 def test_evidence_objects_with_url_accepted(monkeypatch):
     """Evidence as list of objects with 'url' is accepted when fetch succeeds (mocked)."""
+
     def mock_fetch(url: str):
         return "Fetched content from URL." if url == "https://example.com/doc.txt" else None
 
     monkeypatch.setattr("chronicle.scorer_contract._fetch_url", mock_fetch)
-    out = _run({
-        "query": "What happened?",
-        "answer": "It happened.",
-        "evidence": [{"url": "https://example.com/doc.txt"}],
-    })
+    out = _run(
+        {
+            "query": "What happened?",
+            "answer": "It happened.",
+            "evidence": [{"url": "https://example.com/doc.txt"}],
+        }
+    )
     assert "error" not in out
     assert "claim_uid" in out
     assert out["corroboration"]["support_count"] >= 1
@@ -109,11 +111,13 @@ def test_evidence_objects_with_url_accepted(monkeypatch):
 def test_main_returns_zero_on_success(monkeypatch):
     """main() returns 0 when given valid JSON on stdin."""
     monkeypatch.setattr("sys.argv", ["standalone_defensibility_scorer.py"])
-    stdin = json.dumps({
-        "query": "Q?",
-        "answer": "A.",
-        "evidence": ["Chunk one."],
-    })
+    stdin = json.dumps(
+        {
+            "query": "Q?",
+            "answer": "A.",
+            "evidence": ["Chunk one."],
+        }
+    )
     monkeypatch.setattr("sys.stdin", type("Stdin", (), {"read": lambda self, size=-1: stdin})())
     monkeypatch.setattr("sys.stdout", type("Stdout", (), {"write": lambda self, s: None})())
     exit_code = main()

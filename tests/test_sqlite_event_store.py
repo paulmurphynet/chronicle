@@ -5,8 +5,6 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-import pytest
-
 from chronicle.core.events import Event
 from chronicle.store.project import CHRONICLE_DB, create_project
 from chronicle.store.session import ChronicleSession
@@ -70,7 +68,9 @@ def test_event_store_read_all_after_event_id(tmp_path: Path) -> None:
     create_project(tmp_path)
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("After", actor_id="t", actor_type="tool")
-        session.ingest_evidence(inv_uid, b"x", "text/plain", original_filename="x.txt", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid, b"x", "text/plain", original_filename="x.txt", actor_id="t", actor_type="tool"
+        )
         events = session.store.read_all(limit=10)
         assert len(events) >= 2
         first_id = events[0].event_id
@@ -84,7 +84,9 @@ def test_event_store_read_by_investigation(tmp_path: Path) -> None:
     inv_uid = None
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("ByInv", actor_id="t", actor_type="tool")
-        session.ingest_evidence(inv_uid, b"y", "text/plain", original_filename="y.txt", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid, b"y", "text/plain", original_filename="y.txt", actor_id="t", actor_type="tool"
+        )
     with ChronicleSession(tmp_path) as session:
         by_inv = session.store.read_by_investigation(inv_uid)
     assert len(by_inv) >= 2
@@ -113,7 +115,9 @@ def test_event_store_get_event_by_idempotency_key_none_for_empty(tmp_path: Path)
 def test_event_store_get_event_by_idempotency_key_returns_event(tmp_path: Path) -> None:
     create_project(tmp_path)
     with ChronicleSession(tmp_path) as session:
-        session.create_investigation("Idem", actor_id="t", actor_type="tool", idempotency_key="key-1")
+        session.create_investigation(
+            "Idem", actor_id="t", actor_type="tool", idempotency_key="key-1"
+        )
         ev = session.store.get_event_by_idempotency_key("key-1")
     assert ev is not None
     assert ev.payload.get("investigation_uid") is not None
@@ -147,7 +151,9 @@ def test_replay_read_model_up_to_event_id(tmp_path: Path) -> None:
     create_project(tmp_path)
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("Replay2", actor_id="t", actor_type="tool")
-        session.ingest_evidence(inv_uid, b"z", "text/plain", original_filename="z.txt", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid, b"z", "text/plain", original_filename="z.txt", actor_id="t", actor_type="tool"
+        )
         events = session.store.read_all(limit=5)
         first_id = events[0].event_id
         conn = session.store._connection()

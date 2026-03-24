@@ -16,7 +16,7 @@ for use with propose_learn_from_trace.py (suggest Learn guide annotations from s
 import argparse
 import json
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -34,7 +34,9 @@ def load_scenario(scenario_id: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _trace_append(trace: list[dict] | None, learn_step: int, action: str, count: int | None = None) -> None:
+def _trace_append(
+    trace: list[dict] | None, learn_step: int, action: str, count: int | None = None
+) -> None:
     if trace is None:
         return
     entry: dict = {"learn_step": learn_step, "action": action}
@@ -185,9 +187,7 @@ def run_legal_single_claim(
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev_uid = evidence[0].evidence_uid
 
-    _, c_uid = session.propose_claim(
-        inv_uid, "Payment terms are net 30 days from invoice date."
-    )
+    _, c_uid = session.propose_claim(inv_uid, "Payment terms are net 30 days from invoice date.")
     # "Payment terms are net 30 days from invoice date" in doc: start_char 20, end_char 67
     _, span_uid = session.anchor_span(
         inv_uid,
@@ -263,7 +263,9 @@ def run_internal_investigations_single_claim(
     """Execute single finding verification: one doc, one claim, one support link. No tension."""
     docs = scenario["documents"]
     if len(docs) < 1:
-        raise ValueError("internal_investigations_single_claim scenario requires at least 1 document")
+        raise ValueError(
+            "internal_investigations_single_claim scenario requires at least 1 document"
+        )
 
     content = docs[0]["content"].encode("utf-8")
     session.ingest_evidence(inv_uid, content, "text/plain")
@@ -272,9 +274,7 @@ def run_internal_investigations_single_claim(
     evidence = session.read_model.list_evidence_by_investigation(inv_uid)
     ev_uid = evidence[0].evidence_uid
 
-    _, c_uid = session.propose_claim(
-        inv_uid, "Inappropriate material was reported on 2024-02-14."
-    )
+    _, c_uid = session.propose_claim(inv_uid, "Inappropriate material was reported on 2024-02-14.")
     _, span_uid = session.anchor_span(
         inv_uid,
         ev_uid,
@@ -423,7 +423,7 @@ def main() -> int:
         payload = {
             "scenario_id": scenario_id,
             "success": True,
-            "recorded_at": datetime.now(timezone.utc).isoformat(),
+            "recorded_at": datetime.now(UTC).isoformat(),
             "steps": trace,
         }
         trace_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")

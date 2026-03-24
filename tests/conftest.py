@@ -11,7 +11,7 @@ import pytest
 
 def _ollama_available() -> bool:
     """True if CHRONICLE_LLM_ENABLED is set and Ollama is reachable."""
-    if not os.environ.get("CHRONICLE_LLM_ENABLED", "").strip().lower() in ("true", "1", "yes"):
+    if os.environ.get("CHRONICLE_LLM_ENABLED", "").strip().lower() not in ("true", "1", "yes"):
         return False
     base = os.environ.get("CHRONICLE_LLM_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
     try:

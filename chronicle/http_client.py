@@ -26,7 +26,12 @@ class ChronicleClientError(Exception):
 
 
 class ChronicleClient:
-    """Thin HTTP client for Chronicle API. T5.3."""
+    """Thin HTTP client for Chronicle API.
+
+    Project selection is configured server-side via ``CHRONICLE_PROJECT_PATH``.
+    The ``project_path`` constructor argument is retained for compatibility and
+    local diagnostics, but it is not sent to the API.
+    """
 
     def __init__(
         self,
@@ -52,7 +57,6 @@ class ChronicleClient:
 
     def _headers(self, idempotency_key: str | None = None) -> dict[str, str]:
         h: dict[str, str] = {
-            "X-Project-Path": self.project_path,
             "X-Actor-Id": self.actor_id,
             "X-Actor-Type": self.actor_type,
             "Content-Type": "application/json",
@@ -140,7 +144,7 @@ class ChronicleClient:
         return collected
 
     def init_project(self) -> None:
-        """Ensure project path is configured and reachable.
+        """Ensure the server-configured project path is configured and reachable.
 
         The API auto-initializes on first project endpoint access, so there is no
         explicit /project/init route.

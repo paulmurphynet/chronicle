@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Update markdown and other text files to use new lowercase-hyphen doc filenames after rename."""
+
 from pathlib import Path
-import re
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -20,7 +20,10 @@ RENAMES = [
     ("SPLIT_KERNEL_DECISION.md", "split-kernel-decision.md"),
     ("CONFORMANCE.md", "conformance.md"),
     ("FRONTEND_BACKEND_COVERAGE.md", "frontend-backend-coverage.md"),
-    ("EPISTEMOLOGISTS_CONFERENCE_INTERVIEW.md", "thought_experiment/epistemologists-conference-interview.md"),
+    (
+        "EPISTEMOLOGISTS_CONFERENCE_INTERVIEW.md",
+        "thought_experiment/epistemologists-conference-interview.md",
+    ),
     ("INTEGRATING_WITH_CHRONICLE.md", "integrating-with-chronicle.md"),
     ("AIKIDO_UX_PHASES.md", "frontend-ux-phases.md"),
     ("AIKIDO_FRONTEND_EVALUATION.md", "frontend-ux-evaluation.md"),

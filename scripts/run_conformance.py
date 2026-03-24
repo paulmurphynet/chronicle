@@ -49,9 +49,10 @@ def main() -> int:
         }
         if all_passed:
             try:
-                with zipfile.ZipFile(path, "r") as zf, tempfile.TemporaryDirectory(
-                    prefix="chronicle_verify_"
-                ) as tmp:
+                with (
+                    zipfile.ZipFile(path, "r") as zf,
+                    tempfile.TemporaryDirectory(prefix="chronicle_verify_") as tmp,
+                ):
                     db_path = Path(tmp) / "chronicle.db"
                     db_path.write_bytes(zf.read("chronicle.db"))
                     conn = sqlite3.connect(str(db_path))

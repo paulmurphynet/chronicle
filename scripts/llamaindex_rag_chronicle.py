@@ -25,8 +25,8 @@ def main() -> None:
             "This example requires llama-index-core. Install with: pip install llama-index-core"
         ) from e
 
-    from chronicle.store.project import create_project
     from chronicle.integrations.llamaindex import ChronicleCallbackHandler
+    from chronicle.store.project import create_project
 
     # Create a temp Chronicle project
     with tempfile.TemporaryDirectory(prefix="chronicle_llama_") as tmp:

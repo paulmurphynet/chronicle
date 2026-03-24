@@ -55,7 +55,8 @@ def test_vc_adapter_records_claim_and_artifact_attestation(tmp_path: Path) -> No
     artifact_event = next(
         e
         for e in events
-        if e.get("subject_uid") == artifacts[0].artifact_uid and e.get("event_type") == "ArtifactCreated"
+        if e.get("subject_uid") == artifacts[0].artifact_uid
+        and e.get("event_type") == "ArtifactCreated"
     )
     assert artifact_event["payload"].get("_verification_level") == "verified_credential"
     assert artifact_event["payload"].get("_attestation_ref") == "urn:vc:artifact-1"
@@ -65,7 +66,9 @@ def test_vc_adapter_records_checkpoint_attestation(tmp_path: Path) -> None:
     create_project(tmp_path)
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("VC checkpoint", actor_id="t", actor_type="tool")
-        _, claim_uid = session.propose_claim(inv_uid, "Scope claim", actor_id="t", actor_type="tool")
+        _, claim_uid = session.propose_claim(
+            inv_uid, "Scope claim", actor_id="t", actor_type="tool"
+        )
 
     payload = {
         "investigation_uid": inv_uid,

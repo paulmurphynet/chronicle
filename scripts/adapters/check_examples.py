@@ -18,7 +18,9 @@ validator_main = import_module("scripts.adapters.validate_adapter_outputs").main
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Check adapter examples and starter/validator flow.")
+    parser = argparse.ArgumentParser(
+        description="Check adapter examples and starter/validator flow."
+    )
     parser.add_argument(
         "--examples-dir",
         type=Path,

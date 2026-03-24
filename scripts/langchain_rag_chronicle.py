@@ -18,23 +18,22 @@ from pathlib import Path
 
 def main() -> None:
     try:
-        from langchain_core.callbacks import BaseCallbackHandler
         from langchain_core.documents import Document
+        from langchain_core.language_models import BaseChatModel
+        from langchain_core.messages import AIMessage
         from langchain_core.output_parsers import StrOutputParser
+        from langchain_core.outputs import ChatGeneration, ChatResult
         from langchain_core.prompts import ChatPromptTemplate
         from langchain_core.retrievers import BaseRetriever
         from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-        from langchain_core.language_models import BaseChatModel
-        from langchain_core.messages import AIMessage
-        from langchain_core.outputs import ChatGeneration, ChatResult
         from pydantic import ConfigDict
     except ImportError as e:
         raise SystemExit(
             "This example requires langchain-core. Install with: pip install langchain-core"
         ) from e
 
-    from chronicle.store.project import create_project
     from chronicle.integrations.langchain import ChronicleCallbackHandler
+    from chronicle.store.project import create_project
 
     # In-memory retriever (no API keys)
     class MockRetriever(BaseRetriever):
@@ -52,7 +51,9 @@ def main() -> None:
 
         def _generate(self, messages, stop=None, run_manager=None, **kwargs):
             return ChatResult(
-                generations=[ChatGeneration(message=AIMessage(content="Revenue in Q1 2024 was $1.2M."))]
+                generations=[
+                    ChatGeneration(message=AIMessage(content="Revenue in Q1 2024 was $1.2M."))
+                ]
             )
 
     # Create a temp Chronicle project

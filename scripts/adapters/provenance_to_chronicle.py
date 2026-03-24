@@ -72,15 +72,27 @@ def run_one(obj: dict, project_path: Path, actor_id: str = "provenance-adapter")
             )
         else:
             if session.read_model.get_investigation(inv_uid) is None:
-                return {"error": "no_investigation", "message": f"investigation_uid not found: {inv_uid}"}
+                return {
+                    "error": "no_investigation",
+                    "message": f"investigation_uid not found: {inv_uid}",
+                }
         created_sources: list[str] = []
         created_links: int = 0
         for a in assertions:
             if not isinstance(a, dict):
                 continue
-            name = (a.get("source_display_name") or a.get("source_uid") or str(uuid.uuid4())[:8]).strip()
+            name = (
+                a.get("source_display_name") or a.get("source_uid") or str(uuid.uuid4())[:8]
+            ).strip()
             source_type = (a.get("source_type") or "other").strip()
-            if source_type not in ("person", "organization", "document", "public_record", "anonymous_tip", "other"):
+            if source_type not in (
+                "person",
+                "organization",
+                "document",
+                "public_record",
+                "anonymous_tip",
+                "other",
+            ):
                 source_type = "other"
             source_uid = a.get("source_uid")
             if not source_uid:
@@ -128,7 +140,9 @@ def main() -> int:
         description="Provenance assertions → Chronicle (sources, evidence, evidence–source links). We record; we do not verify."
     )
     parser.add_argument("input", nargs="?", help="JSON file (default: stdin)")
-    parser.add_argument("--path", type=Path, required=True, help="Project path (must exist or will be created)")
+    parser.add_argument(
+        "--path", type=Path, required=True, help="Project path (must exist or will be created)"
+    )
     parser.add_argument("--actor-id", default="provenance-adapter", help="Actor id for events")
     args = parser.parse_args()
     raw = Path(args.input).read_text() if args.input else sys.stdin.read()

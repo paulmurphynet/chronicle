@@ -112,9 +112,7 @@ def _export_from_session(session, output_path: Path | None, stdout: bool) -> int
                     evidence_texts.append(text)
 
             metrics = defensibility_metrics_for_claim(session, claim.claim_uid)
-            defensibility_score = (
-                metrics.get("provenance_quality") if metrics else None
-            )
+            defensibility_score = metrics.get("provenance_quality") if metrics else None
             defensibility_metrics = metrics  # full dict for optional use
 
             row = {
@@ -175,6 +173,7 @@ def main() -> int:
             print(f"Not a .chronicle file: {args.chronicle}", file=sys.stderr)
             return 1
         import tempfile
+
         from chronicle.store.export_import import import_investigation
 
         with tempfile.TemporaryDirectory(prefix="chronicle_export_ml_") as tmp:

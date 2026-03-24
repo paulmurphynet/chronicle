@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from chronicle.core.errors import ChronicleUserError
 from chronicle.mcp.service import ChronicleMcpService
 
@@ -73,4 +72,3 @@ def test_mcp_service_rejects_empty_text(tmp_path: Path) -> None:
             investigation_uid=created["investigation_uid"],
             text="   ",
         )
-

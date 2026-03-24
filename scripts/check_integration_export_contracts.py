@@ -189,8 +189,12 @@ def run(project_path: Path, output_dir: Path) -> dict[str, Any]:
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run integration export/import contract harness.")
-    parser.add_argument("--project-path", type=Path, required=True, help="Source Chronicle project path")
-    parser.add_argument("--output-dir", type=Path, required=True, help="Output directory for artifacts")
+    parser.add_argument(
+        "--project-path", type=Path, required=True, help="Source Chronicle project path"
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, required=True, help="Output directory for artifacts"
+    )
     parser.add_argument("--stdout-json", action="store_true", help="Print report JSON to stdout")
     return parser.parse_args(argv)
 

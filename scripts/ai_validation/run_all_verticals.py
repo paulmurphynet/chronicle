@@ -37,7 +37,14 @@ SCENARIOS = [
 def run_one(scenario_id: str, chronicle_path: Path, env: dict) -> tuple[bool, str]:
     """Run scenario driver then scorer for one scenario. Returns (passed, message)."""
     driver_result = subprocess.run(
-        [sys.executable, str(RUN_AGENT), "--scenario", scenario_id, "--output", str(chronicle_path)],
+        [
+            sys.executable,
+            str(RUN_AGENT),
+            "--scenario",
+            scenario_id,
+            "--output",
+            str(chronicle_path),
+        ],
         cwd=REPO_ROOT,
         env=env,
         capture_output=True,
@@ -45,10 +52,19 @@ def run_one(scenario_id: str, chronicle_path: Path, env: dict) -> tuple[bool, st
         timeout=60,
     )
     if driver_result.returncode != 0:
-        return False, "driver failed: " + (driver_result.stderr or driver_result.stdout or "unknown").strip()[:200]
+        return False, "driver failed: " + (
+            driver_result.stderr or driver_result.stdout or "unknown"
+        ).strip()[:200]
 
     score_result = subprocess.run(
-        [sys.executable, str(SCORE_RUN), "--scenario", scenario_id, "--no-report", str(chronicle_path)],
+        [
+            sys.executable,
+            str(SCORE_RUN),
+            "--scenario",
+            scenario_id,
+            "--no-report",
+            str(chronicle_path),
+        ],
         cwd=REPO_ROOT,
         env=env,
         capture_output=True,

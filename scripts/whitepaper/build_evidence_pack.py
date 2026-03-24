@@ -313,7 +313,9 @@ def _component_standards(repo_root: Path, run_dir: Path) -> dict[str, Any]:
         session.export_investigation(inv_uid, chronicle_path)
 
     artifacts = {
-        "standards_jsonld_export": _write_json(work / "standards_jsonld_export.json", standards_jsonld),
+        "standards_jsonld_export": _write_json(
+            work / "standards_jsonld_export.json", standards_jsonld
+        ),
         "standards_jsonld_validation": _write_json(
             work / "standards_jsonld_validation.json",
             {"errors": standards_errors},
@@ -321,7 +323,9 @@ def _component_standards(repo_root: Path, run_dir: Path) -> dict[str, Any]:
         "claimreview_export": _write_json(work / "claimreview_export.json", claimreview),
         "ro_crate_export": _write_json(work / "ro_crate_export.json", ro_crate),
         "c2pa_export_disabled": _write_json(work / "c2pa_export_disabled.json", c2pa_disabled),
-        "c2pa_export_metadata_only": _write_json(work / "c2pa_export_metadata_only.json", c2pa_enabled),
+        "c2pa_export_metadata_only": _write_json(
+            work / "c2pa_export_metadata_only.json", c2pa_enabled
+        ),
         "vc_export_disabled": _write_json(work / "vc_export_disabled.json", vc_disabled),
         "vc_export_metadata_only": _write_json(work / "vc_export_metadata_only.json", vc_enabled),
         "sample_chronicle": str(chronicle_path),
@@ -432,7 +436,9 @@ def _default_output_dir(repo_root: Path) -> Path:
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     choices = sorted(COMPONENT_RUNNERS.keys())
-    parser = argparse.ArgumentParser(description="Build a whitepaper reproducibility evidence pack.")
+    parser = argparse.ArgumentParser(
+        description="Build a whitepaper reproducibility evidence pack."
+    )
     parser.add_argument(
         "--components",
         nargs="*",

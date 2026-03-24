@@ -91,9 +91,15 @@ def main(argv: list[str] | None = None) -> int:
                 reliability_notes="Interpretive artifact; suitable for caveat framing, not as sole fact source.",
                 workspace="forge",
             )
-            session.link_evidence_to_source(ev1_uid, src1_uid, relationship="provided_by", workspace="forge")
-            session.link_evidence_to_source(ev2_uid, src2_uid, relationship="provided_by", workspace="forge")
-            session.link_evidence_to_source(ev3_uid, src3_uid, relationship="authored_by", workspace="forge")
+            session.link_evidence_to_source(
+                ev1_uid, src1_uid, relationship="provided_by", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev2_uid, src2_uid, relationship="provided_by", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev3_uid, src3_uid, relationship="authored_by", workspace="forge"
+            )
 
             _, claim_a_uid = session.propose_claim(inv_uid, "Bridge completion year was 1864.")
             _, claim_b_uid = session.propose_claim(inv_uid, "Bridge completion year was 1862.")

@@ -48,11 +48,16 @@ def _as_str(value: Any) -> str | None:
     return stripped or None
 
 
-def run_one(obj: dict[str, Any], project_path: Path, actor_id: str = "vc-adapter") -> dict[str, Any]:
+def run_one(
+    obj: dict[str, Any], project_path: Path, actor_id: str = "vc-adapter"
+) -> dict[str, Any]:
     """Run one VC/Data Integrity import payload and return summary result."""
     attestations = obj.get("attestations") or []
     if not isinstance(attestations, list) or not attestations:
-        return {"error": "missing_attestations", "message": "field 'attestations' (array) is required"}
+        return {
+            "error": "missing_attestations",
+            "message": "field 'attestations' (array) is required",
+        }
     inv_uid = _as_str(obj.get("investigation_uid"))
 
     if not project_path.joinpath("chronicle.db").exists():
@@ -70,7 +75,10 @@ def run_one(obj: dict[str, Any], project_path: Path, actor_id: str = "vc-adapter
                 actor_type="tool",
             )
         elif session.read_model.get_investigation(inv_uid) is None:
-            return {"error": "no_investigation", "message": f"investigation_uid not found: {inv_uid}"}
+            return {
+                "error": "no_investigation",
+                "message": f"investigation_uid not found: {inv_uid}",
+            }
 
         for item in attestations:
             if not isinstance(item, dict):
@@ -214,7 +222,9 @@ def main(argv: list[str] | None = None) -> int:
             exit_code = 1
             continue
         if not isinstance(obj, dict):
-            print(json.dumps({"error": "invalid_input", "message": "top-level JSON must be object"}))
+            print(
+                json.dumps({"error": "invalid_input", "message": "top-level JSON must be object"})
+            )
             exit_code = 1
             continue
         result = run_one(obj, args.path, actor_id=args.actor_id)

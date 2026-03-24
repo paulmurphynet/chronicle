@@ -89,9 +89,15 @@ def main(argv: list[str] | None = None) -> int:
                 reliability_notes="Attorney work product summary; not itself controlling law.",
                 workspace="forge",
             )
-            session.link_evidence_to_source(ev1_uid, src1_uid, relationship="provided_by", workspace="forge")
-            session.link_evidence_to_source(ev2_uid, src2_uid, relationship="provided_by", workspace="forge")
-            session.link_evidence_to_source(ev3_uid, src3_uid, relationship="authored_by", workspace="forge")
+            session.link_evidence_to_source(
+                ev1_uid, src1_uid, relationship="provided_by", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev2_uid, src2_uid, relationship="provided_by", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev3_uid, src3_uid, relationship="authored_by", workspace="forge"
+            )
 
             _, claim_a_uid = session.propose_claim(inv_uid, "Delivery due March 1, 2024.")
             _, claim_b_uid = session.propose_claim(inv_uid, "Delivery due April 15, 2024.")

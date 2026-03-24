@@ -11,7 +11,9 @@ def test_whitepaper_publication_metadata_shape() -> None:
 
     assert payload["schema_version"] == 1
     assert isinstance(payload["document_id"], str) and payload["document_id"]
-    assert isinstance(payload["canonical_document_path"], str) and payload["canonical_document_path"]
+    assert (
+        isinstance(payload["canonical_document_path"], str) and payload["canonical_document_path"]
+    )
     assert isinstance(payload["current_revision"], str) and payload["current_revision"]
 
     revisions = payload.get("revisions")

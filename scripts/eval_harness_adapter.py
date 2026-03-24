@@ -25,21 +25,21 @@ from pathlib import Path
 def main() -> int:
     try:
         from langchain_core.documents import Document
+        from langchain_core.language_models import BaseChatModel
+        from langchain_core.messages import AIMessage
         from langchain_core.output_parsers import StrOutputParser
+        from langchain_core.outputs import ChatGeneration, ChatResult
         from langchain_core.prompts import ChatPromptTemplate
         from langchain_core.retrievers import BaseRetriever
         from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-        from langchain_core.language_models import BaseChatModel
-        from langchain_core.messages import AIMessage
-        from langchain_core.outputs import ChatGeneration, ChatResult
         from pydantic import ConfigDict
     except ImportError as e:
         print(json.dumps({"error": "langchain_core_required", "message": str(e)}), file=sys.stderr)
         return 1
 
-    from chronicle.store.project import create_project
-    from chronicle.integrations.langchain import ChronicleCallbackHandler
     from chronicle.eval_metrics import defensibility_metrics_for_claim
+    from chronicle.integrations.langchain import ChronicleCallbackHandler
+    from chronicle.store.project import create_project
 
     class MockRetriever(BaseRetriever):
         docs: list[Document]

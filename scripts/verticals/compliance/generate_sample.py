@@ -32,7 +32,9 @@ def _span_for_quote(text: str, quote: str) -> dict[str, int]:
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate deterministic compliance sample .chronicle.")
+    parser = argparse.ArgumentParser(
+        description="Generate deterministic compliance sample .chronicle."
+    )
     parser.add_argument(
         "--output",
         type=Path,
@@ -89,9 +91,15 @@ def main(argv: list[str] | None = None) -> int:
                 reliability_notes="Internal policy interpretation note; action-oriented rather than dispositive.",
                 workspace="forge",
             )
-            session.link_evidence_to_source(ev1_uid, src1_uid, relationship="provided_by", workspace="forge")
-            session.link_evidence_to_source(ev2_uid, src2_uid, relationship="provided_by", workspace="forge")
-            session.link_evidence_to_source(ev3_uid, src3_uid, relationship="authored_by", workspace="forge")
+            session.link_evidence_to_source(
+                ev1_uid, src1_uid, relationship="provided_by", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev2_uid, src2_uid, relationship="provided_by", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev3_uid, src3_uid, relationship="authored_by", workspace="forge"
+            )
 
             _, claim_a_uid = session.propose_claim(
                 inv_uid, "INV-204 revenue was properly recognized in March 2024."

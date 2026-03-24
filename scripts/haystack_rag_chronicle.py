@@ -20,16 +20,16 @@ from pathlib import Path
 def main() -> None:
     try:
         from haystack import Pipeline
+        from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
         from haystack.dataclasses import Document
         from haystack.document_stores.in_memory import InMemoryDocumentStore
-        from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
     except ImportError as e:
         raise SystemExit(
             "This example requires haystack-ai. Install with: pip install haystack-ai"
         ) from e
 
-    from chronicle.store.project import create_project
     from chronicle.integrations.haystack import ChronicleEvidenceWriter
+    from chronicle.store.project import create_project
 
     with tempfile.TemporaryDirectory(prefix="chronicle_hs_") as tmp:
         path = Path(tmp)

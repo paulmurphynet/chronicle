@@ -25,20 +25,37 @@ CSV_PATH = REPO_ROOT / "test_data" / "lb_inquest" / "inquest.csv"
 
 # (row_id_a, row_id_b) - row id is the "id" column in the CSV (1-based in file, we match by id string)
 TENSION_PAIRS = [
-    ("571", "597"),   # upstairs vs kitchen when father came home
-    ("577", "597"),   # on stairs when let him in vs in kitchen
-    ("772", "577"),   # in kitchen when let in vs on stairs when let him in
-    ("776", "846"),   # in sitting room (in house) vs went out to the barn
+    ("571", "597"),  # upstairs vs kitchen when father came home
+    ("577", "597"),  # on stairs when let him in vs in kitchen
+    ("772", "577"),  # in kitchen when let in vs on stairs when let him in
+    ("776", "846"),  # in sitting room (in house) vs went out to the barn
 ]
 
 
 def main() -> int:
     import argparse
-    parser = argparse.ArgumentParser(description="Add Lizzie Borden inquest tensions to an existing Chronicle project.")
-    parser.add_argument("--project", default="chronicle_graph_project", help="Path to Chronicle project (default: chronicle_graph_project)")
-    parser.add_argument("--investigation-uid", default="", help="Use this investigation UID instead of matching by title")
-    parser.add_argument("--title", default="Lizzie Borden inquest", help="Investigation title to match (default: Lizzie Borden inquest)")
-    parser.add_argument("--debug", action="store_true", help="Print sample claim texts from DB when lookups fail")
+
+    parser = argparse.ArgumentParser(
+        description="Add Lizzie Borden inquest tensions to an existing Chronicle project."
+    )
+    parser.add_argument(
+        "--project",
+        default="chronicle_graph_project",
+        help="Path to Chronicle project (default: chronicle_graph_project)",
+    )
+    parser.add_argument(
+        "--investigation-uid",
+        default="",
+        help="Use this investigation UID instead of matching by title",
+    )
+    parser.add_argument(
+        "--title",
+        default="Lizzie Borden inquest",
+        help="Investigation title to match (default: Lizzie Borden inquest)",
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="Print sample claim texts from DB when lookups fail"
+    )
     args = parser.parse_args()
 
     project_path = Path(args.project)
@@ -55,7 +72,11 @@ def main() -> int:
     # Build row id -> (speaker, testimony) from CSV
     with open(CSV_PATH, encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
-        if "id" not in reader.fieldnames or "speaker" not in reader.fieldnames or "testimony" not in reader.fieldnames:
+        if (
+            "id" not in reader.fieldnames
+            or "speaker" not in reader.fieldnames
+            or "testimony" not in reader.fieldnames
+        ):
             print("Error: CSV must have columns id, speaker, testimony", file=sys.stderr)
             return 1
         rows_by_id = {}
@@ -96,7 +117,10 @@ def main() -> int:
             print("Investigations in project:", file=sys.stderr)
             for i in investigations:
                 print(f"  uid={i.investigation_uid}  title={i.title!r}", file=sys.stderr)
-            print("Use --investigation-uid <uid> or --title '<exact title>' to specify which one.", file=sys.stderr)
+            print(
+                "Use --investigation-uid <uid> or --title '<exact title>' to specify which one.",
+                file=sys.stderr,
+            )
             return 1
         inv_uid = inv.investigation_uid
         print(f"Using investigation: {inv.title!r} ({inv_uid})")
@@ -128,7 +152,9 @@ def main() -> int:
         added = 0
         for id_a, id_b in TENSION_PAIRS:
             if id_a not in rows_by_id or id_b not in rows_by_id:
-                print(f"Warning: row id {id_a} or {id_b} not in CSV; skipping pair.", file=sys.stderr)
+                print(
+                    f"Warning: row id {id_a} or {id_b} not in CSV; skipping pair.", file=sys.stderr
+                )
                 continue
             speaker_a, testimony_a = rows_by_id[id_a]
             speaker_b, testimony_b = rows_by_id[id_b]
@@ -139,7 +165,7 @@ def main() -> int:
             if not uid_a:
                 print(f"Warning: claim not found for row {id_a}: {text_a[:60]}...", file=sys.stderr)
                 if getattr(args, "debug", False):
-                    for ct, uid in list(text_to_uid.items())[:3]:
+                    for ct, _uid in list(text_to_uid.items())[:3]:
                         print(f"  DB sample: {ct[:80]!r}...", file=sys.stderr)
                     for ct in list(text_to_uid.keys()):
                         if "up stairs" in ct or "kitchen" in ct:

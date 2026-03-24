@@ -19,10 +19,10 @@ import sys
 from pathlib import Path
 
 REPLACEMENTS_QUOTES = [
-    ("\u2018", "'"),   # left single quotation mark -> ASCII apostrophe
-    ("\u2019", "'"),   # right single quotation mark -> ASCII apostrophe
-    ("\u201c", '"'),   # left double quotation mark -> ASCII double quote
-    ("\u201d", '"'),   # right double quotation mark -> ASCII double quote
+    ("\u2018", "'"),  # left single quotation mark -> ASCII apostrophe
+    ("\u2019", "'"),  # right single quotation mark -> ASCII apostrophe
+    ("\u201c", '"'),  # left double quotation mark -> ASCII double quote
+    ("\u201d", '"'),  # right double quotation mark -> ASCII double quote
 ]
 
 REPLACEMENTS_EMDASH = [
@@ -41,10 +41,16 @@ def normalize(text: str, em_dash: bool = False) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry-run", action="store_true", help="Print what would change, do not write")
-    parser.add_argument("--em-dash", action="store_true", help="Also replace em-dash (U+2014) with ' - '")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Print what would change, do not write"
+    )
+    parser.add_argument(
+        "--em-dash", action="store_true", help="Also replace em-dash (U+2014) with ' - '"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Print every file scanned")
-    parser.add_argument("path", nargs="?", default="docs", help="Directory or file to process (default: docs)")
+    parser.add_argument(
+        "path", nargs="?", default="docs", help="Directory or file to process (default: docs)"
+    )
     args = parser.parse_args()
     root = Path(args.path)
     if not root.exists():

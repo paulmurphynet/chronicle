@@ -64,7 +64,9 @@ def propose_for_trace(trace: dict, guides_data: dict) -> list[str]:
     steps = trace.get("steps") or []
     vertical = _vertical_for_scenario(scenario_id)
     if not vertical:
-        suggestions.append(f"Unknown scenario '{scenario_id}'; no vertical mapping. Add to SCENARIO_TO_VERTICAL.")
+        suggestions.append(
+            f"Unknown scenario '{scenario_id}'; no vertical mapping. Add to SCENARIO_TO_VERTICAL."
+        )
         return suggestions
 
     guide = next((g for g in guides_data.get("guides", []) if g.get("id") == vertical), None)
@@ -88,18 +90,27 @@ def propose_for_trace(trace: dict, guides_data: dict) -> list[str]:
         has_example = bool(gs.get("example"))
 
         action_summary = "; ".join(
-            a.get("action", "") + (f" (count={a.get('count')})" if a.get("count") is not None else "")
+            a.get("action", "")
+            + (f" (count={a.get('count')})" if a.get("count") is not None else "")
             for a in actions
         )
         if has_example:
-            suggestions.append(f"- **Step {step_index} ({title}):** Run had: {action_summary}. Guide already has an example; consider aligning wording with run (e.g. same counts).")
+            suggestions.append(
+                f"- **Step {step_index} ({title}):** Run had: {action_summary}. Guide already has an example; consider aligning wording with run (e.g. same counts)."
+            )
         else:
             tip = f"In successful runs: {action_summary}."
-            suggestions.append(f"- **Step {step_index} ({title}):** Run had: {action_summary}. Consider adding `example`: \"{tip}\" (edit guides.json and approve).")
+            suggestions.append(
+                f'- **Step {step_index} ({title}):** Run had: {action_summary}. Consider adding `example`: "{tip}" (edit guides.json and approve).'
+            )
 
     # Cross-step tip: order of actions
-    if any(s.get("action") == "link_support" for s in steps) and any(s.get("action") == "propose_claims" for s in steps):
-        suggestions.append("- **Tip (steps 3–4):** Successful runs do propose_claims then link_support before Defensibility. Consider adding a one-line tip to step 3 or 4: \"Link support to claims before checking defensibility.\"")
+    if any(s.get("action") == "link_support" for s in steps) and any(
+        s.get("action") == "propose_claims" for s in steps
+    ):
+        suggestions.append(
+            '- **Tip (steps 3–4):** Successful runs do propose_claims then link_support before Defensibility. Consider adding a one-line tip to step 3 or 4: "Link support to claims before checking defensibility."'
+        )
 
     return suggestions
 
@@ -123,21 +134,26 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    guides_data = json.loads(args.guides.read_text(encoding="utf-8")) if args.guides.is_file() else {"guides": []}
+    guides_data = (
+        json.loads(args.guides.read_text(encoding="utf-8"))
+        if args.guides.is_file()
+        else {"guides": []}
+    )
 
     paths = args.trace_paths
     if not paths:
-        if TRACES_DIR.is_dir():
-            paths = sorted(TRACES_DIR.glob("*.json"))
-        else:
-            paths = []
+        paths = sorted(TRACES_DIR.glob("*.json")) if TRACES_DIR.is_dir() else []
 
     if not paths:
-        print("No trace files found. Run: PYTHONPATH=. python3 scripts/ai_validation/run_agent.py --scenario <id> --trace")
+        print(
+            "No trace files found. Run: PYTHONPATH=. python3 scripts/ai_validation/run_agent.py --scenario <id> --trace"
+        )
         return 0
 
     print("# Learn guide suggestions from scenario validation traces\n")
-    print("Review and approve; then edit `chronicle/api/static/learn/guides.json` to add or adjust `example` / tips.\n")
+    print(
+        "Review and approve; then edit `chronicle/api/static/learn/guides.json` to add or adjust `example` / tips.\n"
+    )
 
     for path in paths:
         trace = load_trace(path)

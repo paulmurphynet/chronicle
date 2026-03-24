@@ -32,7 +32,9 @@ def _span_for_quote(text: str, quote: str) -> dict[str, int]:
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate deterministic journalism sample .chronicle.")
+    parser = argparse.ArgumentParser(
+        description="Generate deterministic journalism sample .chronicle."
+    )
     parser.add_argument(
         "--output",
         type=Path,
@@ -89,9 +91,15 @@ def main(argv: list[str] | None = None) -> int:
                 reliability_notes="Second-order summary used for caveat decisions only.",
                 workspace="forge",
             )
-            session.link_evidence_to_source(ev1_uid, src1_uid, relationship="testified_to", workspace="forge")
-            session.link_evidence_to_source(ev2_uid, src2_uid, relationship="provided_by", workspace="forge")
-            session.link_evidence_to_source(ev3_uid, src3_uid, relationship="authored_by", workspace="forge")
+            session.link_evidence_to_source(
+                ev1_uid, src1_uid, relationship="testified_to", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev2_uid, src2_uid, relationship="provided_by", workspace="forge"
+            )
+            session.link_evidence_to_source(
+                ev3_uid, src3_uid, relationship="authored_by", workspace="forge"
+            )
 
             _, c1_uid = session.propose_claim(
                 inv_uid, "Subject was in London on 2024-01-15 at approximately 14:00."
@@ -101,7 +109,10 @@ def main(argv: list[str] | None = None) -> int:
                 inv_uid, "Location remains unresolved and requires caveated reporting."
             )
             session.type_claim(
-                c1_uid, "SAC", rationale="Single-source eyewitness statement; not established.", workspace="forge"
+                c1_uid,
+                "SAC",
+                rationale="Single-source eyewitness statement; not established.",
+                workspace="forge",
             )
             session.type_claim(
                 c2_uid,

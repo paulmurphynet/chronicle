@@ -49,7 +49,11 @@ def test_api_ingestion_pipeline_falls_back_when_sockets_unavailable(
 ) -> None:
     project_path = tmp_path / "project"
     output_dir = tmp_path / "out"
-    monkeypatch.setattr(module, "_find_free_port", lambda: (_ for _ in ()).throw(PermissionError(1, "Operation not permitted")))
+    monkeypatch.setattr(
+        module,
+        "_find_free_port",
+        lambda: (_ for _ in ()).throw(PermissionError(1, "Operation not permitted")),
+    )
     rc = module.main(
         [
             "--project-path",

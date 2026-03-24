@@ -85,7 +85,9 @@ MIN_COUNTS: dict[str, int] = {
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Check quality/completeness of Chronicle vertical samples.")
+    parser = argparse.ArgumentParser(
+        description="Check quality/completeness of Chronicle vertical samples."
+    )
     parser.add_argument("--only", nargs="*", choices=sorted(SAMPLE_SPECS.keys()), default=[])
     parser.add_argument(
         "--output-report",
@@ -121,7 +123,9 @@ def _verification_for(path: Path) -> dict[str, Any]:
     checks = verify_chronicle_file(path, run_invariants=True)
     failures = [name for name, passed, _detail in checks if not passed]
     return {
-        "checks": [{"name": name, "passed": passed, "detail": detail} for name, passed, detail in checks],
+        "checks": [
+            {"name": name, "passed": passed, "detail": detail} for name, passed, detail in checks
+        ],
         "failures": failures,
     }
 
@@ -132,7 +136,9 @@ def _select_investigation_uid(session: ChronicleSession) -> str:
         raise RuntimeError("No investigations after import")
     if len(investigations) == 1:
         return investigations[0].investigation_uid
-    return sorted(investigations, key=lambda i: (i.created_at or "", i.investigation_uid))[-1].investigation_uid
+    return sorted(investigations, key=lambda i: (i.created_at or "", i.investigation_uid))[
+        -1
+    ].investigation_uid
 
 
 def _metrics_for(path: Path) -> dict[str, int]:
@@ -143,13 +149,17 @@ def _metrics_for(path: Path) -> dict[str, int]:
             session.import_investigation(path)
             inv_uid = _select_investigation_uid(session)
             rm = session.read_model
-            claims = rm.list_claims_by_type(investigation_uid=inv_uid, include_withdrawn=True, limit=500)
+            claims = rm.list_claims_by_type(
+                investigation_uid=inv_uid, include_withdrawn=True, limit=500
+            )
             evidence_items = rm.list_evidence_by_investigation(inv_uid)
             sources = rm.list_sources_by_investigation(inv_uid)
             tensions = rm.list_tensions(investigation_uid=inv_uid, limit=500)
 
             support_links = [link for c in claims for link in rm.get_support_for_claim(c.claim_uid)]
-            challenge_links = [link for c in claims for link in rm.get_challenges_for_claim(c.claim_uid)]
+            challenge_links = [
+                link for c in claims for link in rm.get_challenges_for_claim(c.claim_uid)
+            ]
             evidence_source_links = [
                 link
                 for ev in evidence_items
@@ -164,7 +174,9 @@ def _metrics_for(path: Path) -> dict[str, int]:
             return {
                 "claim_count": len(claims),
                 "typed_claim_count": sum(
-                    1 for c in claims if c.claim_type is not None and c.claim_type.strip() != "UNKNOWN"
+                    1
+                    for c in claims
+                    if c.claim_type is not None and c.claim_type.strip() != "UNKNOWN"
                 ),
                 "evidence_count": len(evidence_items),
                 "source_count": len(sources),
@@ -176,11 +188,15 @@ def _metrics_for(path: Path) -> dict[str, int]:
                 "evidence_source_link_count": len(evidence_source_links),
                 "support_link_count": len(support_links),
                 "support_with_rationale_count": sum(
-                    1 for link in support_links if link.rationale is not None and link.rationale.strip() != ""
+                    1
+                    for link in support_links
+                    if link.rationale is not None and link.rationale.strip() != ""
                 ),
                 "challenge_link_count": len(challenge_links),
                 "challenge_with_rationale_count": sum(
-                    1 for link in challenge_links if link.rationale is not None and link.rationale.strip() != ""
+                    1
+                    for link in challenge_links
+                    if link.rationale is not None and link.rationale.strip() != ""
                 ),
                 "tension_count": len(tensions),
                 "redacted_evidence_count": sum(
@@ -193,7 +209,9 @@ def _metrics_for(path: Path) -> dict[str, int]:
                 ),
                 "supersession_count": len(supersession_uids),
                 "temporalized_claim_count": sum(
-                    1 for c in claims if c.temporal_json is not None and c.temporal_json.strip() != ""
+                    1
+                    for c in claims
+                    if c.temporal_json is not None and c.temporal_json.strip() != ""
                 ),
             }
 

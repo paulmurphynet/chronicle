@@ -74,7 +74,9 @@ def build_portfolio_risk_summary(
 ) -> dict[str, Any]:
     resolved_project_path = project_path.resolve()
     if not project_exists(resolved_project_path):
-        raise FileNotFoundError(f"Not a Chronicle project (no chronicle.db): {resolved_project_path}")
+        raise FileNotFoundError(
+            f"Not a Chronicle project (no chronicle.db): {resolved_project_path}"
+        )
 
     inv_rows: list[dict[str, Any]] = []
     with ChronicleSession(resolved_project_path) as session:
@@ -117,8 +119,8 @@ def build_portfolio_risk_summary(
                 policy_deltas_count=policy_deltas_count,
                 policy_has_message=policy_has_message,
             )
-            override_rate = (
-                _round4((human_overrode_count / total_decisions) if total_decisions > 0 else 0.0)
+            override_rate = _round4(
+                (human_overrode_count / total_decisions) if total_decisions > 0 else 0.0
             )
 
             inv_rows.append(
@@ -205,7 +207,9 @@ def build_portfolio_risk_summary(
     hhi = 0.0
     if total_overrides > 0:
         for row in ranked:
-            share = _safe_int((row.get("metrics") or {}).get("human_overrode_count")) / total_overrides
+            share = (
+                _safe_int((row.get("metrics") or {}).get("human_overrode_count")) / total_overrides
+            )
             hhi += share * share
 
     aggregate = {
@@ -213,12 +217,16 @@ def build_portfolio_risk_summary(
         "total_unresolved_tensions": total_unresolved,
         "investigations_with_unresolved_tensions": investigations_with_unresolved,
         "unresolved_tension_rate": _round4(
-            (investigations_with_unresolved / total_investigations) if total_investigations > 0 else 0.0
+            (investigations_with_unresolved / total_investigations)
+            if total_investigations > 0
+            else 0.0
         ),
         "total_human_overrides": total_overrides,
         "investigations_with_human_overrides": investigations_with_overrides,
         "human_override_rate": _round4(
-            (investigations_with_overrides / total_investigations) if total_investigations > 0 else 0.0
+            (investigations_with_overrides / total_investigations)
+            if total_investigations > 0
+            else 0.0
         ),
         "override_concentration": {
             "top_investigation_uid": top_override_uid,

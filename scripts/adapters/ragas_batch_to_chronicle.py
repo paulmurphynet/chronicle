@@ -47,21 +47,29 @@ DEFAULT_RUN_ID_KEYS = ("run_id", "id", "sample_id")
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="RAGAS adapter: rows -> Chronicle scorer JSONL")
     parser.add_argument("--input", type=Path, default=None, help="Input file (default: stdin)")
-    parser.add_argument("--output", type=Path, default=None, help="Output JSONL file (default: stdout)")
+    parser.add_argument(
+        "--output", type=Path, default=None, help="Output JSONL file (default: stdout)"
+    )
     parser.add_argument(
         "--input-format",
         choices=("auto", "jsonl", "json"),
         default="auto",
         help="Input format: newline-delimited JSON (jsonl), JSON array/object (json), or auto (default).",
     )
-    parser.add_argument("--query-key", default=None, help="Query key/path override (dot-separated supported)")
-    parser.add_argument("--answer-key", default=None, help="Answer key/path override (dot-separated supported)")
+    parser.add_argument(
+        "--query-key", default=None, help="Query key/path override (dot-separated supported)"
+    )
+    parser.add_argument(
+        "--answer-key", default=None, help="Answer key/path override (dot-separated supported)"
+    )
     parser.add_argument(
         "--contexts-key",
         default=None,
         help="Evidence contexts key/path override (dot-separated supported)",
     )
-    parser.add_argument("--run-id-key", default=None, help="Run id key/path override (dot-separated supported)")
+    parser.add_argument(
+        "--run-id-key", default=None, help="Run id key/path override (dot-separated supported)"
+    )
     parser.add_argument(
         "--fail-fast",
         action="store_true",
@@ -145,7 +153,9 @@ def _parse_json_payload(text: str) -> tuple[list[dict[str, Any]] | None, str | N
     return None, "json_input_must_be_array_or_object_with_rows"
 
 
-def _load_rows(input_path: Path | None, input_format: str) -> tuple[list[dict[str, Any]] | None, str | None]:
+def _load_rows(
+    input_path: Path | None, input_format: str
+) -> tuple[list[dict[str, Any]] | None, str | None]:
     text = input_path.read_text(encoding="utf-8") if input_path else sys.stdin.read()
     if text.strip() == "":
         return None, "empty_input"

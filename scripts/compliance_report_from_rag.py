@@ -32,7 +32,9 @@ ANSWER = "Revenue in Q1 2024 was $1.2M (from context)."
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate a compliance-style report from a Chronicle run.")
+    parser = argparse.ArgumentParser(
+        description="Generate a compliance-style report from a Chronicle run."
+    )
     parser.add_argument(
         "--mode",
         choices=("auto", "langchain", "session"),
@@ -127,9 +129,7 @@ def _run_langchain_mode(project_path: Path) -> str:
             return "mock"
 
         def _generate(self, messages, stop=None, run_manager=None, **kwargs):
-            return ChatResult(
-                generations=[ChatGeneration(message=AIMessage(content=ANSWER))]
-            )
+            return ChatResult(generations=[ChatGeneration(message=AIMessage(content=ANSWER))])
 
     handler = ChronicleCallbackHandler(
         project_path,
@@ -149,7 +149,9 @@ def _run_langchain_mode(project_path: Path) -> str:
 
     chain = (
         RunnablePassthrough.assign(context=lambda x: retriever.invoke(x["question"]))
-        | RunnableLambda(lambda x: {"context": format_docs(x["context"]), "question": x["question"]})
+        | RunnableLambda(
+            lambda x: {"context": format_docs(x["context"]), "question": x["question"]}
+        )
         | prompt
         | llm
         | StrOutputParser()
@@ -165,7 +167,9 @@ def _run_langchain_mode(project_path: Path) -> str:
     return inv_uid
 
 
-def _build_report(project_path: Path, inv_uid: str, report_dir: Path) -> tuple[dict[str, Any], Path]:
+def _build_report(
+    project_path: Path, inv_uid: str, report_dir: Path
+) -> tuple[dict[str, Any], Path]:
     from chronicle.store.commands.reasoning_brief import reasoning_brief_to_html
     from chronicle.store.session import ChronicleSession
 

@@ -57,7 +57,10 @@ def test_parity_normalize_scorecard_sorts_unordered_fields() -> None:
 
 def test_parity_compare_scorecards_reports_mismatch() -> None:
     sqlite_scores = {"c1": {"provenance_quality": "strong"}, "c2": {"provenance_quality": "weak"}}
-    postgres_scores = {"c1": {"provenance_quality": "strong"}, "c2": {"provenance_quality": "medium"}}
+    postgres_scores = {
+        "c1": {"provenance_quality": "strong"},
+        "c2": {"provenance_quality": "medium"},
+    }
     mismatches = parity_module.compare_scorecards(sqlite_scores, postgres_scores)
     assert set(mismatches.keys()) == {"c2"}
     assert mismatches["c2"]["sqlite"]["provenance_quality"] == "weak"
@@ -153,9 +156,7 @@ def test_onboarding_optional_command_rejects_empty_command() -> None:
     assert raised is True
 
 
-def test_onboarding_main_does_not_mutate_process_env(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_onboarding_main_does_not_mutate_process_env(tmp_path: Path, monkeypatch) -> None:
     env_file = tmp_path / ".env.postgres.local"
     env_file.write_text(
         "\n".join(

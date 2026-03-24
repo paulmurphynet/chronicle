@@ -38,9 +38,7 @@ def test_compliance_session_mode_writes_report(tmp_path: Path) -> None:
     assert isinstance(report.get("claims"), list)
 
 
-def test_reference_workflow_runner_with_stubbed_workflows(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_reference_workflow_runner_with_stubbed_workflows(tmp_path: Path, monkeypatch) -> None:
     def _ok(repo_root: Path, run_dir: Path) -> dict:
         return {"name": "ok", "status": "passed"}
 

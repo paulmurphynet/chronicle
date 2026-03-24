@@ -14,18 +14,11 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
 from scripts.standalone_defensibility_scorer import _run_scorer
 
 
 def main() -> int:
-    if len(sys.argv) > 1:
-        text = Path(sys.argv[1]).read_text()
-    else:
-        text = sys.stdin.read()
+    text = Path(sys.argv[1]).read_text() if len(sys.argv) > 1 else sys.stdin.read()
     lines = [ln.strip() for ln in text.strip().splitlines() if ln.strip()]
     if not lines:
         print(json.dumps({"error": "no_input", "message": "empty input"}))

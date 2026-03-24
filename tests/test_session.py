@@ -98,18 +98,38 @@ def test_session_multi_evidence_corroboration(tmp_path: Path) -> None:
             actor_type="tool",
         )
         _, ev1 = session.ingest_evidence(
-            inv_uid, chunk1, "text/plain", original_filename="a.txt", actor_id="test", actor_type="tool"
+            inv_uid,
+            chunk1,
+            "text/plain",
+            original_filename="a.txt",
+            actor_id="test",
+            actor_type="tool",
         )
         _, ev2 = session.ingest_evidence(
-            inv_uid, chunk2, "text/plain", original_filename="b.txt", actor_id="test", actor_type="tool"
+            inv_uid,
+            chunk2,
+            "text/plain",
+            original_filename="b.txt",
+            actor_id="test",
+            actor_type="tool",
         )
         _, span1 = session.anchor_span(
-            inv_uid, ev1, "text_offset", {"start_char": 0, "end_char": len(chunk1.decode())},
-            quote=chunk1.decode(), actor_id="test", actor_type="tool",
+            inv_uid,
+            ev1,
+            "text_offset",
+            {"start_char": 0, "end_char": len(chunk1.decode())},
+            quote=chunk1.decode(),
+            actor_id="test",
+            actor_type="tool",
         )
         _, span2 = session.anchor_span(
-            inv_uid, ev2, "text_offset", {"start_char": 0, "end_char": len(chunk2.decode())},
-            quote=chunk2.decode(), actor_id="test", actor_type="tool",
+            inv_uid,
+            ev2,
+            "text_offset",
+            {"start_char": 0, "end_char": len(chunk2.decode())},
+            quote=chunk2.decode(),
+            actor_id="test",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(
             inv_uid, "Revenue was $1.2M in Q1 2024.", actor_id="test", actor_type="tool"
@@ -133,11 +153,21 @@ def test_session_defensibility_metrics_contract(tmp_path: Path) -> None:
             "Eval contract test", actor_id="test", actor_type="tool"
         )
         _, ev_uid = session.ingest_evidence(
-            inv_uid, text, "text/plain", original_filename="doc.txt", actor_id="test", actor_type="tool"
+            inv_uid,
+            text,
+            "text/plain",
+            original_filename="doc.txt",
+            actor_id="test",
+            actor_type="tool",
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": len(text.decode())},
-            quote=text.decode(), actor_id="test", actor_type="tool",
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": len(text.decode())},
+            quote=text.decode(),
+            actor_id="test",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(
             inv_uid, "Revenue was $1.5M in Q1.", actor_id="test", actor_type="tool"
@@ -164,15 +194,23 @@ def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
     create_project(tmp_path)
     text = b"The company reported revenue of $1.2M in Q1 2024."
     with ChronicleSession(tmp_path) as session:
-        _, inv_uid = session.create_investigation(
-            "Export test", actor_id="test", actor_type="tool"
-        )
+        _, inv_uid = session.create_investigation("Export test", actor_id="test", actor_type="tool")
         _, ev_uid = session.ingest_evidence(
-            inv_uid, text, "text/plain", original_filename="doc.txt", actor_id="test", actor_type="tool"
+            inv_uid,
+            text,
+            "text/plain",
+            original_filename="doc.txt",
+            actor_id="test",
+            actor_type="tool",
         )
         _, span_uid = session.anchor_span(
-            inv_uid, ev_uid, "text_offset", {"start_char": 0, "end_char": len(text.decode())},
-            quote=text.decode(), actor_id="test", actor_type="tool",
+            inv_uid,
+            ev_uid,
+            "text_offset",
+            {"start_char": 0, "end_char": len(text.decode())},
+            quote=text.decode(),
+            actor_id="test",
+            actor_type="tool",
         )
         _, claim_uid = session.propose_claim(
             inv_uid, "Revenue was $1.2M in Q1 2024.", actor_id="test", actor_type="tool"
@@ -197,7 +235,12 @@ def test_claim_evidence_metrics_export(tmp_path: Path) -> None:
     assert ref.get("span_uid") == span_uid
     assert ref["link_type"] == "SUPPORT"
     assert "defensibility" in claim
-    assert claim["defensibility"].get("provenance_quality") in ("strong", "medium", "weak", "challenged")
+    assert claim["defensibility"].get("provenance_quality") in (
+        "strong",
+        "medium",
+        "weak",
+        "challenged",
+    )
     assert claim["defensibility"].get("link_assurance_level") == "tool_generated"
 
 
@@ -248,7 +291,9 @@ def test_claimreview_export_profile(tmp_path: Path) -> None:
             inv_uid, "A disputed claim.", actor_id="test", actor_type="tool"
         )
         session.link_support(inv_uid, span_support, claim_uid, actor_id="test", actor_type="tool")
-        session.link_challenge(inv_uid, span_challenge, claim_uid, actor_id="test", actor_type="tool")
+        session.link_challenge(
+            inv_uid, span_challenge, claim_uid, actor_id="test", actor_type="tool"
+        )
 
         data = build_claimreview_export(
             session.read_model,
@@ -276,7 +321,9 @@ def test_ro_crate_export_profile(tmp_path: Path) -> None:
 
     create_project(tmp_path)
     with ChronicleSession(tmp_path) as session:
-        _, inv_uid = session.create_investigation("RO-Crate export", actor_id="test", actor_type="tool")
+        _, inv_uid = session.create_investigation(
+            "RO-Crate export", actor_id="test", actor_type="tool"
+        )
         _, ev_uid = session.ingest_evidence(
             inv_uid,
             b"Evidence bytes",
@@ -330,8 +377,12 @@ def test_c2pa_compatibility_export_profile(tmp_path: Path) -> None:
             actor_id="test",
             actor_type="tool",
         )
-        disabled = build_c2pa_compatibility_export(session.read_model, inv_uid, verification_enabled=False)
-        enabled = build_c2pa_compatibility_export(session.read_model, inv_uid, verification_enabled=True)
+        disabled = build_c2pa_compatibility_export(
+            session.read_model, inv_uid, verification_enabled=False
+        )
+        enabled = build_c2pa_compatibility_export(
+            session.read_model, inv_uid, verification_enabled=True
+        )
 
     assert disabled["schema_version"] == 1
     assert disabled["verification"]["enabled"] is False
@@ -415,9 +466,7 @@ def test_vc_data_integrity_export_profile(tmp_path: Path) -> None:
     assert artifact_entry["attestation"]["attestation_ref"] == "urn:vc:artifact-1"
 
     checkpoint_entry = next(
-        x
-        for x in enabled["attestations"]["checkpoints"]
-        if x["checkpoint_uid"] == checkpoint_uid
+        x for x in enabled["attestations"]["checkpoints"] if x["checkpoint_uid"] == checkpoint_uid
     )
     assert checkpoint_entry["attestation"]["verification_status"] == "not_verified"
     assert checkpoint_entry["attestation"]["attestation_ref"] == "urn:vc:checkpoint-1"
@@ -809,7 +858,9 @@ def test_session_temporalize_claim_rejects_invalid_uncertainty_fields(tmp_path: 
                 actor_type="human",
                 workspace="forge",
             )
-        with pytest.raises(ChronicleUserError, match="known_range_start must be <= known_range_end"):
+        with pytest.raises(
+            ChronicleUserError, match="known_range_start must be <= known_range_end"
+        ):
             session.temporalize_claim(
                 claim_uid,
                 {"known_range_start": "2025-01-02", "known_range_end": "2025-01-01"},

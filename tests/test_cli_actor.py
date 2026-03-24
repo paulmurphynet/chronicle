@@ -15,9 +15,11 @@ from chronicle.store.session import ChronicleSession
 
 def test_actor_from_args_uses_args_first() -> None:
     """_actor_from_args uses args.actor_id and args.actor_type when set."""
+
     class Args:
         actor_id = "from_args"
         actor_type = "tool"
+
     args = Args()
     aid, atype = _actor_from_args(args)
     assert aid == "from_args"
@@ -26,9 +28,11 @@ def test_actor_from_args_uses_args_first() -> None:
 
 def test_actor_from_args_falls_back_to_env(monkeypatch: pytest.MonkeyPatch) -> None:
     """_actor_from_args falls back to CHRONICLE_ACTOR_ID and CHRONICLE_ACTOR_TYPE."""
+
     class Args:
         actor_id = None
         actor_type = None
+
     monkeypatch.setenv("CHRONICLE_ACTOR_ID", "env_actor")
     monkeypatch.setenv("CHRONICLE_ACTOR_TYPE", "human")
     aid, atype = _actor_from_args(Args())
@@ -38,9 +42,11 @@ def test_actor_from_args_falls_back_to_env(monkeypatch: pytest.MonkeyPatch) -> N
 
 def test_actor_from_args_default_when_empty() -> None:
     """_actor_from_args returns default/human when args and env are empty."""
+
     class Args:
         actor_id = None
         actor_type = None
+
     # Ensure env is not set for this test
     aid, atype = _actor_from_args(Args())
     assert aid == "default"

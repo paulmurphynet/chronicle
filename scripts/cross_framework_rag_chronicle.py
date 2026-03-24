@@ -28,12 +28,12 @@ def run_langchain(path: Path) -> tuple[str | None, str]:
     """Run LangChain RAG; return (claim_uid or None, answer_snippet)."""
     try:
         from langchain_core.documents import Document
-        from langchain_core.output_parsers import StrOutputParser
-        from langchain_core.prompts import ChatPromptTemplate
-        from langchain_core.runnables import RunnableLambda, RunnablePassthrough
         from langchain_core.language_models import BaseChatModel
         from langchain_core.messages import AIMessage
+        from langchain_core.output_parsers import StrOutputParser
         from langchain_core.outputs import ChatGeneration, ChatResult
+        from langchain_core.prompts import ChatPromptTemplate
+        from langchain_core.runnables import RunnableLambda, RunnablePassthrough
         from pydantic import ConfigDict
     except ImportError:
         return None, "(langchain-core not installed)"
@@ -56,7 +56,9 @@ def run_langchain(path: Path) -> tuple[str | None, str]:
 
         def _generate(self, messages, stop=None, run_manager=None, **kwargs):
             return ChatResult(
-                generations=[ChatGeneration(message=AIMessage(content="Revenue in Q1 2024 was $1.2M."))]
+                generations=[
+                    ChatGeneration(message=AIMessage(content="Revenue in Q1 2024 was $1.2M."))
+                ]
             )
 
     handler = ChronicleCallbackHandler(
@@ -104,11 +106,10 @@ def run_langchain(path: Path) -> tuple[str | None, str]:
 def run_llamaindex(path: Path) -> tuple[str | None, str]:
     """Run LlamaIndex RAG; return (claim_uid or None, answer_snippet)."""
     try:
-        from llama_index.core import Document, VectorStoreIndex
+        from llama_index.core import Document, Settings, VectorStoreIndex
         from llama_index.core.callbacks import CallbackManager
         from llama_index.core.embeddings import MockEmbedding
         from llama_index.core.llms import MockLLM
-        from llama_index.core import Settings
     except ImportError:
         return None, "(llama-index-core not installed)"
 
@@ -192,9 +193,13 @@ def main() -> None:
         for i, c in enumerate(claims):
             sc = session.get_defensibility_score(c.claim_uid)
             support = session.read_model.get_support_for_claim(c.claim_uid)
-            print(f"  Claim {i+1}: {c.claim_uid} | defensibility: {sc.provenance_quality if sc else 'N/A'} | support links: {len(support)}")
+            print(
+                f"  Claim {i + 1}: {c.claim_uid} | defensibility: {sc.provenance_quality if sc else 'N/A'} | support links: {len(support)}"
+            )
 
-    print("\nDone. See docs/integrations/README.md and 'One investigation per key' in integrating-with-chronicle.md.")
+    print(
+        "\nDone. See docs/integrations/README.md and 'One investigation per key' in integrating-with-chronicle.md."
+    )
 
 
 if __name__ == "__main__":

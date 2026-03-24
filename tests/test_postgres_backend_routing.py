@@ -48,7 +48,9 @@ def _seed_exportable_investigation(project_path: Path) -> tuple[str, str]:
 
 class _FailIfSessionUsed:
     def __init__(self, *_args: object, **_kwargs: object) -> None:
-        raise AssertionError("ChronicleSession should not be used for archive import/export routing")
+        raise AssertionError(
+            "ChronicleSession should not be used for archive import/export routing"
+        )
 
 
 def test_cmd_replay_routes_to_postgres(

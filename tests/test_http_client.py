@@ -111,6 +111,12 @@ def test_client_rejects_non_http_base_url() -> None:
         ChronicleClient("file:///tmp/chronicle.sock", "/tmp/project")
 
 
+def test_client_headers_do_not_include_project_path() -> None:
+    client = ChronicleClient("http://api", "/tmp/project")
+    headers = client._headers()
+    assert "X-Project-Path" not in headers
+
+
 def test_ingest_evidence_from_url_blocks_private_host(monkeypatch: Any) -> None:
     client = ChronicleClient("http://api", "/tmp/project")
 

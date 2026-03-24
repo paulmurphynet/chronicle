@@ -6,8 +6,7 @@ import sqlite3
 from pathlib import Path
 
 import pytest
-
-from chronicle.store.project import CHRONICLE_DB, create_project
+from chronicle.store.project import create_project
 from chronicle.store.read_model_snapshot import (
     SNAPSHOT_META_DDL,
     create_read_model_snapshot,
@@ -39,7 +38,12 @@ def test_create_read_model_snapshot_happy(tmp_path: Path) -> None:
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("Snap test", actor_id="t", actor_type="tool")
         session.ingest_evidence(
-            inv_uid, b"chunk", "text/plain", original_filename="a.txt", actor_id="t", actor_type="tool"
+            inv_uid,
+            b"chunk",
+            "text/plain",
+            original_filename="a.txt",
+            actor_id="t",
+            actor_type="tool",
         )
         events = session.store.read_all(limit=5)
         e1 = next(e for e in events if e.event_type == "InvestigationCreated")
@@ -51,7 +55,9 @@ def test_create_read_model_snapshot_happy(tmp_path: Path) -> None:
     assert out.is_file()
 
     conn = sqlite3.connect(str(out))
-    row = conn.execute("SELECT as_of_event_id, as_of_event_rowid, recorded_at FROM snapshot_meta LIMIT 1").fetchone()
+    row = conn.execute(
+        "SELECT as_of_event_id, as_of_event_rowid, recorded_at FROM snapshot_meta LIMIT 1"
+    ).fetchone()
     conn.close()
     assert row is not None
     assert row[0] == first_event_id
@@ -64,7 +70,9 @@ def test_create_read_model_snapshot_at_second_event(tmp_path: Path) -> None:
     second_event_id = None
     with ChronicleSession(tmp_path) as session:
         _, inv_uid = session.create_investigation("Snap two", actor_id="t", actor_type="tool")
-        session.ingest_evidence(inv_uid, b"x", "text/plain", original_filename="x.txt", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid, b"x", "text/plain", original_filename="x.txt", actor_id="t", actor_type="tool"
+        )
         events = session.store.read_all(limit=5)
         ingested = next(e for e in events if e.event_type == "EvidenceIngested")
         second_event_id = ingested.event_id
@@ -111,7 +119,14 @@ def test_restore_from_snapshot_tail_replay(tmp_path: Path) -> None:
         _, inv_uid = session.create_investigation("Tail test", actor_id="t", actor_type="tool")
         events = session.store.read_all(limit=5)
         first_event_id = next(e for e in events if e.event_type == "InvestigationCreated").event_id
-        session.ingest_evidence(inv_uid, b"more", "text/plain", original_filename="b.txt", actor_id="t", actor_type="tool")
+        session.ingest_evidence(
+            inv_uid,
+            b"more",
+            "text/plain",
+            original_filename="b.txt",
+            actor_id="t",
+            actor_type="tool",
+        )
 
     snap_path = tmp_path / "snap.db"
     create_read_model_snapshot(tmp_path, first_event_id, snap_path)

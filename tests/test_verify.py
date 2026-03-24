@@ -6,14 +6,12 @@ import sqlite3
 from pathlib import Path
 
 import pytest
-
 from chronicle.store.project import CHRONICLE_DB, create_project
 from chronicle.store.schema import (
     init_event_store_schema,
     init_read_model_schema,
 )
 from chronicle.verify import (
-    CheckResult,
     VerifyReport,
     verify_append_only_ledger,
     verify_db,
@@ -102,11 +100,43 @@ def test_verify_append_only_ledger_reversal(verify_conn) -> None:
     conn = verify_conn
     conn.execute(
         "INSERT INTO events (event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, envelope_version, payload_version, payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("e1", "InvestigationCreated", "2024-01-01T00:00:00Z", "2024-01-01T00:00:01Z", "i", "i", "tool", "t", "spark", None, None, None, 1, 1, "{}"),
+        (
+            "e1",
+            "InvestigationCreated",
+            "2024-01-01T00:00:00Z",
+            "2024-01-01T00:00:01Z",
+            "i",
+            "i",
+            "tool",
+            "t",
+            "spark",
+            None,
+            None,
+            None,
+            1,
+            1,
+            "{}",
+        ),
     )
     conn.execute(
         "INSERT INTO events (event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, envelope_version, payload_version, payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("e2", "InvestigationCreated", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z", "i", "i", "tool", "t", "spark", None, None, None, 1, 1, "{}"),
+        (
+            "e2",
+            "InvestigationCreated",
+            "2024-01-01T00:00:00Z",
+            "2024-01-01T00:00:00Z",
+            "i",
+            "i",
+            "tool",
+            "t",
+            "spark",
+            None,
+            None,
+            None,
+            1,
+            1,
+            "{}",
+        ),
     )
     conn.commit()
     report = VerifyReport(passed=True)
@@ -124,10 +154,18 @@ def test_verify_referential_integrity_empty(verify_conn) -> None:
 
 def test_verify_referential_integrity_orphan_evidence_link(verify_conn) -> None:
     conn = verify_conn
-    conn.execute("INSERT INTO claim (claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text, current_status, updated_at) VALUES ('c1', 'i', '2024-01-01T00:00:00Z', 't', 'text', 'ACTIVE', '2024-01-01T00:00:00Z')")
-    conn.execute("INSERT INTO evidence_item (evidence_uid, investigation_uid, created_at, ingested_by_actor_id, content_hash, file_size_bytes, original_filename, uri, media_type, updated_at) VALUES ('ev1', 'i', '2024-01-01T00:00:00Z', 't', 'h', 0, '', '', 'text/plain', '2024-01-01T00:00:00Z')")
-    conn.execute("INSERT INTO evidence_span (span_uid, evidence_uid, anchor_type, anchor_json, created_at, created_by_actor_id, source_event_id) VALUES ('s1', 'ev1', 'text_offset', '{}', '2024-01-01T00:00:00Z', 't', 'ev-span-1')")
-    conn.execute("INSERT INTO evidence_link (link_uid, claim_uid, span_uid, link_type, created_at, created_by_actor_id, source_event_id) VALUES ('l1', 'missing_claim', 's1', 'support', '2024-01-01T00:00:00Z', 't', 'ev-link-1')")
+    conn.execute(
+        "INSERT INTO claim (claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text, current_status, updated_at) VALUES ('c1', 'i', '2024-01-01T00:00:00Z', 't', 'text', 'ACTIVE', '2024-01-01T00:00:00Z')"
+    )
+    conn.execute(
+        "INSERT INTO evidence_item (evidence_uid, investigation_uid, created_at, ingested_by_actor_id, content_hash, file_size_bytes, original_filename, uri, media_type, updated_at) VALUES ('ev1', 'i', '2024-01-01T00:00:00Z', 't', 'h', 0, '', '', 'text/plain', '2024-01-01T00:00:00Z')"
+    )
+    conn.execute(
+        "INSERT INTO evidence_span (span_uid, evidence_uid, anchor_type, anchor_json, created_at, created_by_actor_id, source_event_id) VALUES ('s1', 'ev1', 'text_offset', '{}', '2024-01-01T00:00:00Z', 't', 'ev-span-1')"
+    )
+    conn.execute(
+        "INSERT INTO evidence_link (link_uid, claim_uid, span_uid, link_type, created_at, created_by_actor_id, source_event_id) VALUES ('l1', 'missing_claim', 's1', 'support', '2024-01-01T00:00:00Z', 't', 'ev-link-1')"
+    )
     conn.commit()
     report = VerifyReport(passed=True)
     verify_referential_integrity(conn, report)
@@ -137,7 +175,9 @@ def test_verify_referential_integrity_orphan_evidence_link(verify_conn) -> None:
 
 def test_verify_status_consistency_valid(verify_conn) -> None:
     conn = verify_conn
-    conn.execute("INSERT INTO claim (claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text, current_status, updated_at) VALUES ('c1', 'i', '2024-01-01T00:00:00Z', 't', 'text', 'ACTIVE', '2024-01-01T00:00:00Z')")
+    conn.execute(
+        "INSERT INTO claim (claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text, current_status, updated_at) VALUES ('c1', 'i', '2024-01-01T00:00:00Z', 't', 'text', 'ACTIVE', '2024-01-01T00:00:00Z')"
+    )
     conn.commit()
     report = VerifyReport(passed=True)
     verify_status_consistency(conn, report)
@@ -146,17 +186,23 @@ def test_verify_status_consistency_valid(verify_conn) -> None:
 
 def test_verify_status_consistency_invalid_claim_status(verify_conn) -> None:
     conn = verify_conn
-    conn.execute("INSERT INTO claim (claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text, current_status, updated_at) VALUES ('c1', 'i', '2024-01-01T00:00:00Z', 't', 'text', 'INVALID', '2024-01-01T00:00:00Z')")
+    conn.execute(
+        "INSERT INTO claim (claim_uid, investigation_uid, created_at, created_by_actor_id, claim_text, current_status, updated_at) VALUES ('c1', 'i', '2024-01-01T00:00:00Z', 't', 'text', 'INVALID', '2024-01-01T00:00:00Z')"
+    )
     conn.commit()
     report = VerifyReport(passed=True)
     verify_status_consistency(conn, report)
     assert report.passed is False
-    assert any(c.name == "status_consistency" and "invalid" in c.detail.lower() for c in report.results)
+    assert any(
+        c.name == "status_consistency" and "invalid" in c.detail.lower() for c in report.results
+    )
 
 
 def test_verify_projection_completeness_match(verify_conn_with_events) -> None:
     conn = verify_conn_with_events
-    conn.execute("INSERT INTO processed_event (projection_name, event_id, processed_at) VALUES ('read_model', 'e1', '2024-01-01T00:00:00Z')")
+    conn.execute(
+        "INSERT INTO processed_event (projection_name, event_id, processed_at) VALUES ('read_model', 'e1', '2024-01-01T00:00:00Z')"
+    )
     conn.commit()
     report = VerifyReport(passed=True)
     verify_projection_completeness(conn, report)
@@ -168,7 +214,9 @@ def test_verify_projection_completeness_mismatch(verify_conn_with_events) -> Non
     report = VerifyReport(passed=True)
     verify_projection_completeness(conn, report)
     assert report.passed is False
-    assert any(c.name == "projection_completeness" and "events=" in c.detail for c in report.results)
+    assert any(
+        c.name == "projection_completeness" and "events=" in c.detail for c in report.results
+    )
 
 
 def test_verify_evidence_integrity_no_items(verify_conn, tmp_path: Path) -> None:
@@ -226,7 +274,23 @@ def verify_conn_with_events(verify_conn):
     conn = verify_conn
     conn.execute(
         "INSERT INTO events (event_id, event_type, occurred_at, recorded_at, investigation_uid, subject_uid, actor_type, actor_id, workspace, policy_profile_id, correlation_id, causation_id, envelope_version, payload_version, payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("e1", "InvestigationCreated", "2024-01-01T00:00:00Z", "2024-01-01T00:00:01Z", "i", "i", "tool", "t", "spark", None, None, None, 1, 1, "{}"),
+        (
+            "e1",
+            "InvestigationCreated",
+            "2024-01-01T00:00:00Z",
+            "2024-01-01T00:00:01Z",
+            "i",
+            "i",
+            "tool",
+            "t",
+            "spark",
+            None,
+            None,
+            None,
+            1,
+            1,
+            "{}",
+        ),
     )
     conn.commit()
     return conn

@@ -78,7 +78,14 @@ EXPECTED_EXPORT_HEADERS: dict[str, list[str]] = {
         "alias",
         "created_at",
     ],
-    "spans.csv": ["span_uid", "evidence_uid", "anchor_type", "anchor_json", "created_at", "source_event_id"],
+    "spans.csv": [
+        "span_uid",
+        "evidence_uid",
+        "anchor_type",
+        "anchor_json",
+        "created_at",
+        "source_event_id",
+    ],
     "supersession.csv": [
         "supersession_uid",
         "new_evidence_uid",
@@ -213,12 +220,16 @@ def run_checks(repo_root: Path) -> list[str]:
         missing_refs = sorted(expected_files - cypher_refs)
         extra_refs = sorted(cypher_refs - expected_files)
         if missing_refs:
-            errors.append(f"CSV files exported but not referenced by rebuild Cypher: {missing_refs}")
+            errors.append(
+                f"CSV files exported but not referenced by rebuild Cypher: {missing_refs}"
+            )
         if extra_refs:
             errors.append(f"CSV files referenced by rebuild Cypher but not exported: {extra_refs}")
 
     sync_text = sync_path.read_text(encoding="utf-8")
-    rebuild_text = nodes_path.read_text(encoding="utf-8") + "\n" + rels_path.read_text(encoding="utf-8")
+    rebuild_text = (
+        nodes_path.read_text(encoding="utf-8") + "\n" + rels_path.read_text(encoding="utf-8")
+    )
     docs_text = docs_schema_path.read_text(encoding="utf-8")
 
     sync_labels = _extract_labels_from_text(sync_text)
@@ -263,7 +274,9 @@ def run_checks(repo_root: Path) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Check Neo4j schema/integration contract consistency")
+    parser = argparse.ArgumentParser(
+        description="Check Neo4j schema/integration contract consistency"
+    )
     parser.add_argument(
         "--repo-root",
         type=Path,

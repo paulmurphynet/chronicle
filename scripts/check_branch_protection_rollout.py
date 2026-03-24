@@ -54,7 +54,9 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _required_settings_report(protection: dict[str, Any], required_checks: list[str]) -> dict[str, Any]:
+def _required_settings_report(
+    protection: dict[str, Any], required_checks: list[str]
+) -> dict[str, Any]:
     out: dict[str, Any] = {
         "exists": True,
         "required_checks_present": [],
@@ -74,7 +76,9 @@ def _required_settings_report(protection: dict[str, Any], required_checks: list[
     out["required_checks_present"] = sorted(c for c in required_checks if c in present)
     out["missing_required_checks"] = sorted(c for c in required_checks if c not in present)
 
-    out["settings"]["require_pull_request_before_merge"] = bool(protection.get("required_pull_request_reviews"))
+    out["settings"]["require_pull_request_before_merge"] = bool(
+        protection.get("required_pull_request_reviews")
+    )
     out["settings"]["require_status_checks"] = bool(protection.get("required_status_checks"))
     out["settings"]["require_up_to_date_branches"] = bool(status_checks.get("strict") is True)
     enforce_admins = protection.get("enforce_admins") or {}
@@ -185,7 +189,10 @@ def run_check(
             )
         report["branch_protection"] = _required_settings_report(protection, required_checks)
     except FileNotFoundError:
-        report["branch_protection"] = {"exists": False, "error": "fixture protection.json not found"}
+        report["branch_protection"] = {
+            "exists": False,
+            "error": "fixture protection.json not found",
+        }
         report["status"] = "blocked"
     except urllib.error.HTTPError as exc:
         if exc.code in (403, 404):

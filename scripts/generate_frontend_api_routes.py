@@ -11,7 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def _ts_key(operation_id: str) -> str:
     # Keep generator stable and readable in TS object keys.
-    cleaned = ''.join(ch if ch.isalnum() or ch == '_' else '_' for ch in operation_id)
+    cleaned = "".join(ch if ch.isalnum() or ch == "_" else "_" for ch in operation_id)
     return cleaned
 
 
@@ -40,7 +40,9 @@ def generate(output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8") as f:
         f.write("// Auto-generated from chronicle.api.app OpenAPI.\n")
-        f.write("// Regenerate with: ./.venv/bin/python scripts/generate_frontend_api_routes.py\n\n")
+        f.write(
+            "// Regenerate with: ./.venv/bin/python scripts/generate_frontend_api_routes.py\n\n"
+        )
         f.write("export const ROUTES = {\n")
         for op_id, _method, path in entries:
             f.write(f"  {op_id}: '{path}',\n")

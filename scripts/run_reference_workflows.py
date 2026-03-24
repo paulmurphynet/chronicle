@@ -331,7 +331,9 @@ def _workflow_readiness(repo_root: Path, run_dir: Path) -> dict[str, Any]:
     result["summary"] = {
         "investigation_uid": investigation_uid,
         "status": payload.get("status"),
-        "unresolved_tensions_count": (payload.get("metrics") or {}).get("unresolved_tensions_count"),
+        "unresolved_tensions_count": (payload.get("metrics") or {}).get(
+            "unresolved_tensions_count"
+        ),
         "policy_deltas_count": (payload.get("metrics") or {}).get("policy_deltas_count"),
     }
     if payload.get("status") != "passed":
@@ -475,7 +477,9 @@ def _default_output_dir(repo_root: Path) -> Path:
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     choices = sorted(WORKFLOW_RUNNERS.keys())
-    parser = argparse.ArgumentParser(description="Run Chronicle reference workflows and summarize results.")
+    parser = argparse.ArgumentParser(
+        description="Run Chronicle reference workflows and summarize results."
+    )
     parser.add_argument("--only", nargs="*", choices=choices, default=[])
     parser.add_argument("--skip", nargs="*", choices=choices, default=[])
     parser.add_argument(

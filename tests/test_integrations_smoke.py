@@ -9,8 +9,6 @@ expected attribute exists (type may be None or a class).
 
 from __future__ import annotations
 
-import pytest
-
 
 def test_langchain_integration_imports_and_exposes_handler() -> None:
     """chronicle.integrations.langchain can be imported and exposes ChronicleCallbackHandler."""

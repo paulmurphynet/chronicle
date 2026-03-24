@@ -146,7 +146,9 @@ def _build_reports_and_exports(project_path: Path, output_dir: Path) -> dict[str
     summary = {
         "investigation_uid": inv_uid,
         "claims_in_snapshot": len(audit_bundle.get("defensibility_snapshot") or []),
-        "review_packet_claims": len((review_packet.get("audit_export_bundle") or {}).get("claims", [])),
+        "review_packet_claims": len(
+            (review_packet.get("audit_export_bundle") or {}).get("claims", [])
+        ),
     }
     return {"artifacts": artifacts, "summary": summary}
 
@@ -270,7 +272,7 @@ def main(argv: list[str] | None = None) -> int:
             "artifacts": {},
         }
 
-    manifest_path = (out_dir.resolve() / "starter_pack_manifest.json")
+    manifest_path = out_dir.resolve() / "starter_pack_manifest.json"
     _write_json(manifest_path, result)
     print(f"Wrote starter pack manifest: {manifest_path}")
     if args.stdout_json:

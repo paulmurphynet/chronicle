@@ -26,7 +26,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Suggest tensions (heuristic and/or Ollama LLM) and optionally apply them."
     )
-    parser.add_argument("--path", "-p", required=True, help="Chronicle project directory (must contain chronicle.db)")
+    parser.add_argument(
+        "--path",
+        "-p",
+        required=True,
+        help="Chronicle project directory (must contain chronicle.db)",
+    )
     parser.add_argument(
         "--investigation-uid",
         default="",
@@ -92,7 +97,9 @@ def main() -> int:
             title_match = (args.title or "").strip()
             if title_match:
                 for i in investigations:
-                    if (i.title or "").strip() == title_match or title_match.lower() in (i.title or "").lower():
+                    if (i.title or "").strip() == title_match or title_match.lower() in (
+                        i.title or ""
+                    ).lower():
                         inv = i
                         break
             if inv is None:
@@ -147,7 +154,9 @@ def main() -> int:
             print(json.dumps(out, indent=2))
         else:
             for s in suggestions:
-                print(f"  {s.claim_a_uid} <-> {s.claim_b_uid}  kind={s.suggested_tension_kind} conf={s.confidence:.2f}")
+                print(
+                    f"  {s.claim_a_uid} <-> {s.claim_b_uid}  kind={s.suggested_tension_kind} conf={s.confidence:.2f}"
+                )
                 print(f"    {s.rationale}")
 
         if args.apply and suggestions:

@@ -62,7 +62,9 @@ def validate_contract_payload(payload: dict[str, Any]) -> list[str]:
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Validate adapter output rows against eval contract")
+    parser = argparse.ArgumentParser(
+        description="Validate adapter output rows against eval contract"
+    )
     parser.add_argument("--input", type=Path, required=True, help="Adapter output JSONL file")
     parser.add_argument(
         "--wrapped-key",
@@ -120,7 +122,9 @@ def main(argv: list[str] | None = None) -> int:
         assert row is not None
         payload = row if not wrapped_key else row.get(wrapped_key)
         if not isinstance(payload, dict):
-            invalid_rows.append({"row_index": idx, "errors": [f"missing_wrapped_payload:{wrapped_key}"]})
+            invalid_rows.append(
+                {"row_index": idx, "errors": [f"missing_wrapped_payload:{wrapped_key}"]}
+            )
             continue
         errors = validate_contract_payload(payload)
         if args.allow_unknown_error:
